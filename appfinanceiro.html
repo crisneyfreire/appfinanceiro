@@ -1,17 +1,11 @@
-APLICATIVO DE GASTOS - CÓDIGO COMPLETO
-=======================================
-
-Instruções: Copie TODO o conteúdo abaixo e salve como "app-gastos.html"
-Depois é só abrir no navegador!
-
-================================================================================
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4CAF50">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💰 App de Gastos</title>
+    <title>💰 App Financeiro</title>
     <style>
         * {
             margin: 0;
@@ -248,7 +242,7 @@ Depois é só abrir no navegador!
 <body>
     <div class="container">
         <div class="header">
-            <h1>💰 App de Gastos</h1>
+            <h1>💰 App Financeiro</h1>
             <button class="dark-mode-toggle" onclick="toggleDarkMode()">
                 🌙 Modo Escuro
             </button>
@@ -457,6 +451,13 @@ Depois é só abrir no navegador!
                 document.body.classList.add('dark-mode');
                 document.querySelector('.dark-mode-toggle').textContent = '☀️ Modo Claro';
             }
+        }
+
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js');
+            });
         }
 
         carregarDados();
