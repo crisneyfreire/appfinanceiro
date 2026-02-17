@@ -6,6 +6,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>💰 Sistema Financeiro</title>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -122,7 +127,6 @@
             display: block;
         }
 
-        /* Dashboard */
         .balance-card {
             background: linear-gradient(135deg, var(--accent), var(--accent-hover));
             color: white;
@@ -184,7 +188,6 @@
             margin-top: 5px;
         }
 
-        /* Formulários */
         .form-card {
             background: var(--card-bg);
             border-radius: 15px;
@@ -265,7 +268,7 @@
 
         .payment-types {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 10px;
             margin-bottom: 15px;
         }
@@ -312,7 +315,6 @@
             transform: translateY(-2px);
         }
 
-        /* Listas */
         .transactions-list {
             background: var(--card-bg);
             border-radius: 15px;
@@ -437,7 +439,6 @@
             color: var(--expense);
         }
 
-        /* Contas */
         .contas-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -483,7 +484,6 @@
             margin-top: 15px;
         }
 
-        /* Orçamento */
         .orcamento-header {
             display: flex;
             justify-content: space-between;
@@ -509,29 +509,6 @@
             margin-bottom: 30px;
         }
 
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: var(--bg-secondary);
-            border-radius: 4px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: var(--income);
-            transition: width 0.3s;
-        }
-
-        .progress-fill.warning {
-            background: var(--warning);
-        }
-
-        .progress-fill.danger {
-            background: var(--expense);
-        }
-
         .orcamento-item {
             background: var(--card-bg);
             padding: 15px;
@@ -545,7 +522,6 @@
             margin-bottom: 10px;
         }
 
-        /* Relatórios */
         .relatorio-periodo {
             display: flex;
             gap: 15px;
@@ -594,7 +570,6 @@
             </button>
         </div>
 
-        <!-- Navegação Principal -->
         <div class="nav-tabs">
             <button class="nav-tab active" onclick="showTab('dashboard')">📊 Dashboard</button>
             <button class="nav-tab" onclick="showTab('lancamentos')">📝 Lançamentos</button>
@@ -603,7 +578,6 @@
             <button class="nav-tab" onclick="showTab('relatorios')">📈 Relatórios</button>
         </div>
 
-        <!-- DASHBOARD -->
         <div id="dashboard" class="tab-content active">
             <div class="balance-card">
                 <div class="balance-label">Saldo Total</div>
@@ -634,7 +608,6 @@
             </div>
         </div>
 
-        <!-- LANÇAMENTOS -->
         <div id="lancamentos" class="tab-content">
             <div class="tabs">
                 <button class="tab income-tab active" onclick="setTipoLancamento('receita')">📈 Receita</button>
@@ -674,11 +647,12 @@
                         <label>💳 Pagamento/Recebimento</label>
                         <div class="payment-types">
                             <button class="payment-btn active" onclick="setPagamento('dinheiro')">💵 Dinheiro</button>
-                            <button class="payment-btn" onclick="setPagamento('débito')">💳 Débito</button>
-                            <button class="payment-btn" onclick="setPagamento('crédito')">💳 Crédito</button>
+                            <button class="payment-btn" onclick="setPagamento('debito')">💳 Débito</button>
+                            <button class="payment-btn" onclick="setPagamento('credito')">💳 Crédito</button>
+                            <button class="payment-btn" onclick="setPagamento('credito_debito')">💳 Crédito/Débito</button>
                             <button class="payment-btn" onclick="setPagamento('pix')">📱 Pix</button>
                             <button class="payment-btn" onclick="setPagamento('boleto')">📄 Boleto</button>
-                            <button class="payment-btn" onclick="setPagamento('transferência')">🔄 Transferência</button>
+                            <button class="payment-btn" onclick="setPagamento('transferencia')">🔄 Transferência</button>
                         </div>
                     </div>
                 </div>
@@ -709,7 +683,6 @@
             </div>
         </div>
 
-        <!-- CONTAS -->
         <div id="contas" class="tab-content">
             <div class="form-card">
                 <h3 style="margin-bottom: 20px;">➕ Nova Conta</h3>
@@ -743,7 +716,6 @@
             <div class="contas-grid" id="listaContas"></div>
         </div>
 
-        <!-- ORÇAMENTO -->
         <div id="orcamento" class="tab-content">
             <div class="orcamento-header">
                 <h3>📅 Orçamento Mensal</h3>
@@ -803,7 +775,6 @@
             </div>
         </div>
 
-        <!-- RELATÓRIOS -->
         <div id="relatorios" class="tab-content">
             <div class="relatorio-periodo">
                 <select id="relatorioMes" onchange="gerarRelatorio()">
@@ -840,6 +811,23 @@
 
     <script>
         // ============================================
+        // CONFIGURAÇÃO DO FIREBASE
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDQPz3wvkID4tmUHazT1aXew6fYzSbyL00",
+            authDomain: "projeto-appfinanceiro.firebaseapp.com",
+            projectId: "projeto-appfinanceiro",
+            storageBucket: "projeto-appfinanceiro.firebasestorage.app",
+            messagingSenderId: "1086361791636",
+            appId: "1:1086361791636:web:b761c87d4a3d49984a5881",
+            measurementId: "G-4LLMZ9QJSR"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ============================================
         // ESTRUTURA DE DADOS
         // ============================================
         let transacoes = [];
@@ -873,9 +861,56 @@
         };
 
         // ============================================
-        // INICIALIZAÇÃO
+        // FUNÇÕES DE SINCRONIZAÇÃO FIREBASE
         // ============================================
-        function carregarDados() {
+        
+        async function carregarDadosFirebase() {
+            try {
+                const docRef = db.collection('dados_usuario').doc('usuario_atual');
+                const docSnap = await docRef.get();
+                
+                if (docSnap.exists) {
+                    const dados = docSnap.data();
+                    transacoes = dados.transacoes || [];
+                    contas = dados.contas || [];
+                    previsoes = dados.previsoes || [];
+                    console.log('✅ Dados carregados da nuvem!');
+                } else {
+                    console.log('📁 Primeiro acesso - criando dados na nuvem');
+                    await salvarDadosFirebase();
+                }
+                atualizarTela();
+            } catch (error) {
+                console.log('⚠️ Erro ao carregar da nuvem, usando localStorage:', error);
+                carregarDadosLocal();
+            }
+        }
+
+        async function salvarDadosFirebase() {
+            try {
+                await db.collection('dados_usuario').doc('usuario_atual').set({
+                    transacoes: transacoes,
+                    contas: contas,
+                    previsoes: previsoes,
+                    ultimaAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                console.log('✅ Dados sincronizados com a nuvem!');
+            } catch (error) {
+                console.log('⚠️ Erro ao salvar na nuvem:', error);
+            }
+        }
+
+        function salvarDados() {
+            // Salvar local (backup)
+            localStorage.setItem('transacoes', JSON.stringify(transacoes));
+            localStorage.setItem('contas', JSON.stringify(contas));
+            localStorage.setItem('previsoes', JSON.stringify(previsoes));
+            
+            // Salvar na nuvem
+            salvarDadosFirebase();
+        }
+
+        function carregarDadosLocal() {
             const transacoesSalvas = localStorage.getItem('transacoes');
             const contasSalvas = localStorage.getItem('contas');
             const previsoesSalvas = localStorage.getItem('previsoes');
@@ -893,14 +928,10 @@
                     cor: '#4CAF50'
                 });
             }
-
-            atualizarTela();
         }
 
-        function salvarDados() {
-            localStorage.setItem('transacoes', JSON.stringify(transacoes));
-            localStorage.setItem('contas', JSON.stringify(contas));
-            localStorage.setItem('previsoes', JSON.stringify(previsoes));
+        function carregarDados() {
+            carregarDadosFirebase();
         }
 
         // ============================================
@@ -917,6 +948,7 @@
                 preencherCategorias();
                 preencherSelectContas();
                 preencherFiltros();
+                atualizarListaLancamentos();
             } else if (tabName === 'orcamento') {
                 preencherCategoriasPrevisao();
                 carregarOrcamento();
@@ -957,6 +989,7 @@
 
         function setPagamento(tipo) {
             pagamentoSelecionado = tipo;
+            
             document.querySelectorAll('.payment-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
@@ -1041,7 +1074,7 @@
             document.getElementById('valor').value = '';
             document.getElementById('descricao').value = '';
             document.getElementById('observacao').value = '';
-            document.getElementById('dataLancamento').value = '';
+            document.getElementById('dataLancamento').value = new Date().toISOString().split('T')[0];
             
             atualizarListaLancamentos();
             atualizarDashboard();
@@ -1114,18 +1147,23 @@
             }
 
             if (transacoesFiltradas.length === 0) {
-                listaDiv.innerHTML = `
-                    <div class="empty-state">
-                        🕒 Nenhum lançamento encontrado<br>
-                        Clique em "Lançamentos" para adicionar!
-                    </div>
-                `;
+                listaDiv.innerHTML = '<div class="empty-state">🕒 Nenhum lançamento encontrado</div>';
                 return;
             }
 
             let html = '';
             transacoesFiltradas.forEach(t => {
                 const conta = contas.find(c => c.id === t.contaId) || { nome: 'Conta' };
+                
+                const icones = {
+                    'dinheiro': '💵',
+                    'debito': '💳',
+                    'credito': '💳',
+                    'credito_debito': '💳',
+                    'pix': '📱',
+                    'boleto': '📄',
+                    'transferencia': '🔄'
+                };
                 
                 html += `
                     <div class="transaction-item">
@@ -1139,7 +1177,7 @@
                             </div>
                             <div class="transaction-descricao">${t.descricao}</div>
                             <div class="transaction-detalhes">
-                                ${t.pagamento ? `💳 ${t.pagamento} • ` : ''}
+                                ${t.pagamento ? `${icones[t.pagamento] || '💳'} ${t.pagamento} • ` : ''}
                                 📅 ${new Date(t.data).toLocaleDateString('pt-BR')}
                                 ${t.observacao ? `<br>📌 ${t.observacao}` : ''}
                             </div>
@@ -1226,18 +1264,13 @@
             if (!listaDiv) return;
 
             if (contas.length === 0) {
-                listaDiv.innerHTML = `
-                    <div class="empty-state">
-                        🏦 Nenhuma conta cadastrada<br>
-                        Adicione sua primeira conta!
-                    </div>
-                `;
+                listaDiv.innerHTML = '<div class="empty-state">🏦 Nenhuma conta cadastrada</div>';
                 return;
             }
 
             let html = '';
             contas.forEach(conta => {
-                const saldo = calcularSaldoConta(conta.id) + conta.saldoInicial;
+                const saldo = calcularSaldoConta(conta.id) + (conta.saldoInicial || 0);
                 
                 html += `
                     <div class="conta-card" style="border-left: 4px solid ${conta.cor}">
@@ -1245,7 +1278,6 @@
                         <div class="conta-nome">${conta.nome}</div>
                         <div class="conta-saldo">R$ ${saldo.toFixed(2)}</div>
                         <div class="conta-actions">
-                            <button class="action-btn edit" onclick="editarConta(${conta.id})">✏️</button>
                             <button class="action-btn delete" onclick="deletarConta(${conta.id})">🗑️</button>
                         </div>
                     </div>
@@ -1355,11 +1387,7 @@
             if (!listaDiv) return;
 
             if (previsoesMes.length === 0) {
-                listaDiv.innerHTML = `
-                    <div class="empty-state">
-                        📅 Nenhuma previsão para este mês
-                    </div>
-                `;
+                listaDiv.innerHTML = '<div class="empty-state">📅 Nenhuma previsão para este mês</div>';
                 return;
             }
 
@@ -1424,7 +1452,6 @@
                 return data.getFullYear() === ano && (mes === 'all' || data.getMonth() === parseInt(mes));
             });
 
-            // Resumo
             let totalReceitas = 0;
             let totalDespesas = 0;
             let porCategoria = {};
@@ -1447,7 +1474,6 @@
                 }
             });
 
-            // Atualizar resumo
             const resumoDiv = document.getElementById('relatorioResumo');
             if (resumoDiv) {
                 resumoDiv.innerHTML = `
@@ -1468,7 +1494,6 @@
                 `;
             }
 
-            // Tabela por categoria
             const tbody = document.getElementById('corpoTabelaCategorias');
             if (tbody) {
                 let html = '';
@@ -1525,7 +1550,6 @@
             document.getElementById('pagamentosMes').textContent = `R$ ${despesasMes.toFixed(2)}`;
             document.getElementById('recebimentosMes').textContent = `R$ ${receitasMes.toFixed(2)}`;
 
-            // Saldo em contas
             let saldoContas = 0;
             contas.forEach(conta => {
                 saldoContas += calcularSaldoConta(conta.id) + (conta.saldoInicial || 0);
@@ -1534,7 +1558,6 @@
             document.getElementById('saldoContas').textContent = `R$ ${saldoContas.toFixed(2)}`;
             document.getElementById('totalContas').textContent = `${contas.length} contas ativas`;
 
-            // Previsões
             const mesKey = `${anoAtual}-${String(mesAtual + 1).padStart(2, '0')}`;
             const previsoesMes = previsoes.filter(p => p.mes === mesKey);
             
@@ -1575,9 +1598,6 @@
             }
         }
 
-        // ============================================
-        // FUNÇÃO PRINCIPAL DE ATUALIZAÇÃO
-        // ============================================
         function atualizarTela() {
             atualizarDashboard();
             if (document.getElementById('lancamentos').classList.contains('active')) {
@@ -1606,13 +1626,11 @@
         carregarDados();
         carregarModoEscuro();
         
-        // Preencher data atual
         const hoje = new Date().toISOString().split('T')[0];
         if (document.getElementById('dataLancamento')) {
             document.getElementById('dataLancamento').value = hoje;
         }
 
-        // Preencher mês atual no orçamento
         const mesAtual = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
         if (document.getElementById('mesOrcamento')) {
             document.getElementById('mesOrcamento').value = mesAtual;
