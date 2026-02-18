@@ -559,6 +559,167 @@
             padding: 40px 20px;
             color: var(--text-secondary);
         }
+
+            }
+        
+        /* ============================================ */
+        /* ESTILOS PARA IMPORTAÇÃO/EXPORTAÇÃO - COLE AQUI */
+        /* ============================================ */
+        .import-export-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+
+        .import-export-title {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .import-export-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .import-card, .export-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .import-card h4, .export-card h4 {
+            margin-bottom: 15px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .import-options, .export-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .import-btn, .export-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .import-btn {
+            background: var(--info);
+            color: white;
+        }
+
+        .export-btn {
+            background: var(--accent);
+            color: white;
+        }
+
+        .import-btn:hover, .export-btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .import-warning {
+            margin-top: 15px;
+            padding: 10px;
+            background: var(--warning);
+            color: white;
+            border-radius: 6px;
+            font-size: 12px;
+            display: none;
+        }
+
+        .import-warning.show {
+            display: block;
+        }
+
+        .sample-link {
+            color: var(--info);
+            text-decoration: underline;
+            cursor: pointer;
+            font-size: 12px;
+            margin-top: 10px;
+            display: inline-block;
+        }
+
+        /* Modal de confirmação */
+        .confirm-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .confirm-content {
+            background: var(--bg-primary);
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .confirm-content h3 {
+            margin-bottom: 15px;
+            color: var(--warning);
+        }
+
+        .confirm-content p {
+            margin-bottom: 20px;
+            color: var(--text-secondary);
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .confirm-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .confirm-btn.yes {
+            background: var(--expense);
+            color: white;
+        }
+
+        .confirm-btn.no {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+    
     </style>
 </head>
 <body>
@@ -790,6 +951,52 @@
                     <option value="2025">2025</option>
                 </select>
                 <button class="btn-primary btn-income" onclick="gerarRelatorio()">📊 GERAR RELATÓRIO</button>
+                        <!-- SEÇÃO DE IMPORTAÇÃO/EXPORTAÇÃO -->
+        <div class="import-export-section">
+            <div class="import-export-title">
+                <span>🔄</span> Importar / Exportar Dados
+            </div>
+            
+            <div class="import-export-grid">
+                <!-- CARD DE IMPORTAÇÃO -->
+                <div class="import-card">
+                    <h4>📥 Importar Dados</h4>
+                    <div class="import-options">
+                        <button class="import-btn" onclick="importarCSV()">
+                            <span>📄</span> Importar CSV
+                        </button>
+                        <button class="import-btn" onclick="importarJSON()">
+                            <span>📦</span> Importar JSON (Backup)
+                        </button>
+                        <input type="file" id="fileInput" class="file-input" accept=".csv,.json,text/csv,application/json">
+                        
+                        <div class="import-warning" id="importWarning">
+                            ⚠️ A importação substituirá todos os dados atuais!
+                        </div>
+                        
+                        <span class="sample-link" onclick="baixarModeloCSV()">
+                            📋 Baixar modelo CSV
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- CARD DE EXPORTAÇÃO -->
+                <div class="export-card">
+                    <h4>📤 Exportar Dados</h4>
+                    <div class="export-options">
+                        <button class="export-btn" onclick="exportarCSV()">
+                            <span>📄</span> Exportar CSV
+                        </button>
+                        <button class="export-btn" onclick="exportarJSON()">
+                            <span>📦</span> Exportar JSON (Backup)
+                        </button>
+                        <button class="export-btn" onclick="exportarPDF()">
+                            <span>📑</span> Exportar Relatório PDF
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
             </div>
 
             <div class="relatorio-card">
@@ -2079,6 +2286,404 @@
         const mesAtual = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
         if (document.getElementById('mesOrcamento')) {
             document.getElementById('mesOrcamento').value = mesAtual;
+        }
+        
+        // ============================================
+        // FUNÇÕES DE IMPORTAÇÃO/EXPORTAÇÃO
+        // ============================================
+
+        // Mostrar aviso de importação
+        function mostrarAvisoImportacao() {
+            document.getElementById('importWarning').classList.add('show');
+            setTimeout(() => {
+                document.getElementById('importWarning').classList.remove('show');
+            }, 3000);
+        }
+
+        // Baixar modelo CSV
+        function baixarModeloCSV() {
+            const modelo = `tipo,data,valor,descricao,categoria,conta,pagamento,observacao
+receita,2024-01-15,5000.00,Salário,Salário,Carteira,transferencia,Salário Janeiro
+despesa,2024-01-20,350.75,Supermercado,Alimentação,NuBank,debito,Compras do mês
+despesa,2024-01-21,45.90,Uber,Transporte,Carteira,credito,Corrida para o trabalho
+receita,2024-01-25,1200.00,Freelance,Prestação de Serviço,Itaú,pix,Projeto website`;
+
+            const blob = new Blob(["\uFEFF" + modelo], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'modelo_importacao.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Abrir seletor de arquivo
+        function abrirSeletorArquivo(tipo) {
+            return new Promise((resolve) => {
+                const input = document.getElementById('fileInput');
+                input.accept = tipo === 'csv' ? '.csv' : '.json';
+                input.value = ''; // Limpar para permitir mesmo arquivo
+                
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        resolve(file);
+                    }
+                };
+                
+                input.click();
+            });
+        }
+
+        // Modal de confirmação
+        function mostrarConfirmacao(mensagem) {
+            return new Promise((resolve) => {
+                const modal = document.createElement('div');
+                modal.className = 'confirm-modal';
+                modal.innerHTML = `
+                    <div class="confirm-content">
+                        <h3>⚠️ Atenção!</h3>
+                        <p>${mensagem}</p>
+                        <div class="confirm-buttons">
+                            <button class="confirm-btn yes" onclick="responderConfirmacao(true)">Sim, continuar</button>
+                            <button class="confirm-btn no" onclick="responderConfirmacao(false)">Cancelar</button>
+                        </div>
+                    </div>
+                `;
+                
+                window.responderConfirmacao = (resposta) => {
+                    modal.remove();
+                    resolve(resposta);
+                    delete window.responderConfirmacao;
+                };
+                
+                document.body.appendChild(modal);
+            });
+        }
+
+        // ============================================
+        // IMPORTAÇÃO CSV
+        // ============================================
+        async function importarCSV() {
+            const confirmado = await mostrarConfirmacao('A importação CSV irá SUBSTITUIR todos os seus dados atuais. Deseja continuar?');
+            if (!confirmado) return;
+            
+            try {
+                const file = await abrirSeletorArquivo('csv');
+                const text = await file.text();
+                
+                // Remover BOM se existir
+                const content = text.charCodeAt(0) === 0xFEFF ? text.slice(1) : text;
+                
+                const linhas = content.split('\n');
+                const cabecalho = linhas[0].split(',').map(h => h.trim().toLowerCase());
+                
+                // Verificar cabeçalho
+                const colunasEsperadas = ['tipo', 'data', 'valor', 'descricao', 'categoria', 'conta', 'pagamento', 'observacao'];
+                const valido = colunasEsperadas.every(col => cabecalho.includes(col));
+                
+                if (!valido) {
+                    alert('❌ Formato de CSV inválido! Use o modelo disponível.');
+                    return;
+                }
+                
+                let importados = 0;
+                let erros = 0;
+                
+                // Processar linhas
+                for (let i = 1; i < linhas.length; i++) {
+                    if (!linhas[i].trim()) continue;
+                    
+                    try {
+                        // Parse simples (para CSV complexo, use uma biblioteca)
+                        const valores = linhas[i].split(',').map(v => v.trim());
+                        const linhaObj = {};
+                        
+                        cabecalho.forEach((col, index) => {
+                            linhaObj[col] = valores[index] || '';
+                        });
+                        
+                        // Validar dados
+                        if (!linhaObj.tipo || !linhaObj.valor || !linhaObj.descricao) {
+                            erros++;
+                            continue;
+                        }
+                        
+                        // Encontrar ou criar conta
+                        let contaId;
+                        const contaExistente = contas.find(c => 
+                            c.nome.toLowerCase() === linhaObj.conta.toLowerCase()
+                        );
+                        
+                        if (contaExistente) {
+                            contaId = contaExistente.id;
+                        } else {
+                            // Criar nova conta
+                            const novaConta = {
+                                id: Date.now() + importados,
+                                nome: linhaObj.conta || 'Conta Importada',
+                                tipo: 'corrente',
+                                saldoInicial: 0,
+                                cor: '#4CAF50'
+                            };
+                            contas.push(novaConta);
+                            contaId = novaConta.id;
+                        }
+                        
+                        // Criar transação
+                        const transacao = {
+                            id: Date.now() + importados,
+                            tipo: linhaObj.tipo === 'receita' ? 'receita' : 'despesa',
+                            valor: parseFloat(linhaObj.valor) || 0,
+                            descricao: linhaObj.descricao,
+                            categoria: linhaObj.categoria || 'Outros',
+                            contaId: contaId,
+                            pagamento: linhaObj.pagamento || 'dinheiro',
+                            observacao: linhaObj.observacao || '',
+                            data: linhaObj.data || new Date().toISOString().split('T')[0]
+                        };
+                        
+                        if (transacao.valor > 0) {
+                            transacoes.push(transacao);
+                            importados++;
+                        } else {
+                            erros++;
+                        }
+                        
+                    } catch (e) {
+                        erros++;
+                        console.log('Erro na linha', i, e);
+                    }
+                }
+                
+                // Salvar dados
+                await salvarDadosFirebase();
+                salvarDadosLocal();
+                atualizarTela();
+                
+                alert(`✅ Importação concluída!\n📥 ${importados} registros importados\n❌ ${erros} erros encontrados`);
+                
+            } catch (error) {
+                console.error('Erro na importação:', error);
+                alert('❌ Erro ao importar arquivo!');
+            }
+        }
+
+        // ============================================
+        // IMPORTAÇÃO JSON (BACKUP COMPLETO)
+        // ============================================
+        async function importarJSON() {
+            const confirmado = await mostrarConfirmacao('A importação JSON irá SUBSTITUIR todos os seus dados atuais (transações, contas, previsões e categorias). Deseja continuar?');
+            if (!confirmado) return;
+            
+            try {
+                const file = await abrirSeletorArquivo('json');
+                const text = await file.text();
+                const dados = JSON.parse(text);
+                
+                // Validar estrutura
+                if (!dados.transacoes || !dados.contas || !dados.previsoes || !dados.categorias) {
+                    alert('❌ Arquivo JSON inválido! Estrutura incorreta.');
+                    return;
+                }
+                
+                // Substituir dados
+                transacoes = dados.transacoes;
+                contas = dados.contas;
+                previsoes = dados.previsoes;
+                categorias = dados.categorias;
+                
+                // Salvar tudo
+                await salvarCategoriasFirebase();
+                await salvarDadosFirebase();
+                salvarDadosLocal();
+                salvarCategoriasLocal();
+                
+                atualizarTela();
+                
+                alert(`✅ Backup restaurado com sucesso!\n📊 ${transacoes.length} transações\n🏦 ${contas.length} contas\n📅 ${previsoes.length} previsões`);
+                
+            } catch (error) {
+                console.error('Erro na importação JSON:', error);
+                alert('❌ Erro ao importar arquivo JSON!');
+            }
+        }
+
+        // ============================================
+        // EXPORTAÇÃO CSV
+        // ============================================
+        function exportarCSV() {
+            try {
+                // Cabeçalho
+                let csv = 'tipo,data,valor,descricao,categoria,conta,pagamento,observacao\n';
+                
+                // Dados
+                transacoes.forEach(t => {
+                    const conta = contas.find(c => c.id === t.contaId) || { nome: 'Conta' };
+                    
+                    const linha = [
+                        t.tipo,
+                        t.data,
+                        t.valor.toFixed(2),
+                        `"${t.descricao.replace(/"/g, '""')}"`, // Escape de aspas
+                        `"${t.categoria}"`,
+                        `"${conta.nome}"`,
+                        t.pagamento || '',
+                        `"${(t.observacao || '').replace(/"/g, '""')}"`
+                    ].join(',');
+                    
+                    csv += linha + '\n';
+                });
+                
+                // Adicionar BOM para UTF-8 com acentuação
+                const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `exportacao_financeira_${new Date().toISOString().slice(0,10)}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                alert(`✅ CSV exportado com ${transacoes.length} transações!`);
+                
+            } catch (error) {
+                console.error('Erro na exportação CSV:', error);
+                alert('❌ Erro ao exportar CSV!');
+            }
+        }
+
+        // ============================================
+        // EXPORTAÇÃO JSON (BACKUP COMPLETO)
+        // ============================================
+        function exportarJSON() {
+            try {
+                const backup = {
+                    dataExportacao: new Date().toISOString(),
+                    versao: '1.0',
+                    transacoes: transacoes,
+                    contas: contas,
+                    previsoes: previsoes,
+                    categorias: categorias,
+                    estatisticas: {
+                        totalTransacoes: transacoes.length,
+                        totalContas: contas.length,
+                        totalPrevisoes: previsoes.length,
+                        saldoTotal: transacoes.reduce((acc, t) => 
+                            acc + (t.tipo === 'receita' ? t.valor : -t.valor), 0
+                        )
+                    }
+                };
+                
+                const json = JSON.stringify(backup, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup_financeiro_${new Date().toISOString().slice(0,10)}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                alert(`✅ Backup completo exportado!`);
+                
+            } catch (error) {
+                console.error('Erro na exportação JSON:', error);
+                alert('❌ Erro ao exportar backup!');
+            }
+        }
+
+        // ============================================
+        // EXPORTAÇÃO PDF (RELATÓRIO)
+        // ============================================
+        function exportarPDF() {
+            // Abrir relatório em nova janela para impressão
+            const janela = window.open('', '_blank');
+            
+            const hoje = new Date().toLocaleDateString('pt-BR');
+            const totalReceitas = transacoes.filter(t => t.tipo === 'receita').reduce((acc, t) => acc + t.valor, 0);
+            const totalDespesas = transacoes.filter(t => t.tipo === 'despesa').reduce((acc, t) => acc + t.valor, 0);
+            const saldo = totalReceitas - totalDespesas;
+            
+            const html = `
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Relatório Financeiro</title>
+                <style>
+                    body { font-family: Arial; padding: 20px; }
+                    h1 { color: #333; }
+                    .header { text-align: center; margin-bottom: 30px; }
+                    .data { color: #666; }
+                    .resumo { display: flex; justify-content: space-around; margin: 30px 0; }
+                    .card { padding: 20px; border-radius: 10px; text-align: center; }
+                    .receita { background: #e8f5e9; }
+                    .despesa { background: #ffebee; }
+                    .saldo { background: #e3f2fd; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th { background: #f5f5f5; padding: 10px; text-align: left; }
+                    td { padding: 10px; border-bottom: 1px solid #ddd; }
+                    .positivo { color: #4CAF50; }
+                    .negativo { color: #f44336; }
+                    @media print {
+                        button { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <h1>📊 Relatório Financeiro</h1>
+                    <p class="data">Gerado em: ${hoje}</p>
+                </div>
+                
+                <div class="resumo">
+                    <div class="card receita">
+                        <h3>Receitas</h3>
+                        <h2>R$ ${totalReceitas.toFixed(2).replace('.', ',')}</h2>
+                    </div>
+                    <div class="card despesa">
+                        <h3>Despesas</h3>
+                        <h2>R$ ${totalDespesas.toFixed(2).replace('.', ',')}</h2>
+                    </div>
+                    <div class="card saldo">
+                        <h3>Saldo</h3>
+                        <h2 class="${saldo >= 0 ? 'positivo' : 'negativo'}">
+                            R$ ${saldo.toFixed(2).replace('.', ',')}
+                        </h2>
+                    </div>
+                </div>
+                
+                <h3>Últimas Transações</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Data</th>
+                            <th>Descrição</th>
+                            <th>Categoria</th>
+                            <th>Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${transacoes.slice(0, 20).map(t => `
+                            <tr>
+                                <td>${new Date(t.data).toLocaleDateString('pt-BR')}</td>
+                                <td>${t.descricao}</td>
+                                <td>${t.categoria}</td>
+                                <td class="${t.tipo === 'receita' ? 'positivo' : 'negativo'}">
+                                    ${t.tipo === 'receita' ? '+' : '-'} R$ ${t.valor.toFixed(2).replace('.', ',')}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+                
+                <p style="text-align: center; margin-top: 30px;">
+                    <button onclick="window.print()">🖨️ Imprimir / Salvar PDF</button>
+                </p>
+            </body>
+            </html>
+            `;
+            
+            janela.document.write(html);
+            janela.document.close();
         }
     </script>
 </body>
