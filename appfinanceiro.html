@@ -618,7 +618,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>💰 Valor (R$)</label>
-                        <input type="number" id="valor" placeholder="0,00" step="0.01" min="0">
+                        <input type="text" id="valor" placeholder="0,00">
                     </div>
                     <div class="form-group">
                         <label>📅 Data</label>
@@ -669,7 +669,12 @@
 
             <div class="transactions-list">
                 <div class="list-header">
-                    <h3>📋 Últimos Lançamentos</h3>
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <h3>📋 Últimos Lançamentos</h3>
+                        <button class="action-btn edit" onclick="abrirGerenciarCategorias()" title="Gerenciar Categorias" style="padding: 8px 12px; background: var(--accent); color: white; border-radius: 6px;">
+                            📂 Gerenciar Categorias
+                        </button>
+                    </div>
                     <div class="list-filters">
                         <select id="filtroMes" onchange="filtrarLancamentos()">
                             <option value="all">Todos os meses</option>
@@ -693,7 +698,7 @@
                     </div>
                     <div class="form-group">
                         <label>💰 Saldo Inicial</label>
-                        <input type="number" id="saldoInicial" value="0" step="0.01">
+                        <input type="text" id="saldoInicial" value="0,00">
                     </div>
                 </div>
                 <div class="form-row">
@@ -747,7 +752,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>💰 Valor</label>
-                        <input type="number" id="valorPrevisto" step="0.01">
+                        <input type="text" id="valorPrevisto" placeholder="0,00">
                     </div>
                     <div class="form-group">
                         <label>📝 Descrição</label>
@@ -838,7 +843,10 @@
         let pagamentoSelecionado = 'dinheiro';
         let editandoId = null;
 
-        const categorias = {
+        // ============================================
+        // SISTEMA DE CATEGORIAS EDITÁVEIS
+        // ============================================
+        let categorias = {
             receita: [
                 'Salário',
                 'Prestação de Serviço',
@@ -860,30 +868,414 @@
             ]
         };
 
-        // ============================================
-        // FUNÇÕES DE SINCRONIZAÇÃO FIREBASE
-        // ============================================
-        
-        async function carregarDadosFirebase() {
+        // Carregar categorias do Firebase
+        async function carregarCategoriasFirebase() {
             try {
-                const docRef = db.collection('dados_usuario').doc('usuario_atual');
+                const docRef = db.collection('dados_usuario').doc('categorias');
                 const docSnap = await docRef.get();
                 
                 if (docSnap.exists) {
                     const dados = docSnap.data();
-                    transacoes = dados.transacoes || [];
-                    contas = dados.contas || [];
-                    previsoes = dados.previsoes || [];
-                    console.log('✅ Dados carregados da nuvem!');
-                } else {
-                    console.log('📁 Primeiro acesso - criando dados na nuvem');
-                    await salvarDadosFirebase();
+                    if (dados.receita && dados.despesa) {
+                        categorias = dados;
+                    }
                 }
-                atualizarTela();
+                await salvarCategoriasFirebase();
             } catch (error) {
-                console.log('⚠️ Erro ao carregar da nuvem, usando localStorage:', error);
-                carregarDadosLocal();
+                console.log('Erro ao carregar categorias:', error);
+                carregarCategoriasLocal();
             }
+        }
+
+        async function salvarCategoriasFirebase() {
+            try {
+                await db.collection('dados_usuario').doc('categorias').set({
+                    receita: categorias.receita,
+                    despesa: categorias.despesa,
+                    ultimaAtualizacao: firebase.firestore.FieldValue.serverTimestamp()
+                });
+            } catch (error) {
+                console.log('Erro ao salvar categorias:', error);
+            }
+        }
+
+        function carregarCategoriasLocal() {
+            const catsSalvas = localStorage.getItem('categorias');
+            if (catsSalvas) {
+                categorias = JSON.parse(catsSalvas);
+            }
+        }
+
+        function salvarCategorias() {
+            localStorage.setItem('categorias', JSON.stringify(categorias));
+            salvarCategoriasFirebase();
+        }
+
+        // Modal de gerenciamento de categorias
+        function abrirGerenciarCategorias() {
+            const modal = document.createElement('div');
+            modal.className = 'modal-categorias';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3>📂 Gerenciar Categorias</h3>
+                        <button onclick="this.closest('.modal-categorias').remove()" class="close-btn">✖</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="categoria-tabs">
+                            <button class="categoria-tab active" onclick="mudarTabCategoria('receita', this)">📈 Receitas</button>
+                            <button class="categoria-tab" onclick="mudarTabCategoria('despesa', this)">📉 Despesas</button>
+                        </div>
+                        
+                        <div id="categoria-receita" class="categoria-list active">
+                            ${categorias.receita.map((cat, index) => `
+                                <div class="categoria-item">
+                                    <span>${cat}</span>
+                                    <div>
+                                        <button onclick="editarCategoria('receita', ${index}, '${cat}')" class="edit-btn">✏️</button>
+                                        ${cat !== 'Outros' ? `<button onclick="deletarCategoria('receita', ${index})" class="delete-btn">🗑️</button>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div id="categoria-despesa" class="categoria-list">
+                            ${categorias.despesa.map((cat, index) => `
+                                <div class="categoria-item">
+                                    <span>${cat}</span>
+                                    <div>
+                                        <button onclick="editarCategoria('despesa', ${index}, '${cat}')" class="edit-btn">✏️</button>
+                                        ${cat !== 'Outros' ? `<button onclick="deletarCategoria('despesa', ${index})" class="delete-btn">🗑️</button>` : ''}
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="nova-categoria">
+                            <h4>➕ Nova Categoria</h4>
+                            <div class="form-group">
+                                <input type="text" id="novaCategoriaNome" placeholder="Nome da categoria">
+                                <select id="novaCategoriaTipo">
+                                    <option value="receita">Receita</option>
+                                    <option value="despesa">Despesa</option>
+                                </select>
+                                <button onclick="adicionarCategoria()" class="btn-primary btn-income">ADICIONAR</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Adicionar CSS do modal
+            const style = document.createElement('style');
+            style.textContent = `
+                .modal-categorias {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0,0,0,0.5);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 1000;
+                }
+                .modal-content {
+                    background: var(--bg-primary);
+                    border-radius: 15px;
+                    padding: 20px;
+                    max-width: 500px;
+                    width: 90%;
+                    max-height: 80vh;
+                    overflow-y: auto;
+                }
+                .modal-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 20px;
+                }
+                .close-btn {
+                    background: none;
+                    border: none;
+                    font-size: 20px;
+                    cursor: pointer;
+                    color: var(--text-primary);
+                }
+                .categoria-tabs {
+                    display: flex;
+                    gap: 10px;
+                    margin-bottom: 20px;
+                }
+                .categoria-tab {
+                    flex: 1;
+                    padding: 10px;
+                    border: 1px solid var(--border);
+                    background: var(--bg-secondary);
+                    color: var(--text-primary);
+                    border-radius: 8px;
+                    cursor: pointer;
+                }
+                .categoria-tab.active {
+                    background: var(--accent);
+                    color: white;
+                }
+                .categoria-list {
+                    display: none;
+                    margin-bottom: 20px;
+                }
+                .categoria-list.active {
+                    display: block;
+                }
+                .categoria-item {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 10px;
+                    border-bottom: 1px solid var(--border);
+                }
+                .nova-categoria {
+                    margin-top: 20px;
+                    padding: 20px;
+                    background: var(--bg-secondary);
+                    border-radius: 10px;
+                }
+                .nova-categoria .form-group {
+                    display: flex;
+                    gap: 10px;
+                    flex-wrap: wrap;
+                }
+                .nova-categoria input,
+                .nova-categoria select {
+                    flex: 1;
+                    min-width: 150px;
+                }
+                .edit-btn, .delete-btn {
+                    background: none;
+                    border: none;
+                    font-size: 16px;
+                    cursor: pointer;
+                    padding: 5px;
+                    border-radius: 4px;
+                }
+                .edit-btn:hover {
+                    background: var(--info);
+                    color: white;
+                }
+                .delete-btn:hover {
+                    background: var(--expense);
+                    color: white;
+                }
+            `;
+            
+            document.head.appendChild(style);
+            document.body.appendChild(modal);
+        }
+
+        function mudarTabCategoria(tipo, element) {
+            document.querySelectorAll('.categoria-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.categoria-list').forEach(l => l.classList.remove('active'));
+            
+            element.classList.add('active');
+            document.getElementById(`categoria-${tipo}`).classList.add('active');
+        }
+
+        function adicionarCategoria() {
+            const nome = document.getElementById('novaCategoriaNome').value.trim();
+            const tipo = document.getElementById('novaCategoriaTipo').value;
+
+            if (!nome) {
+                alert('Digite um nome para a categoria!');
+                return;
+            }
+
+            if (categorias[tipo].includes(nome)) {
+                alert('Esta categoria já existe!');
+                return;
+            }
+
+            categorias[tipo].push(nome);
+            salvarCategorias();
+            
+            // Atualizar selects em todas as telas
+            preencherCategorias();
+            preencherCategoriasPrevisao();
+            
+            // Fechar modal
+            document.querySelector('.modal-categorias').remove();
+            
+            // Mostrar mensagem de sucesso
+            alert('✅ Categoria adicionada com sucesso!');
+        }
+
+        function editarCategoria(tipo, index, nomeAtual) {
+            const novoNome = prompt('Editar categoria:', nomeAtual);
+            
+            if (novoNome && novoNome.trim()) {
+                if (categorias[tipo].includes(novoNome.trim()) && novoNome.trim() !== nomeAtual) {
+                    alert('Esta categoria já existe!');
+                    return;
+                }
+                
+                categorias[tipo][index] = novoNome.trim();
+                salvarCategorias();
+                
+                // Atualizar transações existentes
+                transacoes.forEach(t => {
+                    if (t.categoria === nomeAtual) {
+                        t.categoria = novoNome.trim();
+                    }
+                });
+                
+                preencherCategorias();
+                preencherCategoriasPrevisao();
+                atualizarListaLancamentos();
+                salvarDados();
+                
+                alert('✅ Categoria atualizada!');
+            }
+        }
+
+        function deletarCategoria(tipo, index) {
+            if (categorias[tipo][index] === 'Outros') {
+                alert('A categoria "Outros" não pode ser removida!');
+                return;
+            }
+
+            if (confirm(`Remover categoria "${categorias[tipo][index]}"?`)) {
+                const categoriaRemovida = categorias[tipo][index];
+                
+                // Substituir nas transações existentes
+                transacoes.forEach(t => {
+                    if (t.categoria === categoriaRemovida) {
+                        t.categoria = 'Outros';
+                    }
+                });
+                
+                categorias[tipo].splice(index, 1);
+                salvarCategorias();
+                salvarDados();
+                
+                preencherCategorias();
+                preencherCategoriasPrevisao();
+                atualizarListaLancamentos();
+                
+                alert('✅ Categoria removida!');
+            }
+        }
+
+        // ============================================
+        // FORMATAÇÃO DE MOEDA BRASILEIRA
+        // ============================================
+        function formatarMoeda(input) {
+            let valor = input.value.replace(/\D/g, '');
+            
+            if (valor === '') {
+                input.value = '';
+                return;
+            }
+            
+            // Converter para centavos
+            valor = parseInt(valor) / 100;
+            
+            // Formatar como moeda brasileira
+            input.value = valor.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function converterMoedaParaNumber(valorString) {
+            if (!valorString) return 0;
+            
+            // Remover pontos de milhar e substituir vírgula por ponto
+            const valorLimpo = valorString
+                .replace(/\./g, '')  // Remove pontos (milhar)
+                .replace(',', '.');   // Substitui vírgula por ponto
+            
+            return parseFloat(valorLimpo) || 0;
+        }
+
+        // ============================================
+        // FUNÇÕES DE SINCRONIZAÇÃO FIREBASE
+        // ============================================
+        
+        function carregarDadosFirebase() {
+            try {
+                // Listener para dados principais
+                db.collection('dados_usuario').doc('usuario_atual')
+                    .onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const dados = doc.data();
+                            let dadosAlterados = false;
+                            
+                            if (dados.transacoes) {
+                                transacoes = dados.transacoes;
+                                dadosAlterados = true;
+                            }
+                            if (dados.contas) {
+                                contas = dados.contas;
+                                dadosAlterados = true;
+                            }
+                            if (dados.previsoes) {
+                                previsoes = dados.previsoes;
+                                dadosAlterados = true;
+                            }
+                            
+                            if (dadosAlterados) {
+                                console.log('🔄 Dados atualizados da nuvem!');
+                                salvarDadosLocal(); // Backup local
+                                atualizarTela();
+                            }
+                        } else {
+                            console.log('📁 Primeiro acesso - criando dados na nuvem');
+                            salvarDadosFirebase();
+                        }
+                    }, (error) => {
+                        console.log('⚠️ Erro no listener Firebase:', error);
+                        carregarDadosLocal();
+                        atualizarTela();
+                    });
+
+                // Listener para categorias
+                db.collection('dados_usuario').doc('categorias')
+                    .onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const dados = doc.data();
+                            if (dados.receita && dados.despesa) {
+                                categorias = dados;
+                                salvarCategoriasLocal();
+                                
+                                // Atualizar selects se necessário
+                                if (document.getElementById('lancamentos').classList.contains('active')) {
+                                    preencherCategorias();
+                                }
+                                if (document.getElementById('orcamento').classList.contains('active')) {
+                                    preencherCategoriasPrevisao();
+                                }
+                            }
+                        }
+                    }, (error) => {
+                        console.log('Erro no listener de categorias:', error);
+                    });
+
+            } catch (error) {
+                console.log('⚠️ Erro ao configurar Firebase:', error);
+                carregarDadosLocal();
+                atualizarTela();
+            }
+        }
+
+        // Funções de backup local
+        function salvarDadosLocal() {
+            localStorage.setItem('transacoes', JSON.stringify(transacoes));
+            localStorage.setItem('contas', JSON.stringify(contas));
+            localStorage.setItem('previsoes', JSON.stringify(previsoes));
+        }
+
+        function salvarCategoriasLocal() {
+            localStorage.setItem('categorias', JSON.stringify(categorias));
         }
 
         async function salvarDadosFirebase() {
@@ -902,9 +1294,7 @@
 
         function salvarDados() {
             // Salvar local (backup)
-            localStorage.setItem('transacoes', JSON.stringify(transacoes));
-            localStorage.setItem('contas', JSON.stringify(contas));
-            localStorage.setItem('previsoes', JSON.stringify(previsoes));
+            salvarDadosLocal();
             
             // Salvar na nuvem
             salvarDadosFirebase();
@@ -932,6 +1322,7 @@
 
         function carregarDados() {
             carregarDadosFirebase();
+            carregarCategoriasFirebase();
         }
 
         // ============================================
@@ -941,7 +1332,17 @@
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            event.target.classList.add('active');
+            // Encontrar o botão clicado
+            const botoes = document.querySelectorAll('.nav-tab');
+            botoes.forEach(btn => {
+                if (btn.textContent.includes(tabName === 'dashboard' ? '📊' : 
+                                             tabName === 'lancamentos' ? '📝' :
+                                             tabName === 'contas' ? '🏦' :
+                                             tabName === 'orcamento' ? '📅' : '📈')) {
+                    btn.classList.add('active');
+                }
+            });
+            
             document.getElementById(tabName).classList.add('active');
             
             if (tabName === 'lancamentos') {
@@ -1025,15 +1426,24 @@
             });
         }
 
-        function lancarTransacao() {
-            const valor = document.getElementById('valor').value;
+        async function lancarTransacao() {
+            const valorInput = document.getElementById('valor').value;
             const descricao = document.getElementById('descricao').value;
             const categoria = document.getElementById('categoria').value;
             const contaId = parseInt(document.getElementById('contaSelect').value);
             const observacao = document.getElementById('observacao').value;
             let data = document.getElementById('dataLancamento').value;
 
-            if (!valor || valor <= 0) {
+            // Validar se há contas cadastradas
+            if (contas.length === 0) {
+                alert('⚠️ Cadastre uma conta primeiro!');
+                showTab('contas');
+                return;
+            }
+
+            const valorNumerico = converterMoedaParaNumber(valorInput);
+
+            if (!valorNumerico || valorNumerico <= 0) {
                 alert('Digite um valor válido!');
                 return;
             }
@@ -1050,7 +1460,7 @@
             const novaTransacao = {
                 id: editandoId || Date.now(),
                 tipo: tipoLancamento,
-                valor: parseFloat(valor),
+                valor: valorNumerico,
                 descricao: descricao,
                 categoria: categoria,
                 contaId: contaId,
@@ -1069,13 +1479,17 @@
                 transacoes.unshift(novaTransacao);
             }
 
-            salvarDados();
+            // Salvar no Firebase (isso vai disparar o listener em todos os dispositivos)
+            await salvarDadosFirebase();
+            salvarDadosLocal();
             
+            // Limpar formulário
             document.getElementById('valor').value = '';
             document.getElementById('descricao').value = '';
             document.getElementById('observacao').value = '';
             document.getElementById('dataLancamento').value = new Date().toISOString().split('T')[0];
             
+            // Atualizar UI local
             atualizarListaLancamentos();
             atualizarDashboard();
             
@@ -1096,7 +1510,7 @@
                 document.querySelector('#lancamentos .expense-tab').click();
             }
 
-            document.getElementById('valor').value = transacao.valor;
+            document.getElementById('valor').value = transacao.valor.toFixed(2).replace('.', ',');
             document.getElementById('descricao').value = transacao.descricao;
             document.getElementById('categoria').value = transacao.categoria;
             document.getElementById('contaSelect').value = transacao.contaId;
@@ -1170,7 +1584,7 @@
                         <div class="transaction-info">
                             <div class="transaction-header">
                                 <span class="transaction-valor ${t.tipo}">
-                                    ${t.tipo === 'receita' ? '+' : '-'} R$ ${t.valor.toFixed(2)}
+                                    ${t.tipo === 'receita' ? '+' : '-'} R$ ${t.valor.toFixed(2).replace('.', ',')}
                                 </span>
                                 <span class="transaction-categoria">${t.categoria}</span>
                                 <span class="transaction-conta">${conta.nome}</span>
@@ -1229,9 +1643,10 @@
         // ============================================
         // FUNÇÕES DE CONTAS
         // ============================================
-        function adicionarConta() {
+        async function adicionarConta() {
             const nome = document.getElementById('nomeConta').value;
-            const saldoInicial = parseFloat(document.getElementById('saldoInicial').value) || 0;
+            const saldoInicialInput = document.getElementById('saldoInicial').value;
+            const saldoInicial = converterMoedaParaNumber(saldoInicialInput) || 0;
             const tipo = document.getElementById('tipoConta').value;
             const cor = document.getElementById('corConta').value;
 
@@ -1249,10 +1664,11 @@
             };
 
             contas.push(novaConta);
-            salvarDados();
+            await salvarDadosFirebase();
+            salvarDadosLocal();
 
             document.getElementById('nomeConta').value = '';
-            document.getElementById('saldoInicial').value = '0';
+            document.getElementById('saldoInicial').value = '0,00';
             
             atualizarListaContas();
             preencherSelectContas();
@@ -1276,7 +1692,7 @@
                     <div class="conta-card" style="border-left: 4px solid ${conta.cor}">
                         <span class="conta-tipo">${conta.tipo}</span>
                         <div class="conta-nome">${conta.nome}</div>
-                        <div class="conta-saldo">R$ ${saldo.toFixed(2)}</div>
+                        <div class="conta-saldo">R$ ${saldo.toFixed(2).replace('.', ',')}</div>
                         <div class="conta-actions">
                             <button class="action-btn delete" onclick="deletarConta(${conta.id})">🗑️</button>
                         </div>
@@ -1323,9 +1739,10 @@
             });
         }
 
-        function adicionarPrevisao() {
+        async function adicionarPrevisao() {
             const mes = document.getElementById('mesOrcamento').value;
-            const valor = document.getElementById('valorPrevisto').value;
+            const valorInput = document.getElementById('valorPrevisto').value;
+            const valor = converterMoedaParaNumber(valorInput);
             const descricao = document.getElementById('descricaoPrevista').value;
             const categoria = document.getElementById('categoriaPrevista').value;
             const dia = document.getElementById('diaVencimento').value;
@@ -1349,14 +1766,15 @@
                 id: Date.now(),
                 mes: mes,
                 tipo: tipoPrevisao,
-                valor: parseFloat(valor),
+                valor: valor,
                 descricao: descricao,
                 categoria: categoria,
                 dia: dia || 1
             };
 
             previsoes.push(novaPrevisao);
-            salvarDados();
+            await salvarDadosFirebase();
+            salvarDadosLocal();
 
             document.getElementById('valorPrevisto').value = '';
             document.getElementById('descricaoPrevista').value = '';
@@ -1379,9 +1797,9 @@
                 else totalDespesas += p.valor;
             });
 
-            document.getElementById('totalReceitasPrevistas').textContent = `R$ ${totalReceitas.toFixed(2)}`;
-            document.getElementById('totalDespesasPrevistas').textContent = `R$ ${totalDespesas.toFixed(2)}`;
-            document.getElementById('saldoPrevisto').textContent = `R$ ${(totalReceitas - totalDespesas).toFixed(2)}`;
+            document.getElementById('totalReceitasPrevistas').textContent = `R$ ${totalReceitas.toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalDespesasPrevistas').textContent = `R$ ${totalDespesas.toFixed(2).replace('.', ',')}`;
+            document.getElementById('saldoPrevisto').textContent = `R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}`;
 
             const listaDiv = document.getElementById('listaPrevisoes');
             if (!listaDiv) return;
@@ -1397,7 +1815,7 @@
                     <div class="orcamento-item">
                         <div class="orcamento-header-item">
                             <span style="color: ${p.tipo === 'receita' ? 'var(--income)' : 'var(--expense)'}">
-                                ${p.tipo === 'receita' ? '📈' : '📉'} R$ ${p.valor.toFixed(2)}
+                                ${p.tipo === 'receita' ? '📈' : '📉'} R$ ${p.valor.toFixed(2).replace('.', ',')}
                             </span>
                             <span>Dia ${p.dia}</span>
                         </div>
@@ -1479,16 +1897,16 @@
                 resumoDiv.innerHTML = `
                     <div class="stat-card">
                         <div class="stat-title">📈 Total Receitas</div>
-                        <div class="stat-value" style="color: var(--income)">R$ ${totalReceitas.toFixed(2)}</div>
+                        <div class="stat-value" style="color: var(--income)">R$ ${totalReceitas.toFixed(2).replace('.', ',')}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-title">📉 Total Despesas</div>
-                        <div class="stat-value" style="color: var(--expense)">R$ ${totalDespesas.toFixed(2)}</div>
+                        <div class="stat-value" style="color: var(--expense)">R$ ${totalDespesas.toFixed(2).replace('.', ',')}</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-title">💰 Saldo do Período</div>
                         <div class="stat-value" style="color: ${totalReceitas - totalDespesas >= 0 ? 'var(--income)' : 'var(--expense)'}">
-                            R$ ${(totalReceitas - totalDespesas).toFixed(2)}
+                            R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}
                         </div>
                     </div>
                 `;
@@ -1502,10 +1920,10 @@
                     html += `
                         <tr>
                             <td>${cat}</td>
-                            <td style="color: var(--income)">R$ ${porCategoria[cat].receitas.toFixed(2)}</td>
-                            <td style="color: var(--expense)">R$ ${porCategoria[cat].despesas.toFixed(2)}</td>
+                            <td style="color: var(--income)">R$ ${porCategoria[cat].receitas.toFixed(2).replace('.', ',')}</td>
+                            <td style="color: var(--expense)">R$ ${porCategoria[cat].despesas.toFixed(2).replace('.', ',')}</td>
                             <td style="color: ${saldo >= 0 ? 'var(--income)' : 'var(--expense)'}">
-                                R$ ${saldo.toFixed(2)}
+                                R$ ${saldo.toFixed(2).replace('.', ',')}
                             </td>
                         </tr>
                     `;
@@ -1543,19 +1961,19 @@
                 }
             });
 
-            document.getElementById('saldoTotal').textContent = `R$ ${(totalReceitas - totalDespesas).toFixed(2)}`;
-            document.getElementById('totalReceitas').textContent = `📈 Receitas: R$ ${totalReceitas.toFixed(2)}`;
-            document.getElementById('totalDespesas').textContent = `📉 Despesas: R$ ${totalDespesas.toFixed(2)}`;
+            document.getElementById('saldoTotal').textContent = `R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalReceitas').textContent = `📈 Receitas: R$ ${totalReceitas.toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalDespesas').textContent = `📉 Despesas: R$ ${totalDespesas.toFixed(2).replace('.', ',')}`;
             
-            document.getElementById('pagamentosMes').textContent = `R$ ${despesasMes.toFixed(2)}`;
-            document.getElementById('recebimentosMes').textContent = `R$ ${receitasMes.toFixed(2)}`;
+            document.getElementById('pagamentosMes').textContent = `R$ ${despesasMes.toFixed(2).replace('.', ',')}`;
+            document.getElementById('recebimentosMes').textContent = `R$ ${receitasMes.toFixed(2).replace('.', ',')}`;
 
             let saldoContas = 0;
             contas.forEach(conta => {
                 saldoContas += calcularSaldoConta(conta.id) + (conta.saldoInicial || 0);
             });
             
-            document.getElementById('saldoContas').textContent = `R$ ${saldoContas.toFixed(2)}`;
+            document.getElementById('saldoContas').textContent = `R$ ${saldoContas.toFixed(2).replace('.', ',')}`;
             document.getElementById('totalContas').textContent = `${contas.length} contas ativas`;
 
             const mesKey = `${anoAtual}-${String(mesAtual + 1).padStart(2, '0')}`;
@@ -1569,9 +1987,9 @@
                 else despesasPrevistas += p.valor;
             });
 
-            document.getElementById('pagamentosPrevistos').textContent = `Previsto: R$ ${despesasPrevistas.toFixed(2)}`;
-            document.getElementById('recebimentosPrevistos').textContent = `Previsto: R$ ${receitasPrevistas.toFixed(2)}`;
-            document.getElementById('totalPrevisto').textContent = `📅 Previsto: R$ ${(receitasPrevistas - despesasPrevistas).toFixed(2)}`;
+            document.getElementById('pagamentosPrevistos').textContent = `Previsto: R$ ${despesasPrevistas.toFixed(2).replace('.', ',')}`;
+            document.getElementById('recebimentosPrevistos').textContent = `Previsto: R$ ${receitasPrevistas.toFixed(2).replace('.', ',')}`;
+            document.getElementById('totalPrevisto').textContent = `📅 Previsto: R$ ${(receitasPrevistas - despesasPrevistas).toFixed(2).replace('.', ',')}`;
         }
 
         // ============================================
@@ -1609,6 +2027,9 @@
             if (document.getElementById('contas').classList.contains('active')) {
                 atualizarListaContas();
             }
+            if (document.getElementById('orcamento').classList.contains('active')) {
+                carregarOrcamento();
+            }
         }
 
         // ============================================
@@ -1623,6 +2044,30 @@
         // ============================================
         // INICIALIZAÇÃO
         // ============================================
+        
+        // Adicionar eventos de formatação nos campos de valor
+        document.addEventListener('DOMContentLoaded', function() {
+            const camposValor = ['valor', 'saldoInicial', 'valorPrevisto'];
+            
+            camposValor.forEach(id => {
+                const campo = document.getElementById(id);
+                if (campo) {
+                    campo.addEventListener('input', function() {
+                        formatarMoeda(this);
+                    });
+                    
+                    campo.addEventListener('blur', function() {
+                        if (this.value === '') {
+                            this.value = '0,00';
+                        } else {
+                            // Garantir formato correto ao sair do campo
+                            formatarMoeda(this);
+                        }
+                    });
+                }
+            });
+        });
+
         carregarDados();
         carregarModoEscuro();
         
