@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👑 MASTER APP - CONTROLE TOTAL</title>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        /* (mesmo estilo que já tens - mantém) */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #2a2a40;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent: #4CAF50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --info: #2196F3;
+            --gold: gold;
+            --neon: #00ffaa;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* HEADER FUTURISTA */
+        .header {
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 255, 170, 0.3);
+            box-shadow: 0 0 20px rgba(0, 255, 170, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header h1 {
+            font-size: clamp(24px, 4vw, 32px);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 0 0 10px var(--neon);
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .power-btn {
+            background: linear-gradient(45deg, var(--accent), var(--neon));
+            color: black;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .power-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--neon);
+        }
+
+        /* GRID PRINCIPAL */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+
+        /* PAINEL DE CLIENTES */
+        .clientes-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 20px;
+            border-left: 4px solid var(--neon);
+        }
+
+        .cliente-item {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .cliente-item:hover {
+            border-color: var(--neon);
+            transform: translateX(5px);
+            box-shadow: 0 0 15px rgba(0, 255, 170, 0.3);
+        }
+
+        .cliente-item.active {
+            border-color: var(--neon);
+            background: #33334d;
+        }
+
+        .cliente-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .action-icon {
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-icon:hover {
+            background: var(--neon);
+            color: black;
+        }
+
+        /* PAINEL DE EDIÇÃO FUTURISTA */
+        .editor-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 20px;
+            border-top: 4px solid var(--neon);
+        }
+
+        .editor-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #404040;
+            padding-bottom: 10px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .tab:hover {
+            background: var(--bg-secondary);
+            color: white;
+        }
+
+        .tab.active {
+            background: var(--neon);
+            color: black;
+        }
+
+        /* VISUALIZADOR DO SITE */
+        .site-preview {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            min-height: 300px;
+            color: black;
+            border: 2px solid var(--neon);
+            box-shadow: 0 0 30px rgba(0, 255, 170, 0.3);
+        }
+
+        /* EDITOR DE CÓDIGO */
+        .code-editor {
+            background: #1e1e1e;
+            border-radius: 15px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+            border: 1px solid #404040;
+        }
+
+        .code-editor textarea {
+            width: 100%;
+            height: 300px;
+            background: #1e1e1e;
+            color: #00ff00;
+            border: none;
+            font-family: 'Courier New', monospace;
+            padding: 10px;
+            resize: vertical;
+        }
+
+        /* BOTÕES DE CONTROLE */
+        .control-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-edit { background: var(--info); color: white; }
+        .btn-block { background: var(--danger); color: white; }
+        .btn-save { background: var(--accent); color: white; }
+        .btn-view { background: var(--gold); color: black; }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        /* LOG */
+        .log-panel {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 20px;
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 12px;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            border-left: 5px solid var(--neon);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--neon);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER FUTURISTA -->
+        <div class="header">
+            <div>
+                <h1>👑 MASTER APP - CONTROLE TOTAL</h1>
+                <p style="color: var(--neon);">⚡ Editando TUDO dos clientes</p>
+            </div>
+            <div class="status">
+                <span id="firebaseStatus" style="color: var(--neon);">🔵 Conectando...</span>
+                <span id="clientesCount">📊 0 clientes</span>
+                <button class="power-btn" onclick="mostrarAjuda()">
+                    🚀 PODERES
+                </button>
+            </div>
+        </div>
+
+        <!-- GRID PRINCIPAL -->
+        <div class="main-grid">
+            <!-- PAINEL CLIENTES -->
+            <div class="clientes-panel">
+                <h2 style="margin-bottom: 20px; color: var(--neon);">📋 CLIENTES</h2>
+                
+                <div style="margin-bottom: 15px;">
+                    <input type="text" id="buscarCliente" placeholder="🔍 Buscar cliente..." onkeyup="filtrarClientes()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <button onclick="criarCliente()" style="width: 100%; padding: 10px; background: var(--accent); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+                        ➕ NOVO CLIENTE
+                    </button>
+                </div>
+                
+                <div id="listaClientes">
+                    <!-- Clientes serão carregados aqui -->
+                    <div class="loading">📡 Carregando clientes...</div>
+                </div>
+            </div>
+
+            <!-- PAINEL EDIÇÃO -->
+            <div class="editor-panel" id="editorPanel">
+                <div class="editor-tabs">
+                    <button class="tab active" onclick="mudarAba('visual')">🎨 VISUAL</button>
+                    <button class="tab" onclick="mudarAba('conteudo')">📝 CONTEÚDO</button>
+                    <button class="tab" onclick="mudarAba('funcoes')">⚙️ FUNÇÕES</button>
+                    <button class="tab" onclick="mudarAba('codigo')">💻 CÓDIGO</button>
+                </div>
+
+                <!-- ABA VISUAL -->
+                <div id="abaVisual" class="tab-content active">
+                    <h3 style="margin-bottom: 15px;">🎨 EDITOR VISUAL</h3>
+                    
+                    <div style="display: grid; gap: 15px;">
+                        <div>
+                            <label>🏢 NOME DA EMPRESA</label>
+                            <input type="text" id="nomeEmpresa" value="" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+                        </div>
+                        
+                        <div>
+                            <label>🎨 COR PRINCIPAL</label>
+                            <input type="color" id="corPrincipal" value="#4CAF50" onchange="alteracaoNaoSalva()" style="width: 100%; height: 50px;">
+                        </div>
+                        
+                        <div>
+                            <label>🌙 MODO ESCURO</label>
+                            <select id="modoEscuro" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+                                <option value="auto">Automático (padrão)</option>
+                                <option value="light">Sempre claro</option>
+                                <option value="dark">Sempre escuro</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA CONTEÚDO -->
+                <div id="abaConteudo" class="tab-content">
+                    <h3 style="margin-bottom: 15px;">📝 EDITOR DE CONTEÚDO</h3>
+                    
+                    <div style="display: grid; gap: 15px;">
+                        <div>
+                            <label>👤 Termo para colaborador</label>
+                            <input type="text" id="termoColaborador" value="Motorista" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+                        </div>
+                        
+                        <div>
+                            <label>📦 Termo para ação</label>
+                            <input type="text" id="termoAcao" value="Entrega" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+                        </div>
+                        
+                        <div>
+                            <label>👥 Termo para cliente</label>
+                            <input type="text" id="termoCliente" value="Cliente" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+                        </div>
+                        
+                        <div>
+                            <label>💰 Moeda</label>
+                            <select id="moeda" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+                                <option value="BRL">Real (R$)</option>
+                                <option value="USD">Dólar ($)</option>
+                                <option value="EUR">Euro (€)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA FUNÇÕES -->
+                <div id="abaFuncoes" class="tab-content">
+                    <h3 style="margin-bottom: 15px;">⚙️ CONTROLE DE FUNÇÕES</h3>
+                    <p style="color: var(--warning); font-size: 12px; margin-bottom: 15px;">🔒 Desative funções para limitar o acesso do cliente</p>
+                    
+                    <div style="display: grid; gap: 15px;">
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="funcDashboard" checked onchange="alteracaoNaoSalva()"> 📊 Dashboard
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="funcLancamentos" checked onchange="alteracaoNaoSalva()"> 📝 Lançamentos
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="funcContas" checked onchange="alteracaoNaoSalva()"> 🏦 Contas
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="funcOrcamento" checked onchange="alteracaoNaoSalva()"> 📅 Orçamento
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="funcRelatorios" checked onchange="alteracaoNaoSalva()"> 📈 Relatórios
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="funcPlanos" onchange="alteracaoNaoSalva()"> 💰 Planos (assinaturas)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px;">
+                            <input type="checkbox" id="funcImportar" checked onchange="alteracaoNaoSalva()"> 📥 Importação/Exportação
+                        </label>
+                    </div>
+                </div>
+
+                <!-- ABA CÓDIGO -->
+                <div id="abaCodigo" class="tab-content">
+                    <h3 style="margin-bottom: 15px;">💻 EDITOR DE CÓDIGO</h3>
+                    <p style="color: var(--warning); font-size: 12px; margin-bottom: 15px;">⚡ Edite o HTML diretamente (apenas para avançados)</p>
+                    
+                    <div class="code-editor">
+                        <textarea id="codigoHtml" placeholder="&lt;!-- Código HTML personalizado --&gt;" onchange="alteracaoNaoSalva()"></textarea>
+                    </div>
+                </div>
+
+                <!-- VISUALIZAÇÃO DO SITE (Preview) -->
+                <div class="site-preview" id="sitePreview">
+                    <div id="previewConteudo" style="text-align: center;">
+                        <div style="width: 100px; height: 100px; background: #ddd; margin: 0 auto; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            LOGO
+                        </div>
+                        <h2 id="previewTitulo" style="margin: 10px 0;">Selecione um cliente</h2>
+                        <div id="previewBotoes" style="display: flex; gap: 10px; justify-content: center;">
+                            <span>📊 Dashboard</span>
+                            <span>📝 Lançamentos</span>
+                            <span>🏦 Contas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTÕES DE CONTROLE -->
+                <div class="control-buttons">
+                    <button class="control-btn btn-edit" onclick="entrarModoEdicao()" id="btnEditar" disabled>
+                        ✏️ EDITAR
+                    </button>
+                    <button class="control-btn btn-block" onclick="bloquearCliente()" id="btnBloquear" disabled>
+                        🔒 BLOQUEAR
+                    </button>
+                    <button class="control-btn btn-save" onclick="salvarAlteracoes()" id="btnSalvar" disabled>
+                        💾 SALVAR
+                    </button>
+                    <button class="control-btn btn-view" onclick="verComoCliente()" id="btnVisualizar" disabled>
+                        👁️ VER COMO CLIENTE
+                    </button>
+                </div>
+
+                <!-- LOG -->
+                <div class="log-panel" id="logPanel">
+                    <div>🚀 Sistema pronto para controle total</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO -->
+    <div id="modalConfirm" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitulo">⚡ Confirmação</h2>
+            <p id="modalMsg">Tem certeza?</p>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button style="flex:1; padding: 10px; background: var(--accent);" onclick="confirmarAcao()">SIM</button>
+                <button style="flex:1; padding: 10px; background: var(--danger);" onclick="fecharModal()">NÃO</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NOVO CLIENTE -->
+    <div id="modalNovoCliente" class="modal">
+        <div class="modal-content">
+            <h2>➕ NOVO CLIENTE</h2>
+            <div style="margin: 20px 0;">
+                <label>Nome da Empresa:</label>
+                <input type="text" id="novoClienteNome" style="width: 100%; padding: 10px; margin-top: 5px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+            </div>
+            <div style="margin: 20px 0;">
+                <label>Plano:</label>
+                <select id="novoClientePlano" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+                    <option value="basico">Básico</option>
+                    <option value="profissional">Profissional</option>
+                    <option value="empresarial">Empresarial</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button style="flex:1; padding: 10px; background: var(--accent);" onclick="criarClienteFirebase()">CRIAR</button>
+                <button style="flex:1; padding: 10px; background: var(--danger);" onclick="fecharModalNovoCliente()">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================
+        // CONFIGURAÇÃO FIREBASE (COLOQUE SUAS CREDENCIAIS AQUI!)
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyA6uqdXBhS8h-6pW2OVx_gPZYyRKnjU_ZA",
+            authDomain: "sistema-transportes-8b822.firebaseapp.com",
+            projectId: "sistema-transportes-8b822",
+            storageBucket: "sistema-transportes-8b822.firebasestorage.app",
+            messagingSenderId: "44819672967",
+            appId: "1:44819672967:web:5a7159fbb89d137df9a532"
+        };
+
+        // Inicializar Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // ============================================
+        // VARIÁVEIS GLOBAIS
+        // ============================================
+        let clientes = [];
+        let clienteAtual = null;
+        let acaoPendente = null;
+        let alteracoesNaoSalvas = false;
+
+        // ============================================
+        // FUNÇÕES PRINCIPAIS
+        // ============================================
+        
+        // Carregar clientes do Firebase
+        function carregarClientes() {
+            document.getElementById('firebaseStatus').innerHTML = '🔄 Carregando...';
+            
+            db.collection('clientes').onSnapshot((snapshot) => {
+                clientes = [];
+                snapshot.forEach(doc => {
+                    clientes.push({
+                        id: doc.id,
+                        ...doc.data()
+                    });
+                });
+                
+                document.getElementById('clientesCount').innerHTML = `📊 ${clientes.length} clientes`;
+                document.getElementById('firebaseStatus').innerHTML = '🟢 Conectado';
+                
+                atualizarListaClientes();
+                
+                // Se tinha um cliente selecionado, atualiza
+                if (clienteAtual) {
+                    const atualizado = clientes.find(c => c.id === clienteAtual.id);
+                    if (atualizado) {
+                        clienteAtual = atualizado;
+                        preencherFormularioCliente();
+                    }
+                }
+                
+                adicionarLog('📡 Dados sincronizados com Firebase');
+            }, (error) => {
+                console.error('Erro ao carregar clientes:', error);
+                document.getElementById('firebaseStatus').innerHTML = '🔴 Erro de conexão';
+                document.getElementById('listaClientes').innerHTML = '<div style="color: var(--danger); padding: 20px;">❌ Erro ao carregar clientes</div>';
+            });
+        }
+
+        // Atualizar lista de clientes na interface
+        function atualizarListaClientes() {
+            const lista = document.getElementById('listaClientes');
+            const filtro = document.getElementById('buscarCliente')?.value.toLowerCase() || '';
+            
+            if (clientes.length === 0) {
+                lista.innerHTML = '<div class="empty-state" style="padding: 20px; text-align: center; color: var(--text-secondary);">📭 Nenhum cliente cadastrado</div>';
+                return;
+            }
+            
+            let html = '';
+            const clientesFiltrados = clientes.filter(c => c.nome?.toLowerCase().includes(filtro));
+            
+            clientesFiltrados.forEach(c => {
+                const ativo = clienteAtual && clienteAtual.id === c.id;
+                html += `
+                    <div class="cliente-item ${ativo ? 'active' : ''}" onclick="selecionarCliente('${c.id}')">
+                        <div>
+                            <strong>${c.nome || 'Sem nome'}</strong>
+                            <p style="font-size: 11px; color: ${c.status === 'ativo' ? '#4CAF50' : '#f44336'}">
+                                ${c.status || 'ativo'} • ${c.plano || 'basico'}
+                            </p>
+                        </div>
+                        <div class="cliente-actions">
+                            <span class="action-icon" onclick="entrarModoEdicao(); event.stopPropagation()">✏️</span>
+                            <span class="action-icon" onclick="bloquearCliente(); event.stopPropagation()">🔒</span>
+                            <span class="action-icon" onclick="verComoCliente(); event.stopPropagation()">👁️</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            lista.innerHTML = html || '<div style="padding: 20px; color: var(--text-secondary);">🔍 Nenhum cliente encontrado</div>';
+        }
+
+        // Selecionar cliente
+        async function selecionarCliente(clienteId) {
+            const cliente = clientes.find(c => c.id === clienteId);
+            if (!cliente) return;
+            
+            // Verificar se há alterações não salvas
+            if (alteracoesNaoSalvas) {
+                if (!confirm('⚠️ Há alterações não salvas! Deseja realmente mudar de cliente?')) {
+                    return;
+                }
+            }
+            
+            clienteAtual = cliente;
+            alteracoesNaoSalvas = false;
+            
+            // Atualizar UI
+            atualizarListaClientes();
+            preencherFormularioCliente();
+            
+            // Habilitar botões
+            document.getElementById('btnEditar').disabled = false;
+            document.getElementById('btnBloquear').disabled = false;
+            document.getElementById('btnSalvar').disabled = false;
+            document.getElementById('btnVisualizar').disabled = false;
+            
+            adicionarLog(`📂 Cliente selecionado: ${cliente.nome}`);
+        }
+
+        // Preencher formulário com dados do cliente
+        function preencherFormularioCliente() {
+            if (!clienteAtual) return;
+            
+            // Dados básicos
+            document.getElementById('nomeEmpresa').value = clienteAtual.nome || '';
+            document.getElementById('corPrincipal').value = clienteAtual.cor || '#4CAF50';
+            document.getElementById('modoEscuro').value = clienteAtual.modoEscuro || 'auto';
+            
+            // Termos
+            document.getElementById('termoColaborador').value = clienteAtual.termoColaborador || 'Motorista';
+            document.getElementById('termoAcao').value = clienteAtual.termoAcao || 'Entrega';
+            document.getElementById('termoCliente').value = clienteAtual.termoCliente || 'Cliente';
+            document.getElementById('moeda').value = clienteAtual.moeda || 'BRL';
+            
+            // Funções
+            document.getElementById('funcDashboard').checked = clienteAtual.funcDashboard !== false;
+            document.getElementById('funcLancamentos').checked = clienteAtual.funcLancamentos !== false;
+            document.getElementById('funcContas').checked = clienteAtual.funcContas !== false;
+            document.getElementById('funcOrcamento').checked = clienteAtual.funcOrcamento !== false;
+            document.getElementById('funcRelatorios').checked = clienteAtual.funcRelatorios !== false;
+            document.getElementById('funcPlanos').checked = clienteAtual.funcPlanos === true;
+            document.getElementById('funcImportar').checked = clienteAtual.funcImportar !== false;
+            
+            // Código HTML personalizado
+            document.getElementById('codigoHtml').value = clienteAtual.codigoHtml || '';
+            
+            // Atualizar preview
+            atualizarPreview();
+        }
+
+        // Atualizar preview
+        function atualizarPreview() {
+            if (!clienteAtual) return;
+            
+            document.getElementById('previewTitulo').innerHTML = clienteAtual.nome || 'Empresa';
+            
+            let botoes = [];
+            if (document.getElementById('funcDashboard').checked) botoes.push('📊 Dashboard');
+            if (document.getElementById('funcLancamentos').checked) botoes.push('📝 Lançamentos');
+            if (document.getElementById('funcContas').checked) botoes.push('🏦 Contas');
+            
+            document.getElementById('previewBotoes').innerHTML = botoes.map(b => `<span>${b}</span>`).join('');
+        }
+
+        // Marcar que houve alteração
+        function alteracaoNaoSalva() {
+            alteracoesNaoSalvas = true;
+            atualizarPreview();
+        }
+
+        // Salvar alterações no Firebase
+        async function salvarAlteracoes() {
+            if (!clienteAtual) {
+                alert('Selecione um cliente primeiro!');
+                return;
+            }
+            
+            const dadosAtualizados = {
+                nome: document.getElementById('nomeEmpresa').value,
+                cor: document.getElementById('corPrincipal').value,
+                modoEscuro: document.getElementById('modoEscuro').value,
+                termoColaborador: document.getElementById('termoColaborador').value,
+                termoAcao: document.getElementById('termoAcao').value,
+                termoCliente: document.getElementById('termoCliente').value,
+                moeda: document.getElementById('moeda').value,
+                funcDashboard: document.getElementById('funcDashboard').checked,
+                funcLancamentos: document.getElementById('funcLancamentos').checked,
+                funcContas: document.getElementById('funcContas').checked,
+                funcOrcamento: document.getElementById('funcOrcamento').checked,
+                funcRelatorios: document.getElementById('funcRelatorios').checked,
+                funcPlanos: document.getElementById('funcPlanos').checked,
+                funcImportar: document.getElementById('funcImportar').checked,
+                codigoHtml: document.getElementById('codigoHtml').value,
+                ultimaAlteracao: new Date().toISOString()
+            };
+            
+            try {
+                await db.collection('clientes').doc(clienteAtual.id).update(dadosAtualizados);
+                alteracoesNaoSalvas = false;
+                adicionarLog(`💾 Alterações salvas para ${clienteAtual.nome}`);
+                alert('✅ Alterações salvas com sucesso!');
+            } catch (error) {
+                console.error('Erro ao salvar:', error);
+                alert('❌ Erro ao salvar alterações');
+            }
+        }
+
+        // Bloquear/desbloquear cliente
+        async function bloquearCliente() {
+            if (!clienteAtual) return;
+            
+            const novoStatus = clienteAtual.status === 'ativo' ? 'bloqueado' : 'ativo';
+            
+            document.getElementById('modalTitulo').textContent = novoStatus === 'bloqueado' ? '🔒 BLOQUEAR' : '🔓 DESBLOQUEAR';
+            document.getElementById('modalMsg').textContent = `${novoStatus === 'bloqueado' ? 'Bloquear' : 'Desbloquear'} acesso de ${clienteAtual.nome}?`;
+            document.getElementById('modalConfirm').style.display = 'flex';
+            
+            acaoPendente = 'bloquear';
+        }
+
+        // Ver como cliente
+        function verComoCliente() {
+            if (!clienteAtual) return;
+            
+            const url = `appfinanceiro.html?cliente=${clienteAtual.id}&modo=visao`;
+            window.open(url, '_blank');
+            adicionarLog(`👁️ Visualizando ${clienteAtual.nome} como cliente`);
+        }
+
+        // Entrar em modo edição
+        function entrarModoEdicao() {
+            if (!clienteAtual) return;
+            
+            document.getElementById('modalTitulo').textContent = '✏️ MODO EDIÇÃO';
+            document.getElementById('modalMsg').textContent = `Ativar modo edição para ${clienteAtual.nome}? O cliente será bloqueado durante a edição.`;
+            document.getElementById('modalConfirm').style.display = 'flex';
+            
+            acaoPendente = 'editar';
+        }
+
+        // Confirmar ação do modal
+        async function confirmarAcao() {
+            if (acaoPendente === 'editar') {
+                try {
+                    await db.collection('clientes').doc(clienteAtual.id).update({
+                        status: 'bloqueado',
+                        modoEdicaoAtivo: true
+                    });
+                    adicionarLog(`✏️ Modo edição ativado para ${clienteAtual.nome}`);
+                } catch (error) {
+                    console.error('Erro ao bloquear:', error);
+                }
+            } else if (acaoPendente === 'bloquear') {
+                const novoStatus = clienteAtual.status === 'ativo' ? 'bloqueado' : 'ativo';
+                try {
+                    await db.collection('clientes').doc(clienteAtual.id).update({
+                        status: novoStatus
+                    });
+                    adicionarLog(`🔒 Cliente ${clienteAtual.nome} ${novoStatus}`);
+                } catch (error) {
+                    console.error('Erro ao alterar status:', error);
+                }
+            }
+            
+            fecharModal();
+        }
+
+        // Criar novo cliente
+        function criarCliente() {
+            document.getElementById('modalNovoCliente').style.display = 'flex';
+        }
+
+        async function criarClienteFirebase() {
+            const nome = document.getElementById('novoClienteNome').value;
+            const plano = document.getElementById('novoClientePlano').value;
+            
+            if (!nome) {
+                alert('Digite o nome da empresa!');
+                return;
+            }
+            
+            const novoCliente = {
+                nome: nome,
+                plano: plano,
+                status: 'ativo',
+                cor: '#4CAF50',
+                modoEscuro: 'auto',
+                termoColaborador: 'Motorista',
+                termoAcao: 'Entrega',
+                termoCliente: 'Cliente',
+                moeda: 'BRL',
+                funcDashboard: true,
+                funcLancamentos: true,
+                funcContas: true,
+                funcOrcamento: true,
+                funcRelatorios: true,
+                funcPlanos: false,
+                funcImportar: true,
+                dataCriacao: new Date().toISOString()
+            };
+            
+            try {
+                const docRef = await db.collection('clientes').add(novoCliente);
+                adicionarLog(`➕ Cliente ${nome} criado com ID: ${docRef.id}`);
+                fecharModalNovoCliente();
+                document.getElementById('novoClienteNome').value = '';
+            } catch (error) {
+                console.error('Erro ao criar cliente:', error);
+                alert('❌ Erro ao criar cliente');
+            }
+        }
+
+        // Funções auxiliares
+        function mudarAba(aba) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById('aba' + aba.charAt(0).toUpperCase() + aba.slice(1)).classList.add('active');
+        }
+
+        function adicionarLog(msg) {
+            const log = document.getElementById('logPanel');
+            const entry = document.createElement('div');
+            entry.textContent = `⏱️ ${new Date().toLocaleTimeString()} - ${msg}`;
+            log.insertBefore(entry, log.firstChild);
+            
+            // Limitar logs
+            if (log.children.length > 10) {
+                log.removeChild(log.lastChild);
+            }
+        }
+
+        function filtrarClientes() {
+            atualizarListaClientes();
+        }
+
+        function mostrarAjuda() {
+            alert(`🚀 PODERES DO MASTER:\n\n` +
+                  `✏️ Editar - Muda o sistema do cliente\n` +
+                  `🔒 Bloquear - Cliente perde acesso\n` +
+                  `💾 Salvar - Publica alterações\n` +
+                  `👁️ Visualizar - Vê como cliente\n` +
+                  `🎨 Cores - Muda identidade visual\n` +
+                  `📝 Textos - Personaliza termos\n` +
+                  `⚙️ Funções - Ativa/desativa módulos\n` +
+                  `💻 Código - Edita HTML direto`);
+        }
+
+        function fecharModal() {
+            document.getElementById('modalConfirm').style.display = 'none';
+            acaoPendente = null;
+        }
+
+        function fecharModalNovoCliente() {
+            document.getElementById('modalNovoCliente').style.display = 'none';
+        }
+
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
+        window.onload = function() {
+            carregarClientes();
+            adicionarLog('🚀 Master App iniciado - Controle total');
+        };
+    </script>
+</body>
+</html>
