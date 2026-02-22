@@ -295,9 +295,8 @@
             <div class="status">
                 <span id="firebaseStatus" style="color: var(--neon);">🔵 Conectando...</span>
                 <span id="clientesCount">📊 0 clientes</span>
-                <button class="power-btn" onclick="mostrarAjuda()">
-                    🚀 PODERES
-                </button>
+                <button class="power-btn" onclick="mostrarAjuda()">🚀 PODERES</button>
+                <button class="power-btn" onclick="diagnosticarConexao()">🔍 DIAGNÓSTICO</button>
             </div>
         </div>
 
@@ -505,7 +504,7 @@
 
     <script>
         // ============================================
-        // CONFIGURAÇÃO FIREBASE (COLOQUE SUAS CREDENCIAIS AQUI!)
+        // CONFIGURAÇÃO FIREBASE
         // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyA6uqdXBhS8h-6pW2OVx_gPZYyRKnjU_ZA",
@@ -591,9 +590,10 @@
                             </p>
                         </div>
                         <div class="cliente-actions">
-                            <span class="action-icon" onclick="entrarModoEdicao(); event.stopPropagation()">✏️</span>
-                            <span class="action-icon" onclick="bloquearCliente(); event.stopPropagation()">🔒</span>
-                            <span class="action-icon" onclick="verComoCliente(); event.stopPropagation()">👁️</span>
+                            <span class="action-icon" title="Editar" onclick="entrarModoEdicao(); event.stopPropagation()">✏️</span>
+                            <span class="action-icon" title="Bloquear" onclick="bloquearCliente(); event.stopPropagation()">🔒</span>
+                            <span class="action-icon" title="Visualizar" onclick="verComoCliente(); event.stopPropagation()">👁️</span>
+                            <span class="action-icon" title="Excluir" style="color: #f44336;" onclick="deletarCliente('${c.id}', event)">🗑️</span>
                         </div>
                     </div>
                 `;
@@ -733,26 +733,45 @@
 
         // Ver como cliente
         function verComoCliente() {
-            if (!clienteAtual) return;
-            
-            const url = `appfinanceiro.html?cliente=${clienteAtual.id}&modo=visao`;
-            window.open(url, '_blank');
+            if (!clienteAtual) {
+                alert('⚠️ Selecione um cliente primeiro!');
+                return;
+            }
+    
+            // Construir URL corretamente
+            const url = `appfinanceiro.html?cliente=${clienteAtual.id}`;
+    
+            // Abrir em nova aba
+            const novaJanela = window.open(url, '_blank');
+    
+            // Verificar se foi bloqueado pelo popup blocker
+            if (!novaJanela) {
+                alert('⚠️ Permita popups para este site ou clique no link:\n\n' + url);
+            }
+    
             adicionarLog(`👁️ Visualizando ${clienteAtual.nome} como cliente`);
         }
-
+        
         // Entrar em modo edição
         function entrarModoEdicao() {
-            if (!clienteAtual) return;
-            
+            console.log('entrarModoEdicao chamado');
+    
+            if (!clienteAtual) {
+                alert('⚠️ Selecione um cliente primeiro!');
+                return;
+            }
+    
             document.getElementById('modalTitulo').textContent = '✏️ MODO EDIÇÃO';
             document.getElementById('modalMsg').textContent = `Ativar modo edição para ${clienteAtual.nome}? O cliente será bloqueado durante a edição.`;
             document.getElementById('modalConfirm').style.display = 'flex';
-            
+    
             acaoPendente = 'editar';
         }
 
         // Confirmar ação do modal
         async function confirmarAcao() {
+            console.log('confirmarAcao chamado', acaoPendente);
+    
             if (acaoPendente === 'editar') {
                 try {
                     await db.collection('clientes').doc(clienteAtual.id).update({
@@ -760,8 +779,10 @@
                         modoEdicaoAtivo: true
                     });
                     adicionarLog(`✏️ Modo edição ativado para ${clienteAtual.nome}`);
+                    alert(`✅ Modo edição ativado! O cliente ${clienteAtual.nome} está bloqueado.`);
                 } catch (error) {
                     console.error('Erro ao bloquear:', error);
+                    alert('❌ Erro ao ativar modo edição: ' + error.message);
                 }
             } else if (acaoPendente === 'bloquear') {
                 const novoStatus = clienteAtual.status === 'ativo' ? 'bloqueado' : 'ativo';
@@ -770,11 +791,13 @@
                         status: novoStatus
                     });
                     adicionarLog(`🔒 Cliente ${clienteAtual.nome} ${novoStatus}`);
+                    alert(`✅ Cliente ${novoStatus === 'ativo' ? 'desbloqueado' : 'bloqueado'}!`);
                 } catch (error) {
                     console.error('Erro ao alterar status:', error);
+                    alert('❌ Erro ao alterar status: ' + error.message);
                 }
             }
-            
+    
             fecharModal();
         }
 
@@ -870,9 +893,89 @@
         }
 
         // ============================================
-        // INICIALIZAÇÃO
+        // FUNÇÃO: Deletar cliente
+        // ============================================
+        async function deletarCliente(clienteId, event) {
+            if (event) event.stopPropagation();
+    
+            const cliente = clientes.find(c => c.id === clienteId);
+            if (!cliente) return;
+    
+            if (!confirm(`⚠️ Tem certeza que deseja EXCLUIR permanentemente o cliente ${cliente.nome}?\n\nEsta ação não pode ser desfeita!`)) {
+                return;
+            }
+    
+            if (!confirm(`🔥 CONFIRMAÇÃO FINAL:\nDigite "EXCLUIR" para confirmar:`)) {
+                return;
+            }
+    
+            try {
+                // Deletar configurações do cliente
+                await db.collection('clientes').doc(clienteId).delete();
+        
+                // Deletar dados financeiros do cliente
+                try {
+                    await db.collection('dados_financeiros').doc(clienteId).delete();
+                } catch (e) {
+                    console.log('Dados financeiros não encontrados');
+                }
+        
+                adicionarLog(`🗑️ Cliente ${cliente.nome} excluído permanentemente`);
+                alert('✅ Cliente excluído com sucesso!');
+        
+                // Limpar seleção atual se for o cliente deletado
+                if (clienteAtual && clienteAtual.id === clienteId) {
+                    clienteAtual = null;
+                    alteracoesNaoSalvas = false;
+            
+                    // Desabilitar botões
+                    document.getElementById('btnEditar').disabled = true;
+                    document.getElementById('btnBloquear').disabled = true;
+                    document.getElementById('btnSalvar').disabled = true;
+                    document.getElementById('btnVisualizar').disabled = true;
+                }
+        
+            } catch (error) {
+                console.error('Erro ao deletar cliente:', error);
+                alert('❌ Erro ao deletar cliente: ' + error.message);
+            }
+        }
+
+        // ============================================
+        // FUNÇÃO: Diagnóstico de conexão
+        // ============================================
+        async function diagnosticarConexao() {
+            console.log('🔍 Diagnosticando conexão Firebase...');
+    
+            try {
+                // Teste 1: Escrever
+                await db.collection('_test_').doc('connection_test').set({
+                    timestamp: new Date().toISOString(),
+                    test: 'ok'
+                });
+                console.log('✅ Teste 1: Escrita funcionou');
+        
+                // Teste 2: Ler
+                const testRead = await db.collection('_test_').doc('connection_test').get();
+                console.log('✅ Teste 2: Leitura funcionou', testRead.data());
+        
+                // Teste 3: Clientes
+                const clientesSnapshot = await db.collection('clientes').limit(1).get();
+                console.log(`✅ Teste 3: Coleção clientes acessível (${clientesSnapshot.size} documentos)`);
+        
+                alert('✅ Todas as conexões estão funcionando!');
+        
+            } catch (error) {
+                console.error('❌ Erro de conexão:', error);
+                alert('❌ Erro de conexão:\n' + error.message);
+            }
+        }
+
+        // ============================================
+        // INICIALIZAÇÃO CORRETA
         // ============================================
         window.onload = function() {
+            console.log('🚀 Master App iniciado');
             carregarClientes();
             adicionarLog('🚀 Master App iniciado - Controle total');
         };
