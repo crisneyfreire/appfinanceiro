@@ -1349,9 +1349,13 @@
         // ============================================
         // CARREGAR CONFIGURAÇÕES DO CLIENTE
         // ============================================
+        // assinatura ativa do cliente (para não criar vários listeners)
+        let unsubscribeCliente = null;
+        let appInicializado = false;
+
         async function carregarConfigCliente() {
             clienteId = getClienteIdFromUrl();
-            
+
             if (!clienteId) {
                 document.body.innerHTML = `
                     <div class="bloqueio-container">
@@ -1365,45 +1369,74 @@
                 return;
             }
 
+            // evita acumular listeners se a função for chamada de novo
+            if (unsubscribeCliente) {
+                unsubscribeCliente();
+                unsubscribeCliente = null;
+            }
+
             try {
-                const doc = await db.collection('clientes').doc(clienteId).get();
-                
-                if (!doc.exists) {
+                const ref = db.collection('clientes').doc(clienteId);
+
+                unsubscribeCliente = ref.onSnapshot(async (doc) => {
+                    if (!doc.exists) {
+                        document.body.innerHTML = `
+                            <div class="bloqueio-container">
+                                <div class="bloqueio-card" style="border-left-color: #ff9800;">
+                                    <h1>❓</h1>
+                                    <h2>Cliente não encontrado</h2>
+                                    <p>O cliente solicitado não existe no sistema.</p>
+                                </div>
+                            </div>
+                        `;
+                        return;
+                    }
+
+                    // ✅ recebe config atualizada em tempo real
+                    clienteConfig = { id: doc.id, ...doc.data() };
+
+                    // bloqueio instantâneo
+                    if (clienteConfig.status === 'bloqueado') {
+                        document.getElementById('bloqueioScreen').style.display = 'block';
+                        document.getElementById('bloqueioMsg').innerHTML =
+                            `Sistema bloqueado pelo administrador.<br>Entre em contato para mais informações.`;
+                        document.getElementById('appContent').style.display = 'none';
+                        return;
+                    }
+
+                    // desbloqueado
+                    document.getElementById('bloqueioScreen').style.display = 'none';
+                    document.getElementById('appContent').style.display = 'block';
+
+                    // aplica tema/termos/moeda etc. sempre que o master alterar
+                    aplicarConfiguracoes();
+
+                    // inicialização pesada só uma vez
+                    if (!appInicializado) {
+                        appInicializado = true;
+                        await carregarDadosFinanceiros();
+                        inicializarInterface();
+                    } else {
+                        // Se você quiser que as abas atualizem automaticamente quando o Master
+                        // ligar/desligar funções, descomente a linha abaixo:
+                        // inicializarInterface();
+                    }
+                }, (error) => {
+                    console.error('Erro no onSnapshot:', error);
                     document.body.innerHTML = `
                         <div class="bloqueio-container">
-                            <div class="bloqueio-card" style="border-left-color: #ff9800;">
-                                <h1>❓</h1>
-                                <h2>Cliente não encontrado</h2>
-                                <p>O cliente solicitado não existe no sistema.</p>
+                            <div class="bloqueio-card" style="border-left-color: #f44336;">
+                                <h1>❌</h1>
+                                <h2>Erro de conexão</h2>
+                                <p>Não foi possível carregar os dados.</p>
+                                <button onclick="window.location.reload()">Tentar novamente</button>
                             </div>
                         </div>
                     `;
-                    return;
-                }
-
-                clienteConfig = { id: doc.id, ...doc.data() };
-
-                // Verificar bloqueio
-                if (clienteConfig.status === 'bloqueado') {
-                    document.getElementById('bloqueioScreen').style.display = 'block';
-                    document.getElementById('bloqueioMsg').innerHTML = 
-                        `Sistema bloqueado pelo administrador.<br>Entre em contato para mais informações.`;
-                    return;
-                }
-
-                // Aplicar configurações
-                aplicarConfiguracoes();
-                
-                // Carregar dados financeiros do cliente
-                await carregarDadosFinanceiros();
-                
-                // Inicializar interface
-                inicializarInterface();
-                
-                document.getElementById('appContent').style.display = 'block';
+                });
 
             } catch (error) {
-                console.error('Erro ao carregar cliente:', error);
+                console.error('Erro ao iniciar sincronização:', error);
                 document.body.innerHTML = `
                     <div class="bloqueio-container">
                         <div class="bloqueio-card" style="border-left-color: #f44336;">
@@ -1416,6 +1449,7 @@
                 `;
             }
         }
+
 
         // ============================================
         // APLICAR CONFIGURAÇÕES DO CLIENTE
