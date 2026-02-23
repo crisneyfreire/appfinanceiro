@@ -183,11 +183,6 @@
             color: black;
         }
 
-        /* CONTEÚDO DAS ABAS */
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-
         /* VISUALIZADOR DO SITE */
         .site-preview {
             background: white;
@@ -330,14 +325,14 @@
             <!-- PAINEL EDIÇÃO -->
             <div class="editor-panel" id="editorPanel">
                 <div class="editor-tabs">
-                    <button id="tab-visual" class="tab active" onclick="mudarAba('visual')">Visual</button>
-                    <button id="tab-conteudo" class="tab" onclick="mudarAba('conteudo')">Conteúdo</button>
-                    <button id="tab-funcoes" class="tab" onclick="mudarAba('funcoes')">Funções</button>
-                    <button id="tab-codigo" class="tab" onclick="mudarAba('codigo')">Código</button>
+                    <button id="tab-visual" onclick="mudarAba('visual')">Visual</button>
+                    <button id="tab-conteudo" onclick="mudarAba('conteudo')">Conteúdo</button>
+                    <button id="tab-funcoes" onclick="mudarAba('funcoes')">Funções</button>
+                    <button id="tab-codigo" onclick="mudarAba('codigo')">Código</button>
                 </div>
 
                 <!-- ABA VISUAL -->
-                <div id="aba-visual" class="tab-content active">
+                <div id="abaVisual" class="tab-content active">
                     <h3 style="margin-bottom: 15px;">🎨 EDITOR VISUAL</h3>
                     
                     <div style="display: grid; gap: 15px;">
@@ -363,7 +358,7 @@
                 </div>
 
                 <!-- ABA CONTEÚDO -->
-                <div id="aba-conteudo" class="tab-content">
+                <div id="abaConteudo" class="tab-content">
                     <h3 style="margin-bottom: 15px;">📝 EDITOR DE CONTEÚDO</h3>
                     
                     <div style="display: grid; gap: 15px;">
@@ -394,7 +389,7 @@
                 </div>
 
                 <!-- ABA FUNÇÕES -->
-                <div id="aba-funcoes" class="tab-content">
+                <div id="abaFuncoes" class="tab-content">
                     <h3 style="margin-bottom: 15px;">⚙️ CONTROLE DE FUNÇÕES</h3>
                     <p style="color: var(--warning); font-size: 12px; margin-bottom: 15px;">🔒 Desative funções para limitar o acesso do cliente</p>
                     
@@ -424,21 +419,39 @@
                 </div>
 
                 <!-- ABA CÓDIGO -->
-                <div id="aba-codigo" class="tab-content">
+                <div id="abaCodigo" class="tab-content">
                     <h3 style="margin-bottom: 15px;">💻 EDITOR DE CÓDIGO</h3>
                     <p style="color: var(--warning); font-size: 12px; margin-bottom: 15px;">⚡ Edite o HTML diretamente (apenas para avançados)</p>
                     
                     <div class="code-editor">
-                        <textarea id="codigoHtml" placeholder="&lt;!-- Código HTML personalizado --&gt;" onchange="alteracaoNaoSalva()"></textarea>
+                        <textarea id="codigoHtml" placeholder="&lt;!-- Código HTML personalizado --&gt;" onchange="alteracaoNaoSalva()">
+</textarea>
+                        <div class="invite-box" style="margin-top:12px; padding:12px; border:1px dashed rgba(255,255,255,0.25); border-radius:10px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                                <div>
+                                    <div style="font-weight:700;">🔗 Convite de cadastro do cliente</div>
+                                    <div style="font-size:12px; opacity:0.9; margin-top:4px;">
+                                        Gera um link único para o cliente preencher os dados. (O cadastro por convite será ativado no Financeiro quando você decidir.)
+                                    </div>
+                                </div>
+                                <div style="display:flex; gap:8px;">
+                                    <button class="control-btn btn-view" onclick="gerarConviteCadastro()" id="btnGerarConvite" disabled>✨ GERAR CONVITE</button>
+                                    <button class="control-btn btn-view" onclick="copiarUltimoConvite()" id="btnCopiarConvite" disabled>📋 COPIAR LINK</button>
+                                </div>
+                            </div>
+                            <input id="ultimoConviteLink" readonly style="margin-top:10px; width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.25); color:#fff;" placeholder="O link do convite vai aparecer aqui..." />
+                        </div>
+
                     </div>
                 </div>
 
                 <!-- VISUALIZAÇÃO DO SITE (Preview) -->
                 <div class="site-preview" id="sitePreview">
                     <div id="previewConteudo" style="text-align: center;">
-                        <div style="width: 100px; height: 100px; background: #ddd; margin: 0 auto; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
-                            LOGO
-                        </div>
+                        <div id="previewLogoBox" style="width: 120px; height: 120px; background: #ddd; margin: 0 auto; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+  <span id="previewLogoPlaceholder" style="color:#555;font-weight:600;">LOGO</span>
+  <img id="previewLogoImg" alt="Logo do cliente" style="display:none; width:100%; height:100%; object-fit:contain; background:transparent;" />
+</div>
                         <h2 id="previewTitulo" style="margin: 10px 0;">Selecione um cliente</h2>
                         <div id="previewBotoes" style="display: flex; gap: 10px; justify-content: center;">
                             <span>📊 Dashboard</span>
@@ -449,6 +462,35 @@
                 </div>
 
                 <!-- BOTÕES DE CONTROLE -->
+                
+                <!-- LOGOTIPO DO CLIENTE -->
+                <div id="logoSection" style="margin-top: 16px; padding: 14px; border-radius: 14px; border: 1px dashed rgba(255,255,255,0.25);">
+                    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                        <div>
+                            <div style="font-weight:800;">🖼️ Logotipo do cliente</div>
+                            <div style="font-size:12px; opacity:0.9; margin-top:4px;">
+                                Espaço “médio/grande”. O sistema comprime automaticamente para não pesar no banco.
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="control-btn btn-edit" onclick="abrirSeletorLogo()" id="btnEscolherLogo" disabled>📤 ENVIAR LOGO</button>
+                            <button class="control-btn btn-block" onclick="removerLogoCliente()" id="btnRemoverLogo" disabled>🗑️ REMOVER</button>
+                        </div>
+                    </div>
+
+                    <input type="file" id="logoInput" accept="image/*" style="display:none" />
+
+                    <div id="logoDropArea" style="margin-top:12px; height: 180px; border-radius: 14px; background: rgba(0,0,0,0.20); display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative;">
+                        <div id="logoDropPlaceholder" style="text-align:center; padding:16px; opacity:0.95;">
+                            <div style="font-size:40px;">🏷️</div>
+                            <div style="margin-top:8px; font-weight:700;">Nenhum logo selecionado</div>
+                            <div style="margin-top:6px; font-size:12px; opacity:0.9;">Clique em “ENVIAR LOGO” (ou arraste uma imagem aqui)</div>
+                        </div>
+                        <img id="logoPreview" alt="Preview do logo" style="display:none; width:100%; height:100%; object-fit:contain; background:transparent;" />
+                    </div>
+                </div>
+
+
                 <div class="control-buttons">
                     <button class="control-btn btn-edit" onclick="entrarModoEdicao()" id="btnEditar" disabled>
                         ✏️ EDITAR
@@ -635,6 +677,9 @@
             document.getElementById('btnSalvar').disabled = false;
             document.getElementById('btnVisualizar').disabled = false;
             document.getElementById('btnCopiarLink').disabled = false;
+            document.getElementById('btnEscolherLogo').disabled = false;
+            document.getElementById('btnRemoverLogo').disabled = false;
+            document.getElementById('btnGerarConvite').disabled = false;
             
             adicionarLog(`📂 Cliente selecionado: ${cliente.nome}`);
         }
@@ -666,6 +711,10 @@
             // Código HTML personalizado
             document.getElementById('codigoHtml').value = clienteAtual.codigoHtml || '';
             
+            // Logo
+            logoTempBase64 = null;
+            setLogoPreview(clienteAtual.logoBase64 || null);
+
             // Atualizar preview
             atualizarPreview();
         }
@@ -675,6 +724,8 @@
             if (!clienteAtual) return;
             
             document.getElementById('previewTitulo').innerHTML = clienteAtual.nome || 'Empresa';
+            // Logo no preview
+            setLogoPreview(logoTempBase64 || clienteAtual.logoBase64 || null);
             
             let botoes = [];
             if (document.getElementById('funcDashboard').checked) botoes.push('📊 Dashboard');
@@ -713,11 +764,15 @@
                 funcPlanos: document.getElementById('funcPlanos').checked,
                 funcImportar: document.getElementById('funcImportar').checked,
                 codigoHtml: document.getElementById('codigoHtml').value,
+                logoBase64: (logoTempBase64 !== null ? (logoTempBase64 || '') : (clienteAtual.logoBase64 || '')),
                 ultimaAlteracao: new Date().toISOString()
             };
             
             try {
                 await db.collection('clientes').doc(clienteAtual.id).update(dadosAtualizados);
+                // atualizar cache local
+                clienteAtual.logoBase64 = dadosAtualizados.logoBase64 || '';
+                logoTempBase64 = null;
                 alteracoesNaoSalvas = false;
                 adicionarLog(`💾 Alterações salvas para ${clienteAtual.nome}`);
                 alert('✅ Alterações salvas com sucesso!');
@@ -906,28 +961,13 @@
         }
 
         // Funções auxiliares
-
-        // Troca de abas (Visual / Conteúdo / Funções / Código)
-        function mudarAba(nomeAba) {
-            const abas = ["visual","conteudo","funcoes","codigo"];
-
-            // Botões
-            abas.forEach(a => {
-                const btn = document.getElementById(`tab-${a}`);
-                if (btn) btn.classList.remove("active");
-            });
-            const btnAtivo = document.getElementById(`tab-${nomeAba}`);
-            if (btnAtivo) btnAtivo.classList.add("active");
-
-            // Conteúdos
-            abas.forEach(a => {
-                const sec = document.getElementById(`aba-${a}`);
-                if (sec) sec.classList.remove("active");
-            });
-            const secAtiva = document.getElementById(`aba-${nomeAba}`);
-            if (secAtiva) secAtiva.classList.add("active");
+        function mudarAba(aba, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            (el || event?.target)?.classList.add('active');
+            document.getElementById('aba' + aba.charAt(0).toUpperCase() + aba.slice(1)).classList.add('active');
         }
-        window.mudarAba = mudarAba;
 
         function adicionarLog(msg) {
             const log = document.getElementById('logPanel');
@@ -1052,11 +1092,226 @@
         window.onload = function() {
             console.log('🚀 Master App iniciado');
             carregarClientes();
-            // abre a aba Visual por padrão
-            mudarAba('visual');
             adicionarLog('🚀 Master App iniciado - Controle total');
         };
 
-        </script>
+        // ===============================
+        // FIX DE ABAS (VISUAL / CONTEÚDO / FUNÇÕES / CÓDIGO)
+        // ===============================
+        (function () {
+          const ABAS = ["visual", "conteudo", "funcoes", "codigo"];
+
+          function esconderTodas() {
+            ABAS.forEach((a) => {
+                const el = document.getElementById(`aba-${a}`);
+                if (el) el.style.display = "none";
+            });
+        }
+
+        function marcarAtiva(nomeAba) {
+          ABAS.forEach((a) => {
+            const btn = document.getElementById(`tab-${a}`);
+            if (btn) {
+              btn.classList.toggle("ativa", a === nomeAba);
+              btn.setAttribute("aria-selected", a === nomeAba ? "true" : "false");
+            }
+          });
+        }
+
+        function mudarAba(nomeAba) {
+          if (!ABAS.includes(nomeAba)) nomeAba = "visual";
+
+          esconderTodas();
+
+          const alvo = document.getElementById(`aba-${nomeAba}`);
+          if (alvo) alvo.style.display = "block";
+
+          marcarAtiva(nomeAba);
+        }
+
+        // deixa o onclick funcionar SEM falhar
+        window.mudarAba = mudarAba;
+
+        // abre em Visual ao carregar
+        window.addEventListener("load", () => mudarAba("visual"));
+      })();
+    
+        // ===============================
+        // LOGO (base64 comprimido) + PREVIEW
+        // ===============================
+        let logoTempBase64 = null;
+
+        function abrirSeletorLogo() {
+            if (!clienteAtual) return alert('Selecione um cliente primeiro!');
+            document.getElementById('logoInput').click();
+        }
+
+        function setLogoPreview(dataUrl) {
+            const img = document.getElementById('logoPreview');
+            const ph = document.getElementById('logoDropPlaceholder');
+            if (dataUrl) {
+                img.src = dataUrl;
+                img.style.display = 'block';
+                ph.style.display = 'none';
+            } else {
+                img.removeAttribute('src');
+                img.style.display = 'none';
+                ph.style.display = 'block';
+            }
+
+            // também aplica no preview do app do cliente
+            const pImg = document.getElementById('previewLogoImg');
+            const pPh = document.getElementById('previewLogoPlaceholder');
+            if (pImg && pPh) {
+                if (dataUrl) {
+                    pImg.src = dataUrl;
+                    pImg.style.display = 'block';
+                    pPh.style.display = 'none';
+                } else {
+                    pImg.removeAttribute('src');
+                    pImg.style.display = 'none';
+                    pPh.style.display = 'block';
+                }
+            }
+        }
+
+        async function comprimirImagemParaDataURL(file) {
+            // converte para JPEG/PNG redimensionando para no máx. 600px (lado maior)
+            const bitmap = await createImageBitmap(file);
+            const max = 600;
+            const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+            const w = Math.round(bitmap.width * scale);
+            const h = Math.round(bitmap.height * scale);
+
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(bitmap, 0, 0, w, h);
+
+            // tenta jpeg para reduzir peso
+            const jpeg = canvas.toDataURL('image/jpeg', 0.85);
+
+            // fallback: se ainda ficar muito grande, reduz qualidade
+            if (jpeg.length > 900_000) {
+                return canvas.toDataURL('image/jpeg', 0.70);
+            }
+            return jpeg;
+        }
+
+        async function processarArquivoLogo(file) {
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                alert('Escolha um arquivo de imagem (PNG/JPG/WebP).');
+                return;
+            }
+
+            try {
+                const dataUrl = await comprimirImagemParaDataURL(file);
+                logoTempBase64 = dataUrl;
+                setLogoPreview(dataUrl);
+                alteracaoNaoSalva();
+            } catch (e) {
+                console.error(e);
+                alert('Não consegui processar esse logo. Tente outra imagem.');
+            }
+        }
+
+        function removerLogoCliente() {
+            if (!clienteAtual) return alert('Selecione um cliente primeiro!');
+            if (!confirm('Remover o logo deste cliente?')) return;
+            logoTempBase64 = '';
+            setLogoPreview(null);
+            alteracaoNaoSalva();
+        }
+
+        // Drag & Drop
+        (function habilitarDropLogo() {
+            const area = document.getElementById('logoDropArea');
+            const input = document.getElementById('logoInput');
+            if (!area || !input) return;
+
+            input.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                processarArquivoLogo(file);
+                input.value = '';
+            });
+
+            ['dragenter','dragover'].forEach(ev => {
+                area.addEventListener(ev, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    area.style.outline = '2px solid rgba(255,255,255,0.35)';
+                });
+            });
+            ['dragleave','drop'].forEach(ev => {
+                area.addEventListener(ev, (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    area.style.outline = 'none';
+                });
+            });
+            area.addEventListener('drop', (e) => {
+                const file = e.dataTransfer.files && e.dataTransfer.files[0];
+                processarArquivoLogo(file);
+            });
+        })();
+
+        // ===============================
+        // CONVITES (gera token + link)
+        // ===============================
+        let ultimoConviteGerado = '';
+
+        function gerarTokenConvite(tamanho = 10) {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let out = '';
+            for (let i = 0; i < tamanho; i++) out += chars[Math.floor(Math.random() * chars.length)];
+            return out;
+        }
+
+        function gerarLinkConvite(token) {
+            const base = window.location.origin + window.location.pathname.replace('master_app.html','');
+            // modo cadastro será ativado no appfinanceiro.html via ?convite=
+            return `${base}appfinanceiro.html?convite=${encodeURIComponent(token)}`;
+        }
+
+        async function gerarConviteCadastro() {
+            if (!clienteAtual) return alert('Selecione um cliente primeiro!');
+
+            const token = gerarTokenConvite(12);
+            const link = gerarLinkConvite(token);
+
+            try {
+                await db.collection('convites').doc(token).set({
+                    status: 'pendente',
+                    criadoEm: new Date().toISOString(),
+                    clienteIdVinculado: clienteAtual.id,
+                    perfilSugerido: clienteAtual.perfil || 'PESSOAL/FAMILIAR'
+                });
+
+                ultimoConviteGerado = link;
+                document.getElementById('ultimoConviteLink').value = link;
+                document.getElementById('btnCopiarConvite').disabled = false;
+
+                try { await navigator.clipboard.writeText(link); } catch (_) {}
+
+                alert('✅ Convite gerado e link copiado.\n\nEnvie esse link para o cliente: \n' + link);
+                adicionarLog(`✨ Convite gerado para ${clienteAtual.nome}: ${token}`);
+            } catch (e) {
+                console.error(e);
+                alert('Não consegui gerar o convite. Veja o Console (F12).');
+            }
+        }
+
+        async function copiarUltimoConvite() {
+            const link = document.getElementById('ultimoConviteLink').value || ultimoConviteGerado;
+            if (!link) return alert('Ainda não há convite gerado.');
+            try { await navigator.clipboard.writeText(link); } catch (_) {}
+            alert('✅ Link copiado:\n\n' + link);
+        }
+
+
+</script>
 </body>
 </html>
