@@ -325,10 +325,10 @@
             <!-- PAINEL EDIÇÃO -->
             <div class="editor-panel" id="editorPanel">
                 <div class="editor-tabs">
-                    <button class="tab active" onclick="mudarAba('visual')">🎨 VISUAL</button>
-                    <button class="tab" onclick="mudarAba('conteudo')">📝 CONTEÚDO</button>
-                    <button class="tab" onclick="mudarAba('funcoes')">⚙️ FUNÇÕES</button>
-                    <button class="tab" onclick="mudarAba('codigo')">💻 CÓDIGO</button>
+                    <button class="tab active" onclick=\"mudarAba('visual', this)\">🎨 VISUAL</button>
+                    <button class="tab" onclick=\"mudarAba('conteudo', this)\">📝 CONTEÚDO</button>
+                    <button class="tab" onclick=\"mudarAba('funcoes', this)\">⚙️ FUNÇÕES</button>
+                    <button class="tab" onclick=\"mudarAba('codigo', this)\">💻 CÓDIGO</button>
                 </div>
 
                 <!-- ABA VISUAL -->
@@ -543,7 +543,7 @@
                 snapshot.forEach(doc => {
                     clientes.push({
                         id: doc.id,
-                        .....doc.data()
+                        ...doc.data()
                     });
                 });
                 
@@ -901,11 +901,11 @@
         }
 
         // Funções auxiliares
-        function mudarAba(aba) {
+        function mudarAba(aba, el) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            event.target.classList.add('active');
+            (el || event?.target)?.classList.add('active');
             document.getElementById('aba' + aba.charAt(0).toUpperCase() + aba.slice(1)).classList.add('active');
         }
 
