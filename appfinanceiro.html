@@ -279,7 +279,35 @@
             background: var(--expense);
         }
 
-        .btn-primary {
+        
+        .btn-secondary {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .btn-secondary:hover {
+            filter: brightness(1.08);
+        }
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        .relatorio-periodo input[type="date"],
+        .relatorio-periodo select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+.btn-primary {
             width: 100%;
             padding: 14px;
             color: white;
@@ -1133,6 +1161,11 @@
                         <option value="2025">2025</option>
                         <option value="2024" selected>2024</option>
                     </select>
+
+                    <input type="date" id="relatorioDataInicio" title="Data inicial" onchange="gerarRelatorio()">
+                    <input type="date" id="relatorioDataFim" title="Data final" onchange="gerarRelatorio()">
+                    <button class="btn-secondary btn-small" type="button" onclick="definirPeriodoRelatorio('mesAtual')">📅 Este mês</button>
+                    <button class="btn-secondary btn-small" type="button" onclick="limparPeriodoRelatorio()">🧹 Limpar</button>
                     <button class="btn-primary btn-income" onclick="gerarRelatorio()">📊 GERAR RELATÓRIO</button>
                 </div>
 
@@ -2039,12 +2072,55 @@
             }
         }
 
+
+        function definirPeriodoRelatorio(tipo) {
+            const hoje = new Date();
+            const inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+            const fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
+
+            if (tipo === 'mesAtual') {
+                document.getElementById('relatorioDataInicio').value = inicio.toISOString().slice(0, 10);
+                document.getElementById('relatorioDataFim').value = fim.toISOString().slice(0, 10);
+            }
+            gerarRelatorio();
+        }
+
+        function limparPeriodoRelatorio() {
+            const di = document.getElementById('relatorioDataInicio');
+            const df = document.getElementById('relatorioDataFim');
+            if (di) di.value = '';
+            if (df) df.value = '';
+            gerarRelatorio();
+        }
+
+
+
         function gerarRelatorio() {
             const mes = document.getElementById('relatorioMes').value;
             const ano = parseInt(document.getElementById('relatorioAno').value);
 
+            const dataInicioStr = document.getElementById('relatorioDataInicio')?.value || '';
+            const dataFimStr = document.getElementById('relatorioDataFim')?.value || '';
+
+            const temPeriodo = !!dataInicioStr || !!dataFimStr;
+
+            let dataInicio = null;
+            let dataFim = null;
+
+            if (dataInicioStr) dataInicio = new Date(dataInicioStr + 'T00:00:00');
+            if (dataFimStr) dataFim = new Date(dataFimStr + 'T23:59:59.999');
+
             let transacoesFiltradas = transacoes.filter(t => {
                 const data = new Date(t.data);
+
+                // Se o usuário escolheu um período (de/até), usamos esse filtro e ignoramos mês/ano
+                if (temPeriodo) {
+                    if (dataInicio && data < dataInicio) return false;
+                    if (dataFim && data > dataFim) return false;
+                    return true;
+                }
+
+                // Caso contrário, segue o filtro clássico por ano/mês
                 return data.getFullYear() === ano && (mes === 'all' || data.getMonth() === parseInt(mes));
             });
 
