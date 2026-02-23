@@ -457,6 +457,9 @@
                     <button class="control-btn btn-view" onclick="verComoCliente()" id="btnVisualizar" disabled>
                         👁️ VER COMO CLIENTE
                     </button>
+                    <button class="control-btn btn-view" onclick="copiarLinkClienteAtual()" id="btnCopiarLink" disabled>
+                        🔗 COPIAR LINK
+                    </button>
                 </div>
 
                 <!-- LOG -->
@@ -507,13 +510,13 @@
         // CONFIGURAÇÃO FIREBASE
         // ============================================
         const firebaseConfig = {
-          apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
-          authDomain: "painelmastercomplet.firebaseapp.com",
-          projectId: "painelmastercomplet",
-          storageBucket: "painelmastercomplet.firebasestorage.app",
-          messagingSenderId: "87580974705",
-          appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
-        };
+  apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
+  authDomain: "painelmastercomplet.firebaseapp.com",
+  projectId: "painelmastercomplet",
+  storageBucket: "painelmastercomplet.firebasestorage.app",
+  messagingSenderId: "87580974705",
+  appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
+};
 
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
@@ -540,7 +543,7 @@
                 snapshot.forEach(doc => {
                     clientes.push({
                         id: doc.id,
-                        ...doc.data()
+                        .....doc.data()
                     });
                 });
                 
@@ -626,6 +629,7 @@
             document.getElementById('btnBloquear').disabled = false;
             document.getElementById('btnSalvar').disabled = false;
             document.getElementById('btnVisualizar').disabled = false;
+            document.getElementById('btnCopiarLink').disabled = false;
             
             adicionarLog(`📂 Cliente selecionado: ${cliente.nome}`);
         }
@@ -732,6 +736,36 @@
         }
 
         // Ver como cliente
+        
+        function gerarLinkClientePorId(clienteId) {
+            // Gera link absoluto para funcionar quando você copia/manda no WhatsApp
+            // Ex.: https://usuario.github.io/repo/appfinanceiro.html?cliente=<ID>
+            const base = window.location.origin + window.location.pathname.replace(/master_app\.html$/i, '');
+            return `${base}appfinanceiro.html?cliente=${encodeURIComponent(clienteId)}`;
+        }
+
+        async function copiarLinkClienteAtual() {
+            if (!clienteAtual) {
+                alert('⚠️ Selecione um cliente primeiro!');
+                return;
+            }
+            const url = gerarLinkClientePorId(clienteAtual.id);
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(url);
+                    alert('✅ Link do cliente copiado!\n\n' + url);
+                } else {
+                    // fallback para navegadores antigos / contexto não seguro
+                    prompt('Copie o link do cliente:', url);
+                }
+                adicionarLog(`🔗 Link do cliente ${clienteAtual.nome} copiado`);
+            } catch (e) {
+                console.warn('Não foi possível copiar automaticamente:', e);
+                prompt('Copie o link do cliente:', url);
+            }
+        }
+
         function verComoCliente() {
             if (!clienteAtual) {
                 alert('⚠️ Selecione um cliente primeiro!');
@@ -739,7 +773,7 @@
             }
     
             // Construir URL corretamente
-            const url = `appfinanceiro.html?cliente=${clienteAtual.id}`;
+            const url = gerarLinkClientePorId(clienteAtual.id);
     
             // Abrir em nova aba
             const novaJanela = window.open(url, '_blank');
@@ -837,7 +871,27 @@
             
             try {
                 const docRef = await db.collection('clientes').add(novoCliente);
-                adicionarLog(`➕ Cliente ${nome} criado com ID: ${docRef.id}`);
+                const novoId = docRef.id;
+
+                // Atualiza "clienteAtual" para facilitar copiar link / visualizar
+                clienteAtual = { id: novoId, ...novoCliente };
+
+                const linkCliente = gerarLinkClientePorId(novoId);
+
+                adicionarLog(`➕ Cliente ${nome} criado com ID: ${novoId}`);
+
+                // Tenta copiar o link automaticamente (se não der, mostra pra copiar)
+                try {
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(linkCliente);
+                    }
+                } catch (_) {}
+
+                alert(`✅ Cliente criado!\n\nNome: ${nome}\nCódigo (ID): ${novoId}\n\nLink do cliente:\n${linkCliente}\n\n(Dica: o link já foi copiado, se o navegador permitir.)`);
+
+                // Recarrega lista e seleciona o novo cliente
+                await carregarClientes();
+
                 fecharModalNovoCliente();
                 document.getElementById('novoClienteNome').value = '';
             } catch (error) {
@@ -933,6 +987,7 @@
                     document.getElementById('btnBloquear').disabled = true;
                     document.getElementById('btnSalvar').disabled = true;
                     document.getElementById('btnVisualizar').disabled = true;
+                    document.getElementById('btnCopiarLink').disabled = true;
                 }
         
             } catch (error) {
@@ -982,5 +1037,3 @@
     </script>
 </body>
 </html>
-
-
