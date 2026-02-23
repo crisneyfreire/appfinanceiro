@@ -183,6 +183,11 @@
             color: black;
         }
 
+        /* CONTEÚDO DAS ABAS */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+
         /* VISUALIZADOR DO SITE */
         .site-preview {
             background: white;
@@ -325,14 +330,14 @@
             <!-- PAINEL EDIÇÃO -->
             <div class="editor-panel" id="editorPanel">
                 <div class="editor-tabs">
-                    <button id="tab-visual" onclick="mudarAba('visual')">Visual</button>
-                    <button id="tab-conteudo" onclick="mudarAba('conteudo')">Conteúdo</button>
-                    <button id="tab-funcoes" onclick="mudarAba('funcoes')">Funções</button>
-                    <button id="tab-codigo" onclick="mudarAba('codigo')">Código</button>
+                    <button id="tab-visual" class="tab active" onclick="mudarAba('visual')">Visual</button>
+                    <button id="tab-conteudo" class="tab" onclick="mudarAba('conteudo')">Conteúdo</button>
+                    <button id="tab-funcoes" class="tab" onclick="mudarAba('funcoes')">Funções</button>
+                    <button id="tab-codigo" class="tab" onclick="mudarAba('codigo')">Código</button>
                 </div>
 
                 <!-- ABA VISUAL -->
-                <div id="aba-Visual" class="tab-content active">
+                <div id="aba-visual" class="tab-content active">
                     <h3 style="margin-bottom: 15px;">🎨 EDITOR VISUAL</h3>
                     
                     <div style="display: grid; gap: 15px;">
@@ -358,7 +363,7 @@
                 </div>
 
                 <!-- ABA CONTEÚDO -->
-                <div id="abaConteudo" class="tab-content">
+                <div id="aba-conteudo" class="tab-content">
                     <h3 style="margin-bottom: 15px;">📝 EDITOR DE CONTEÚDO</h3>
                     
                     <div style="display: grid; gap: 15px;">
@@ -389,7 +394,7 @@
                 </div>
 
                 <!-- ABA FUNÇÕES -->
-                <div id="abaFuncoes" class="tab-content">
+                <div id="aba-funcoes" class="tab-content">
                     <h3 style="margin-bottom: 15px;">⚙️ CONTROLE DE FUNÇÕES</h3>
                     <p style="color: var(--warning); font-size: 12px; margin-bottom: 15px;">🔒 Desative funções para limitar o acesso do cliente</p>
                     
@@ -419,7 +424,7 @@
                 </div>
 
                 <!-- ABA CÓDIGO -->
-                <div id="abaCodigo" class="tab-content">
+                <div id="aba-codigo" class="tab-content">
                     <h3 style="margin-bottom: 15px;">💻 EDITOR DE CÓDIGO</h3>
                     <p style="color: var(--warning); font-size: 12px; margin-bottom: 15px;">⚡ Edite o HTML diretamente (apenas para avançados)</p>
                     
@@ -901,13 +906,28 @@
         }
 
         // Funções auxiliares
-        function mudarAba(aba, el) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            (el || event?.target)?.classList.add('active');
-            document.getElementById('aba' + aba.charAt(0).toUpperCase() + aba.slice(1)).classList.add('active');
+
+        // Troca de abas (Visual / Conteúdo / Funções / Código)
+        function mudarAba(nomeAba) {
+            const abas = ["visual","conteudo","funcoes","codigo"];
+
+            // Botões
+            abas.forEach(a => {
+                const btn = document.getElementById(`tab-${a}`);
+                if (btn) btn.classList.remove("active");
+            });
+            const btnAtivo = document.getElementById(`tab-${nomeAba}`);
+            if (btnAtivo) btnAtivo.classList.add("active");
+
+            // Conteúdos
+            abas.forEach(a => {
+                const sec = document.getElementById(`aba-${a}`);
+                if (sec) sec.classList.remove("active");
+            });
+            const secAtiva = document.getElementById(`aba-${nomeAba}`);
+            if (secAtiva) secAtiva.classList.add("active");
         }
+        window.mudarAba = mudarAba;
 
         function adicionarLog(msg) {
             const log = document.getElementById('logPanel');
@@ -1032,49 +1052,11 @@
         window.onload = function() {
             console.log('🚀 Master App iniciado');
             carregarClientes();
+            // abre a aba Visual por padrão
+            mudarAba('visual');
             adicionarLog('🚀 Master App iniciado - Controle total');
         };
 
-        // ===============================
-        // FIX DE ABAS (VISUAL / CONTEÚDO / FUNÇÕES / CÓDIGO)
-        // ===============================
-        (function () {
-          const ABAS = ["visual", "conteudo", "funcoes", "codigo"];
-
-          function esconderTodas() {
-            ABAS.forEach((a) => {
-                const el = document.getElementById(`aba-${a}`);
-                if (el) el.style.display = "none";
-            });
-        }
-
-        function marcarAtiva(nomeAba) {
-          ABAS.forEach((a) => {
-            const btn = document.getElementById(`tab-${a}`);
-            if (btn) {
-              btn.classList.toggle("ativa", a === nomeAba);
-              btn.setAttribute("aria-selected", a === nomeAba ? "true" : "false");
-            }
-          });
-        }
-
-        function mudarAba(nomeAba) {
-          if (!ABAS.includes(nomeAba)) nomeAba = "visual";
-
-          esconderTodas();
-
-          const alvo = document.getElementById(`aba-${nomeAba}`);
-          if (alvo) alvo.style.display = "block";
-
-          marcarAtiva(nomeAba);
-        }
-
-        // deixa o onclick funcionar SEM falhar
-        window.mudarAba = mudarAba;
-
-        // abre em Visual ao carregar
-        window.addEventListener("load", () => mudarAba("visual"));
-      })();
-    </script>
+        </script>
 </body>
 </html>
