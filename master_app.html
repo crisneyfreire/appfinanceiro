@@ -1284,17 +1284,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return out;
         }
 
-        function gerarLinkConvite(token) {
+        function gerarLinkConvite(token, clienteId) {
             const base = window.location.origin + window.location.pathname.replace('master_app.html','');
-            // modo cadastro será ativado no appfinanceiro.html via ?convite=
-            return `${base}appfinanceiro.html?convite=${encodeURIComponent(token)}`;
+            // Importante: o appfinanceiro só abre quando recebe ?cliente=<ID>. 
+            // Mantemos também o token do convite para uso futuro (cadastro guiado/validação).
+            return `${base}appfinanceiro.html?cliente=${encodeURIComponent(clienteId)}&convite=${encodeURIComponent(token)}`;
         }
 
         async function gerarConviteCadastro() {
             if (!clienteAtual) return alert('Selecione um cliente primeiro!');
 
             const token = gerarTokenConvite(12);
-            const link = gerarLinkConvite(token);
+            const link = gerarLinkConvite(token, clienteAtual.id);
 
             try {
                 await db.collection('convites').doc(token).set({
