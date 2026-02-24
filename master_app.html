@@ -1148,43 +1148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // ===============================
         // FIX DE ABAS (VISUAL / CONTEÚDO / FUNÇÕES / CÓDIGO)
         // ===============================
-        (function () {
-          const ABAS = ["visual", "conteudo", "funcoes", "codigo"];
 
-          function esconderTodas() {
-            ABAS.forEach((a) => {
-                const el = document.getElementById(`aba-${a}`);
-                if (el) el.style.display = "none";
-            });
-        }
-
-        function marcarAtiva(nomeAba) {
-          ABAS.forEach((a) => {
-            const btn = document.getElementById(`tab-${a}`);
-            if (btn) {
-              btn.classList.toggle("ativa", a === nomeAba);
-              btn.setAttribute("aria-selected", a === nomeAba ? "true" : "false");
-            }
-          });
-        }
-
-        function mudarAba(nomeAba) {
-          if (!ABAS.includes(nomeAba)) nomeAba = "visual";
-
-          esconderTodas();
-
-          const alvo = document.getElementById(`aba-${nomeAba}`);
-          if (alvo) alvo.style.display = "block";
-
-          marcarAtiva(nomeAba);
-        }
-
-        // deixa o onclick funcionar SEM falhar
-        window.mudarAba = mudarAba;
-
-        // abre em Visual ao carregar
-        window.addEventListener("load", () => mudarAba("visual"));
-      })();
     
         // ===============================
         // LOGO (base64 comprimido) + PREVIEW
