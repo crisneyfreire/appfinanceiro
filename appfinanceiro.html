@@ -75,6 +75,25 @@
             font-size: 24px;
             color: var(--text-primary);
         }
+        /* Logo do cliente (carregado do Master) */
+        .brand{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:14px;
+            flex-wrap:wrap;
+        }
+        #clienteLogoImg{
+            width:72px;
+            height:72px;
+            object-fit:contain;
+            border-radius:12px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(0,0,0,0.25);
+            padding:10px;
+            display:none; /* só aparece se existir logo */
+        }
+
 
         .user-info {
             display: flex;
@@ -941,7 +960,29 @@
             font-size: 18px;
             color: var(--accent);
         }
-    </style>
+    
+        .cliente-meta{
+            margin-top: 6px;
+            font-size: 12px;
+            opacity: 0.9;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .cliente-meta-item{
+            background: rgba(255,255,255,0.15);
+            padding: 4px 8px;
+            border-radius: 999px;
+        }
+        .cliente-meta-sep{
+            opacity: 0.7;
+        }
+        body.dark-mode .cliente-meta-item{
+            background: rgba(255,255,255,0.08);
+        }
+
+</style>
 </head>
 <body>
     <div id="bloqueioScreen" style="display: none;">
@@ -959,8 +1000,18 @@
     <div id="appContent" style="display: none;">
         <div class="container">
             <div class="header">
-                <h1 id="empresaNome">💰 SISTEMA FINANCEIRO</h1>
-                <div class="user-info">
+                <div class="brand">
+            <img id="clienteLogoImg" alt="Logo do cliente" />
+            <h1 id="empresaNome">💰 SISTEMA FINANCEIRO</h1>
+        </div>
+                                <div class="cliente-meta" id="clienteMeta" style="display:none;">
+                    <span class="cliente-meta-item" id="clientePerfil"></span>
+                    <span class="cliente-meta-sep">•</span>
+                    <span class="cliente-meta-item" id="clienteDocumento"></span>
+                    <span class="cliente-meta-sep">•</span>
+                    <span class="cliente-meta-item" id="clienteIdMini"></span>
+                </div>
+<div class="user-info">
                     <span class="user-badge" id="userBadge">👤 Carregando...</span>
                     <button class="dark-mode-toggle" id="darkModeBtn" onclick="toggleDarkMode()">
                         🌙 Modo Escuro
@@ -1493,6 +1544,51 @@
             // Nome da empresa
             document.getElementById('empresaNome').innerHTML = `💰 ${clienteConfig.nome || 'SISTEMA FINANCEIRO'}`;
             document.getElementById('userBadge').innerHTML = `👤 ${clienteConfig.nome || 'Empresa'}`;
+
+            
+            // Logo do cliente (vem do Master: logoBase64 / logoUrl)
+            const logoImg = document.getElementById('clienteLogoImg');
+            const logoSrc = clienteConfig.logoBase64 || clienteConfig.logoUrl || clienteConfig.logo || '';
+            if (logoImg) {
+                if (logoSrc && typeof logoSrc === 'string' && logoSrc.trim().length > 10) {
+                    logoImg.src = logoSrc;
+                    logoImg.style.display = 'block';
+                } else {
+                    logoImg.removeAttribute('src');
+                    logoImg.style.display = 'none';
+                }
+            }
+// Perfil / Documento / ID (para confiança do cliente)
+            const perfil = (clienteConfig.perfil || clienteConfig.tipoCliente || clienteConfig.tipoPerfil || '').toString().trim();
+            const documento = (clienteConfig.cnpj || clienteConfig.cpf || clienteConfig.documento || '').toString().trim();
+
+            const metaEl = document.getElementById('clienteMeta');
+            const perfilEl = document.getElementById('clientePerfil');
+            const docEl = document.getElementById('clienteDocumento');
+            const idEl = document.getElementById('clienteIdMini');
+
+            const idAtual = (clienteId || '').toString().trim();
+
+            const temAlgumaMeta = !!(perfil || documento || idAtual);
+
+            if (metaEl) {
+                metaEl.style.display = temAlgumaMeta ? 'flex' : 'none';
+            }
+            if (perfilEl) {
+                perfilEl.textContent = perfil ? `Perfil: ${perfil}` : 'Perfil: —';
+            }
+            if (docEl) {
+                if (documento) {
+                    const rotulo = clienteConfig.cnpj ? 'CNPJ' : (clienteConfig.cpf ? 'CPF' : 'Documento');
+                    docEl.textContent = `${rotulo}: ${documento}`;
+                } else {
+                    docEl.textContent = 'Documento: —';
+                }
+            }
+            if (idEl) {
+                idEl.textContent = idAtual ? `ID: ${idAtual}` : 'ID: —';
+            }
+
 
             // Cor principal
             if (clienteConfig.cor) {
