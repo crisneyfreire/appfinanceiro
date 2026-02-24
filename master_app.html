@@ -962,12 +962,16 @@
 
         // Funções auxiliares
         function mudarAba(aba, el) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            (el || event?.target)?.classList.add('active');
-            document.getElementById('aba' + aba.charAt(0).toUpperCase() + aba.slice(1)).classList.add('active');
-        }
+  // Se alguém passar o elemento (this), marcamos ele como ativo
+  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
+  const btn = el || document.querySelector(`.tab-btn[data-tab="${aba}"]`);
+  if (btn) btn.classList.add('active');
+
+  // Alterna o conteúdo
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  const content = document.getElementById('aba' + aba.charAt(0).toUpperCase() + aba.slice(1));
+  if (content) content.classList.add('active');
+}
 
         function adicionarLog(msg) {
             const log = document.getElementById('logPanel');
