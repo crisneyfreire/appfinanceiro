@@ -325,10 +325,10 @@
             <!-- PAINEL EDIÇÃO -->
             <div class="editor-panel" id="editorPanel">
                 <div class="editor-tabs">
-                    <button id="tab-visual" onclick="mudarAba('visual')">Visual</button>
-                    <button id="tab-conteudo" onclick="mudarAba('conteudo')">Conteúdo</button>
-                    <button id="tab-funcoes" onclick="mudarAba('funcoes')">Funções</button>
-                    <button id="tab-codigo" onclick="mudarAba('codigo')">Código</button>
+                    <button id="tab-visual" class="tab-btn active" onclick="mudarAba('visual', this)">Visual</button>
+                    <button id="tab-conteudo" class="tab-btn" onclick="mudarAba('conteudo', this)">Conteúdo</button>
+                    <button id="tab-funcoes" class="tab-btn" onclick="mudarAba('funcoes', this)">Funções</button>
+                    <button id="tab-codigo" class="tab-btn" onclick="mudarAba('codigo', this)">Código</button>
                 </div>
 
                 <!-- ABA VISUAL -->
@@ -340,6 +340,30 @@
                             <label>🏢 NOME DA EMPRESA</label>
                             <input type="text" id="nomeEmpresa" value="" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
                         </div>
+                        <div>
+                            <label>👤 PERFIL</label>
+                            <select id="perfilCliente" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #444; border-radius: 8px; color: var(--text-primary);">
+                                <option value="pf">PESSOAL/FAMILIAR</option>
+                                <option value="pj">EMPRESARIAL</option>
+                            </select>
+                            <small style="color: var(--text-secondary); display:block; margin-top:6px;">
+                                PF: controle pessoal/familiar. PJ: empresa/negócio.
+                            </small>
+                        </div>
+
+                        <div>
+                            <label>🧾 CPF ou CNPJ (opcional)</label>
+                            <input type="text" id="cpfCnpj" placeholder="Ex.: 000.000.000-00 ou 00.000.000/0000-00" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #444; border-radius: 8px; color: var(--text-primary);">
+                        </div>
+
+                        <div>
+                            <label>🆔 ID do cliente (gerado pelo sistema)</label>
+                            <input type="text" id="clienteIdVisivel" disabled style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #444; border-radius: 8px; color: var(--text-primary); opacity: .85; cursor: not-allowed;">
+                            <small style="color: var(--text-secondary); display:block; margin-top:6px;">
+                                Esse ID é o que você envia no link do Financeiro (ex.: ?cliente=ID).
+                            </small>
+                        </div>
+
                         
                         <div>
                             <label>🎨 COR PRINCIPAL</label>
@@ -750,6 +774,8 @@
             
             const dadosAtualizados = {
                 nome: document.getElementById('nomeEmpresa').value,
+                perfil: (document.getElementById('perfilCliente') ? document.getElementById('perfilCliente').value : 'pj'),
+                cpfCnpj: (document.getElementById('cpfCnpj') ? document.getElementById('cpfCnpj').value : ''),
                 cor: document.getElementById('corPrincipal').value,
                 modoEscuro: document.getElementById('modoEscuro').value,
                 termoColaborador: document.getElementById('termoColaborador').value,
@@ -911,6 +937,8 @@
             
             const novoCliente = {
                 nome: nome,
+                perfil: 'pj',
+                cpfCnpj: '',
                 plano: plano,
                 status: 'ativo',
                 cor: '#4CAF50',
@@ -961,17 +989,35 @@
         }
 
         // Funções auxiliares
-        function mudarAba(aba, el) {
-  // Se alguém passar o elemento (this), marcamos ele como ativo
-  document.querySelectorAll('.tab-btn').forEach(t => t.classList.remove('active'));
-  const btn = el || document.querySelector(`.tab-btn[data-tab="${aba}"]`);
-  if (btn) btn.classList.add('active');
+        function mudarAba(aba, btnEl) {
+  try {
+    // Esconder todas as abas de conteúdo
+    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
 
-  // Alterna o conteúdo
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-  const content = document.getElementById('aba' + aba.charAt(0).toUpperCase() + aba.slice(1));
-  if (content) content.classList.add('active');
+    // Mostrar a aba selecionada
+    const idMap = {
+      visual: 'abaVisual',
+      conteudo: 'abaConteudo',
+      funcoes: 'abaFuncoes',
+      codigo: 'abaCodigo'
+    };
+    const alvo = document.getElementById(idMap[aba] || 'abaVisual');
+    if (alvo) alvo.style.display = 'block';
+
+    // Marcar botão ativo (sem depender de "event")
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    if (btnEl && btnEl.classList) btnEl.classList.add('active');
+  } catch (e) {
+    console.error('Erro ao mudar aba:', e);
+  }
 }
+
+// Garantir que a primeira aba aparece ao abrir
+document.addEventListener('DOMContentLoaded', () => {
+  const firstBtn = document.getElementById('tab-visual');
+  if (firstBtn) mudarAba('visual', firstBtn);
+});
+
 
         function adicionarLog(msg) {
             const log = document.getElementById('logPanel');
@@ -1315,6 +1361,41 @@
             alert('✅ Link copiado:\n\n' + link);
         }
 
+
+
+// =========================
+// PERFIL PF/PJ (UI simples)
+// =========================
+function aplicarPerfilUI() {
+  const perfilEl = document.getElementById('perfilCliente');
+  if (!perfilEl) return;
+
+  const isPF = perfilEl.value === 'pf';
+
+  const tc = document.getElementById('termoColaborador');
+  const ta = document.getElementById('termoAcao');
+  const tcl = document.getElementById('termoCliente');
+
+  [tc, ta, tcl].forEach(el => {
+    if (!el) return;
+    el.disabled = isPF;
+    el.style.opacity = isPF ? '0.75' : '1';
+    el.style.cursor = isPF ? 'not-allowed' : 'text';
+    if (isPF) {
+      el.value = 'Não se aplica';
+    } else {
+      if (el.value === 'Não se aplica') el.value = '';
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const perfilEl = document.getElementById('perfilCliente');
+  if (perfilEl) {
+    perfilEl.addEventListener('change', aplicarPerfilUI);
+    aplicarPerfilUI();
+  }
+});
 
 </script>
 </body>
