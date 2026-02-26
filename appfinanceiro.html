@@ -1440,6 +1440,12 @@
         async function carregarConfigCliente() {
             clienteId = getClienteIdFromUrl();
 
+            // ✅ Salva o último cliente aberto
+            if (clienteId) {
+              localStorage.setItem("ultimoClienteId", clienteId);
+              localStorage.setItem("ultimoClienteAtualizadoEm", new Date().toISOString());
+            }
+
             if (!clienteId) {
                 document.body.innerHTML = `
                     <div class="bloqueio-container">
