@@ -982,7 +982,76 @@
             background: rgba(255,255,255,0.08);
         }
 
-</style>
+
+        /* Editor de Indicadores (visível só no Master) */
+        .indicadores-editor{
+            margin-top: 14px;
+            padding: 14px;
+            border: 1px solid rgba(0,0,0,.12);
+            border-radius: 12px;
+            background: rgba(255,255,255,.04);
+        }
+        .indicadores-editor h3{
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+        .indicadores-grid{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+        }
+        .indicadores-grid label{
+            display:block;
+            font-size: 12px;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+        .indicadores-grid input{
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,0,0,.15);
+            background: rgba(255,255,255,.08);
+            color: var(--text-primary);
+            outline: none;
+        }
+        .indicadores-actions{
+            display:flex;
+            gap:10px;
+            flex-wrap: wrap;
+            align-items:center;
+            margin-top: 10px;
+        }
+        .indicadores-actions .btn{
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-salvar-indicadores{
+            background: #2E7D32;
+            color: #fff;
+        }
+        .btn-reset-indicadores{
+            background: rgba(244,67,54,.85);
+            color: #fff;
+        }
+        .indicadores-msg{
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .inline-check{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+    </style>
 </head>
 <body>
     <div id="bloqueioScreen" style="display: none;">
@@ -1049,6 +1118,47 @@
                         <div class="stat-title" id="statTitle3">💰 Faturamento</div>
                         <div class="stat-value" id="statValue3">R$ 0,00</div>
                         <div class="stat-sub" id="statSub3">Meta: R$ 0,00</div>
+                    </div>
+                </div>
+
+                <!-- Editor de Indicadores (somente Master: usar ?master=1 na URL) -->
+                <div id="indicadoresEditor" class="indicadores-editor" style="display:none;">
+                    <h3>⚙️ Indicadores do cliente (painel)</h3>
+
+                    <div class="indicadores-grid">
+                        <div>
+                            <label for="ind_entregasMes">Entregas (mês)</label>
+                            <input id="ind_entregasMes" type="number" min="0" step="1" placeholder="0">
+                        </div>
+
+                        <div>
+                            <label for="ind_metaEntregas">Meta de entregas</label>
+                            <input id="ind_metaEntregas" type="number" min="0" step="1" placeholder="0">
+                        </div>
+
+                        <div>
+                            <label for="ind_colabAtivos">Colaboradores / motoqueiros ativos</label>
+                            <input id="ind_colabAtivos" type="number" min="0" step="1" placeholder="0">
+                            <div class="inline-check">
+                                <input id="ind_na_colabAtivos" type="checkbox">
+                                <label for="ind_na_colabAtivos" style="margin:0;">Não se aplica</label>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="ind_colabDisp">Disponíveis</label>
+                            <input id="ind_colabDisp" type="number" min="0" step="1" placeholder="0">
+                            <div class="inline-check">
+                                <input id="ind_na_colabDisp" type="checkbox">
+                                <label for="ind_na_colabDisp" style="margin:0;">Não se aplica</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="indicadores-actions">
+                        <button id="btnSalvarIndicadores" class="btn btn-salvar-indicadores">Salvar indicadores</button>
+                        <button id="btnZerarIndicadores" class="btn btn-reset-indicadores">Zerar (só este cliente)</button>
+                        <span id="indicadoresMsg" class="indicadores-msg"></span>
                     </div>
                 </div>
             </div>
@@ -1413,14 +1523,193 @@
         let transacoes = [];
         let contas = [];
         let previsoes = [];
+        let indicadores = null;
         let tipoLancamento = 'receita';
         let tipoPrevisao = 'receita';
         let automacoesAtivas = {};
+
+
+        // Modo Master: abre o editor de indicadores quando a URL tiver ?master=1
+        // (ou quando localStorage.modoMaster = '1')
+        const __params = new URLSearchParams(window.location.search);
+        const modoMaster = (__params.get('master') === '1') || (localStorage.getItem('modoMaster') === '1');
+
 
         const categorias = {
             receita: ['Serviços', 'Contratos', 'Frete', 'Entregas', 'Outros'],
             despesa: ['Combustível', 'Manutenção', 'Pessoal', 'Alimentação', 'Viagem', 'Impostos', 'Outros']
         };
+
+        // ============================================
+        // INDICADORES DO DASHBOARD (POR CLIENTE)
+        // ============================================
+        function getIndicadoresDefault() {
+            return {
+                entregasMes: 0,
+                metaEntregas: 0,
+                colaboradoresAtivos: 0,
+                colaboradoresDisponiveis: 0
+            };
+        
+        // ============================================
+        // EDITOR DE INDICADORES (SOMENTE MASTER)
+        // ============================================
+        function setIndicadoresMsg(msg) {
+            const el = document.getElementById('indicadoresMsg');
+            if (el) el.textContent = msg || '';
+        }
+
+        function mostrarEditorIndicadoresSeForMaster() {
+            const box = document.getElementById('indicadoresEditor');
+            if (!box) return;
+            box.style.display = modoMaster ? 'block' : 'none';
+        }
+
+        function preencherEditorIndicadores() {
+            if (!modoMaster) return;
+            mostrarEditorIndicadoresSeForMaster();
+
+            const ind = indicadores || getIndicadoresDefault();
+
+            const entregasMes = document.getElementById('ind_entregasMes');
+            const metaEntregas = document.getElementById('ind_metaEntregas');
+            const colabAtivos = document.getElementById('ind_colabAtivos');
+            const colabDisp = document.getElementById('ind_colabDisp');
+
+            const naAtivos = document.getElementById('ind_na_colabAtivos');
+            const naDisp = document.getElementById('ind_na_colabDisp');
+
+            if (entregasMes) entregasMes.value = (ind.entregasMes ?? 0);
+            if (metaEntregas) metaEntregas.value = (ind.metaEntregas ?? 0);
+
+            const ativosNA = (ind.colaboradoresAtivos === null || ind.colaboradoresAtivos === undefined);
+            const dispNA = (ind.colaboradoresDisponiveis === null || ind.colaboradoresDisponiveis === undefined);
+
+            if (naAtivos) naAtivos.checked = ativosNA;
+            if (naDisp) naDisp.checked = dispNA;
+
+            if (colabAtivos) {
+                colabAtivos.disabled = ativosNA;
+                colabAtivos.value = ativosNA ? '' : (ind.colaboradoresAtivos ?? 0);
+            }
+
+            if (colabDisp) {
+                colabDisp.disabled = dispNA;
+                colabDisp.value = dispNA ? '' : (ind.colaboradoresDisponiveis ?? 0);
+            }
+
+            setIndicadoresMsg('');
+        }
+
+        function lerIndicadoresDoEditor() {
+            const entregasMes = document.getElementById('ind_entregasMes');
+            const metaEntregas = document.getElementById('ind_metaEntregas');
+            const colabAtivos = document.getElementById('ind_colabAtivos');
+            const colabDisp = document.getElementById('ind_colabDisp');
+
+            const naAtivos = document.getElementById('ind_na_colabAtivos');
+            const naDisp = document.getElementById('ind_na_colabDisp');
+
+            const parseIntSafe = (v) => {
+                const n = parseInt(String(v ?? '').trim(), 10);
+                return Number.isFinite(n) ? n : 0;
+            };
+
+            return {
+                entregasMes: parseIntSafe(entregasMes?.value),
+                metaEntregas: parseIntSafe(metaEntregas?.value),
+                colaboradoresAtivos: (naAtivos?.checked) ? null : parseIntSafe(colabAtivos?.value),
+                colaboradoresDisponiveis: (naDisp?.checked) ? null : parseIntSafe(colabDisp?.value),
+            };
+        }
+
+        async function salvarIndicadoresDoEditor() {
+            if (!modoMaster) return;
+            if (!clienteId) {
+                setIndicadoresMsg('Cliente não identificado.');
+                return;
+            }
+
+            try {
+                setIndicadoresMsg('Salvando...');
+                const novos = lerIndicadoresDoEditor();
+                await db.collection('dados_financeiros').doc(clienteId).set({
+                    indicadores: novos,
+                    atualizadoEm: new Date().toISOString()
+                }, { merge: true });
+
+                indicadores = novos;
+                atualizarDashboard();
+            mostrarEditorIndicadoresSeForMaster();
+            configurarEventosEditorIndicadores();
+            preencherEditorIndicadores();
+                setIndicadoresMsg('Salvo.');
+            } catch (e) {
+                console.error('Erro ao salvar indicadores:', e);
+                setIndicadoresMsg('Erro ao salvar. Veja o Console.');
+            }
+        }
+
+        async function zerarIndicadoresDoClienteAtual() {
+            if (!modoMaster) return;
+            if (!clienteId) {
+                setIndicadoresMsg('Cliente não identificado.');
+                return;
+            }
+
+            try {
+                setIndicadoresMsg('Zerando...');
+                const zerados = getIndicadoresDefault();
+                // Mantém a lógica de "não se aplica" para colaboradores, se você quiser:
+                // zerados.colaboradoresAtivos = null; zerados.colaboradoresDisponiveis = null;
+
+                await db.collection('dados_financeiros').doc(clienteId).set({
+                    indicadores: zerados,
+                    atualizadoEm: new Date().toISOString()
+                }, { merge: true });
+
+                indicadores = zerados;
+                preencherEditorIndicadores();
+                atualizarDashboard();
+                setIndicadoresMsg('Zerado (somente este cliente).');
+            } catch (e) {
+                console.error('Erro ao zerar indicadores:', e);
+                setIndicadoresMsg('Erro ao zerar. Veja o Console.');
+            }
+        }
+
+        function configurarEventosEditorIndicadores() {
+            if (!modoMaster) return;
+
+            const naAtivos = document.getElementById('ind_na_colabAtivos');
+            const naDisp = document.getElementById('ind_na_colabDisp');
+            const colabAtivos = document.getElementById('ind_colabAtivos');
+            const colabDisp = document.getElementById('ind_colabDisp');
+
+            if (naAtivos && colabAtivos) {
+                naAtivos.addEventListener('change', () => {
+                    colabAtivos.disabled = naAtivos.checked;
+                    if (naAtivos.checked) colabAtivos.value = '';
+                });
+            }
+
+            if (naDisp && colabDisp) {
+                naDisp.addEventListener('change', () => {
+                    colabDisp.disabled = naDisp.checked;
+                    if (naDisp.checked) colabDisp.value = '';
+                });
+            }
+
+            const btnSalvar = document.getElementById('btnSalvarIndicadores');
+            if (btnSalvar) btnSalvar.addEventListener('click', salvarIndicadoresDoEditor);
+
+            const btnZerar = document.getElementById('btnZerarIndicadores');
+            if (btnZerar) btnZerar.addEventListener('click', zerarIndicadoresDoClienteAtual);
+        }
+
+
+}
+
 
         // ============================================
         // CARREGAR CLIENTE DA URL
@@ -1526,6 +1815,9 @@
                         </div>
                     `;
                 });
+
+                // Atualizar editor (se for Master)
+                preencherEditorIndicadores();
 
             } catch (error) {
                 console.error('Erro ao iniciar sincronização:', error);
@@ -1647,23 +1939,26 @@
                 // Tentar carregar dados existentes
                 const docRef = db.collection('dados_financeiros').doc(clienteId);
                 const doc = await docRef.get();
-                
+
                 if (doc.exists) {
                     const dados = doc.data();
                     transacoes = dados.transacoes || [];
                     contas = dados.contas || [];
                     previsoes = dados.previsoes || [];
+                    indicadores = dados.indicadores || getIndicadoresDefault();
                 } else {
                     // Criar dados iniciais
                     transacoes = [];
                     contas = [];
                     previsoes = [];
-                    
+                    indicadores = getIndicadoresDefault();
+
                     // Salvar estrutura inicial
                     await docRef.set({
                         transacoes: [],
                         contas: [],
                         previsoes: [],
+                        indicadores: indicadores,
                         criadoEm: new Date().toISOString()
                     });
                 }
@@ -1681,6 +1976,7 @@
                     transacoes: transacoes,
                     contas: contas,
                     previsoes: previsoes,
+                    indicadores: indicadores || getIndicadoresDefault(),
                     atualizadoEm: new Date().toISOString()
                 }, { merge: true });
                 return true;
@@ -2152,11 +2448,17 @@
             document.getElementById('statValue3').innerHTML = `R$ ${saldoContas.toFixed(2).replace('.', ',')}`;
             document.getElementById('statSub3').innerHTML = `${contas.length} contas ativas`;
 
-            // Estatísticas simuladas
-            document.getElementById('statValue1').innerHTML = '342';
-            document.getElementById('statSub1').innerHTML = 'Meta: 400';
-            document.getElementById('statValue2').innerHTML = '12';
-            document.getElementById('statSub2').innerHTML = '3 disponíveis';
+            // Indicadores por cliente (salvos em dados_financeiros/{clienteId}.indicadores)
+            const ind = indicadores || getIndicadoresDefault();
+
+            document.getElementById('statValue1').innerHTML = (ind.entregasMes === null || ind.entregasMes === undefined) ? 'Não se aplica' : ind.entregasMes;
+            document.getElementById('statSub1').innerHTML = (ind.metaEntregas === null || ind.metaEntregas === undefined) ? '' : `Meta: ${ind.metaEntregas}`;
+
+            const ativos = ind.colaboradoresAtivos;
+            const disp = ind.colaboradoresDisponiveis;
+
+            document.getElementById('statValue2').innerHTML = (ativos === null || ativos === undefined) ? 'Não se aplica' : ativos;
+            document.getElementById('statSub2').innerHTML = (disp === null || disp === undefined) ? '' : `${disp} disponíveis`;
         }
 
         // ============================================
