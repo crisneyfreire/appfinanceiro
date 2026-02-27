@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Portal — Sistema Financeiro</title>
+  <style>
+    body{
+      margin:0; font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background: radial-gradient(1200px 600px at 50% 20%, #1b2a4a 0%, #0b1020 60%, #070a14 100%);
+      color:#e8eefc; min-height:100vh; display:flex; align-items:center; justify-content:center;
+      padding:24px;
+    }
+    .card{
+      width:min(720px, 100%);
+      background: rgba(20,24,40,.82);
+      border: 1px solid rgba(120,140,255,.25);
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.45);
+      padding: 22px;
+    }
+    h1{margin:0 0 6px; font-size:20px; font-weight:700;}
+    p{margin:0 0 14px; opacity:.9; line-height:1.4}
+    .row{display:flex; gap:10px; flex-wrap:wrap; margin-top:14px;}
+    input{
+      flex:1;
+      min-width: 260px;
+      padding:12px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(120,140,255,.25);
+      background: rgba(8,10,18,.55);
+      color:#e8eefc;
+      outline:none;
+    }
+    input:focus{border-color: rgba(140,160,255,.6)}
+    button{
+      padding:12px 14px;
+      border-radius: 12px;
+      border: 0;
+      cursor:pointer;
+      font-weight:700;
+      background: #3b5bff;
+      color:#fff;
+    }
+    button.secondary{
+      background: rgba(255,255,255,.10);
+      border: 1px solid rgba(120,140,255,.25);
+      color:#e8eefc;
+      font-weight:600;
+    }
+    .hint{
+      margin-top:10px;
+      font-size: 13px;
+      opacity:.85;
+    }
+    .err{
+      margin-top:10px;
+      font-size: 13px;
+      color: #ffb3b3;
+      display:none;
+    }
+    .saved{
+      margin-top:16px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(120,140,255,.18);
+      display:flex; justify-content:space-between; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .saved b{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace}
+    a{color:#cfd8ff}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Portal do Sistema Financeiro</h1>
+    <p>Escolha um cliente para abrir o painel. (O app do cliente continua funcionando via link com <code>?cliente=</code>.)</p>
+
+    <div class="row">
+      <input id="clienteIdInput" placeholder="Cole aqui o ID do cliente (Firestore)..." autocomplete="off" />
+      <button id="abrirBtn">Abrir Cliente</button>
+    </div>
+
+    <div class="row">
+      <button class="secondary" id="limparBtn">Limpar último cliente salvo</button>
+    </div>
+
+    <div class="err" id="erro"></div>
+
+    <div class="saved" id="blocoUltimo" style="display:none;">
+      <div>
+        Último cliente usado: <b id="ultimoId"></b>
+      </div>
+      <div class="row" style="margin:0;">
+        <button id="abrirUltimoBtn">Abrir último</button>
+      </div>
+    </div>
+
+    <div class="hint">
+      Dica: para cliente final, o link é do tipo:
+      <br/>
+      <code>appfinanceiro.html?cliente=ID_DO_CLIENTE</code>
+    </div>
+  </div>
+
+  <script>
+    const input = document.getElementById("clienteIdInput");
+    const abrirBtn = document.getElementById("abrirBtn");
+    const erro = document.getElementById("erro");
+
+    const blocoUltimo = document.getElementById("blocoUltimo");
+    const ultimoIdEl = document.getElementById("ultimoId");
+    const abrirUltimoBtn = document.getElementById("abrirUltimoBtn");
+    const limparBtn = document.getElementById("limparBtn");
+
+    function showError(msg){
+      erro.textContent = msg;
+      erro.style.display = "block";
+    }
+    function clearError(){
+      erro.textContent = "";
+      erro.style.display = "none";
+    }
+
+    function abrirCliente(id){
+      const clienteId = (id || "").trim();
+      if (!clienteId) {
+        showError("Cole um ID de cliente válido.");
+        return;
+      }
+      clearError();
+      // salva para facilitar sua vida
+      localStorage.setItem("ultimoClienteId", clienteId);
+      localStorage.setItem("ultimoClienteAtualizadoEm", new Date().toISOString());
+
+      // abre o app do cliente com parâmetro
+      window.location.href = `appfinanceiro.html?cliente=${encodeURIComponent(clienteId)}`;
+    }
+
+    // UI do último cliente
+    const ultimo = localStorage.getItem("ultimoClienteId");
+    if (ultimo) {
+      blocoUltimo.style.display = "flex";
+      ultimoIdEl.textContent = ultimo;
+    }
+
+    abrirBtn.addEventListener("click", () => abrirCliente(input.value));
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") abrirCliente(input.value);
+    });
+
+    abrirUltimoBtn.addEventListener("click", () => abrirCliente(ultimo));
+    limparBtn.addEventListener("click", () => {
+      localStorage.removeItem("ultimoClienteId");
+      localStorage.removeItem("ultimoClienteAtualizadoEm");
+      blocoUltimo.style.display = "none";
+      input.value = "";
+      clearError();
+    });
+  </script>
+</body>
+</html>
