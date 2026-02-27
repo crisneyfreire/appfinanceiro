@@ -6,8 +6,92 @@
     <title>👑 MASTER APP - CONTROLE TOTAL</title>
     
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
+// Zerar APENAS os indicadores do cliente atual (não apaga transações/contas/previsões)
+async function zerarIndicadoresClienteAtual() {
+    try {
+        if (!clienteAtual || !clienteAtual.id) {
+            alert('Selecione um cliente primeiro.');
+            return;
+        }
+
+        const id = clienteAtual.id;
+
+        // Confirmação forte: digitar o ID do cliente
+        const typed = prompt('⚠️ Isso vai zerar APENAS os INDICADORES (painel) deste cliente.\n\nPara confirmar, digite o ID do cliente exatamente assim:\n' + id);
+        if (typed === null) return;
+        if (typed.trim() !== id) {
+            alert('ID não confere. Operação cancelada.');
+            return;
+        }
+
+        // Garantir documento existe e zerar somente indicadores
+        const ref = db.collection('dados_financeiros').doc(id);
+
+        const payload = {
+            indicadores: {
+                entregasMes: 0,
+                metaEntregas: 0,
+                colaboradoresAtivos: 0,
+                colaboradoresDisponiveis: 0
+            },
+            atualizadoEm: new Date().toISOString()
+        };
+
+        await ref.set(payload, { merge: true });
+
+        adicionarLog(`🧹 Indicadores zerados para ${clienteAtual.nome || id}`);
+        alert('✅ Indicadores zerados (apenas painel)!');
+    } catch (e) {
+        console.error(e);
+        alert('❌ Erro ao zerar indicadores. Veja o console.');
+    }
+}
+
+</script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js">
+// Zerar APENAS os indicadores do cliente atual (não apaga transações/contas/previsões)
+async function zerarIndicadoresClienteAtual() {
+    try {
+        if (!clienteAtual || !clienteAtual.id) {
+            alert('Selecione um cliente primeiro.');
+            return;
+        }
+
+        const id = clienteAtual.id;
+
+        // Confirmação forte: digitar o ID do cliente
+        const typed = prompt('⚠️ Isso vai zerar APENAS os INDICADORES (painel) deste cliente.\n\nPara confirmar, digite o ID do cliente exatamente assim:\n' + id);
+        if (typed === null) return;
+        if (typed.trim() !== id) {
+            alert('ID não confere. Operação cancelada.');
+            return;
+        }
+
+        // Garantir documento existe e zerar somente indicadores
+        const ref = db.collection('dados_financeiros').doc(id);
+
+        const payload = {
+            indicadores: {
+                entregasMes: 0,
+                metaEntregas: 0,
+                colaboradoresAtivos: 0,
+                colaboradoresDisponiveis: 0
+            },
+            atualizadoEm: new Date().toISOString()
+        };
+
+        await ref.set(payload, { merge: true });
+
+        adicionarLog(`🧹 Indicadores zerados para ${clienteAtual.nome || id}`);
+        alert('✅ Indicadores zerados (apenas painel)!');
+    } catch (e) {
+        console.error(e);
+        alert('❌ Erro ao zerar indicadores. Veja o console.');
+    }
+}
+
+</script>
     
     <style>
         /* (mesmo estilo que já tens - mantém) */
@@ -156,6 +240,7 @@
 
         .editor-tabs {
             display: flex;
+            flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 20px;
             border-bottom: 1px solid #404040;
@@ -282,6 +367,40 @@
             padding: 20px;
             color: var(--neon);
         }
+    
+        /* BOTÕES DAS ABAS (PADRÃO BONITO) */
+        .tab-btn{
+            padding: 12px 22px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(0,255,170,0.25);
+            color: var(--text-primary);
+            cursor: pointer;
+            border-radius: 10px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            min-width: 140px;
+            text-align: center;
+        }
+        .tab-btn:hover{
+            transform: translateY(-1px);
+            border-color: rgba(0,255,170,0.6);
+            box-shadow: 0 0 14px rgba(0,255,170,0.25);
+        }
+        .tab-btn.active{
+            background: linear-gradient(45deg, var(--neon), var(--accent));
+            color: #000;
+            border-color: transparent;
+        }
+        .tab-btn.danger{
+            background: rgba(244,67,54,0.12);
+            border-color: rgba(244,67,54,0.5);
+            color: #fff;
+        }
+        .tab-btn.danger:hover{
+            box-shadow: 0 0 16px rgba(244,67,54,0.25);
+            border-color: rgba(244,67,54,0.9);
+        }
+
     </style>
 </head>
 <body>
@@ -329,10 +448,8 @@
                     <button id="tab-conteudo" class="tab-btn" onclick="mudarAba('conteudo', this)">Conteúdo</button>
                     <button id="tab-funcoes" class="tab-btn" onclick="mudarAba('funcoes', this)">Funções</button>
                     <button id="tab-codigo" class="tab-btn" onclick="mudarAba('codigo', this)">Código</button>
-
-                    <button id="btnZerarDados" class="tab-btn danger" onclick="zerarDadosClienteAtual()" disabled>
-                        🧹 ZERAR DADOS
-                    </button>
+                
+                    <button id="btn-zerar-indicadores" class="tab-btn danger" onclick="zerarIndicadoresClienteAtual()">🧹 Zerar indicadores</button>
                 </div>
 
                 <!-- ABA VISUAL -->
@@ -708,7 +825,6 @@
             document.getElementById('btnEscolherLogo').disabled = false;
             document.getElementById('btnRemoverLogo').disabled = false;
             document.getElementById('btnGerarConvite').disabled = false;
-            document.getElementById('btnZerarDados').disabled = false;
             
             adicionarLog(`📂 Cliente selecionado: ${cliente.nome}`);
         }
@@ -1103,8 +1219,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('btnSalvar').disabled = true;
                     document.getElementById('btnVisualizar').disabled = true;
                     document.getElementById('btnCopiarLink').disabled = true;
-                    const bz = document.getElementById('btnZerarDados');
-                    if (bz) bz.disabled = true;
                 }
         
             } catch (error) {
@@ -1113,39 +1227,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        
-// ============================================
-// FUNÇÃO: Zerar dados financeiros do cliente atual
-// - Não exclui o cliente
-// - Limpa o documento em dados_financeiros/{clienteId}
-// ============================================
-async function zerarDadosClienteAtual() {
-    if (!clienteAtual) {
-        alert('⚠️ Selecione um cliente primeiro!');
-        return;
-    }
-
-    const nome = clienteAtual.nome || 'este cliente';
-
-    const ok1 = confirm(`⚠️ Você quer ZERAR os dados financeiros de "${nome}"?\n\nIsso limpa o painel/dados do cliente, mas NÃO apaga o cadastro do cliente.`);
-    if (!ok1) return;
-
-    const ok2 = confirm('🔥 Confirmação final: tem certeza absoluta?');
-    if (!ok2) return;
-
-    try {
-        // Apaga o documento principal de dados financeiros (subcoleções não são removidas pelo Firestore via delete())
-        await db.collection('dados_financeiros').doc(clienteAtual.id).delete();
-
-        adicionarLog(`🧹 Dados financeiros zerados para ${nome}`);
-        alert('✅ Dados financeiros zerados para este cliente!');
-    } catch (error) {
-        console.error('Erro ao zerar dados financeiros:', error);
-        alert('❌ Erro ao zerar dados: ' + (error.message || 'erro desconhecido'));
-    }
-}
-
-// ============================================
+        // ============================================
         // FUNÇÃO: Diagnóstico de conexão
         // ============================================
         async function diagnosticarConexao() {
@@ -1400,6 +1482,48 @@ document.addEventListener('DOMContentLoaded', () => {
     aplicarPerfilUI();
   }
 });
+
+
+// Zerar APENAS os indicadores do cliente atual (não apaga transações/contas/previsões)
+async function zerarIndicadoresClienteAtual() {
+    try {
+        if (!clienteAtual || !clienteAtual.id) {
+            alert('Selecione um cliente primeiro.');
+            return;
+        }
+
+        const id = clienteAtual.id;
+
+        // Confirmação forte: digitar o ID do cliente
+        const typed = prompt('⚠️ Isso vai zerar APENAS os INDICADORES (painel) deste cliente.\n\nPara confirmar, digite o ID do cliente exatamente assim:\n' + id);
+        if (typed === null) return;
+        if (typed.trim() !== id) {
+            alert('ID não confere. Operação cancelada.');
+            return;
+        }
+
+        // Garantir documento existe e zerar somente indicadores
+        const ref = db.collection('dados_financeiros').doc(id);
+
+        const payload = {
+            indicadores: {
+                entregasMes: 0,
+                metaEntregas: 0,
+                colaboradoresAtivos: 0,
+                colaboradoresDisponiveis: 0
+            },
+            atualizadoEm: new Date().toISOString()
+        };
+
+        await ref.set(payload, { merge: true });
+
+        adicionarLog(`🧹 Indicadores zerados para ${clienteAtual.nome || id}`);
+        alert('✅ Indicadores zerados (apenas painel)!');
+    } catch (e) {
+        console.error(e);
+        alert('❌ Erro ao zerar indicadores. Veja o console.');
+    }
+}
 
 </script>
 </body>
