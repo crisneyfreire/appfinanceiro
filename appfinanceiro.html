@@ -1439,6 +1439,8 @@
 
         async function carregarConfigCliente() {
             clienteId = getClienteIdFromUrl();
+            console.log("Search:", window.location.search);
+            console.log("clienteId:", clienteId);
 
             // ✅ Salva o último cliente aberto
             if (clienteId) {
