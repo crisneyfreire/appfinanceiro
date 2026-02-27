@@ -1426,8 +1426,8 @@
         // CARREGAR CLIENTE DA URL
         // ============================================
         function getClienteIdFromUrl() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('cliente');
+            const params = new URLSearchParams(window.location.search);
+            return params.get("cliente");
         }
 
         // ============================================
