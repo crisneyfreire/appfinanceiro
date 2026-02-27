@@ -2703,13 +2703,120 @@
         }
 
         // ============================================
+        // ============================================
         // FUNÇÕES DE IMPORTAÇÃO/EXPORTAÇÃO
         // ============================================
-        function importarCSV() { alert('📥 Importação CSV'); }
-        function importarTXT() { alert('📥 Importação TXT'); }
-        function importarJSON() { alert('📥 Importação JSON'); }
-        function exportarCSV() { alert('📤 Exportação CSV'); }
-        function exportarJSON() { alert('📤 Exportação JSON'); }
+
+        function importarCSV() { alert('📥 Importação CSV ainda não implementada. Use JSON por enquanto.'); }
+        function importarTXT() { alert('📥 Importação TXT ainda não implementada. Use JSON por enquanto.'); }
+        function exportarCSV() { alert('📤 Exportação CSV ainda não implementada. Use JSON por enquanto.'); }
+
+        async function importarJSON() {
+            try {
+                const input = document.getElementById('fileInput');
+                const file = input?.files?.[0];
+                if (!file) {
+                    alert('Selecione um arquivo .json primeiro.');
+                    return;
+                }
+                if (!clienteId) {
+                    alert('Cliente não identificado. Abra com ?cliente=ID');
+                    return;
+                }
+
+                const texto = await file.text();
+                let obj;
+                try {
+                    obj = JSON.parse(texto);
+                } catch (e) {
+                    alert('JSON inválido. Verifique o arquivo.');
+                    return;
+                }
+
+                // Aceita formatos diferentes:
+                // 1) { clienteId, clienteNome, dados: { transacoes, contas, previsoes, indicadores } }
+                // 2) { transacoes, contas, previsoes, indicadores }
+                // 3) { dados_financeiros: { ... } } (pega o primeiro nível)
+                let dados = null;
+
+                if (obj && typeof obj === 'object') {
+                    if (obj.dados && typeof obj.dados === 'object') dados = obj.dados;
+                    else if (obj.transacoes || obj.contas || obj.previsoes || obj.indicadores) dados = obj;
+                    else if (obj.dados_financeiros && typeof obj.dados_financeiros === 'object') dados = obj.dados_financeiros;
+                }
+
+                if (!dados) {
+                    alert('Estrutura do JSON não reconhecida.');
+                    return;
+                }
+
+                const ok = confirm('Importar vai SUBSTITUIR os dados financeiros deste cliente (transações/contas/previsões/indicadores). Continuar?');
+                if (!ok) return;
+
+                transacoes = Array.isArray(dados.transacoes) ? dados.transacoes : [];
+                contas = Array.isArray(dados.contas) ? dados.contas : [];
+                previsoes = Array.isArray(dados.previsoes) ? dados.previsoes : [];
+                indicadores = (dados.indicadores && typeof dados.indicadores === 'object') ? dados.indicadores : null;
+
+                await db.collection('dados_financeiros').doc(clienteId).set({
+                    transacoes,
+                    contas,
+                    previsoes,
+                    indicadores,
+                    atualizadoEm: new Date().toISOString(),
+                    importadoEm: new Date().toISOString()
+                }, { merge: true });
+
+                // Atualiza UI
+                atualizarDashboard();
+                atualizarListaTransacoes?.();
+                atualizarListaContas?.();
+                atualizarListaPrevisoes?.();
+                preencherEditorIndicadores?.();
+
+                alert('✅ Importação concluída!');
+                input.value = '';
+            } catch (e) {
+                console.error('Erro ao importar JSON:', e);
+                alert('❌ Erro na importação. Veja o Console.');
+            }
+        }
+
+        function exportarJSON() {
+            try {
+                if (!clienteId) {
+                    alert('Cliente não identificado. Abra com ?cliente=ID');
+                    return;
+                }
+
+                const payload = {
+                    versao: 1,
+                    exportadoEm: new Date().toISOString(),
+                    clienteId: clienteId,
+                    clienteNome: clienteConfig?.nome || null,
+                    dados: {
+                        transacoes: transacoes || [],
+                        contas: contas || [],
+                        previsoes: previsoes || [],
+                        indicadores: indicadores || null
+                    }
+                };
+
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${(clienteConfig?.nome || 'cliente').replace(/\s+/g,'_')}_dados_financeiros.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                console.error('Erro ao exportar JSON:', e);
+                alert('❌ Erro ao exportar JSON. Veja o Console.');
+            }
+        }
+
         
         function exportarTXT() {
             try {
