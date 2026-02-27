@@ -1839,6 +1839,7 @@
         // ============================================
         // assinatura ativa do cliente (para não criar vários listeners)
         let unsubscribeCliente = null;
+        let unsubscribeCfg = null;
         let appInicializado = false;
 
         async function carregarConfigCliente() {
@@ -1873,7 +1874,9 @@
 
             try {
                 const ref = db.collection('clientes').doc(clienteId);
+                const refCfg = db.collection('configs').doc(clienteId);
 
+                // Base do cliente (modo antigo) + Config separado (modo profissional)
                 unsubscribeCliente = ref.onSnapshot(async (doc) => {
                     if (!doc.exists) {
                         document.body.innerHTML = `
@@ -1883,39 +1886,31 @@
                                     <h2>Cliente não encontrado</h2>
                                     <p>O cliente solicitado não existe no sistema.</p>
                                 </div>
-                            </div>
-                        `;
+                            </div>`;
                         return;
                     }
 
-                    // ✅ recebe config atualizada em tempo real
-                    clienteConfig = { id: doc.id, ...doc.data() };
+                    clienteBase = doc.data() || {};
 
-                    // bloqueio instantâneo
-                    if (clienteConfig.status === 'bloqueado') {
-                        document.getElementById('bloqueioScreen').style.display = 'block';
-                        document.getElementById('bloqueioMsg').innerHTML =
-                            `Sistema bloqueado pelo administrador.<br>Entre em contato para mais informações.`;
-                        document.getElementById('appContent').style.display = 'none';
+                    // Se configs já carregaram, mescla. Se não, segue com base.
+                    const cfg = (clienteCfg || {});
+                    const override = previewOverrideConfig || null;
+                    clienteConfig = mesclarConfig(clienteBase, override || cfg);
+
+                    // Bloqueio continua valendo pela base
+                    if (clienteBase.bloqueado) {
+                        mostrarTelaBloqueio(clienteBase);
                         return;
                     }
 
-                    // desbloqueado
-                    document.getElementById('bloqueioScreen').style.display = 'none';
-                    document.getElementById('appContent').style.display = 'block';
-
-                    // aplica tema/termos/moeda etc. sempre que o master alterar
                     aplicarConfiguracoes();
+                    atualizarCamposDePermissao();
 
                     // inicialização pesada só uma vez
                     if (!appInicializado) {
                         appInicializado = true;
                         await carregarDadosFinanceiros();
                         inicializarInterface();
-                    } else {
-                        // Se você quiser que as abas atualizem automaticamente quando o Master
-                        // ligar/desligar funções, descomente a linha abaixo:
-                        // inicializarInterface();
                     }
                 }, (error) => {
                     console.error('Erro no onSnapshot:', error);
@@ -1929,6 +1924,24 @@
                             </div>
                         </div>
                     `;
+                });
+
+                // 🔁 Também escuta configs separadas (configs/{clienteId})
+                if (unsubscribeCfg) { try { unsubscribeCfg(); } catch(e) {} }
+                unsubscribeCfg = refCfg.onSnapshot((doc) => {
+                    clienteCfg = doc.exists ? (doc.data() || {}) : {};
+
+                    // Se estiver em preview ao vivo, quem manda é o Master.
+                    if (previewOverrideConfig) return;
+
+                    if (clienteBase) {
+                        clienteConfig = mesclarConfig(clienteBase, clienteCfg);
+                        aplicarConfiguracoes();
+                    atualizarCamposDePermissao();
+                        try { inicializarInterface(); } catch(e) {}
+                    }
+                }, (err) => {
+                    console.warn('Erro no onSnapshot de configs:', err);
                 });
 
                 // Atualizar editor (se for Master)
@@ -2045,6 +2058,19 @@
                 document.getElementById('darkModeBtn').innerHTML = '🌙 Modo Escuro';
             }
         }
+
+        
+        function atualizarCamposDePermissao() {
+            // Preparação para o ponto 4 (editar/excluir lançamentos)
+            const podeEditar = (clienteConfig?.permitirEditarLancamentos !== false);
+            const podeExcluir = (clienteConfig?.permitirExcluirLancamentos !== false);
+
+            // Se no futuro você adicionar botões na lista, use essas flags.
+            window.__podeEditarLanc = podeEditar;
+            window.__podeExcluirLanc = podeExcluir;
+        }
+
+
 
         // ============================================
         // CARREGAR DADOS FINANCEIROS DO CLIENTE
@@ -2250,7 +2276,10 @@
             if (!select) return;
             
             select.innerHTML = '';
-            categorias[tipoLancamento].forEach(cat => {
+            const listaCategorias = (clienteConfig && Array.isArray(clienteConfig.categorias) && clienteConfig.categorias.length)
+                ? clienteConfig.categorias
+                : categorias[tipoLancamento];
+            listaCategorias.forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat;
                 option.textContent = cat;
@@ -2263,7 +2292,10 @@
             if (!select) return;
             
             select.innerHTML = '';
-            contas.forEach(conta => {
+            const listaContas = (clienteConfig && Array.isArray(clienteConfig.contasPadrao) && clienteConfig.contasPadrao.length)
+                ? clienteConfig.contasPadrao
+                : contas;
+            listaContas.forEach(conta => {
                 const option = document.createElement('option');
                 option.value = conta.id;
                 option.textContent = `${conta.nome} (${conta.tipo})`;
