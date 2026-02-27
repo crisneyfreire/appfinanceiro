@@ -447,6 +447,7 @@ async function zerarIndicadoresClienteAtual() {
                     <button id="tab-visual" class="tab-btn active" onclick="mudarAba('visual', this)">Visual</button>
                     <button id="tab-conteudo" class="tab-btn" onclick="mudarAba('conteudo', this)">Conteúdo</button>
                     <button id="tab-funcoes" class="tab-btn" onclick="mudarAba('funcoes', this)">Funções</button>
+                    <button id="tab-dados" class="tab-btn" onclick="mudarAba('dados', this)">Dados</button>
                     <button id="tab-codigo" class="tab-btn" onclick="mudarAba('codigo', this)">Código</button>
                 
                     <button id="btn-zerar-indicadores" class="tab-btn danger" onclick="zerarIndicadoresClienteAtual()">🧹 Zerar indicadores</button>
@@ -562,6 +563,64 @@ async function zerarIndicadoresClienteAtual() {
                         </label>
                     </div>
                 </div>
+
+                
+                <!-- ABA DADOS (menos rústico) -->
+                <div id="abaDados" class="tab-content" style="display:none;">
+                    <h3 style="margin-bottom: 15px;">🧩 EDITOR DE DADOS (SEM CÓDIGO)</h3>
+                    <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 12px;">
+                        Aqui você controla listas e padrões do cliente (categorias, contas) sem mexer no HTML.
+                    </p>
+
+                    <div style="display: grid; gap: 15px;">
+                        <div>
+                            <label>🏷️ Categorias (uma por linha)</label>
+                            <textarea id="listaCategorias" rows="8" onchange="alteracaoNaoSalva(); atualizarPreviewDraft();" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white; resize: vertical;" placeholder="Ex:
+Alimentação
+Transporte
+Moradia
+Lazer"></textarea>
+                            <small style="color: var(--text-secondary); display:block; margin-top:6px;">
+                                O AppFinanceiro vai usar essa lista no campo Categoria dos lançamentos.
+                            </small>
+                        </div>
+
+                        <div>
+                            <label>🏦 Contas padrão (uma por linha)</label>
+                            <textarea id="listaContasPadrao" rows="6" onchange="alteracaoNaoSalva(); atualizarPreviewDraft();" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white; resize: vertical;" placeholder="Ex:
+Carteira
+Banco
+Pix"></textarea>
+                            <small style="color: var(--text-secondary); display:block; margin-top:6px;">
+                                Se o cliente ainda não tiver contas criadas, o sistema pode sugerir essas.
+                            </small>
+                        </div>
+
+                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                            <button class="control-btn btn-view" onclick="abrirPreviewModal()" id="btnPreviewInline" disabled style="flex:1; min-width: 180px;">
+                                👁️ PREVIEW AO VIVO
+                            </button>
+                            <button class="control-btn btn-save" onclick="salvarAlteracoes()" id="btnSalvarDados" disabled style="flex:1; min-width: 180px;">
+                                💾 SALVAR (PUBLICAR)
+                            </button>
+                        </div>
+
+                        <div style="background: var(--bg-secondary); border-radius: 12px; padding: 12px; border: 1px solid #404040;">
+                            <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+                                <div>
+                                    <div style="font-weight:bold; color: var(--neon);">🕵️ Auditoria</div>
+                                    <div id="auditoriaInfo" style="font-size:12px; color: var(--text-secondary); margin-top:6px;">
+                                        Nenhuma publicação ainda.
+                                    </div>
+                                </div>
+                                <button class="power-btn" onclick="recarregarConfigDoCliente()" style="height: fit-content;">
+                                    🔄 Recarregar config
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
 
                 <!-- ABA CÓDIGO -->
                 <div id="abaCodigo" class="tab-content">
@@ -815,6 +874,7 @@ async function zerarIndicadoresClienteAtual() {
             // Atualizar UI
             atualizarListaClientes();
             preencherFormularioCliente();
+            await carregarConfigCliente(clienteId);
             
             // Habilitar botões
             document.getElementById('btnEditar').disabled = false;
@@ -825,6 +885,8 @@ async function zerarIndicadoresClienteAtual() {
             document.getElementById('btnEscolherLogo').disabled = false;
             document.getElementById('btnRemoverLogo').disabled = false;
             document.getElementById('btnGerarConvite').disabled = false;
+            if (document.getElementById('btnPreviewInline')) document.getElementById('btnPreviewInline').disabled = false;
+            if (document.getElementById('btnSalvarDados')) document.getElementById('btnSalvarDados').disabled = false;
             
             adicionarLog(`📂 Cliente selecionado: ${cliente.nome}`);
         }
@@ -863,6 +925,84 @@ async function zerarIndicadoresClienteAtual() {
             // Atualizar preview
             atualizarPreview();
         }
+        // ============================================
+        // Carregar config profissional (configs/{clienteId})
+        // ============================================
+        async function carregarConfigCliente(clienteId) {
+            try {
+                // tenta configs separadas (novo)
+                const cfgDoc = await db.collection('configs').doc(clienteId).get();
+                const cfg = cfgDoc.exists ? (cfgDoc.data() || {}) : null;
+
+                if (cfg) {
+                    // Visual
+                    if (cfg.visual?.corPrincipal && document.getElementById('corPrincipal')) {
+                        document.getElementById('corPrincipal').value = cfg.visual.corPrincipal;
+                    }
+                    if (cfg.visual?.modoEscuro && document.getElementById('modoEscuro')) {
+                        document.getElementById('modoEscuro').value = cfg.visual.modoEscuro;
+                    }
+                    // Conteúdo
+                    if (cfg.conteudo?.nomeEmpresa && document.getElementById('nomeEmpresa')) {
+                        document.getElementById('nomeEmpresa').value = cfg.conteudo.nomeEmpresa;
+                    }
+                    if (cfg.conteudo?.termoColaborador && document.getElementById('termoColaborador')) {
+                        document.getElementById('termoColaborador').value = cfg.conteudo.termoColaborador;
+                    }
+                    if (cfg.conteudo?.termoAcao && document.getElementById('termoAcao')) {
+                        document.getElementById('termoAcao').value = cfg.conteudo.termoAcao;
+                    }
+                    if (cfg.conteudo?.termoCliente && document.getElementById('termoCliente')) {
+                        document.getElementById('termoCliente').value = cfg.conteudo.termoCliente;
+                    }
+                    if (cfg.conteudo?.moeda && document.getElementById('moeda')) {
+                        document.getElementById('moeda').value = cfg.conteudo.moeda;
+                    }
+
+                    // Dados (categorias / contas padrão)
+                    const cats = Array.isArray(cfg.conteudo?.categorias) ? cfg.conteudo.categorias : [];
+                    if (document.getElementById('listaCategorias')) {
+                        document.getElementById('listaCategorias').value = cats.join('\n');
+                    }
+                    const contasPadrao = Array.isArray(cfg.conteudo?.contasPadrao) ? cfg.conteudo.contasPadrao : [];
+                    if (document.getElementById('listaContasPadrao')) {
+                        document.getElementById('listaContasPadrao').value = contasPadrao.join('\n');
+                    }
+
+                    // Funções
+                    const f = cfg.funcoes || {};
+                    if (document.getElementById('funcDashboard')) document.getElementById('funcDashboard').checked = (f.dashboard !== false);
+                    if (document.getElementById('funcLancamentos')) document.getElementById('funcLancamentos').checked = (f.lancamentos !== false);
+                    if (document.getElementById('funcContas')) document.getElementById('funcContas').checked = (f.contas !== false);
+                    if (document.getElementById('funcOrcamento')) document.getElementById('funcOrcamento').checked = (f.orcamento !== false);
+                    if (document.getElementById('funcRelatorios')) document.getElementById('funcRelatorios').checked = (f.relatorios !== false);
+                    if (document.getElementById('funcPlanos')) document.getElementById('funcPlanos').checked = (f.planos !== false);
+                    if (document.getElementById('funcImportExport')) document.getElementById('funcImportExport').checked = (f.importExport !== false);
+
+                    if (document.getElementById('permEditarLanc')) document.getElementById('permEditarLanc').checked = (f.permitirEditarLancamentos !== false);
+                    if (document.getElementById('permExcluirLanc')) document.getElementById('permExcluirLanc').checked = (f.permitirExcluirLancamentos !== false);
+
+                    // Auditoria
+                    const auditEl = document.getElementById('auditoriaInfo');
+                    if (auditEl) {
+                        const when = cfg.meta?.atualizadoEm ? new Date(cfg.meta.atualizadoEm).toLocaleString('pt-BR') : '—';
+                        const who = cfg.meta?.atualizadoPor || '—';
+                        auditEl.textContent = `Última publicação: ${when} · por ${who}`;
+                    }
+                } else {
+                    // Se não existir configs, mantém o que já veio do cliente (modo antigo)
+                    const auditEl = document.getElementById('auditoriaInfo');
+                    if (auditEl) auditEl.textContent = 'Sem configs separadas ainda (modo antigo).';
+                }
+
+                // atualizar preview draft (se modal aberto)
+                atualizarPreviewDraft();
+            } catch (e) {
+                console.warn('Falha ao carregar configs:', e);
+            }
+        }
+
+
 
         // Atualizar preview
         function atualizarPreview() {
@@ -892,6 +1032,54 @@ async function zerarIndicadoresClienteAtual() {
                 alert('Selecione um cliente primeiro!');
                 return;
             }
+
+            const clienteId = clienteAtual.id;
+
+            // Base (cliente)
+            const baseCliente = {
+                nome: document.getElementById('nomeEmpresa').value,
+                perfil: (document.getElementById('perfilCliente') ? document.getElementById('perfilCliente').value : 'pj'),
+                cpfCnpj: (document.getElementById('cpfCnpj') ? document.getElementById('cpfCnpj').value : ''),
+                atualizadoEm: new Date().toISOString()
+            };
+
+            // Config (profissional)
+            const draft = construirDraftConfig();
+            const config = {
+                visual: draft.visual,
+                conteudo: draft.conteudo,
+                funcoes: draft.funcoes,
+                meta: {
+                    atualizadoEm: new Date().toISOString(),
+                    atualizadoPor: 'master',
+                    userAgent: navigator.userAgent
+                }
+            };
+
+            try {
+                // salva base
+                await db.collection('clientes').doc(clienteId).set(baseCliente, { merge: true });
+
+                // salva config separado (SaaS)
+                await db.collection('configs').doc(clienteId).set(config, { merge: true });
+
+                alteracoesPendentes = false;
+                document.getElementById('btnSalvar').disabled = true;
+                document.getElementById('btnSalvarDados').disabled = true;
+                adicionarLog('✅ Config publicada em configs/' + clienteId);
+
+                // auditoria na tela
+                const auditEl = document.getElementById('auditoriaInfo');
+                if (auditEl) {
+                    auditEl.textContent = `Última publicação: ${new Date().toLocaleString('pt-BR')} · por master`;
+                }
+
+                alert('✅ Alterações salvas com sucesso!');
+            } catch (error) {
+                console.error('Erro ao salvar:', error);
+                alert('❌ Erro ao salvar alterações: ' + (error?.message || error));
+            }
+        }
             
             const dadosAtualizados = {
                 nome: document.getElementById('nomeEmpresa').value,
@@ -1120,6 +1308,7 @@ async function zerarIndicadoresClienteAtual() {
       visual: 'abaVisual',
       conteudo: 'abaConteudo',
       funcoes: 'abaFuncoes',
+      dados: 'abaDados',
       codigo: 'abaCodigo'
     };
     const alvo = document.getElementById(idMap[aba] || 'abaVisual');
@@ -1526,5 +1715,23 @@ async function zerarIndicadoresClienteAtual() {
 }
 
 </script>
+
+    <!-- MODAL PREVIEW AO VIVO -->
+    <div class="modal" id="previewModal" onclick="fecharPreviewModal(event)">
+        <div class="modal-content" style="max-width: 1000px; width: 95%; height: 85vh; padding: 15px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
+                <div>
+                    <div style="font-weight:bold; color: var(--neon);">👁️ Preview ao vivo</div>
+                    <div id="previewHint" style="font-size:12px; color: var(--text-secondary);">Alterações nos campos atualizam aqui sem salvar.</div>
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                    <button class="power-btn" onclick="abrirPreviewEmNovaAba(event)">🧭 Abrir em nova aba</button>
+                    <button class="power-btn" onclick="fecharPreviewModal(event)">✖ Fechar</button>
+                </div>
+            </div>
+            <iframe id="previewFrame" src="about:blank" style="width: 100%; height: calc(85vh - 70px); border: 1px solid #404040; border-radius: 12px; background: #000;"></iframe>
+        </div>
+    </div>
+
 </body>
 </html>
