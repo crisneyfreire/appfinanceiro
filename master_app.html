@@ -329,6 +329,10 @@
                     <button id="tab-conteudo" class="tab-btn" onclick="mudarAba('conteudo', this)">Conteúdo</button>
                     <button id="tab-funcoes" class="tab-btn" onclick="mudarAba('funcoes', this)">Funções</button>
                     <button id="tab-codigo" class="tab-btn" onclick="mudarAba('codigo', this)">Código</button>
+
+                    <button id="btnZerarDados" class="tab-btn danger" onclick="zerarDadosClienteAtual()" disabled>
+                        🧹 ZERAR DADOS
+                    </button>
                 </div>
 
                 <!-- ABA VISUAL -->
@@ -704,6 +708,7 @@
             document.getElementById('btnEscolherLogo').disabled = false;
             document.getElementById('btnRemoverLogo').disabled = false;
             document.getElementById('btnGerarConvite').disabled = false;
+            document.getElementById('btnZerarDados').disabled = false;
             
             adicionarLog(`📂 Cliente selecionado: ${cliente.nome}`);
         }
@@ -1098,6 +1103,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('btnSalvar').disabled = true;
                     document.getElementById('btnVisualizar').disabled = true;
                     document.getElementById('btnCopiarLink').disabled = true;
+                    const bz = document.getElementById('btnZerarDados');
+                    if (bz) bz.disabled = true;
                 }
         
             } catch (error) {
@@ -1106,7 +1113,39 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // ============================================
+        
+// ============================================
+// FUNÇÃO: Zerar dados financeiros do cliente atual
+// - Não exclui o cliente
+// - Limpa o documento em dados_financeiros/{clienteId}
+// ============================================
+async function zerarDadosClienteAtual() {
+    if (!clienteAtual) {
+        alert('⚠️ Selecione um cliente primeiro!');
+        return;
+    }
+
+    const nome = clienteAtual.nome || 'este cliente';
+
+    const ok1 = confirm(`⚠️ Você quer ZERAR os dados financeiros de "${nome}"?\n\nIsso limpa o painel/dados do cliente, mas NÃO apaga o cadastro do cliente.`);
+    if (!ok1) return;
+
+    const ok2 = confirm('🔥 Confirmação final: tem certeza absoluta?');
+    if (!ok2) return;
+
+    try {
+        // Apaga o documento principal de dados financeiros (subcoleções não são removidas pelo Firestore via delete())
+        await db.collection('dados_financeiros').doc(clienteAtual.id).delete();
+
+        adicionarLog(`🧹 Dados financeiros zerados para ${nome}`);
+        alert('✅ Dados financeiros zerados para este cliente!');
+    } catch (error) {
+        console.error('Erro ao zerar dados financeiros:', error);
+        alert('❌ Erro ao zerar dados: ' + (error.message || 'erro desconhecido'));
+    }
+}
+
+// ============================================
         // FUNÇÃO: Diagnóstico de conexão
         // ============================================
         async function diagnosticarConexao() {
