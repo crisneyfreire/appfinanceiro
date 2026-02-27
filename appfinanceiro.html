@@ -1030,6 +1030,39 @@
             cursor: pointer;
             font-weight: 600;
         }
+        .indicadores-links{
+            margin-top: 12px;
+            display: grid;
+            gap: 10px;
+        }
+        .indicadores-links .link-block label{
+            display:block;
+            font-size: 12px;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+        .indicadores-links .link-controls{
+            display:flex;
+            gap:8px;
+            align-items:center;
+        }
+        .indicadores-links .link-controls input{
+            flex: 1;
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,0,0,.15);
+            background: rgba(255,255,255,.08);
+            color: var(--text-primary);
+            outline: none;
+        }
+        .btn-link{
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
         .btn-salvar-indicadores{
             background: #2E7D32;
             color: #fff;
@@ -1151,6 +1184,24 @@
                             <div class="inline-check">
                                 <input id="ind_na_colabDisp" type="checkbox">
                                 <label for="ind_na_colabDisp" style="margin:0;">Não se aplica</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="indicadores-links">
+                        <div class="link-block">
+                            <label for="linkClienteNormal">Link do cliente (normal)</label>
+                            <div class="link-controls">
+                                <input id="linkClienteNormal" type="text" readonly>
+                                <button id="btnCopiarLinkNormal" class="btn-link">Copiar</button>
+                            </div>
+                        </div>
+
+                        <div class="link-block">
+                            <label for="linkClienteMaster">Link do cliente (Master)</label>
+                            <div class="link-controls">
+                                <input id="linkClienteMaster" type="text" readonly>
+                                <button id="btnCopiarLinkMaster" class="btn-link">Copiar</button>
                             </div>
                         </div>
                     </div>
@@ -1550,7 +1601,8 @@
                 colaboradoresAtivos: 0,
                 colaboradoresDisponiveis: 0
             };
-        
+        }
+
         // ============================================
         // EDITOR DE INDICADORES (SOMENTE MASTER)
         // ============================================
@@ -1565,9 +1617,75 @@
             box.style.display = modoMaster ? 'block' : 'none';
         }
 
+
+        // Links rápidos (normal e Master) — gerados a partir do cliente atual
+        function buildClienteLink(id, isMasterLink) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('cliente', id);
+
+            if (isMasterLink) url.searchParams.set('master', '1');
+            else url.searchParams.delete('master');
+
+            return url.toString();
+        }
+
+        async function copiarTextoParaClipboard(texto) {
+            try {
+                if (navigator?.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(texto);
+                    return true;
+                }
+            } catch (_) {}
+
+            // fallback antigo
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = texto;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'absolute';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function atualizarLinksDoEditor() {
+            if (!modoMaster) return;
+            if (!clienteId) return;
+
+            const inputNormal = document.getElementById('linkClienteNormal');
+            const inputMaster = document.getElementById('linkClienteMaster');
+            const btnNormal = document.getElementById('btnCopiarLinkNormal');
+            const btnMaster = document.getElementById('btnCopiarLinkMaster');
+
+            if (inputNormal) inputNormal.value = buildClienteLink(clienteId, false);
+            if (inputMaster) inputMaster.value = buildClienteLink(clienteId, true);
+
+            if (btnNormal && !btnNormal.dataset.bound) {
+                btnNormal.dataset.bound = '1';
+                btnNormal.addEventListener('click', async () => {
+                    const ok = await copiarTextoParaClipboard(inputNormal?.value || '');
+                    setIndicadoresMsg(ok ? 'Link normal copiado.' : 'Não consegui copiar. Copie manualmente.');
+                });
+            }
+
+            if (btnMaster && !btnMaster.dataset.bound) {
+                btnMaster.dataset.bound = '1';
+                btnMaster.addEventListener('click', async () => {
+                    const ok = await copiarTextoParaClipboard(inputMaster?.value || '');
+                    setIndicadoresMsg(ok ? 'Link Master copiado.' : 'Não consegui copiar. Copie manualmente.');
+                });
+            }
+        }
         function preencherEditorIndicadores() {
             if (!modoMaster) return;
             mostrarEditorIndicadoresSeForMaster();
+            atualizarLinksDoEditor();
 
             const ind = indicadores || getIndicadoresDefault();
 
@@ -1706,9 +1824,6 @@
             const btnZerar = document.getElementById('btnZerarIndicadores');
             if (btnZerar) btnZerar.addEventListener('click', zerarIndicadoresDoClienteAtual);
         }
-
-
-}
 
 
         // ============================================
