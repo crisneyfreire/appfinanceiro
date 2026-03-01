@@ -1975,7 +1975,47 @@
         // ============================================
         // APLICAR CONFIGURAÇÕES DO CLIENTE
         // ============================================
-        function aplicarConfiguracoes() {
+        
+    // =============================
+    // Merge base client doc + config doc (SaaS)
+    // =============================
+    function mesclarConfig(base, cfg) {
+        const b = base || {};
+        const c = cfg || {};
+
+        // deep-ish clone of cfg to avoid mutating original
+        const out = JSON.parse(JSON.stringify(c));
+
+        // ensure sections exist
+        out.visual = out.visual || {};
+        out.conteudo = out.conteudo || {};
+        out.funcoes = out.funcoes || {};
+        out.meta = out.meta || {};
+
+        // Base (cliente) fields (these are authoritative for identity/block)
+        out.clienteId = b.id || out.clienteId || null;
+        out.nome = b.nome || out.nome || '';
+        out.perfil = b.perfil || out.perfil || '';
+        out.cpfCnpj = b.cpfCnpj || out.cpfCnpj || '';
+        out.bloqueado = !!b.bloqueado;
+
+        // Visual defaults fall back to base doc if present
+        out.visual.corPrincipal = out.visual.corPrincipal ?? b.corPrincipal ?? b.cor ?? '#4CAF50';
+        out.visual.modoEscuro = out.visual.modoEscuro ?? b.modoEscuro ?? 'auto';
+        out.visual.logoBase64 = out.visual.logoBase64 ?? b.logoBase64 ?? null;
+
+        // Content defaults fall back to base doc if present
+        out.conteudo.termoColaborador = out.conteudo.termoColaborador ?? b.termoColaborador ?? 'Colaborador';
+        out.conteudo.termoMotorista = out.conteudo.termoMotorista ?? b.termoMotorista ?? 'Motorista';
+        out.conteudo.termoAcao = out.conteudo.termoAcao ?? b.termoAcao ?? 'Ação';
+
+        // Meta (audit)
+        out.meta.atualizadoEm = out.meta.atualizadoEm ?? b.atualizadoEm ?? null;
+
+        return out;
+    }
+
+function aplicarConfiguracoes() {
             if (!clienteConfig) return;
 
             // Nome da empresa
