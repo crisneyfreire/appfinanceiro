@@ -3,96 +3,16 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <!-- MASTER_APP_BUILD: FIX_V3_2026-02-28T00:00Z -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>👑 MASTER APP - CONTROLE TOTAL</title>
     
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script>
-// Zerar APENAS os indicadores do cliente atual (não apaga transações/contas/previsões)
-async function zerarIndicadoresClienteAtual() {
-    try {
-        if (!clienteAtual || !clienteAtual.id) {
-            alert('Selecione um cliente primeiro.');
-            return;
-        }
-
-        const id = clienteAtual.id;
-
-        // Confirmação forte: digitar o ID do cliente
-        const typed = prompt('⚠️ Isso vai zerar APENAS os INDICADORES (painel) deste cliente.\n\nPara confirmar, digite o ID do cliente exatamente assim:\n' + id);
-        if (typed === null) return;
-        if (typed.trim() !== id) {
-            alert('ID não confere. Operação cancelada.');
-            return;
-        }
-
-        // Garantir documento existe e zerar somente indicadores
-        const ref = db.collection('dados_financeiros').doc(id);
-
-        const payload = {
-            indicadores: {
-                entregasMes: 0,
-                metaEntregas: 0,
-                colaboradoresAtivos: 0,
-                colaboradoresDisponiveis: 0
-            },
-            atualizadoEm: new Date().toISOString()
-        };
-
-        await ref.set(payload, { merge: true });
-
-        adicionarLog(`🧹 Indicadores zerados para ${clienteAtual.nome || id}`);
-        alert('✅ Indicadores zerados (apenas painel)!');
-    } catch (e) {
-        console.error(e);
-        alert('❌ Erro ao zerar indicadores. Veja o console.');
-    }
-}
-
-// Zerar APENAS os indicadores do cliente atual (não apaga transações/contas/previsões)
-async function zerarIndicadoresClienteAtual() {
-    try {
-        if (!clienteAtual || !clienteAtual.id) {
-            alert('Selecione um cliente primeiro.');
-            return;
-        }
-
-        const id = clienteAtual.id;
-
-        // Confirmação forte: digitar o ID do cliente
-        const typed = prompt('⚠️ Isso vai zerar APENAS os INDICADORES (painel) deste cliente.\n\nPara confirmar, digite o ID do cliente exatamente assim:\n' + id);
-        if (typed === null) return;
-        if (typed.trim() !== id) {
-            alert('ID não confere. Operação cancelada.');
-            return;
-        }
-
-        // Garantir documento existe e zerar somente indicadores
-        const ref = db.collection('dados_financeiros').doc(id);
-
-        const payload = {
-            indicadores: {
-                entregasMes: 0,
-                metaEntregas: 0,
-                colaboradoresAtivos: 0,
-                colaboradoresDisponiveis: 0
-            },
-            atualizadoEm: new Date().toISOString()
-        };
-
-        await ref.set(payload, { merge: true });
-
-        adicionarLog(`🧹 Indicadores zerados para ${clienteAtual.nome || id}`);
-        alert('✅ Indicadores zerados (apenas painel)!');
-    } catch (e) {
-        console.error(e);
-        alert('❌ Erro ao zerar indicadores. Veja o console.');
-    }
-}
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
+console.log("MASTER APP FIX V3 loaded");
 </script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     
     <style>
@@ -1080,42 +1000,6 @@ Pix"></textarea>
             } catch (error) {
                 console.error('Erro ao salvar:', error);
                 alert('❌ Erro ao salvar alterações: ' + (error?.message || error));
-            }
-        }
-            
-            const dadosAtualizados = {
-                nome: document.getElementById('nomeEmpresa').value,
-                perfil: (document.getElementById('perfilCliente') ? document.getElementById('perfilCliente').value : 'pj'),
-                cpfCnpj: (document.getElementById('cpfCnpj') ? document.getElementById('cpfCnpj').value : ''),
-                cor: document.getElementById('corPrincipal').value,
-                modoEscuro: document.getElementById('modoEscuro').value,
-                termoColaborador: document.getElementById('termoColaborador').value,
-                termoAcao: document.getElementById('termoAcao').value,
-                termoCliente: document.getElementById('termoCliente').value,
-                moeda: document.getElementById('moeda').value,
-                funcDashboard: document.getElementById('funcDashboard').checked,
-                funcLancamentos: document.getElementById('funcLancamentos').checked,
-                funcContas: document.getElementById('funcContas').checked,
-                funcOrcamento: document.getElementById('funcOrcamento').checked,
-                funcRelatorios: document.getElementById('funcRelatorios').checked,
-                funcPlanos: document.getElementById('funcPlanos').checked,
-                funcImportar: document.getElementById('funcImportar').checked,
-                codigoHtml: document.getElementById('codigoHtml').value,
-                logoBase64: (logoTempBase64 !== null ? (logoTempBase64 || '') : (clienteAtual.logoBase64 || '')),
-                ultimaAlteracao: new Date().toISOString()
-            };
-            
-            try {
-                await db.collection('clientes').doc(clienteAtual.id).update(dadosAtualizados);
-                // atualizar cache local
-                clienteAtual.logoBase64 = dadosAtualizados.logoBase64 || '';
-                logoTempBase64 = null;
-                alteracoesNaoSalvas = false;
-                adicionarLog(`💾 Alterações salvas para ${clienteAtual.nome}`);
-                alert('✅ Alterações salvas com sucesso!');
-            } catch (error) {
-                console.error('Erro ao salvar:', error);
-                alert('❌ Erro ao salvar alterações');
             }
         }
 
