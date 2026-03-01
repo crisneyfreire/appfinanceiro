@@ -1099,7 +1099,7 @@
         </div>
     </div>
 
-    <div id="appContent" style="display: none;">
+    <div id="appContent" style="display: block;">
         <div class="container">
             <div class="header">
                 <div class="brand">
@@ -1576,6 +1576,30 @@
         const db = firebase.firestore();
 
         // ============================================
+        // UI: Mostrar/Ocultar telas (evita tela preta)
+        // ============================================
+        function mostrarApp() {
+            const app = document.getElementById('appContent');
+            const bloq = document.getElementById('bloqueioScreen');
+            if (bloq) bloq.style.display = 'none';
+            if (app) app.style.display = 'block';
+        }
+
+        function mostrarBloqueio(msg) {
+            const app = document.getElementById('appContent');
+            const bloq = document.getElementById('bloqueioScreen');
+            const p = document.getElementById('bloqueioMsg');
+            if (p) p.textContent = msg || 'Sistema bloqueado pelo administrador.';
+            if (app) app.style.display = 'none';
+            if (bloq) bloq.style.display = 'block';
+        }
+
+        function mostrarTelaBloqueio(clienteBase) {
+            const motivo = (clienteBase && (clienteBase.motivoBloqueio || clienteBase.mensagemBloqueio)) || 'Sistema bloqueado pelo administrador.';
+            mostrarBloqueio(motivo);
+        }
+
+        // ============================================
         // VARIÁVEIS GLOBAIS
         // ============================================
         let clienteId = null;
@@ -1856,7 +1880,10 @@
             console.log("Search:", window.location.search);
             console.log("clienteId:", clienteId);
 
-            // ✅ Salva o último cliente aberto
+            
+            // Garante que a interface apareça mesmo antes de carregar os dados
+            mostrarApp();
+// ✅ Salva o último cliente aberto
             if (clienteId) {
               localStorage.setItem("ultimoClienteId", clienteId);
               localStorage.setItem("ultimoClienteAtualizadoEm", new Date().toISOString());
@@ -3045,6 +3072,18 @@ function aplicarConfiguracoes() {
         window.onload = function() {
             carregarConfigCliente();
         };
+    
+        // ============================================
+        // PWA: Service Worker (cache offline)
+        // ============================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch((err) => {
+                    console.warn('SW register falhou:', err);
+                });
+            });
+        }
+
     </script>
 </body>
 </html>
