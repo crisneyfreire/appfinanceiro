@@ -1551,6 +1551,15 @@
 
     <script>
         // ============================================
+        // GLOBAIS (importante em <script type="module"> / modo strict)
+        // ============================================
+        // Quando este arquivo roda como módulo, qualquer variável usada sem "let/const" vira erro.
+        // Esses 3 nomes são usados em callbacks do Firestore e no modo "preview ao vivo" do Master.
+        let previewOverrideConfig = null; // objeto de override enviado pelo Master (quando existir)
+        let clienteCfg = {};              // configs/{clienteId}
+        let clienteBase = null;           // clientes/{clienteId}
+
+        // ============================================
         // CONFIGURAÇÃO FIREBASE (MESMA DO MASTER_APP)
         // ============================================
         const firebaseConfig = {
