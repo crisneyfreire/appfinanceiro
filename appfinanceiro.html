@@ -1099,7 +1099,7 @@
         </div>
     </div>
 
-    <div id="appContent" style="display: block;">
+    <div id="appContent" style="display: none;">
         <div class="container">
             <div class="header">
                 <div class="brand">
@@ -1576,30 +1576,6 @@
         const db = firebase.firestore();
 
         // ============================================
-        // UI: Mostrar/Ocultar telas (evita tela preta)
-        // ============================================
-        function mostrarApp() {
-            const app = document.getElementById('appContent');
-            const bloq = document.getElementById('bloqueioScreen');
-            if (bloq) bloq.style.display = 'none';
-            if (app) app.style.display = 'block';
-        }
-
-        function mostrarBloqueio(msg) {
-            const app = document.getElementById('appContent');
-            const bloq = document.getElementById('bloqueioScreen');
-            const p = document.getElementById('bloqueioMsg');
-            if (p) p.textContent = msg || 'Sistema bloqueado pelo administrador.';
-            if (app) app.style.display = 'none';
-            if (bloq) bloq.style.display = 'block';
-        }
-
-        function mostrarTelaBloqueio(clienteBase) {
-            const motivo = (clienteBase && (clienteBase.motivoBloqueio || clienteBase.mensagemBloqueio)) || 'Sistema bloqueado pelo administrador.';
-            mostrarBloqueio(motivo);
-        }
-
-        // ============================================
         // VARIÁVEIS GLOBAIS
         // ============================================
         let clienteId = null;
@@ -1880,10 +1856,7 @@
             console.log("Search:", window.location.search);
             console.log("clienteId:", clienteId);
 
-            
-            // Garante que a interface apareça mesmo antes de carregar os dados
-            mostrarApp();
-// ✅ Salva o último cliente aberto
+            // ✅ Salva o último cliente aberto
             if (clienteId) {
               localStorage.setItem("ultimoClienteId", clienteId);
               localStorage.setItem("ultimoClienteAtualizadoEm", new Date().toISOString());
@@ -2816,7 +2789,216 @@ function aplicarConfiguracoes() {
         // ============================================
 
         function importarCSV() { alert('📥 Importação CSV ainda não implementada. Use JSON por enquanto.'); }
-        function importarTXT() { alert('📥 Importação TXT ainda não implementada. Use JSON por enquanto.'); }
+                async function importarTXT() {
+            try {
+                const input = document.getElementById('fileInput');
+                const file = input?.files?.[0];
+                if (!file) {
+                    alert('Selecione um arquivo .txt primeiro.');
+                    return;
+                }
+                if (!clienteId) {
+                    alert('Cliente não identificado. Abra com ?cliente=ID');
+                    return;
+                }
+
+                const texto = await file.text();
+                const linhas = texto
+                    .split(/\r?\n/)
+                    .map(l => (l || '').trim())
+                    .filter(l => l && !l.startsWith('#') && !l.startsWith('//'));
+
+                if (!linhas.length) {
+                    alert('Arquivo TXT vazio (ou só comentários).');
+                    return;
+                }
+
+                const hoje = new Date().toISOString().split('T')[0];
+                const defaultContaId = (contas && contas.length) ? contas[0].id : 1;
+
+                const normalizarTipo = (s) => {
+                    const t = (s || '').toLowerCase();
+                    if (t === 'r' || t === 'receita' || t === 'entrada' || t === '+') return 'receita';
+                    if (t === 'd' || t === 'despesa' || t === 'saida' || t === 'saída' || t === '-') return 'despesa';
+                    return null;
+                };
+
+                const parseDataFlex = (s) => {
+                    const v = (s || '').trim();
+                    // YYYY-MM-DD
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+                    // DD/MM/YYYY
+                    const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+                    if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+                    return null;
+                };
+
+                const extrairValorStr = (s) => {
+                    if (!s) return null;
+                    const m = String(s).match(/-?\d{1,3}(?:\.\d{3})*(?:,\d{1,2})|-?\d+(?:[.,]\d{1,2})?/);
+                    return m ? m[0] : null;
+                };
+
+                const pickContaId = (s) => {
+                    // conta:Nome da Conta  | conta=Nome
+                    const m = String(s || '').match(/\bconta\s*[:=]\s*([^\|;]+)\b/i);
+                    if (!m) return null;
+                    const nome = m[1].trim().toLowerCase();
+                    const conta = (contas || []).find(c => (c.nome || '').toLowerCase() === nome);
+                    return conta ? conta.id : null;
+                };
+
+                const pickMotorista = (s) => {
+                    const m = String(s || '').match(/\bmotorista\s*[:=]\s*([^\|;]+)\b/i);
+                    return m ? m[1].trim() : '';
+                };
+
+                const pickObs = (s) => {
+                    const m = String(s || '').match(/\b(obs|observacao|observação)\s*[:=]\s*([^\|;]+)\b/i);
+                    return m ? m[2].trim() : '';
+                };
+
+                const pickCategoria = (s) => {
+                    const m = String(s || '').match(/\b(cat|categoria)\s*[:=]\s*([^\|;]+)\b/i);
+                    return m ? m[2].trim() : '';
+                };
+
+                const stripMeta = (s) => {
+                    return String(s || '')
+                        .replace(/\bconta\s*[:=]\s*[^\|;]+/ig, '')
+                        .replace(/\bmotorista\s*[:=]\s*[^\|;]+/ig, '')
+                        .replace(/\b(obs|observacao|observação)\s*[:=]\s*[^\|;]+/ig, '')
+                        .replace(/\b(cat|categoria)\s*[:=]\s*[^\|;]+/ig, '')
+                        .trim();
+                };
+
+                const novas = [];
+
+                for (const linhaOriginal of linhas) {
+                    const linha = linhaOriginal.trim();
+
+                    // Metadados opcionais em qualquer lugar da linha:
+                    const contaIdLinha = pickContaId(linha) ?? defaultContaId;
+                    const motoristaLinha = pickMotorista(linha);
+                    const obsLinha = pickObs(linha);
+                    const catLinha = pickCategoria(linha);
+
+                    const limpa = stripMeta(linha);
+
+                    // Separadores aceitos: ; | TAB
+                    let partes = limpa.split(/[;|\t]/).map(p => p.trim()).filter(Boolean);
+
+                    // Caso 1: formato estruturado (exemplos)
+                    // 2026-03-01; despesa; 56,90; Almoço; Alimentação
+                    // 01/03/2026; receita; 1200; Frete; Serviços
+                    let data = null;
+                    let tipo = null;
+                    let valorStr = null;
+                    let descricao = '';
+                    let categoria = '';
+
+                    if (partes.length >= 2) {
+                        const d = parseDataFlex(partes[0]);
+                        if (d) {
+                            data = d;
+                            partes.shift();
+                        }
+                    }
+
+                    if (partes.length >= 2) {
+                        const t = normalizarTipo(partes[0]);
+                        if (t) {
+                            tipo = t;
+                            partes.shift();
+                        }
+                    }
+
+                    if (partes.length) {
+                        valorStr = extrairValorStr(partes[0]);
+                        if (valorStr) {
+                            partes.shift();
+                        } else {
+                            // fallback: extrai de toda a linha
+                            valorStr = extrairValorStr(limpa);
+                        }
+                    }
+
+                    // Caso 2: formato livre (exemplos)
+                    // 56,90 almoço alimentação
+                    // -80 gasolina
+                    // receita 1200 frete serviços
+                    if (!valorStr) {
+                        continue; // pula linha impossível de entender
+                    }
+
+                    let valorNum = converterMoedaParaNumber(valorStr);
+                    if (!valorNum || Number.isNaN(valorNum)) continue;
+
+                    // Se vier negativo, vira despesa e usa o absoluto
+                    if (valorNum < 0) {
+                        tipo = 'despesa';
+                        valorNum = Math.abs(valorNum);
+                    }
+
+                    // Se tipo não veio, tenta deduzir por palavra no começo
+                    if (!tipo) {
+                        const t2 = normalizarTipo(partes[0] || '');
+                        if (t2) {
+                            tipo = t2;
+                            partes.shift();
+                        } else {
+                            tipo = 'despesa'; // padrão mais seguro em importação
+                        }
+                    }
+
+                    // Descrição/categoria
+                    if (partes.length >= 2) {
+                        descricao = partes.slice(0, -1).join(' - ').trim();
+                        categoria = partes[partes.length - 1].trim();
+                    } else if (partes.length === 1) {
+                        descricao = partes[0].trim();
+                    } else {
+                        // se não sobrou nada, usa a própria linha (limpa) sem o valor
+                        descricao = limpa.replace(valorStr, '').trim() || '(Sem descrição)';
+                    }
+
+                    // categoria fallback: linha -> select padrão
+                    if (!categoria) categoria = catLinha || (categorias[tipo] ? categorias[tipo][0] : 'Outros');
+
+                    const novaTransacao = {
+                        id: Date.now() + Math.floor(Math.random() * 1000),
+                        tipo,
+                        valor: valorNum,
+                        descricao: descricao || '(Sem descrição)',
+                        categoria,
+                        contaId: contaIdLinha,
+                        motorista: motoristaLinha || '',
+                        observacao: obsLinha || '',
+                        data: data || hoje
+                    };
+
+                    novas.push(novaTransacao);
+                }
+
+                if (!novas.length) {
+                    alert('Não consegui importar nenhuma linha. Dica: use formato "data; tipo; valor; descrição; categoria" ou "valor descrição categoria".');
+                    return;
+                }
+
+                // Ordena por data desc e coloca no início
+                novas.sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+                transacoes = [...novas, ...(transacoes || [])];
+
+                await salvarDadosFinanceiros();
+                atualizarListaLancamentos();
+                atualizarDashboard();
+
+                alert(`📥 Importação TXT concluída: ${novas.length} lançamentos adicionados.`);
+            } catch (error) {
+                console.error('Erro ao importar TXT:', error);
+                alert('Erro ao importar TXT. Veja o Console.');
+            }
+        }
         function exportarCSV() { alert('📤 Exportação CSV ainda não implementada. Use JSON por enquanto.'); }
 
         async function importarJSON() {
@@ -2904,186 +3086,4 @@ function aplicarConfiguracoes() {
                     clienteNome: clienteConfig?.nome || null,
                     dados: {
                         transacoes: transacoes || [],
-                        contas: contas || [],
-                        previsoes: previsoes || [],
-                        indicadores: indicadores || null
-                    }
-                };
-
-                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${(clienteConfig?.nome || 'cliente').replace(/\s+/g,'_')}_dados_financeiros.json`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                URL.revokeObjectURL(url);
-            } catch (e) {
-                console.error('Erro ao exportar JSON:', e);
-                alert('❌ Erro ao exportar JSON. Veja o Console.');
-            }
-        }
-
-        
-        function exportarTXT() {
-            try {
-                let conteudo = `=== RELATÓRIO ${clienteConfig?.nome?.toUpperCase()} ===\n`;
-                conteudo += `Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
-                conteudo += "=".repeat(50) + "\n\n";
-                
-                let totalReceitas = 0, totalDespesas = 0;
-                transacoes.forEach(t => {
-                    if (t.tipo === 'receita') totalReceitas += t.valor;
-                    else totalDespesas += t.valor;
-                });
-                
-                conteudo += "📊 RESUMO GERAL\n";
-                conteudo += `Receitas: R$ ${totalReceitas.toFixed(2).replace('.', ',')}\n`;
-                conteudo += `Despesas: R$ ${totalDespesas.toFixed(2).replace('.', ',')}\n`;
-                conteudo += `Saldo: R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}\n\n`;
-                
-                conteudo += "📝 ÚLTIMAS TRANSAÇÕES\n";
-                conteudo += "-".repeat(50) + "\n";
-                transacoes.slice(0, 20).forEach(t => {
-                    const data = new Date(t.data).toLocaleDateString('pt-BR');
-                    const valor = t.valor.toFixed(2).replace('.', ',');
-                    conteudo += `${data} | ${t.descricao} | ${t.tipo === 'receita' ? '+' : '-'} R$ ${valor}\n`;
-                });
-                
-                const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${clienteConfig?.nome || 'relatorio'}_${new Date().toISOString().slice(0,10)}.txt`;
-                a.click();
-                URL.revokeObjectURL(url);
-                
-                alert('✅ Arquivo TXT exportado!');
-            } catch (error) {
-                alert('❌ Erro ao exportar TXT');
-            }
-        }
-
-        function exportarPDF() {
-            const janela = window.open('', '_blank');
-            const hoje = new Date().toLocaleDateString('pt-BR');
-            
-            let totalReceitas = 0, totalDespesas = 0;
-            transacoes.forEach(t => {
-                if (t.tipo === 'receita') totalReceitas += t.valor;
-                else totalDespesas += t.valor;
-            });
-            
-            const html = `
-            <html>
-            <head>
-                <title>Relatório ${clienteConfig?.nome || 'Financeiro'}</title>
-                <style>
-                    body { font-family: Arial; padding: 20px; }
-                    h1 { color: ${clienteConfig?.cor || '#333'}; }
-                    .receita { color: #28a745; }
-                    .despesa { color: #dc3545; }
-                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-                    th { background: #f5f5f5; padding: 10px; }
-                    td { padding: 10px; border-bottom: 1px solid #ddd; }
-                </style>
-            </head>
-            <body>
-                <h1>📊 ${clienteConfig?.nome || 'Relatório Financeiro'}</h1>
-                <p>Gerado em: ${hoje}</p>
-                
-                <h3>Resumo</h3>
-                <p class="receita">Receitas: R$ ${totalReceitas.toFixed(2).replace('.', ',')}</p>
-                <p class="despesa">Despesas: R$ ${totalDespesas.toFixed(2).replace('.', ',')}</p>
-                <p>Saldo: R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}</p>
-                
-                <h3>Últimas movimentações</h3>
-                <table>
-                    <tr><th>Data</th><th>Descrição</th><th>Valor</th></tr>
-                    ${transacoes.slice(0, 10).map(t => `
-                        <tr>
-                            <td>${new Date(t.data).toLocaleDateString('pt-BR')}</td>
-                            <td>${t.descricao}</td>
-                            <td class="${t.tipo === 'receita' ? 'receita' : 'despesa'}">
-                                R$ ${t.valor.toFixed(2).replace('.', ',')}
-                            </td>
-                        </tr>
-                    `).join('')}
-                </table>
-                <p><button onclick="window.print()">Imprimir</button></p>
-            </body>
-            </html>
-            `;
-            
-            janela.document.write(html);
-            janela.document.close();
-        }
-
-        // ============================================
-        // FUNÇÕES DOS PLANOS
-        // ============================================
-        function togglePlanos() {
-            const isAnual = document.getElementById('toggleAnual').checked;
-            document.querySelectorAll('.preco-linha').forEach(linha => {
-                if (linha.classList.contains('anual')) {
-                    linha.style.display = isAnual ? 'table-row' : 'none';
-                } else {
-                    linha.style.display = isAnual ? 'none' : 'table-row';
-                }
-            });
-        }
-
-        function selecionarPlano(plano) {
-            let nomePlano = {
-                'basico': 'Básico',
-                'profissional': 'Profissional',
-                'empresarial': 'Empresarial'
-            }[plano] || plano;
-            
-            const isAnual = document.getElementById('toggleAnual').checked;
-            const periodo = isAnual ? 'anual' : 'mensal';
-            
-            let valor = 0;
-            if (plano === 'basico') valor = isAnual ? 1197.60 : 49.90;
-            if (plano === 'profissional') valor = isAnual ? 2397.60 : 99.90;
-            if (plano === 'empresarial') valor = isAnual ? 4797.60 : 199.90;
-            
-            document.getElementById('planoEscolhido').innerHTML = 
-                `<strong>Plano:</strong> ${nomePlano} (${periodo})`;
-            document.getElementById('valorEscolhido').innerHTML = 
-                `R$ ${valor.toFixed(2).replace('.', ',')}`;
-            
-            document.getElementById('modalPagamento').style.display = 'flex';
-        }
-
-        function simularPagamento(tipo) {
-            alert(`✅ Pagamento ${tipo} simulado! (Modo demonstração)`);
-            fecharModal();
-        }
-
-        function fecharModal() {
-            document.getElementById('modalPagamento').style.display = 'none';
-        }
-
-        // ============================================
-        // INICIALIZAÇÃO
-        // ============================================
-        window.onload = function() {
-            carregarConfigCliente();
-        };
-    
-        // ============================================
-        // PWA: Service Worker (cache offline)
-        // ============================================
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch((err) => {
-                    console.warn('SW register falhou:', err);
-                });
-            });
-        }
-
-    </script>
-</body>
-</html>
+       
