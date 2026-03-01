@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,7 +7,9 @@
     <title>👑 MASTER APP - CONTROLE TOTAL</title>
     
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script>
 // Zerar APENAS os indicadores do cliente atual (não apaga transações/contas/previsões)
 async function zerarIndicadoresClienteAtual() {
     try {
@@ -48,8 +51,6 @@ async function zerarIndicadoresClienteAtual() {
     }
 }
 
-</script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js">
 // Zerar APENAS os indicadores do cliente atual (não apaga transações/contas/previsões)
 async function zerarIndicadoresClienteAtual() {
     try {
@@ -90,8 +91,8 @@ async function zerarIndicadoresClienteAtual() {
         alert('❌ Erro ao zerar indicadores. Veja o console.');
     }
 }
-
 </script>
+
     
     <style>
         /* (mesmo estilo que já tens - mantém) */
@@ -1063,7 +1064,7 @@ Pix"></textarea>
                 // salva config separado (SaaS)
                 await db.collection('configs').doc(clienteId).set(config, { merge: true });
 
-                alteracoesPendentes = false;
+                alteracoesNaoSalvas = false;
                 document.getElementById('btnSalvar').disabled = true;
                 document.getElementById('btnSalvarDados').disabled = true;
                 adicionarLog('✅ Config publicada em configs/' + clienteId);
