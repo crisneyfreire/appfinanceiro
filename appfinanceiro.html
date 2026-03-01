@@ -8,7 +8,34 @@
     <title>💰 Sistema Financeiro</title>
     
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
+// ============================================
+// CONTROLE DE TELAS (evita tela branca)
+// ============================================
+function mostrarTelaApp() {
+  const bloqueio = document.getElementById('bloqueioScreen');
+  const app = document.getElementById('appContent');
+  if (bloqueio) bloqueio.style.display = 'none';
+  if (app) app.style.display = 'block';
+}
+
+function mostrarTelaBloqueio(clienteBase) {
+  const bloqueio = document.getElementById('bloqueioScreen');
+  const app = document.getElementById('appContent');
+  const msg = document.getElementById('bloqueioMsg');
+
+  if (msg) {
+    const texto = (clienteBase && clienteBase.motivoBloqueio)
+      ? String(clienteBase.motivoBloqueio)
+      : 'Sistema bloqueado pelo administrador.';
+    msg.textContent = texto;
+  }
+
+  if (app) app.style.display = 'none';
+  if (bloqueio) bloqueio.style.display = 'block';
+}
+
+</script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <style>
@@ -1912,6 +1939,8 @@
                         return;
                     }
 
+                    mostrarTelaApp();
+
                     aplicarConfiguracoes();
                     atualizarCamposDePermissao();
 
@@ -3086,4 +3115,174 @@ function aplicarConfiguracoes() {
                     clienteNome: clienteConfig?.nome || null,
                     dados: {
                         transacoes: transacoes || [],
-       
+                        contas: contas || [],
+                        previsoes: previsoes || [],
+                        indicadores: indicadores || null
+                    }
+                };
+
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${(clienteConfig?.nome || 'cliente').replace(/\s+/g,'_')}_dados_financeiros.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                console.error('Erro ao exportar JSON:', e);
+                alert('❌ Erro ao exportar JSON. Veja o Console.');
+            }
+        }
+
+        
+        function exportarTXT() {
+            try {
+                let conteudo = `=== RELATÓRIO ${clienteConfig?.nome?.toUpperCase()} ===\n`;
+                conteudo += `Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
+                conteudo += "=".repeat(50) + "\n\n";
+                
+                let totalReceitas = 0, totalDespesas = 0;
+                transacoes.forEach(t => {
+                    if (t.tipo === 'receita') totalReceitas += t.valor;
+                    else totalDespesas += t.valor;
+                });
+                
+                conteudo += "📊 RESUMO GERAL\n";
+                conteudo += `Receitas: R$ ${totalReceitas.toFixed(2).replace('.', ',')}\n`;
+                conteudo += `Despesas: R$ ${totalDespesas.toFixed(2).replace('.', ',')}\n`;
+                conteudo += `Saldo: R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}\n\n`;
+                
+                conteudo += "📝 ÚLTIMAS TRANSAÇÕES\n";
+                conteudo += "-".repeat(50) + "\n";
+                transacoes.slice(0, 20).forEach(t => {
+                    const data = new Date(t.data).toLocaleDateString('pt-BR');
+                    const valor = t.valor.toFixed(2).replace('.', ',');
+                    conteudo += `${data} | ${t.descricao} | ${t.tipo === 'receita' ? '+' : '-'} R$ ${valor}\n`;
+                });
+                
+                const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${clienteConfig?.nome || 'relatorio'}_${new Date().toISOString().slice(0,10)}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                alert('✅ Arquivo TXT exportado!');
+            } catch (error) {
+                alert('❌ Erro ao exportar TXT');
+            }
+        }
+
+        function exportarPDF() {
+            const janela = window.open('', '_blank');
+            const hoje = new Date().toLocaleDateString('pt-BR');
+            
+            let totalReceitas = 0, totalDespesas = 0;
+            transacoes.forEach(t => {
+                if (t.tipo === 'receita') totalReceitas += t.valor;
+                else totalDespesas += t.valor;
+            });
+            
+            const html = `
+            <html>
+            <head>
+                <title>Relatório ${clienteConfig?.nome || 'Financeiro'}</title>
+                <style>
+                    body { font-family: Arial; padding: 20px; }
+                    h1 { color: ${clienteConfig?.cor || '#333'}; }
+                    .receita { color: #28a745; }
+                    .despesa { color: #dc3545; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th { background: #f5f5f5; padding: 10px; }
+                    td { padding: 10px; border-bottom: 1px solid #ddd; }
+                </style>
+            </head>
+            <body>
+                <h1>📊 ${clienteConfig?.nome || 'Relatório Financeiro'}</h1>
+                <p>Gerado em: ${hoje}</p>
+                
+                <h3>Resumo</h3>
+                <p class="receita">Receitas: R$ ${totalReceitas.toFixed(2).replace('.', ',')}</p>
+                <p class="despesa">Despesas: R$ ${totalDespesas.toFixed(2).replace('.', ',')}</p>
+                <p>Saldo: R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}</p>
+                
+                <h3>Últimas movimentações</h3>
+                <table>
+                    <tr><th>Data</th><th>Descrição</th><th>Valor</th></tr>
+                    ${transacoes.slice(0, 10).map(t => `
+                        <tr>
+                            <td>${new Date(t.data).toLocaleDateString('pt-BR')}</td>
+                            <td>${t.descricao}</td>
+                            <td class="${t.tipo === 'receita' ? 'receita' : 'despesa'}">
+                                R$ ${t.valor.toFixed(2).replace('.', ',')}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </table>
+                <p><button onclick="window.print()">Imprimir</button></p>
+            </body>
+            </html>
+            `;
+            
+            janela.document.write(html);
+            janela.document.close();
+        }
+
+        // ============================================
+        // FUNÇÕES DOS PLANOS
+        // ============================================
+        function togglePlanos() {
+            const isAnual = document.getElementById('toggleAnual').checked;
+            document.querySelectorAll('.preco-linha').forEach(linha => {
+                if (linha.classList.contains('anual')) {
+                    linha.style.display = isAnual ? 'table-row' : 'none';
+                } else {
+                    linha.style.display = isAnual ? 'none' : 'table-row';
+                }
+            });
+        }
+
+        function selecionarPlano(plano) {
+            let nomePlano = {
+                'basico': 'Básico',
+                'profissional': 'Profissional',
+                'empresarial': 'Empresarial'
+            }[plano] || plano;
+            
+            const isAnual = document.getElementById('toggleAnual').checked;
+            const periodo = isAnual ? 'anual' : 'mensal';
+            
+            let valor = 0;
+            if (plano === 'basico') valor = isAnual ? 1197.60 : 49.90;
+            if (plano === 'profissional') valor = isAnual ? 2397.60 : 99.90;
+            if (plano === 'empresarial') valor = isAnual ? 4797.60 : 199.90;
+            
+            document.getElementById('planoEscolhido').innerHTML = 
+                `<strong>Plano:</strong> ${nomePlano} (${periodo})`;
+            document.getElementById('valorEscolhido').innerHTML = 
+                `R$ ${valor.toFixed(2).replace('.', ',')}`;
+            
+            document.getElementById('modalPagamento').style.display = 'flex';
+        }
+
+        function simularPagamento(tipo) {
+            alert(`✅ Pagamento ${tipo} simulado! (Modo demonstração)`);
+            fecharModal();
+        }
+
+        function fecharModal() {
+            document.getElementById('modalPagamento').style.display = 'none';
+        }
+
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
+        window.onload = function() {
+            carregarConfigCliente();
+        };
+    </script>
+</body>
+</html>
