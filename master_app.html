@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -9,14 +7,10 @@
     <title>👑 MASTER APP - CONTROLE TOTAL</title>
     
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
-console.log("MASTER APP FIX V3 loaded");
-</script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-    
     <style>
-        /* (mesmo estilo que já tens - mantém) */
         * {
             margin: 0;
             padding: 0;
@@ -50,7 +44,6 @@ console.log("MASTER APP FIX V3 loaded");
             margin: 0 auto;
         }
 
-        /* HEADER FUTURISTA */
         .header {
             background: rgba(26, 26, 46, 0.8);
             backdrop-filter: blur(10px);
@@ -96,14 +89,12 @@ console.log("MASTER APP FIX V3 loaded");
             box-shadow: 0 0 20px var(--neon);
         }
 
-        /* GRID PRINCIPAL */
         .main-grid {
             display: grid;
             grid-template-columns: 350px 1fr;
             gap: 20px;
         }
 
-        /* PAINEL DE CLIENTES */
         .clientes-panel {
             background: var(--bg-card);
             border-radius: 20px;
@@ -152,7 +143,6 @@ console.log("MASTER APP FIX V3 loaded");
             color: black;
         }
 
-        /* PAINEL DE EDIÇÃO FUTURISTA */
         .editor-panel {
             background: var(--bg-card);
             border-radius: 20px;
@@ -190,7 +180,6 @@ console.log("MASTER APP FIX V3 loaded");
             color: black;
         }
 
-        /* VISUALIZADOR DO SITE */
         .site-preview {
             background: white;
             border-radius: 15px;
@@ -202,7 +191,6 @@ console.log("MASTER APP FIX V3 loaded");
             box-shadow: 0 0 30px rgba(0, 255, 170, 0.3);
         }
 
-        /* EDITOR DE CÓDIGO */
         .code-editor {
             background: #1e1e1e;
             border-radius: 15px;
@@ -223,7 +211,6 @@ console.log("MASTER APP FIX V3 loaded");
             resize: vertical;
         }
 
-        /* BOTÕES DE CONTROLE */
         .control-buttons {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -250,7 +237,6 @@ console.log("MASTER APP FIX V3 loaded");
             filter: brightness(1.1);
         }
 
-        /* LOG */
         .log-panel {
             background: var(--bg-secondary);
             border-radius: 10px;
@@ -261,7 +247,6 @@ console.log("MASTER APP FIX V3 loaded");
             font-size: 12px;
         }
 
-        /* MODAL */
         .modal {
             display: none;
             position: fixed;
@@ -290,7 +275,6 @@ console.log("MASTER APP FIX V3 loaded");
             color: var(--neon);
         }
     
-        /* BOTÕES DAS ABAS (PADRÃO BONITO) */
         .tab-btn{
             padding: 12px 22px;
             background: rgba(255,255,255,0.04);
@@ -327,7 +311,6 @@ console.log("MASTER APP FIX V3 loaded");
 </head>
 <body>
     <div class="container">
-        <!-- HEADER FUTURISTA -->
         <div class="header">
             <div>
                 <h1>👑 MASTER APP - CONTROLE TOTAL</h1>
@@ -341,9 +324,7 @@ console.log("MASTER APP FIX V3 loaded");
             </div>
         </div>
 
-        <!-- GRID PRINCIPAL -->
         <div class="main-grid">
-            <!-- PAINEL CLIENTES -->
             <div class="clientes-panel">
                 <h2 style="margin-bottom: 20px; color: var(--neon);">📋 CLIENTES</h2>
                 
@@ -358,12 +339,10 @@ console.log("MASTER APP FIX V3 loaded");
                 </div>
                 
                 <div id="listaClientes">
-                    <!-- Clientes serão carregados aqui -->
                     <div class="loading">📡 Carregando clientes...</div>
                 </div>
             </div>
 
-            <!-- PAINEL EDIÇÃO -->
             <div class="editor-panel" id="editorPanel">
                 <div class="editor-tabs">
                     <button id="tab-visual" class="tab-btn active" onclick="mudarAba('visual', this)">Visual</button>
@@ -375,7 +354,6 @@ console.log("MASTER APP FIX V3 loaded");
                     <button id="btn-zerar-indicadores" class="tab-btn danger" onclick="zerarIndicadoresClienteAtual()">🧹 Zerar indicadores</button>
                 </div>
 
-                <!-- ABA VISUAL -->
                 <div id="abaVisual" class="tab-content active">
                     <h3 style="margin-bottom: 15px;">🎨 EDITOR VISUAL</h3>
                     
@@ -425,7 +403,6 @@ console.log("MASTER APP FIX V3 loaded");
                     </div>
                 </div>
 
-                <!-- ABA CONTEÚDO -->
                 <div id="abaConteudo" class="tab-content">
                     <h3 style="margin-bottom: 15px;">📝 EDITOR DE CONTEÚDO</h3>
                     
@@ -456,7 +433,6 @@ console.log("MASTER APP FIX V3 loaded");
                     </div>
                 </div>
 
-                <!-- ABA FUNÇÕES -->
                 <div id="abaFuncoes" class="tab-content">
                     <h3 style="margin-bottom: 15px;">⚙️ CONTROLE DE FUNÇÕES</h3>
                     <p style="color: var(--warning); font-size: 12px; margin-bottom: 15px;">🔒 Desative funções para limitar o acesso do cliente</p>
@@ -487,7 +463,6 @@ console.log("MASTER APP FIX V3 loaded");
                 </div>
 
                 
-                <!-- ABA DADOS (menos rústico) -->
                 <div id="abaDados" class="tab-content" style="display:none;">
                     <h3 style="margin-bottom: 15px;">🧩 EDITOR DE DADOS (SEM CÓDIGO)</h3>
                     <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 12px;">
@@ -544,7 +519,6 @@ Pix"></textarea>
                 </div>
 
 
-                <!-- ABA CÓDIGO -->
                 <div id="abaCodigo" class="tab-content">
                     <h3 style="margin-bottom: 15px;">💻 EDITOR DE CÓDIGO</h3>
                     <p style="color: var(--warning); font-size: 12px; margin-bottom: 15px;">⚡ Edite o HTML diretamente (apenas para avançados)</p>
@@ -571,7 +545,6 @@ Pix"></textarea>
                     </div>
                 </div>
 
-                <!-- VISUALIZAÇÃO DO SITE (Preview) -->
                 <div class="site-preview" id="sitePreview">
                     <div id="previewConteudo" style="text-align: center;">
                         <div id="previewLogoBox" style="width: 120px; height: 120px; background: #ddd; margin: 0 auto; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
@@ -587,9 +560,6 @@ Pix"></textarea>
                     </div>
                 </div>
 
-                <!-- BOTÕES DE CONTROLE -->
-                
-                <!-- LOGOTIPO DO CLIENTE -->
                 <div id="logoSection" style="margin-top: 16px; padding: 14px; border-radius: 14px; border: 1px dashed rgba(255,255,255,0.25);">
                     <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
                         <div>
@@ -635,7 +605,6 @@ Pix"></textarea>
                     </button>
                 </div>
 
-                <!-- LOG -->
                 <div class="log-panel" id="logPanel">
                     <div>🚀 Sistema pronto para controle total</div>
                 </div>
@@ -643,7 +612,6 @@ Pix"></textarea>
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMAÇÃO -->
     <div id="modalConfirm" class="modal">
         <div class="modal-content">
             <h2 id="modalTitulo">⚡ Confirmação</h2>
@@ -655,7 +623,6 @@ Pix"></textarea>
         </div>
     </div>
 
-    <!-- MODAL NOVO CLIENTE -->
     <div id="modalNovoCliente" class="modal">
         <div class="modal-content">
             <h2>➕ NOVO CLIENTE</h2>
@@ -683,13 +650,13 @@ Pix"></textarea>
         // CONFIGURAÇÃO FIREBASE
         // ============================================
         const firebaseConfig = {
-  apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
-  authDomain: "painelmastercomplet.firebaseapp.com",
-  projectId: "painelmastercomplet",
-  storageBucket: "painelmastercomplet.firebasestorage.app",
-  messagingSenderId: "87580974705",
-  appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
-};
+            apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
+            authDomain: "painelmastercomplet.firebaseapp.com",
+            projectId: "painelmastercomplet",
+            storageBucket: "painelmastercomplet.firebasestorage.app",
+            messagingSenderId: "87580974705",
+            appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
+        };
 
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
@@ -704,10 +671,32 @@ Pix"></textarea>
         let alteracoesNaoSalvas = false;
 
         // ============================================
+        // FUNÇÃO CORRIGIDA PARA GERAR LINKS (GITHUB PAGES)
+        // ============================================
+        function gerarLinkClientePorId(clienteId) {
+            // Detecta automaticamente a URL base para GitHub Pages
+            const urlAtual = window.location.href;
+            
+            // Remove o nome do arquivo atual (master_app.html) da URL
+            const base = urlAtual.substring(0, urlAtual.lastIndexOf('/') + 1);
+            
+            // Retorna o link completo para o appfinanceiro.html
+            return `${base}appfinanceiro.html?cliente=${encodeURIComponent(clienteId)}`;
+        }
+
+        // ============================================
+        // FUNÇÃO CORRIGIDA PARA CONVITES
+        // ============================================
+        function gerarLinkConvite(token, clienteId) {
+            const urlAtual = window.location.href;
+            const base = urlAtual.substring(0, urlAtual.lastIndexOf('/') + 1);
+            return `${base}appfinanceiro.html?cliente=${encodeURIComponent(clienteId)}&convite=${encodeURIComponent(token)}`;
+        }
+
+        // ============================================
         // FUNÇÕES PRINCIPAIS
         // ============================================
         
-        // Carregar clientes do Firebase
         function carregarClientes() {
             document.getElementById('firebaseStatus').innerHTML = '🔄 Carregando...';
             
@@ -725,7 +714,6 @@ Pix"></textarea>
                 
                 atualizarListaClientes();
                 
-                // Se tinha um cliente selecionado, atualiza
                 if (clienteAtual) {
                     const atualizado = clientes.find(c => c.id === clienteAtual.id);
                     if (atualizado) {
@@ -742,7 +730,6 @@ Pix"></textarea>
             });
         }
 
-        // Atualizar lista de clientes na interface
         function atualizarListaClientes() {
             const lista = document.getElementById('listaClientes');
             const filtro = document.getElementById('buscarCliente')?.value.toLowerCase() || '';
@@ -778,12 +765,10 @@ Pix"></textarea>
             lista.innerHTML = html || '<div style="padding: 20px; color: var(--text-secondary);">🔍 Nenhum cliente encontrado</div>';
         }
 
-        // Selecionar cliente
         async function selecionarCliente(clienteId) {
             const cliente = clientes.find(c => c.id === clienteId);
             if (!cliente) return;
             
-            // Verificar se há alterações não salvas
             if (alteracoesNaoSalvas) {
                 if (!confirm('⚠️ Há alterações não salvas! Deseja realmente mudar de cliente?')) {
                     return;
@@ -793,12 +778,10 @@ Pix"></textarea>
             clienteAtual = cliente;
             alteracoesNaoSalvas = false;
             
-            // Atualizar UI
             atualizarListaClientes();
             preencherFormularioCliente();
             await carregarConfigCliente(clienteId);
             
-            // Habilitar botões
             document.getElementById('btnEditar').disabled = false;
             document.getElementById('btnBloquear').disabled = false;
             document.getElementById('btnSalvar').disabled = false;
@@ -813,22 +796,18 @@ Pix"></textarea>
             adicionarLog(`📂 Cliente selecionado: ${cliente.nome}`);
         }
 
-        // Preencher formulário com dados do cliente
         function preencherFormularioCliente() {
             if (!clienteAtual) return;
             
-            // Dados básicos
             document.getElementById('nomeEmpresa').value = clienteAtual.nome || '';
             document.getElementById('corPrincipal').value = clienteAtual.cor || '#4CAF50';
             document.getElementById('modoEscuro').value = clienteAtual.modoEscuro || 'auto';
             
-            // Termos
             document.getElementById('termoColaborador').value = clienteAtual.termoColaborador || 'Motorista';
             document.getElementById('termoAcao').value = clienteAtual.termoAcao || 'Entrega';
             document.getElementById('termoCliente').value = clienteAtual.termoCliente || 'Cliente';
             document.getElementById('moeda').value = clienteAtual.moeda || 'BRL';
             
-            // Funções
             document.getElementById('funcDashboard').checked = clienteAtual.funcDashboard !== false;
             document.getElementById('funcLancamentos').checked = clienteAtual.funcLancamentos !== false;
             document.getElementById('funcContas').checked = clienteAtual.funcContas !== false;
@@ -837,34 +816,26 @@ Pix"></textarea>
             document.getElementById('funcPlanos').checked = clienteAtual.funcPlanos === true;
             document.getElementById('funcImportar').checked = clienteAtual.funcImportar !== false;
             
-            // Código HTML personalizado
             document.getElementById('codigoHtml').value = clienteAtual.codigoHtml || '';
             
-            // Logo
             logoTempBase64 = null;
             setLogoPreview(clienteAtual.logoBase64 || null);
 
-            // Atualizar preview
             atualizarPreview();
         }
-        // ============================================
-        // Carregar config profissional (configs/{clienteId})
-        // ============================================
+
         async function carregarConfigCliente(clienteId) {
             try {
-                // tenta configs separadas (novo)
                 const cfgDoc = await db.collection('configs').doc(clienteId).get();
                 const cfg = cfgDoc.exists ? (cfgDoc.data() || {}) : null;
 
                 if (cfg) {
-                    // Visual
                     if (cfg.visual?.corPrincipal && document.getElementById('corPrincipal')) {
                         document.getElementById('corPrincipal').value = cfg.visual.corPrincipal;
                     }
                     if (cfg.visual?.modoEscuro && document.getElementById('modoEscuro')) {
                         document.getElementById('modoEscuro').value = cfg.visual.modoEscuro;
                     }
-                    // Conteúdo
                     if (cfg.conteudo?.nomeEmpresa && document.getElementById('nomeEmpresa')) {
                         document.getElementById('nomeEmpresa').value = cfg.conteudo.nomeEmpresa;
                     }
@@ -881,7 +852,6 @@ Pix"></textarea>
                         document.getElementById('moeda').value = cfg.conteudo.moeda;
                     }
 
-                    // Dados (categorias / contas padrão)
                     const cats = Array.isArray(cfg.conteudo?.categorias) ? cfg.conteudo.categorias : [];
                     if (document.getElementById('listaCategorias')) {
                         document.getElementById('listaCategorias').value = cats.join('\n');
@@ -891,7 +861,6 @@ Pix"></textarea>
                         document.getElementById('listaContasPadrao').value = contasPadrao.join('\n');
                     }
 
-                    // Funções
                     const f = cfg.funcoes || {};
                     if (document.getElementById('funcDashboard')) document.getElementById('funcDashboard').checked = (f.dashboard !== false);
                     if (document.getElementById('funcLancamentos')) document.getElementById('funcLancamentos').checked = (f.lancamentos !== false);
@@ -899,12 +868,8 @@ Pix"></textarea>
                     if (document.getElementById('funcOrcamento')) document.getElementById('funcOrcamento').checked = (f.orcamento !== false);
                     if (document.getElementById('funcRelatorios')) document.getElementById('funcRelatorios').checked = (f.relatorios !== false);
                     if (document.getElementById('funcPlanos')) document.getElementById('funcPlanos').checked = (f.planos !== false);
-                    if (document.getElementById('funcImportExport')) document.getElementById('funcImportExport').checked = (f.importExport !== false);
+                    if (document.getElementById('funcImportar')) document.getElementById('funcImportar').checked = (f.importar !== false);
 
-                    if (document.getElementById('permEditarLanc')) document.getElementById('permEditarLanc').checked = (f.permitirEditarLancamentos !== false);
-                    if (document.getElementById('permExcluirLanc')) document.getElementById('permExcluirLanc').checked = (f.permitirExcluirLancamentos !== false);
-
-                    // Auditoria
                     const auditEl = document.getElementById('auditoriaInfo');
                     if (auditEl) {
                         const when = cfg.meta?.atualizadoEm ? new Date(cfg.meta.atualizadoEm).toLocaleString('pt-BR') : '—';
@@ -912,26 +877,20 @@ Pix"></textarea>
                         auditEl.textContent = `Última publicação: ${when} · por ${who}`;
                     }
                 } else {
-                    // Se não existir configs, mantém o que já veio do cliente (modo antigo)
                     const auditEl = document.getElementById('auditoriaInfo');
                     if (auditEl) auditEl.textContent = 'Sem configs separadas ainda (modo antigo).';
                 }
 
-                // atualizar preview draft (se modal aberto)
                 atualizarPreviewDraft();
             } catch (e) {
                 console.warn('Falha ao carregar configs:', e);
             }
         }
 
-
-
-        // Atualizar preview
         function atualizarPreview() {
             if (!clienteAtual) return;
             
             document.getElementById('previewTitulo').innerHTML = clienteAtual.nome || 'Empresa';
-            // Logo no preview
             setLogoPreview(logoTempBase64 || clienteAtual.logoBase64 || null);
             
             let botoes = [];
@@ -942,13 +901,11 @@ Pix"></textarea>
             document.getElementById('previewBotoes').innerHTML = botoes.map(b => `<span>${b}</span>`).join('');
         }
 
-        // Marcar que houve alteração
         function alteracaoNaoSalva() {
             alteracoesNaoSalvas = true;
             atualizarPreview();
         }
 
-        // Salvar alterações no Firebase
         async function salvarAlteracoes() {
             if (!clienteAtual) {
                 alert('Selecione um cliente primeiro!');
@@ -957,7 +914,6 @@ Pix"></textarea>
 
             const clienteId = clienteAtual.id;
 
-            // Base (cliente)
             const baseCliente = {
                 nome: document.getElementById('nomeEmpresa').value,
                 perfil: (document.getElementById('perfilCliente') ? document.getElementById('perfilCliente').value : 'pj'),
@@ -965,7 +921,6 @@ Pix"></textarea>
                 atualizadoEm: new Date().toISOString()
             };
 
-            // Config (profissional)
             const draft = construirDraftConfig();
             const config = {
                 visual: draft.visual,
@@ -979,10 +934,7 @@ Pix"></textarea>
             };
 
             try {
-                // salva base
                 await db.collection('clientes').doc(clienteId).set(baseCliente, { merge: true });
-
-                // salva config separado (SaaS)
                 await db.collection('configs').doc(clienteId).set(config, { merge: true });
 
                 alteracoesNaoSalvas = false;
@@ -990,7 +942,6 @@ Pix"></textarea>
                 document.getElementById('btnSalvarDados').disabled = true;
                 adicionarLog('✅ Config publicada em configs/' + clienteId);
 
-                // auditoria na tela
                 const auditEl = document.getElementById('auditoriaInfo');
                 if (auditEl) {
                     auditEl.textContent = `Última publicação: ${new Date().toLocaleString('pt-BR')} · por master`;
@@ -1003,7 +954,6 @@ Pix"></textarea>
             }
         }
 
-        // Bloquear/desbloquear cliente
         async function bloquearCliente() {
             if (!clienteAtual) return;
             
@@ -1014,15 +964,6 @@ Pix"></textarea>
             document.getElementById('modalConfirm').style.display = 'flex';
             
             acaoPendente = 'bloquear';
-        }
-
-        // Ver como cliente
-        
-        function gerarLinkClientePorId(clienteId) {
-            // Gera link absoluto para funcionar quando você copia/manda no WhatsApp
-            // Ex.: https://usuario.github.io/repo/appfinanceiro.html?cliente=<ID>
-            const base = window.location.origin + window.location.pathname.replace(/master_app\.html$/i, '');
-            return `${base}appfinanceiro.html?cliente=${encodeURIComponent(clienteId)}`;
         }
 
         async function copiarLinkClienteAtual() {
@@ -1037,7 +978,6 @@ Pix"></textarea>
                     await navigator.clipboard.writeText(url);
                     alert('✅ Link do cliente copiado!\n\n' + url);
                 } else {
-                    // fallback para navegadores antigos / contexto não seguro
                     prompt('Copie o link do cliente:', url);
                 }
                 adicionarLog(`🔗 Link do cliente ${clienteAtual.nome} copiado`);
@@ -1053,13 +993,10 @@ Pix"></textarea>
                 return;
             }
     
-            // Construir URL corretamente
             const url = gerarLinkClientePorId(clienteAtual.id);
     
-            // Abrir em nova aba
             const novaJanela = window.open(url, '_blank');
     
-            // Verificar se foi bloqueado pelo popup blocker
             if (!novaJanela) {
                 alert('⚠️ Permita popups para este site ou clique no link:\n\n' + url);
             }
@@ -1067,7 +1004,6 @@ Pix"></textarea>
             adicionarLog(`👁️ Visualizando ${clienteAtual.nome} como cliente`);
         }
         
-        // Entrar em modo edição
         function entrarModoEdicao() {
             console.log('entrarModoEdicao chamado');
     
@@ -1083,7 +1019,6 @@ Pix"></textarea>
             acaoPendente = 'editar';
         }
 
-        // Confirmar ação do modal
         async function confirmarAcao() {
             console.log('confirmarAcao chamado', acaoPendente);
     
@@ -1116,7 +1051,6 @@ Pix"></textarea>
             fecharModal();
         }
 
-        // Criar novo cliente
         function criarCliente() {
             document.getElementById('modalNovoCliente').style.display = 'flex';
         }
@@ -1156,14 +1090,12 @@ Pix"></textarea>
                 const docRef = await db.collection('clientes').add(novoCliente);
                 const novoId = docRef.id;
 
-                // Atualiza "clienteAtual" para facilitar copiar link / visualizar
                 clienteAtual = { id: novoId, ...novoCliente };
 
                 const linkCliente = gerarLinkClientePorId(novoId);
 
                 adicionarLog(`➕ Cliente ${nome} criado com ID: ${novoId}`);
 
-                // Tenta copiar o link automaticamente (se não der, mostra pra copiar)
                 try {
                     if (navigator.clipboard && window.isSecureContext) {
                         await navigator.clipboard.writeText(linkCliente);
@@ -1172,7 +1104,6 @@ Pix"></textarea>
 
                 alert(`✅ Cliente criado!\n\nNome: ${nome}\nCódigo (ID): ${novoId}\n\nLink do cliente:\n${linkCliente}\n\n(Dica: o link já foi copiado, se o navegador permitir.)`);
 
-                // Recarrega lista e seleciona o novo cliente
                 await carregarClientes();
 
                 fecharModalNovoCliente();
@@ -1183,37 +1114,31 @@ Pix"></textarea>
             }
         }
 
-        // Funções auxiliares
         function mudarAba(aba, btnEl) {
-  try {
-    // Esconder todas as abas de conteúdo
-    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+            try {
+                document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
 
-    // Mostrar a aba selecionada
-    const idMap = {
-      visual: 'abaVisual',
-      conteudo: 'abaConteudo',
-      funcoes: 'abaFuncoes',
-      dados: 'abaDados',
-      codigo: 'abaCodigo'
-    };
-    const alvo = document.getElementById(idMap[aba] || 'abaVisual');
-    if (alvo) alvo.style.display = 'block';
+                const idMap = {
+                    visual: 'abaVisual',
+                    conteudo: 'abaConteudo',
+                    funcoes: 'abaFuncoes',
+                    dados: 'abaDados',
+                    codigo: 'abaCodigo'
+                };
+                const alvo = document.getElementById(idMap[aba] || 'abaVisual');
+                if (alvo) alvo.style.display = 'block';
 
-    // Marcar botão ativo (sem depender de "event")
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    if (btnEl && btnEl.classList) btnEl.classList.add('active');
-  } catch (e) {
-    console.error('Erro ao mudar aba:', e);
-  }
-}
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                if (btnEl && btnEl.classList) btnEl.classList.add('active');
+            } catch (e) {
+                console.error('Erro ao mudar aba:', e);
+            }
+        }
 
-// Garantir que a primeira aba aparece ao abrir
-document.addEventListener('DOMContentLoaded', () => {
-  const firstBtn = document.getElementById('tab-visual');
-  if (firstBtn) mudarAba('visual', firstBtn);
-});
-
+        document.addEventListener('DOMContentLoaded', () => {
+            const firstBtn = document.getElementById('tab-visual');
+            if (firstBtn) mudarAba('visual', firstBtn);
+        });
 
         function adicionarLog(msg) {
             const log = document.getElementById('logPanel');
@@ -1221,7 +1146,6 @@ document.addEventListener('DOMContentLoaded', () => {
             entry.textContent = `⏱️ ${new Date().toLocaleTimeString()} - ${msg}`;
             log.insertBefore(entry, log.firstChild);
             
-            // Limitar logs
             if (log.children.length > 10) {
                 log.removeChild(log.lastChild);
             }
@@ -1252,9 +1176,6 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('modalNovoCliente').style.display = 'none';
         }
 
-        // ============================================
-        // FUNÇÃO: Deletar cliente
-        // ============================================
         async function deletarCliente(clienteId, event) {
             if (event) event.stopPropagation();
     
@@ -1270,10 +1191,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
     
             try {
-                // Deletar configurações do cliente
                 await db.collection('clientes').doc(clienteId).delete();
         
-                // Deletar dados financeiros do cliente
                 try {
                     await db.collection('dados_financeiros').doc(clienteId).delete();
                 } catch (e) {
@@ -1283,12 +1202,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 adicionarLog(`🗑️ Cliente ${cliente.nome} excluído permanentemente`);
                 alert('✅ Cliente excluído com sucesso!');
         
-                // Limpar seleção atual se for o cliente deletado
                 if (clienteAtual && clienteAtual.id === clienteId) {
                     clienteAtual = null;
                     alteracoesNaoSalvas = false;
             
-                    // Desabilitar botões
                     document.getElementById('btnEditar').disabled = true;
                     document.getElementById('btnBloquear').disabled = true;
                     document.getElementById('btnSalvar').disabled = true;
@@ -1302,25 +1219,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // ============================================
-        // FUNÇÃO: Diagnóstico de conexão
-        // ============================================
         async function diagnosticarConexao() {
             console.log('🔍 Diagnosticando conexão Firebase...');
     
             try {
-                // Teste 1: Escrever
                 await db.collection('_test_').doc('connection_test').set({
                     timestamp: new Date().toISOString(),
                     test: 'ok'
                 });
                 console.log('✅ Teste 1: Escrita funcionou');
         
-                // Teste 2: Ler
                 const testRead = await db.collection('_test_').doc('connection_test').get();
                 console.log('✅ Teste 2: Leitura funcionou', testRead.data());
         
-                // Teste 3: Clientes
                 const clientesSnapshot = await db.collection('clientes').limit(1).get();
                 console.log(`✅ Teste 3: Coleção clientes acessível (${clientesSnapshot.size} documentos)`);
         
@@ -1332,23 +1243,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // ============================================
-        // INICIALIZAÇÃO CORRETA
-        // ============================================
         window.onload = function() {
             console.log('🚀 Master App iniciado');
             carregarClientes();
             adicionarLog('🚀 Master App iniciado - Controle total');
         };
 
-        // ===============================
-        // FIX DE ABAS (VISUAL / CONTEÚDO / FUNÇÕES / CÓDIGO)
-        // ===============================
-
-    
-        // ===============================
-        // LOGO (base64 comprimido) + PREVIEW
-        // ===============================
         let logoTempBase64 = null;
 
         function abrirSeletorLogo() {
@@ -1369,7 +1269,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 ph.style.display = 'block';
             }
 
-            // também aplica no preview do app do cliente
             const pImg = document.getElementById('previewLogoImg');
             const pPh = document.getElementById('previewLogoPlaceholder');
             if (pImg && pPh) {
@@ -1386,7 +1285,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         async function comprimirImagemParaDataURL(file) {
-            // converte para JPEG/PNG redimensionando para no máx. 600px (lado maior)
             const bitmap = await createImageBitmap(file);
             const max = 600;
             const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
@@ -1400,10 +1298,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(bitmap, 0, 0, w, h);
 
-            // tenta jpeg para reduzir peso
             const jpeg = canvas.toDataURL('image/jpeg', 0.85);
 
-            // fallback: se ainda ficar muito grande, reduz qualidade
             if (jpeg.length > 900_000) {
                 return canvas.toDataURL('image/jpeg', 0.70);
             }
@@ -1436,7 +1332,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alteracaoNaoSalva();
         }
 
-        // Drag & Drop
         (function habilitarDropLogo() {
             const area = document.getElementById('logoDropArea');
             const input = document.getElementById('logoInput');
@@ -1468,9 +1363,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         })();
 
-        // ===============================
-        // CONVITES (gera token + link)
-        // ===============================
         let ultimoConviteGerado = '';
 
         function gerarTokenConvite(tamanho = 10) {
@@ -1478,13 +1370,6 @@ document.addEventListener('DOMContentLoaded', () => {
             let out = '';
             for (let i = 0; i < tamanho; i++) out += chars[Math.floor(Math.random() * chars.length)];
             return out;
-        }
-
-        function gerarLinkConvite(token, clienteId) {
-            const base = window.location.origin + window.location.pathname.replace('master_app.html','');
-            // Importante: o appfinanceiro só abre quando recebe ?cliente=<ID>. 
-            // Mantemos também o token do convite para uso futuro (cadastro guiado/validação).
-            return `${base}appfinanceiro.html?cliente=${encodeURIComponent(clienteId)}&convite=${encodeURIComponent(token)}`;
         }
 
         async function gerarConviteCadastro() {
@@ -1522,87 +1407,127 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('✅ Link copiado:\n\n' + link);
         }
 
+        function aplicarPerfilUI() {
+            const perfilEl = document.getElementById('perfilCliente');
+            if (!perfilEl) return;
 
+            const isPF = perfilEl.value === 'pf';
 
-// =========================
-// PERFIL PF/PJ (UI simples)
-// =========================
-function aplicarPerfilUI() {
-  const perfilEl = document.getElementById('perfilCliente');
-  if (!perfilEl) return;
+            const tc = document.getElementById('termoColaborador');
+            const ta = document.getElementById('termoAcao');
+            const tcl = document.getElementById('termoCliente');
 
-  const isPF = perfilEl.value === 'pf';
-
-  const tc = document.getElementById('termoColaborador');
-  const ta = document.getElementById('termoAcao');
-  const tcl = document.getElementById('termoCliente');
-
-  [tc, ta, tcl].forEach(el => {
-    if (!el) return;
-    el.disabled = isPF;
-    el.style.opacity = isPF ? '0.75' : '1';
-    el.style.cursor = isPF ? 'not-allowed' : 'text';
-    if (isPF) {
-      el.value = 'Não se aplica';
-    } else {
-      if (el.value === 'Não se aplica') el.value = '';
-    }
-  });
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  const perfilEl = document.getElementById('perfilCliente');
-  if (perfilEl) {
-    perfilEl.addEventListener('change', aplicarPerfilUI);
-    aplicarPerfilUI();
-  }
-});
-
-
-// Zerar APENAS os indicadores do cliente atual (não apaga transações/contas/previsões)
-async function zerarIndicadoresClienteAtual() {
-    try {
-        if (!clienteAtual || !clienteAtual.id) {
-            alert('Selecione um cliente primeiro.');
-            return;
+            [tc, ta, tcl].forEach(el => {
+                if (!el) return;
+                el.disabled = isPF;
+                el.style.opacity = isPF ? '0.75' : '1';
+                el.style.cursor = isPF ? 'not-allowed' : 'text';
+                if (isPF) {
+                    el.value = 'Não se aplica';
+                } else {
+                    if (el.value === 'Não se aplica') el.value = '';
+                }
+            });
         }
 
-        const id = clienteAtual.id;
+        document.addEventListener('DOMContentLoaded', () => {
+            const perfilEl = document.getElementById('perfilCliente');
+            if (perfilEl) {
+                perfilEl.addEventListener('change', aplicarPerfilUI);
+                aplicarPerfilUI();
+            }
+        });
 
-        // Confirmação forte: digitar o ID do cliente
-        const typed = prompt('⚠️ Isso vai zerar APENAS os INDICADORES (painel) deste cliente.\n\nPara confirmar, digite o ID do cliente exatamente assim:\n' + id);
-        if (typed === null) return;
-        if (typed.trim() !== id) {
-            alert('ID não confere. Operação cancelada.');
-            return;
+        async function zerarIndicadoresClienteAtual() {
+            try {
+                if (!clienteAtual || !clienteAtual.id) {
+                    alert('Selecione um cliente primeiro.');
+                    return;
+                }
+
+                const id = clienteAtual.id;
+
+                const typed = prompt('⚠️ Isso vai zerar APENAS os INDICADORES (painel) deste cliente.\n\nPara confirmar, digite o ID do cliente exatamente assim:\n' + id);
+                if (typed === null) return;
+                if (typed.trim() !== id) {
+                    alert('ID não confere. Operação cancelada.');
+                    return;
+                }
+
+                const ref = db.collection('dados_financeiros').doc(id);
+
+                const payload = {
+                    indicadores: {
+                        entregasMes: 0,
+                        metaEntregas: 0,
+                        colaboradoresAtivos: 0,
+                        colaboradoresDisponiveis: 0
+                    },
+                    atualizadoEm: new Date().toISOString()
+                };
+
+                await ref.set(payload, { merge: true });
+
+                adicionarLog(`🧹 Indicadores zerados para ${clienteAtual.nome || id}`);
+                alert('✅ Indicadores zerados (apenas painel)!');
+            } catch (e) {
+                console.error(e);
+                alert('❌ Erro ao zerar indicadores. Veja o console.');
+            }
         }
 
-        // Garantir documento existe e zerar somente indicadores
-        const ref = db.collection('dados_financeiros').doc(id);
+        function construirDraftConfig() {
+            return {
+                visual: {
+                    corPrincipal: document.getElementById('corPrincipal')?.value || '#4CAF50',
+                    modoEscuro: document.getElementById('modoEscuro')?.value || 'auto'
+                },
+                conteudo: {
+                    nomeEmpresa: document.getElementById('nomeEmpresa')?.value || '',
+                    termoColaborador: document.getElementById('termoColaborador')?.value || 'Motorista',
+                    termoAcao: document.getElementById('termoAcao')?.value || 'Entrega',
+                    termoCliente: document.getElementById('termoCliente')?.value || 'Cliente',
+                    moeda: document.getElementById('moeda')?.value || 'BRL',
+                    categorias: (document.getElementById('listaCategorias')?.value || '').split('\n').filter(Boolean),
+                    contasPadrao: (document.getElementById('listaContasPadrao')?.value || '').split('\n').filter(Boolean)
+                },
+                funcoes: {
+                    dashboard: document.getElementById('funcDashboard')?.checked ?? true,
+                    lancamentos: document.getElementById('funcLancamentos')?.checked ?? true,
+                    contas: document.getElementById('funcContas')?.checked ?? true,
+                    orcamento: document.getElementById('funcOrcamento')?.checked ?? true,
+                    relatorios: document.getElementById('funcRelatorios')?.checked ?? true,
+                    planos: document.getElementById('funcPlanos')?.checked ?? false,
+                    importar: document.getElementById('funcImportar')?.checked ?? true
+                }
+            };
+        }
 
-        const payload = {
-            indicadores: {
-                entregasMes: 0,
-                metaEntregas: 0,
-                colaboradoresAtivos: 0,
-                colaboradoresDisponiveis: 0
-            },
-            atualizadoEm: new Date().toISOString()
-        };
+        function atualizarPreviewDraft() {}
 
-        await ref.set(payload, { merge: true });
+        function abrirPreviewModal() {
+            alert('Preview modal - implementar se desejar');
+        }
 
-        adicionarLog(`🧹 Indicadores zerados para ${clienteAtual.nome || id}`);
-        alert('✅ Indicadores zerados (apenas painel)!');
-    } catch (e) {
-        console.error(e);
-        alert('❌ Erro ao zerar indicadores. Veja o console.');
-    }
-}
+        function fecharPreviewModal(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        }
 
-</script>
+        function abrirPreviewEmNovaAba(e) {
+            e.stopPropagation();
+            alert('Preview em nova aba - implementar se desejar');
+        }
 
-    <!-- MODAL PREVIEW AO VIVO -->
+        function recarregarConfigDoCliente() {
+            if (clienteAtual) {
+                carregarConfigCliente(clienteAtual.id);
+            }
+        }
+
+    </script>
+
     <div class="modal" id="previewModal" onclick="fecharPreviewModal(event)">
         <div class="modal-content" style="max-width: 1000px; width: 95%; height: 85vh; padding: 15px;">
             <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
