@@ -7,38 +7,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>💰 Sistema Financeiro</title>
     
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
-// ============================================
-// CONTROLE DE TELAS (evita tela branca)
-// ============================================
-function mostrarTelaApp() {
-  const bloqueio = document.getElementById('bloqueioScreen');
-  const app = document.getElementById('appContent');
-  if (bloqueio) bloqueio.style.display = 'none';
-  if (app) app.style.display = 'block';
-}
-
-function mostrarTelaBloqueio(clienteBase) {
-  const bloqueio = document.getElementById('bloqueioScreen');
-  const app = document.getElementById('appContent');
-  const msg = document.getElementById('bloqueioMsg');
-
-  if (msg) {
-    const texto = (clienteBase && clienteBase.motivoBloqueio)
-      ? String(clienteBase.motivoBloqueio)
-      : 'Sistema bloqueado pelo administrador.';
-    msg.textContent = texto;
-  }
-
-  if (app) app.style.display = 'none';
-  if (bloqueio) bloqueio.style.display = 'block';
-}
-
-</script>
+    <!-- Firebase SDKs (NÃO colocar código dentro destas tags!) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <style>
+        /* (seu CSS existente - mantenha igual) */
         * {
             margin: 0;
             padding: 0;
@@ -118,7 +92,7 @@ function mostrarTelaBloqueio(clienteBase) {
             background: rgba(255,255,255,0.06);
             border: 1px solid rgba(0,0,0,0.25);
             padding:10px;
-            display:none; /* só aparece se existir logo */
+            display:none;
         }
 
 
@@ -1114,6 +1088,7 @@ function mostrarTelaBloqueio(clienteBase) {
     </style>
 </head>
 <body>
+    <!-- TELA DE BLOQUEIO -->
     <div id="bloqueioScreen" style="display: none;">
         <div class="bloqueio-container">
             <div class="bloqueio-card">
@@ -1126,21 +1101,22 @@ function mostrarTelaBloqueio(clienteBase) {
         </div>
     </div>
 
+    <!-- CONTEÚDO PRINCIPAL -->
     <div id="appContent" style="display: none;">
         <div class="container">
             <div class="header">
                 <div class="brand">
-            <img id="clienteLogoImg" alt="Logo do cliente" />
-            <h1 id="empresaNome">💰 SISTEMA FINANCEIRO</h1>
-        </div>
-                                <div class="cliente-meta" id="clienteMeta" style="display:none;">
+                    <img id="clienteLogoImg" alt="Logo do cliente" />
+                    <h1 id="empresaNome">💰 SISTEMA FINANCEIRO</h1>
+                </div>
+                <div class="cliente-meta" id="clienteMeta" style="display:none;">
                     <span class="cliente-meta-item" id="clientePerfil"></span>
                     <span class="cliente-meta-sep">•</span>
                     <span class="cliente-meta-item" id="clienteDocumento"></span>
                     <span class="cliente-meta-sep">•</span>
                     <span class="cliente-meta-item" id="clienteIdMini"></span>
                 </div>
-<div class="user-info">
+                <div class="user-info">
                     <span class="user-badge" id="userBadge">👤 Carregando...</span>
                     <button class="dark-mode-toggle" id="darkModeBtn" onclick="toggleDarkMode()">
                         🌙 Modo Escuro
@@ -1152,6 +1128,7 @@ function mostrarTelaBloqueio(clienteBase) {
                 <!-- Abas serão geradas dinamicamente -->
             </div>
 
+            <!-- DASHBOARD -->
             <div id="dashboard" class="tab-content">
                 <div class="balance-card">
                     <div class="balance-label">Saldo Total</div>
@@ -1241,6 +1218,7 @@ function mostrarTelaBloqueio(clienteBase) {
                 </div>
             </div>
 
+            <!-- LANÇAMENTOS -->
             <div id="lancamentos" class="tab-content">
                 <div class="tabs">
                     <button class="tab income-tab active" onclick="setTipoLancamento('receita')" id="btnReceita">📈 Receita (Entrada)</button>
@@ -1298,6 +1276,7 @@ function mostrarTelaBloqueio(clienteBase) {
                 </div>
             </div>
 
+            <!-- CONTAS -->
             <div id="contas" class="tab-content">
                 <div class="form-card">
                     <h3 style="margin-bottom: 20px;">➕ Nova Conta</h3>
@@ -1331,6 +1310,7 @@ function mostrarTelaBloqueio(clienteBase) {
                 <div class="contas-grid" id="listaContas"></div>
             </div>
 
+            <!-- ORÇAMENTO -->
             <div id="orcamento" class="tab-content">
                 <div class="orcamento-header">
                     <h3>📅 Orçamento Mensal</h3>
@@ -1390,6 +1370,7 @@ function mostrarTelaBloqueio(clienteBase) {
                 </div>
             </div>
 
+            <!-- RELATÓRIOS -->
             <div id="relatorios" class="tab-content">
                 <div class="relatorio-periodo">
                     <select id="relatorioMes" onchange="gerarRelatorio()">
@@ -1471,6 +1452,7 @@ function mostrarTelaBloqueio(clienteBase) {
                 </div>
             </div>
 
+            <!-- PLANOS -->
             <div id="planos" class="tab-content">
                 <div class="planos-section">
                     <div class="planos-titulo">
@@ -1553,6 +1535,7 @@ function mostrarTelaBloqueio(clienteBase) {
             </div>
         </div>
 
+        <!-- MODAL DE PAGAMENTO -->
         <div id="modalPagamento" class="pagamento-modal">
             <div class="pagamento-content">
                 <h3>💰 Finalizar assinatura</h3>
@@ -1578,25 +1561,49 @@ function mostrarTelaBloqueio(clienteBase) {
 
     <script>
         // ============================================
-        // GLOBAIS (importante em <script type="module"> / modo strict)
+        // CONTROLE DE TELAS (CORRIGIDO - AGORA FUNCIONA!)
         // ============================================
-        // Quando este arquivo roda como módulo, qualquer variável usada sem "let/const" vira erro.
-        // Esses 3 nomes são usados em callbacks do Firestore e no modo "preview ao vivo" do Master.
-        let previewOverrideConfig = null; // objeto de override enviado pelo Master (quando existir)
-        let clienteCfg = {};              // configs/{clienteId}
-        let clienteBase = null;           // clientes/{clienteId}
+        function mostrarTelaApp() {
+            const bloqueio = document.getElementById('bloqueioScreen');
+            const app = document.getElementById('appContent');
+            if (bloqueio) bloqueio.style.display = 'none';
+            if (app) app.style.display = 'block';
+        }
+
+        function mostrarTelaBloqueio(clienteBase) {
+            const bloqueio = document.getElementById('bloqueioScreen');
+            const app = document.getElementById('appContent');
+            const msg = document.getElementById('bloqueioMsg');
+
+            if (msg) {
+                const texto = (clienteBase && clienteBase.motivoBloqueio)
+                    ? String(clienteBase.motivoBloqueio)
+                    : 'Sistema bloqueado pelo administrador.';
+                msg.textContent = texto;
+            }
+
+            if (app) app.style.display = 'none';
+            if (bloqueio) bloqueio.style.display = 'block';
+        }
+
+        // ============================================
+        // GLOBAIS
+        // ============================================
+        let previewOverrideConfig = null;
+        let clienteCfg = {};
+        let clienteBase = null;
 
         // ============================================
         // CONFIGURAÇÃO FIREBASE (MESMA DO MASTER_APP)
         // ============================================
         const firebaseConfig = {
-  apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
-  authDomain: "painelmastercomplet.firebaseapp.com",
-  projectId: "painelmastercomplet",
-  storageBucket: "painelmastercomplet.firebasestorage.app",
-  messagingSenderId: "87580974705",
-  appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
-};
+            apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
+            authDomain: "painelmastercomplet.firebaseapp.com",
+            projectId: "painelmastercomplet",
+            storageBucket: "painelmastercomplet.firebasestorage.app",
+            messagingSenderId: "87580974705",
+            appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
+        };
 
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
@@ -1617,7 +1624,6 @@ function mostrarTelaBloqueio(clienteBase) {
 
 
         // Modo Master: abre o editor de indicadores quando a URL tiver ?master=1
-        // (ou quando localStorage.modoMaster = '1')
         const __params = new URLSearchParams(window.location.search);
         const modoMaster = (__params.get('master') === '1') || (localStorage.getItem('modoMaster') === '1');
 
@@ -1654,7 +1660,7 @@ function mostrarTelaBloqueio(clienteBase) {
         }
 
 
-        // Links rápidos (normal e Master) — gerados a partir do cliente atual
+        // Links rápidos (normal e Master)
         function buildClienteLink(id, isMasterLink) {
             const url = new URL(window.location.href);
             url.searchParams.set('cliente', id);
@@ -1673,7 +1679,6 @@ function mostrarTelaBloqueio(clienteBase) {
                 }
             } catch (_) {}
 
-            // fallback antigo
             try {
                 const ta = document.createElement('textarea');
                 ta.value = texto;
@@ -1794,9 +1799,9 @@ function mostrarTelaBloqueio(clienteBase) {
 
                 indicadores = novos;
                 atualizarDashboard();
-            mostrarEditorIndicadoresSeForMaster();
-            configurarEventosEditorIndicadores();
-            preencherEditorIndicadores();
+                mostrarEditorIndicadoresSeForMaster();
+                configurarEventosEditorIndicadores();
+                preencherEditorIndicadores();
                 setIndicadoresMsg('Salvo.');
             } catch (e) {
                 console.error('Erro ao salvar indicadores:', e);
@@ -1814,8 +1819,6 @@ function mostrarTelaBloqueio(clienteBase) {
             try {
                 setIndicadoresMsg('Zerando...');
                 const zerados = getIndicadoresDefault();
-                // Mantém a lógica de "não se aplica" para colaboradores, se você quiser:
-                // zerados.colaboradoresAtivos = null; zerados.colaboradoresDisponiveis = null;
 
                 await db.collection('dados_financeiros').doc(clienteId).set({
                     indicadores: zerados,
@@ -1873,7 +1876,6 @@ function mostrarTelaBloqueio(clienteBase) {
         // ============================================
         // CARREGAR CONFIGURAÇÕES DO CLIENTE
         // ============================================
-        // assinatura ativa do cliente (para não criar vários listeners)
         let unsubscribeCliente = null;
         let unsubscribeCfg = null;
         let appInicializado = false;
@@ -1883,10 +1885,9 @@ function mostrarTelaBloqueio(clienteBase) {
             console.log("Search:", window.location.search);
             console.log("clienteId:", clienteId);
 
-            // ✅ Salva o último cliente aberto
             if (clienteId) {
-              localStorage.setItem("ultimoClienteId", clienteId);
-              localStorage.setItem("ultimoClienteAtualizadoEm", new Date().toISOString());
+                localStorage.setItem("ultimoClienteId", clienteId);
+                localStorage.setItem("ultimoClienteAtualizadoEm", new Date().toISOString());
             }
 
             if (!clienteId) {
@@ -1902,7 +1903,6 @@ function mostrarTelaBloqueio(clienteBase) {
                 return;
             }
 
-            // evita acumular listeners se a função for chamada de novo
             if (unsubscribeCliente) {
                 unsubscribeCliente();
                 unsubscribeCliente = null;
@@ -1912,7 +1912,6 @@ function mostrarTelaBloqueio(clienteBase) {
                 const ref = db.collection('clientes').doc(clienteId);
                 const refCfg = db.collection('configs').doc(clienteId);
 
-                // Base do cliente (modo antigo) + Config separado (modo profissional)
                 unsubscribeCliente = ref.onSnapshot(async (doc) => {
                     if (!doc.exists) {
                         document.body.innerHTML = `
@@ -1928,12 +1927,10 @@ function mostrarTelaBloqueio(clienteBase) {
 
                     clienteBase = doc.data() || {};
 
-                    // Se configs já carregaram, mescla. Se não, segue com base.
                     const cfg = (clienteCfg || {});
                     const override = previewOverrideConfig || null;
                     clienteConfig = mesclarConfig(clienteBase, override || cfg);
 
-                    // Bloqueio continua valendo pela base
                     if (clienteBase.bloqueado) {
                         mostrarTelaBloqueio(clienteBase);
                         return;
@@ -1944,7 +1941,6 @@ function mostrarTelaBloqueio(clienteBase) {
                     aplicarConfiguracoes();
                     atualizarCamposDePermissao();
 
-                    // inicialização pesada só uma vez
                     if (!appInicializado) {
                         appInicializado = true;
                         await carregarDadosFinanceiros();
@@ -1964,25 +1960,22 @@ function mostrarTelaBloqueio(clienteBase) {
                     `;
                 });
 
-                // 🔁 Também escuta configs separadas (configs/{clienteId})
                 if (unsubscribeCfg) { try { unsubscribeCfg(); } catch(e) {} }
                 unsubscribeCfg = refCfg.onSnapshot((doc) => {
                     clienteCfg = doc.exists ? (doc.data() || {}) : {};
 
-                    // Se estiver em preview ao vivo, quem manda é o Master.
                     if (previewOverrideConfig) return;
 
                     if (clienteBase) {
                         clienteConfig = mesclarConfig(clienteBase, clienteCfg);
                         aplicarConfiguracoes();
-                    atualizarCamposDePermissao();
+                        atualizarCamposDePermissao();
                         try { inicializarInterface(); } catch(e) {}
                     }
                 }, (err) => {
                     console.warn('Erro no onSnapshot de configs:', err);
                 });
 
-                // Atualizar editor (se for Master)
                 preencherEditorIndicadores();
 
             } catch (error) {
@@ -2005,54 +1998,42 @@ function mostrarTelaBloqueio(clienteBase) {
         // APLICAR CONFIGURAÇÕES DO CLIENTE
         // ============================================
         
-    // =============================
-    // Merge base client doc + config doc (SaaS)
-    // =============================
-    function mesclarConfig(base, cfg) {
-        const b = base || {};
-        const c = cfg || {};
+        function mesclarConfig(base, cfg) {
+            const b = base || {};
+            const c = cfg || {};
 
-        // deep-ish clone of cfg to avoid mutating original
-        const out = JSON.parse(JSON.stringify(c));
+            const out = JSON.parse(JSON.stringify(c));
 
-        // ensure sections exist
-        out.visual = out.visual || {};
-        out.conteudo = out.conteudo || {};
-        out.funcoes = out.funcoes || {};
-        out.meta = out.meta || {};
+            out.visual = out.visual || {};
+            out.conteudo = out.conteudo || {};
+            out.funcoes = out.funcoes || {};
+            out.meta = out.meta || {};
 
-        // Base (cliente) fields (these are authoritative for identity/block)
-        out.clienteId = b.id || out.clienteId || null;
-        out.nome = b.nome || out.nome || '';
-        out.perfil = b.perfil || out.perfil || '';
-        out.cpfCnpj = b.cpfCnpj || out.cpfCnpj || '';
-        out.bloqueado = !!b.bloqueado;
+            out.clienteId = b.id || out.clienteId || null;
+            out.nome = b.nome || out.nome || '';
+            out.perfil = b.perfil || out.perfil || '';
+            out.cpfCnpj = b.cpfCnpj || out.cpfCnpj || '';
+            out.bloqueado = !!b.bloqueado;
 
-        // Visual defaults fall back to base doc if present
-        out.visual.corPrincipal = out.visual.corPrincipal ?? b.corPrincipal ?? b.cor ?? '#4CAF50';
-        out.visual.modoEscuro = out.visual.modoEscuro ?? b.modoEscuro ?? 'auto';
-        out.visual.logoBase64 = out.visual.logoBase64 ?? b.logoBase64 ?? null;
+            out.visual.corPrincipal = out.visual.corPrincipal ?? b.corPrincipal ?? b.cor ?? '#4CAF50';
+            out.visual.modoEscuro = out.visual.modoEscuro ?? b.modoEscuro ?? 'auto';
+            out.visual.logoBase64 = out.visual.logoBase64 ?? b.logoBase64 ?? null;
 
-        // Content defaults fall back to base doc if present
-        out.conteudo.termoColaborador = out.conteudo.termoColaborador ?? b.termoColaborador ?? 'Colaborador';
-        out.conteudo.termoMotorista = out.conteudo.termoMotorista ?? b.termoMotorista ?? 'Motorista';
-        out.conteudo.termoAcao = out.conteudo.termoAcao ?? b.termoAcao ?? 'Ação';
+            out.conteudo.termoColaborador = out.conteudo.termoColaborador ?? b.termoColaborador ?? 'Colaborador';
+            out.conteudo.termoMotorista = out.conteudo.termoMotorista ?? b.termoMotorista ?? 'Motorista';
+            out.conteudo.termoAcao = out.conteudo.termoAcao ?? b.termoAcao ?? 'Ação';
 
-        // Meta (audit)
-        out.meta.atualizadoEm = out.meta.atualizadoEm ?? b.atualizadoEm ?? null;
+            out.meta.atualizadoEm = out.meta.atualizadoEm ?? b.atualizadoEm ?? null;
 
-        return out;
-    }
+            return out;
+        }
 
-function aplicarConfiguracoes() {
+        function aplicarConfiguracoes() {
             if (!clienteConfig) return;
 
-            // Nome da empresa
             document.getElementById('empresaNome').innerHTML = `💰 ${clienteConfig.nome || 'SISTEMA FINANCEIRO'}`;
             document.getElementById('userBadge').innerHTML = `👤 ${clienteConfig.nome || 'Empresa'}`;
 
-            
-            // Logo do cliente (vem do Master: logoBase64 / logoUrl)
             const logoImg = document.getElementById('clienteLogoImg');
             const logoSrc = clienteConfig.logoBase64 || clienteConfig.logoUrl || clienteConfig.logo || '';
             if (logoImg) {
@@ -2064,7 +2045,7 @@ function aplicarConfiguracoes() {
                     logoImg.style.display = 'none';
                 }
             }
-// Perfil / Documento / ID (para confiança do cliente)
+
             const perfil = (clienteConfig.perfil || clienteConfig.tipoCliente || clienteConfig.tipoPerfil || '').toString().trim();
             const documento = (clienteConfig.cnpj || clienteConfig.cpf || clienteConfig.documento || '').toString().trim();
 
@@ -2095,14 +2076,11 @@ function aplicarConfiguracoes() {
                 idEl.textContent = idAtual ? `ID: ${idAtual}` : 'ID: —';
             }
 
-
-            // Cor principal
             if (clienteConfig.cor) {
                 document.documentElement.style.setProperty('--accent', clienteConfig.cor);
                 document.documentElement.style.setProperty('--accent-hover', adjustColor(clienteConfig.cor, -20));
             }
 
-            // Termos personalizados
             if (clienteConfig.termoColaborador) {
                 document.getElementById('labelMotorista').innerHTML = `🚚 ${clienteConfig.termoColaborador} (opcional)`;
                 document.getElementById('motorista').placeholder = `Nome do ${clienteConfig.termoColaborador.toLowerCase()}`;
@@ -2113,11 +2091,6 @@ function aplicarConfiguracoes() {
                 document.getElementById('statTitle1').innerHTML = `🚚 ${clienteConfig.termoAcao}s (Mês)`;
             }
 
-            if (clienteConfig.termoCliente) {
-                // Pode usar em algum lugar
-            }
-
-            // Moeda
             if (clienteConfig.moeda) {
                 const simbolos = {
                     'BRL': 'R$',
@@ -2127,7 +2100,6 @@ function aplicarConfiguracoes() {
                 document.getElementById('moedaSimbolo').innerHTML = simbolos[clienteConfig.moeda] || 'R$';
             }
 
-            // Modo escuro
             if (clienteConfig.modoEscuro === 'dark') {
                 document.body.classList.add('dark-mode');
                 document.getElementById('darkModeBtn').innerHTML = '☀️ Modo Claro';
@@ -2139,11 +2111,9 @@ function aplicarConfiguracoes() {
 
         
         function atualizarCamposDePermissao() {
-            // Preparação para o ponto 4 (editar/excluir lançamentos)
             const podeEditar = (clienteConfig?.permitirEditarLancamentos !== false);
             const podeExcluir = (clienteConfig?.permitirExcluirLancamentos !== false);
 
-            // Se no futuro você adicionar botões na lista, use essas flags.
             window.__podeEditarLanc = podeEditar;
             window.__podeExcluirLanc = podeExcluir;
         }
@@ -2155,7 +2125,6 @@ function aplicarConfiguracoes() {
         // ============================================
         async function carregarDadosFinanceiros() {
             try {
-                // Tentar carregar dados existentes
                 const docRef = db.collection('dados_financeiros').doc(clienteId);
                 const doc = await docRef.get();
 
@@ -2166,13 +2135,11 @@ function aplicarConfiguracoes() {
                     previsoes = dados.previsoes || [];
                     indicadores = dados.indicadores || getIndicadoresDefault();
                 } else {
-                    // Criar dados iniciais
                     transacoes = [];
                     contas = [];
                     previsoes = [];
                     indicadores = getIndicadoresDefault();
 
-                    // Salvar estrutura inicial
                     await docRef.set({
                         transacoes: [],
                         contas: [],
@@ -2209,7 +2176,6 @@ function aplicarConfiguracoes() {
         // INICIALIZAR INTERFACE
         // ============================================
         function inicializarInterface() {
-            // Construir abas baseado nas funções ativas
             const navTabs = document.getElementById('navTabs');
             navTabs.innerHTML = '';
 
@@ -2236,37 +2202,31 @@ function aplicarConfiguracoes() {
                         primeiraAbaAtiva = aba.id;
                     }
                 } else {
-                    // Esconder a aba se não estiver ativa
                     const tab = document.getElementById(aba.id);
                     if (tab) tab.style.display = 'none';
                 }
             });
 
-            // Se não tem planos, esconder seção de importação também?
             if (clienteConfig.funcImportar === false) {
                 const importSection = document.querySelector('.import-export-section');
                 if (importSection) importSection.style.display = 'none';
             }
 
-            // Mostrar primeira aba
             if (primeiraAbaAtiva) {
                 showTab(primeiraAbaAtiva);
             }
 
-            // Configurar datas
             const hoje = new Date().toISOString().split('T')[0];
             document.getElementById('dataLancamento').value = hoje;
             
             const mesAtual = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
             document.getElementById('mesOrcamento').value = mesAtual;
 
-            // Preencher selects
             preencherCategorias();
             preencherSelectContas();
             preencherCategoriasPrevisao();
             preencherSelectMeses();
 
-            // Atualizar dados
             atualizarDashboard();
             atualizarListaLancamentos();
             atualizarListaContas();
@@ -2278,7 +2238,6 @@ function aplicarConfiguracoes() {
         // FUNÇÕES AUXILIARES
         // ============================================
         function adjustColor(hex, percent) {
-            // Simplificado - escurecer/clarear cor
             return hex;
         }
 
@@ -2673,7 +2632,6 @@ function aplicarConfiguracoes() {
             document.getElementById('statValue3').innerHTML = `R$ ${saldoContas.toFixed(2).replace('.', ',')}`;
             document.getElementById('statSub3').innerHTML = `${contas.length} contas ativas`;
 
-            // Indicadores por cliente (salvos em dados_financeiros/{clienteId}.indicadores)
             const ind = indicadores || getIndicadoresDefault();
 
             document.getElementById('statValue1').innerHTML = (ind.entregasMes === null || ind.entregasMes === undefined) ? 'Não se aplica' : ind.entregasMes;
@@ -2744,14 +2702,12 @@ function aplicarConfiguracoes() {
             let transacoesFiltradas = transacoes.filter(t => {
                 const data = new Date(t.data);
 
-                // Se o usuário escolheu um período (de/até), usamos esse filtro e ignoramos mês/ano
                 if (temPeriodo) {
                     if (dataInicio && data < dataInicio) return false;
                     if (dataFim && data > dataFim) return false;
                     return true;
                 }
 
-                // Caso contrário, segue o filtro clássico por ano/mês
                 return data.getFullYear() === ano && (mes === 'all' || data.getMonth() === parseInt(mes));
             });
 
@@ -2813,12 +2769,11 @@ function aplicarConfiguracoes() {
         }
 
         // ============================================
-        // ============================================
         // FUNÇÕES DE IMPORTAÇÃO/EXPORTAÇÃO
         // ============================================
 
         function importarCSV() { alert('📥 Importação CSV ainda não implementada. Use JSON por enquanto.'); }
-                async function importarTXT() {
+        async function importarTXT() {
             try {
                 const input = document.getElementById('fileInput');
                 const file = input?.files?.[0];
@@ -2854,9 +2809,7 @@ function aplicarConfiguracoes() {
 
                 const parseDataFlex = (s) => {
                     const v = (s || '').trim();
-                    // YYYY-MM-DD
                     if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
-                    // DD/MM/YYYY
                     const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
                     if (m) return `${m[3]}-${m[2]}-${m[1]}`;
                     return null;
@@ -2869,7 +2822,6 @@ function aplicarConfiguracoes() {
                 };
 
                 const pickContaId = (s) => {
-                    // conta:Nome da Conta  | conta=Nome
                     const m = String(s || '').match(/\bconta\s*[:=]\s*([^\|;]+)\b/i);
                     if (!m) return null;
                     const nome = m[1].trim().toLowerCase();
@@ -2906,7 +2858,6 @@ function aplicarConfiguracoes() {
                 for (const linhaOriginal of linhas) {
                     const linha = linhaOriginal.trim();
 
-                    // Metadados opcionais em qualquer lugar da linha:
                     const contaIdLinha = pickContaId(linha) ?? defaultContaId;
                     const motoristaLinha = pickMotorista(linha);
                     const obsLinha = pickObs(linha);
@@ -2914,12 +2865,8 @@ function aplicarConfiguracoes() {
 
                     const limpa = stripMeta(linha);
 
-                    // Separadores aceitos: ; | TAB
                     let partes = limpa.split(/[;|\t]/).map(p => p.trim()).filter(Boolean);
 
-                    // Caso 1: formato estruturado (exemplos)
-                    // 2026-03-01; despesa; 56,90; Almoço; Alimentação
-                    // 01/03/2026; receita; 1200; Frete; Serviços
                     let data = null;
                     let tipo = null;
                     let valorStr = null;
@@ -2947,51 +2894,41 @@ function aplicarConfiguracoes() {
                         if (valorStr) {
                             partes.shift();
                         } else {
-                            // fallback: extrai de toda a linha
                             valorStr = extrairValorStr(limpa);
                         }
                     }
 
-                    // Caso 2: formato livre (exemplos)
-                    // 56,90 almoço alimentação
-                    // -80 gasolina
-                    // receita 1200 frete serviços
                     if (!valorStr) {
-                        continue; // pula linha impossível de entender
+                        continue;
                     }
 
                     let valorNum = converterMoedaParaNumber(valorStr);
                     if (!valorNum || Number.isNaN(valorNum)) continue;
 
-                    // Se vier negativo, vira despesa e usa o absoluto
                     if (valorNum < 0) {
                         tipo = 'despesa';
                         valorNum = Math.abs(valorNum);
                     }
 
-                    // Se tipo não veio, tenta deduzir por palavra no começo
                     if (!tipo) {
                         const t2 = normalizarTipo(partes[0] || '');
                         if (t2) {
                             tipo = t2;
                             partes.shift();
                         } else {
-                            tipo = 'despesa'; // padrão mais seguro em importação
+                            tipo = 'despesa';
                         }
                     }
 
-                    // Descrição/categoria
                     if (partes.length >= 2) {
                         descricao = partes.slice(0, -1).join(' - ').trim();
                         categoria = partes[partes.length - 1].trim();
                     } else if (partes.length === 1) {
                         descricao = partes[0].trim();
                     } else {
-                        // se não sobrou nada, usa a própria linha (limpa) sem o valor
                         descricao = limpa.replace(valorStr, '').trim() || '(Sem descrição)';
                     }
 
-                    // categoria fallback: linha -> select padrão
                     if (!categoria) categoria = catLinha || (categorias[tipo] ? categorias[tipo][0] : 'Outros');
 
                     const novaTransacao = {
@@ -3014,7 +2951,6 @@ function aplicarConfiguracoes() {
                     return;
                 }
 
-                // Ordena por data desc e coloca no início
                 novas.sort((a, b) => (b.data || '').localeCompare(a.data || ''));
                 transacoes = [...novas, ...(transacoes || [])];
 
@@ -3052,10 +2988,6 @@ function aplicarConfiguracoes() {
                     return;
                 }
 
-                // Aceita formatos diferentes:
-                // 1) { clienteId, clienteNome, dados: { transacoes, contas, previsoes, indicadores } }
-                // 2) { transacoes, contas, previsoes, indicadores }
-                // 3) { dados_financeiros: { ... } } (pega o primeiro nível)
                 let dados = null;
 
                 if (obj && typeof obj === 'object') {
@@ -3086,12 +3018,11 @@ function aplicarConfiguracoes() {
                     importadoEm: new Date().toISOString()
                 }, { merge: true });
 
-                // Atualiza UI
                 atualizarDashboard();
-                atualizarListaTransacoes?.();
-                atualizarListaContas?.();
-                atualizarListaPrevisoes?.();
-                preencherEditorIndicadores?.();
+                if (typeof atualizarListaTransacoes === 'function') atualizarListaTransacoes?.();
+                if (typeof atualizarListaContas === 'function') atualizarListaContas?.();
+                if (typeof atualizarListaPrevisoes === 'function') atualizarListaPrevisoes?.();
+                if (typeof preencherEditorIndicadores === 'function') preencherEditorIndicadores?.();
 
                 alert('✅ Importação concluída!');
                 input.value = '';
