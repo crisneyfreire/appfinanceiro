@@ -7,12 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>💰 Sistema Financeiro</title>
     
-    <!-- Firebase SDKs (NÃO colocar código dentro destas tags!) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <style>
-        /* (seu CSS existente - mantenha igual) */
         * {
             margin: 0;
             padding: 0;
@@ -34,6 +32,8 @@
             --shadow: rgba(0,0,0,0.1);
             --warning: #ff9800;
             --info: #2196F3;
+            --edit: #ffc107;
+            --delete: #dc3545;
         }
 
         .dark-mode {
@@ -76,7 +76,7 @@
             font-size: 24px;
             color: var(--text-primary);
         }
-        /* Logo do cliente (carregado do Master) */
+
         .brand{
             display:flex;
             align-items:center;
@@ -94,7 +94,6 @@
             padding:10px;
             display:none;
         }
-
 
         .user-info {
             display: flex;
@@ -299,7 +298,6 @@
             background: var(--expense);
         }
 
-        
         .btn-secondary {
             padding: 10px 14px;
             border: 1px solid var(--border);
@@ -327,7 +325,7 @@
             color: var(--text-primary);
         }
 
-.btn-primary {
+        .btn-primary {
             width: 100%;
             padding: 14px;
             color: white;
@@ -431,6 +429,41 @@
         .transaction-detalhes {
             font-size: 12px;
             color: var(--text-secondary);
+        }
+
+        /* NOVOS BOTÕES DE AÇÃO */
+        .transaction-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .btn-action {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .btn-edit {
+            background: var(--edit);
+            color: #333;
+        }
+
+        .btn-delete {
+            background: var(--delete);
+            color: white;
         }
 
         .contas-grid {
@@ -983,8 +1016,6 @@
             background: rgba(255,255,255,0.08);
         }
 
-
-        /* Editor de Indicadores (visível só no Master) */
         .indicadores-editor{
             margin-top: 14px;
             padding: 14px;
@@ -1085,10 +1116,64 @@
             color: var(--text-secondary);
         }
 
+        /* MODAL DE EDIÇÃO */
+        .edit-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .edit-modal-content {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .edit-modal-content h3 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-save-modal {
+            background: var(--income);
+            color: white;
+        }
+
+        .btn-cancel-modal {
+            background: var(--expense);
+            color: white;
+        }
     </style>
 </head>
 <body>
-    <!-- TELA DE BLOQUEIO -->
     <div id="bloqueioScreen" style="display: none;">
         <div class="bloqueio-container">
             <div class="bloqueio-card">
@@ -1101,7 +1186,6 @@
         </div>
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
     <div id="appContent" style="display: none;">
         <div class="container">
             <div class="header">
@@ -1124,11 +1208,8 @@
                 </div>
             </div>
 
-            <div class="nav-tabs" id="navTabs">
-                <!-- Abas serão geradas dinamicamente -->
-            </div>
+            <div class="nav-tabs" id="navTabs"></div>
 
-            <!-- DASHBOARD -->
             <div id="dashboard" class="tab-content">
                 <div class="balance-card">
                     <div class="balance-label">Saldo Total</div>
@@ -1158,30 +1239,25 @@
                     </div>
                 </div>
 
-                <!-- Editor de Indicadores (somente Master: usar ?master=1 na URL) -->
                 <div id="indicadoresEditor" class="indicadores-editor" style="display:none;">
                     <h3>⚙️ Indicadores do cliente (painel)</h3>
-
                     <div class="indicadores-grid">
                         <div>
                             <label for="ind_entregasMes">Entregas (mês)</label>
                             <input id="ind_entregasMes" type="number" min="0" step="1" placeholder="0">
                         </div>
-
                         <div>
                             <label for="ind_metaEntregas">Meta de entregas</label>
                             <input id="ind_metaEntregas" type="number" min="0" step="1" placeholder="0">
                         </div>
-
                         <div>
-                            <label for="ind_colabAtivos">Colaboradores / motoqueiros ativos</label>
+                            <label for="ind_colabAtivos">Colaboradores ativos</label>
                             <input id="ind_colabAtivos" type="number" min="0" step="1" placeholder="0">
                             <div class="inline-check">
                                 <input id="ind_na_colabAtivos" type="checkbox">
                                 <label for="ind_na_colabAtivos" style="margin:0;">Não se aplica</label>
                             </div>
                         </div>
-
                         <div>
                             <label for="ind_colabDisp">Disponíveis</label>
                             <input id="ind_colabDisp" type="number" min="0" step="1" placeholder="0">
@@ -1200,7 +1276,6 @@
                                 <button id="btnCopiarLinkNormal" class="btn-link">Copiar</button>
                             </div>
                         </div>
-
                         <div class="link-block">
                             <label for="linkClienteMaster">Link do cliente (Master)</label>
                             <div class="link-controls">
@@ -1218,18 +1293,17 @@
                 </div>
             </div>
 
-            <!-- LANÇAMENTOS -->
             <div id="lancamentos" class="tab-content">
                 <div class="tabs">
-                    <button class="tab income-tab active" onclick="setTipoLancamento('receita')" id="btnReceita">📈 Receita (Entrada)</button>
-                    <button class="tab expense-tab" onclick="setTipoLancamento('despesa')" id="btnDespesa">📉 Despesa (Saída)</button>
+                    <button class="tab income-tab active" onclick="setTipoLancamento('receita')" id="btnReceita">📈 Receita</button>
+                    <button class="tab expense-tab" onclick="setTipoLancamento('despesa')" id="btnDespesa">📉 Despesa</button>
                 </div>
 
                 <div class="form-card">
                     <div class="form-row">
                         <div class="form-group">
                             <label>💰 Valor (<span id="moedaSimbolo">R$</span>)</label>
-                            <input type="text" id="valor" placeholder="0,00" value="500,00" onkeyup="formatarMoeda(this)">
+                            <input type="text" id="valor" placeholder="0,00" onkeyup="formatarMoeda(this)">
                         </div>
                         <div class="form-group">
                             <label>📅 Data</label>
@@ -1239,7 +1313,7 @@
 
                     <div class="form-group">
                         <label>📝 Descrição</label>
-                        <input type="text" id="descricao" placeholder="Ex: Entrega, Manutenção" value="Entrega realizada">
+                        <input type="text" id="descricao" placeholder="Ex: Entrega, Manutenção">
                     </div>
 
                     <div class="form-row">
@@ -1270,24 +1344,23 @@
 
                 <div class="transactions-list">
                     <div class="list-header">
-                        <h3>📋 Últimos Lançamentos</h3>
+                        <h3>📋 Lançamentos</h3>
                     </div>
                     <div id="listaLancamentos"></div>
                 </div>
             </div>
 
-            <!-- CONTAS -->
             <div id="contas" class="tab-content">
                 <div class="form-card">
                     <h3 style="margin-bottom: 20px;">➕ Nova Conta</h3>
                     <div class="form-row">
                         <div class="form-group">
                             <label>🏦 Nome da Conta</label>
-                            <input type="text" id="nomeConta" placeholder="Ex: Conta transporte, Caixa" value="Conta Transportes">
+                            <input type="text" id="nomeConta" placeholder="Ex: Conta transporte">
                         </div>
                         <div class="form-group">
                             <label>💰 Saldo Inicial</label>
-                            <input type="text" id="saldoInicial" value="5.000,00" onkeyup="formatarMoeda(this)">
+                            <input type="text" id="saldoInicial" value="0,00" onkeyup="formatarMoeda(this)">
                         </div>
                     </div>
                     <div class="form-row">
@@ -1310,7 +1383,6 @@
                 <div class="contas-grid" id="listaContas"></div>
             </div>
 
-            <!-- ORÇAMENTO -->
             <div id="orcamento" class="tab-content">
                 <div class="orcamento-header">
                     <h3>📅 Orçamento Mensal</h3>
@@ -1342,11 +1414,11 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>💰 Valor</label>
-                            <input type="text" id="valorPrevisto" placeholder="0,00" value="1.500,00" onkeyup="formatarMoeda(this)">
+                            <input type="text" id="valorPrevisto" placeholder="0,00" onkeyup="formatarMoeda(this)">
                         </div>
                         <div class="form-group">
                             <label>📝 Descrição</label>
-                            <input type="text" id="descricaoPrevista" placeholder="Ex: Contrato, Combustível" value="Contrato mensal">
+                            <input type="text" id="descricaoPrevista" placeholder="Ex: Contrato">
                         </div>
                     </div>
 
@@ -1357,7 +1429,7 @@
                         </div>
                         <div class="form-group">
                             <label>📅 Vencimento</label>
-                            <input type="number" id="diaVencimento" min="1" max="31" placeholder="Dia" value="10">
+                            <input type="number" id="diaVencimento" min="1" max="31" placeholder="Dia">
                         </div>
                     </div>
 
@@ -1370,7 +1442,6 @@
                 </div>
             </div>
 
-            <!-- RELATÓRIOS -->
             <div id="relatorios" class="tab-content">
                 <div class="relatorio-periodo">
                     <select id="relatorioMes" onchange="gerarRelatorio()">
@@ -1442,8 +1513,8 @@
                         <thead>
                             <tr>
                                 <th>Categoria</th>
-                                <th>Receitas (Entradas)</th>
-                                <th>Despesas (Saídas)</th>
+                                <th>Receitas</th>
+                                <th>Despesas</th>
                                 <th>Saldo</th>
                             </tr>
                         </thead>
@@ -1452,7 +1523,6 @@
                 </div>
             </div>
 
-            <!-- PLANOS -->
             <div id="planos" class="tab-content">
                 <div class="planos-section">
                     <div class="planos-titulo">
@@ -1535,7 +1605,6 @@
             </div>
         </div>
 
-        <!-- MODAL DE PAGAMENTO -->
         <div id="modalPagamento" class="pagamento-modal">
             <div class="pagamento-content">
                 <h3>💰 Finalizar assinatura</h3>
@@ -1559,10 +1628,46 @@
         </div>
     </div>
 
+    <!-- MODAL DE EDIÇÃO DE LANÇAMENTO -->
+    <div id="editModal" class="edit-modal">
+        <div class="edit-modal-content">
+            <h3>✏️ Editar Lançamento</h3>
+            <div class="form-group">
+                <label>💰 Valor</label>
+                <input type="text" id="editValor" onkeyup="formatarMoeda(this)">
+            </div>
+            <div class="form-group">
+                <label>📅 Data</label>
+                <input type="date" id="editData">
+            </div>
+            <div class="form-group">
+                <label>📝 Descrição</label>
+                <input type="text" id="editDescricao">
+            </div>
+            <div class="form-group">
+                <label>📂 Categoria</label>
+                <select id="editCategoria"></select>
+            </div>
+            <div class="form-group">
+                <label>🏦 Conta</label>
+                <select id="editConta"></select>
+            </div>
+            <div class="form-group">
+                <label>🚚 Motorista</label>
+                <input type="text" id="editMotorista">
+            </div>
+            <div class="form-group">
+                <label>📝 Observações</label>
+                <textarea id="editObservacao" rows="2"></textarea>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn-save-modal" onclick="salvarEdicao()">💾 Salvar</button>
+                <button class="btn-cancel-modal" onclick="fecharModalEdicao()">❌ Cancelar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // ============================================
-        // CONTROLE DE TELAS (CORRIGIDO - AGORA FUNCIONA!)
-        // ============================================
         function mostrarTelaApp() {
             const bloqueio = document.getElementById('bloqueioScreen');
             const app = document.getElementById('appContent');
@@ -1586,16 +1691,10 @@
             if (bloqueio) bloqueio.style.display = 'block';
         }
 
-        // ============================================
-        // GLOBAIS
-        // ============================================
         let previewOverrideConfig = null;
         let clienteCfg = {};
         let clienteBase = null;
 
-        // ============================================
-        // CONFIGURAÇÃO FIREBASE (MESMA DO MASTER_APP)
-        // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
             authDomain: "painelmastercomplet.firebaseapp.com",
@@ -1605,13 +1704,9 @@
             appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
         };
 
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // ============================================
-        // VARIÁVEIS GLOBAIS
-        // ============================================
         let clienteId = null;
         let clienteConfig = null;
         let transacoes = [];
@@ -1622,20 +1717,17 @@
         let tipoPrevisao = 'receita';
         let automacoesAtivas = {};
 
+        // NOVA VARIÁVEL PARA CONTROLE DE EDIÇÃO
+        let transacaoEmEdicao = null;
 
-        // Modo Master: abre o editor de indicadores quando a URL tiver ?master=1
         const __params = new URLSearchParams(window.location.search);
         const modoMaster = (__params.get('master') === '1') || (localStorage.getItem('modoMaster') === '1');
-
 
         const categorias = {
             receita: ['Serviços', 'Contratos', 'Frete', 'Entregas', 'Outros'],
             despesa: ['Combustível', 'Manutenção', 'Pessoal', 'Alimentação', 'Viagem', 'Impostos', 'Outros']
         };
 
-        // ============================================
-        // INDICADORES DO DASHBOARD (POR CLIENTE)
-        // ============================================
         function getIndicadoresDefault() {
             return {
                 entregasMes: 0,
@@ -1645,9 +1737,6 @@
             };
         }
 
-        // ============================================
-        // EDITOR DE INDICADORES (SOMENTE MASTER)
-        // ============================================
         function setIndicadoresMsg(msg) {
             const el = document.getElementById('indicadoresMsg');
             if (el) el.textContent = msg || '';
@@ -1659,8 +1748,6 @@
             box.style.display = modoMaster ? 'block' : 'none';
         }
 
-
-        // Links rápidos (normal e Master)
         function buildClienteLink(id, isMasterLink) {
             const url = new URL(window.location.href);
             url.searchParams.set('cliente', id);
@@ -1723,6 +1810,7 @@
                 });
             }
         }
+
         function preencherEditorIndicadores() {
             if (!modoMaster) return;
             mostrarEditorIndicadoresSeForMaster();
@@ -1864,18 +1952,11 @@
             if (btnZerar) btnZerar.addEventListener('click', zerarIndicadoresDoClienteAtual);
         }
 
-
-        // ============================================
-        // CARREGAR CLIENTE DA URL
-        // ============================================
         function getClienteIdFromUrl() {
             const params = new URLSearchParams(window.location.search);
             return params.get("cliente");
         }
 
-        // ============================================
-        // CARREGAR CONFIGURAÇÕES DO CLIENTE
-        // ============================================
         let unsubscribeCliente = null;
         let unsubscribeCfg = null;
         let appInicializado = false;
@@ -1993,11 +2074,6 @@
             }
         }
 
-
-        // ============================================
-        // APLICAR CONFIGURAÇÕES DO CLIENTE
-        // ============================================
-        
         function mesclarConfig(base, cfg) {
             const b = base || {};
             const c = cfg || {};
@@ -2022,6 +2098,10 @@
             out.conteudo.termoColaborador = out.conteudo.termoColaborador ?? b.termoColaborador ?? 'Colaborador';
             out.conteudo.termoMotorista = out.conteudo.termoMotorista ?? b.termoMotorista ?? 'Motorista';
             out.conteudo.termoAcao = out.conteudo.termoAcao ?? b.termoAcao ?? 'Ação';
+
+            // NOVA LINHA: Garantir que as permissões sejam carregadas
+            out.funcoes.permitirEditarLancamentos = out.funcoes.permitirEditarLancamentos ?? true;
+            out.funcoes.permitirExcluirLancamentos = out.funcoes.permitirExcluirLancamentos ?? true;
 
             out.meta.atualizadoEm = out.meta.atualizadoEm ?? b.atualizadoEm ?? null;
 
@@ -2076,53 +2156,59 @@
                 idEl.textContent = idAtual ? `ID: ${idAtual}` : 'ID: —';
             }
 
-            if (clienteConfig.cor) {
+            if (clienteConfig.visual?.corPrincipal) {
+                document.documentElement.style.setProperty('--accent', clienteConfig.visual.corPrincipal);
+            } else if (clienteConfig.cor) {
                 document.documentElement.style.setProperty('--accent', clienteConfig.cor);
-                document.documentElement.style.setProperty('--accent-hover', adjustColor(clienteConfig.cor, -20));
             }
 
-            if (clienteConfig.termoColaborador) {
+            if (clienteConfig.conteudo?.termoColaborador) {
+                document.getElementById('labelMotorista').innerHTML = `🚚 ${clienteConfig.conteudo.termoColaborador} (opcional)`;
+                document.getElementById('motorista').placeholder = `Nome do ${clienteConfig.conteudo.termoColaborador.toLowerCase()}`;
+                document.getElementById('statTitle2').innerHTML = `📦 ${clienteConfig.conteudo.termoColaborador}s ativos`;
+            } else if (clienteConfig.termoColaborador) {
                 document.getElementById('labelMotorista').innerHTML = `🚚 ${clienteConfig.termoColaborador} (opcional)`;
                 document.getElementById('motorista').placeholder = `Nome do ${clienteConfig.termoColaborador.toLowerCase()}`;
                 document.getElementById('statTitle2').innerHTML = `📦 ${clienteConfig.termoColaborador}s ativos`;
             }
 
-            if (clienteConfig.termoAcao) {
+            if (clienteConfig.conteudo?.termoAcao) {
+                document.getElementById('statTitle1').innerHTML = `🚚 ${clienteConfig.conteudo.termoAcao}s (Mês)`;
+            } else if (clienteConfig.termoAcao) {
                 document.getElementById('statTitle1').innerHTML = `🚚 ${clienteConfig.termoAcao}s (Mês)`;
             }
 
-            if (clienteConfig.moeda) {
-                const simbolos = {
-                    'BRL': 'R$',
-                    'USD': '$',
-                    'EUR': '€'
-                };
-                document.getElementById('moedaSimbolo').innerHTML = simbolos[clienteConfig.moeda] || 'R$';
+            let moeda = 'R$';
+            if (clienteConfig.conteudo?.moeda) {
+                const simbolos = { 'BRL': 'R$', 'USD': '$', 'EUR': '€' };
+                moeda = simbolos[clienteConfig.conteudo.moeda] || 'R$';
+            } else if (clienteConfig.moeda) {
+                const simbolos = { 'BRL': 'R$', 'USD': '$', 'EUR': '€' };
+                moeda = simbolos[clienteConfig.moeda] || 'R$';
             }
+            document.getElementById('moedaSimbolo').innerHTML = moeda;
 
-            if (clienteConfig.modoEscuro === 'dark') {
+            let modoEscuro = clienteConfig.visual?.modoEscuro || clienteConfig.modoEscuro || 'auto';
+            if (modoEscuro === 'dark') {
                 document.body.classList.add('dark-mode');
                 document.getElementById('darkModeBtn').innerHTML = '☀️ Modo Claro';
-            } else if (clienteConfig.modoEscuro === 'light') {
+            } else if (modoEscuro === 'light') {
                 document.body.classList.remove('dark-mode');
                 document.getElementById('darkModeBtn').innerHTML = '🌙 Modo Escuro';
+            } else {
+                // auto - mantém o padrão
             }
         }
 
-        
         function atualizarCamposDePermissao() {
-            const podeEditar = (clienteConfig?.permitirEditarLancamentos !== false);
-            const podeExcluir = (clienteConfig?.permitirExcluirLancamentos !== false);
+            // NOVAS PERMISSÕES
+            const podeEditar = clienteConfig?.funcoes?.permitirEditarLancamentos !== false;
+            const podeExcluir = clienteConfig?.funcoes?.permitirExcluirLancamentos !== false;
 
             window.__podeEditarLanc = podeEditar;
             window.__podeExcluirLanc = podeExcluir;
         }
 
-
-
-        // ============================================
-        // CARREGAR DADOS FINANCEIROS DO CLIENTE
-        // ============================================
         async function carregarDadosFinanceiros() {
             try {
                 const docRef = db.collection('dados_financeiros').doc(clienteId);
@@ -2153,9 +2239,6 @@
             }
         }
 
-        // ============================================
-        // SALVAR DADOS FINANCEIROS
-        // ============================================
         async function salvarDadosFinanceiros() {
             try {
                 await db.collection('dados_financeiros').doc(clienteId).set({
@@ -2172,20 +2255,19 @@
             }
         }
 
-        // ============================================
-        // INICIALIZAR INTERFACE
-        // ============================================
         function inicializarInterface() {
             const navTabs = document.getElementById('navTabs');
             navTabs.innerHTML = '';
 
+            const funcoes = clienteConfig.funcoes || {};
+            
             const abas = [
-                { id: 'dashboard', nome: '📊 Dashboard', ativo: clienteConfig.funcDashboard !== false },
-                { id: 'lancamentos', nome: '📝 Lançamentos', ativo: clienteConfig.funcLancamentos !== false },
-                { id: 'contas', nome: '🏦 Contas', ativo: clienteConfig.funcContas !== false },
-                { id: 'orcamento', nome: '📅 Orçamento', ativo: clienteConfig.funcOrcamento !== false },
-                { id: 'relatorios', nome: '📈 Relatórios', ativo: clienteConfig.funcRelatorios !== false },
-                { id: 'planos', nome: '💰 Planos', ativo: clienteConfig.funcPlanos === true }
+                { id: 'dashboard', nome: '📊 Dashboard', ativo: funcoes.dashboard !== false },
+                { id: 'lancamentos', nome: '📝 Lançamentos', ativo: funcoes.lancamentos !== false },
+                { id: 'contas', nome: '🏦 Contas', ativo: funcoes.contas !== false },
+                { id: 'orcamento', nome: '📅 Orçamento', ativo: funcoes.orcamento !== false },
+                { id: 'relatorios', nome: '📈 Relatórios', ativo: funcoes.relatorios !== false },
+                { id: 'planos', nome: '💰 Planos', ativo: funcoes.planos === true }
             ];
 
             let primeiraAbaAtiva = null;
@@ -2207,7 +2289,7 @@
                 }
             });
 
-            if (clienteConfig.funcImportar === false) {
+            if (funcoes.importar === false) {
                 const importSection = document.querySelector('.import-export-section');
                 if (importSection) importSection.style.display = 'none';
             }
@@ -2234,9 +2316,6 @@
             gerarRelatorio();
         }
 
-        // ============================================
-        // FUNÇÕES AUXILIARES
-        // ============================================
         function adjustColor(hex, percent) {
             return hex;
         }
@@ -2260,14 +2339,13 @@
             return parseFloat(valorLimpo) || 0;
         }
 
-        // ============================================
-        // FUNÇÕES DE NAVEGAÇÃO
-        // ============================================
         function showTab(tabName) {
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+            const tabButton = document.querySelector(`[onclick="showTab('${tabName}')"]`);
+            if (tabButton) tabButton.classList.add('active');
+            
             document.getElementById(tabName).classList.add('active');
         }
 
@@ -2290,7 +2368,7 @@
         function setTipoPrevisao(tipo) {
             tipoPrevisao = tipo;
             document.querySelectorAll('#orcamento .tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            if (event && event.target) event.target.classList.add('active');
             preencherCategoriasPrevisao();
         }
 
@@ -2305,17 +2383,19 @@
             }
         }
 
-        // ============================================
-        // FUNÇÕES DE LANÇAMENTOS
-        // ============================================
         function preencherCategorias() {
             const select = document.getElementById('categoria');
             if (!select) return;
             
             select.innerHTML = '';
-            const listaCategorias = (clienteConfig && Array.isArray(clienteConfig.categorias) && clienteConfig.categorias.length)
-                ? clienteConfig.categorias
-                : categorias[tipoLancamento];
+            let listaCategorias = [];
+            
+            if (clienteConfig?.conteudo?.categorias && clienteConfig.conteudo.categorias.length) {
+                listaCategorias = clienteConfig.conteudo.categorias;
+            } else {
+                listaCategorias = categorias[tipoLancamento];
+            }
+            
             listaCategorias.forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat;
@@ -2329,27 +2409,55 @@
             if (!select) return;
             
             select.innerHTML = '';
-            const listaContas = (clienteConfig && Array.isArray(clienteConfig.contasPadrao) && clienteConfig.contasPadrao.length)
-                ? clienteConfig.contasPadrao
-                : contas;
-            listaContas.forEach(conta => {
+            
+            contas.forEach(conta => {
                 const option = document.createElement('option');
                 option.value = conta.id;
                 option.textContent = `${conta.nome} (${conta.tipo})`;
                 select.appendChild(option);
             });
+            
+            if (contas.length === 0 && clienteConfig?.conteudo?.contasPadrao && clienteConfig.conteudo.contasPadrao.length) {
+                clienteConfig.conteudo.contasPadrao.forEach(contaNome => {
+                    const option = document.createElement('option');
+                    option.value = contaNome;
+                    option.textContent = contaNome;
+                    select.appendChild(option);
+                });
+            }
         }
 
         async function lancarTransacao() {
             const valorInput = document.getElementById('valor').value;
             const descricao = document.getElementById('descricao').value;
             const categoria = document.getElementById('categoria').value;
-            const contaId = parseInt(document.getElementById('contaSelect').value);
+            const contaSelect = document.getElementById('contaSelect');
+            let contaId = contaSelect.value;
+            
+            if (isNaN(contaId)) {
+                const contaExistente = contas.find(c => c.nome === contaId);
+                if (!contaExistente) {
+                    const novaConta = {
+                        id: Date.now(),
+                        nome: contaId,
+                        tipo: 'corrente',
+                        saldoInicial: 0,
+                        cor: '#4CAF50'
+                    };
+                    contas.push(novaConta);
+                    contaId = novaConta.id;
+                } else {
+                    contaId = contaExistente.id;
+                }
+            } else {
+                contaId = parseInt(contaId);
+            }
+
             const motorista = document.getElementById('motorista')?.value || '';
             const observacao = document.getElementById('observacao').value;
             let data = document.getElementById('dataLancamento').value;
 
-            if (!contas.length) {
+            if (!contas.length && isNaN(contaId)) {
                 alert('⚠️ Cadastre uma conta primeiro!');
                 showTab('contas');
                 return;
@@ -2398,6 +2506,94 @@
             alert('✅ Lançamento realizado!');
         }
 
+        // NOVAS FUNÇÕES DE EDIÇÃO/EXCLUSÃO
+        function editarTransacao(id) {
+            const transacao = transacoes.find(t => t.id === id);
+            if (!transacao) return;
+            
+            transacaoEmEdicao = transacao;
+            
+            document.getElementById('editValor').value = transacao.valor.toFixed(2).replace('.', ',');
+            document.getElementById('editData').value = transacao.data;
+            document.getElementById('editDescricao').value = transacao.descricao;
+            document.getElementById('editMotorista').value = transacao.motorista || '';
+            document.getElementById('editObservacao').value = transacao.observacao || '';
+            
+            // Preencher categorias
+            const editCategoria = document.getElementById('editCategoria');
+            editCategoria.innerHTML = '';
+            let listaCategorias = clienteConfig?.conteudo?.categorias?.length ? 
+                clienteConfig.conteudo.categorias : categorias[transacao.tipo];
+            
+            listaCategorias.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat;
+                option.textContent = cat;
+                option.selected = (cat === transacao.categoria);
+                editCategoria.appendChild(option);
+            });
+            
+            // Preencher contas
+            const editConta = document.getElementById('editConta');
+            editConta.innerHTML = '';
+            contas.forEach(conta => {
+                const option = document.createElement('option');
+                option.value = conta.id;
+                option.textContent = `${conta.nome} (${conta.tipo})`;
+                option.selected = (conta.id === transacao.contaId);
+                editConta.appendChild(option);
+            });
+            
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function fecharModalEdicao() {
+            document.getElementById('editModal').style.display = 'none';
+            transacaoEmEdicao = null;
+        }
+
+        async function salvarEdicao() {
+            if (!transacaoEmEdicao) return;
+            
+            const index = transacoes.findIndex(t => t.id === transacaoEmEdicao.id);
+            if (index === -1) return;
+            
+            const valorInput = document.getElementById('editValor').value;
+            const valorNumerico = converterMoedaParaNumber(valorInput);
+            
+            if (!valorNumerico || valorNumerico <= 0) {
+                alert('Digite um valor válido!');
+                return;
+            }
+            
+            transacoes[index] = {
+                ...transacaoEmEdicao,
+                valor: valorNumerico,
+                data: document.getElementById('editData').value,
+                descricao: document.getElementById('editDescricao').value,
+                categoria: document.getElementById('editCategoria').value,
+                contaId: parseInt(document.getElementById('editConta').value),
+                motorista: document.getElementById('editMotorista').value,
+                observacao: document.getElementById('editObservacao').value
+            };
+            
+            await salvarDadosFinanceiros();
+            atualizarListaLancamentos();
+            atualizarDashboard();
+            fecharModalEdicao();
+            alert('✅ Lançamento atualizado!');
+        }
+
+        async function excluirTransacao(id) {
+            if (!confirm('Tem certeza que deseja excluir este lançamento?')) return;
+            
+            transacoes = transacoes.filter(t => t.id !== id);
+            await salvarDadosFinanceiros();
+            atualizarListaLancamentos();
+            atualizarDashboard();
+            alert('✅ Lançamento excluído!');
+        }
+
         function atualizarListaLancamentos() {
             const listaDiv = document.getElementById('listaLancamentos');
             if (!listaDiv) return;
@@ -2407,11 +2603,14 @@
                 return;
             }
 
+            const podeEditar = window.__podeEditarLanc !== false;
+            const podeExcluir = window.__podeExcluirLanc !== false;
+
             let html = '';
             transacoes.slice(0, 15).forEach(t => {
                 const conta = contas.find(c => c.id === t.contaId) || { nome: 'Conta' };
                 const valorFormatado = t.valor.toFixed(2).replace('.', ',');
-                const termoColaborador = clienteConfig?.termoColaborador || 'Motorista';
+                const termoColaborador = clienteConfig?.conteudo?.termoColaborador || clienteConfig?.termoColaborador || 'Motorista';
                 
                 html += `
                     <div class="transaction-item">
@@ -2430,6 +2629,10 @@
                                 ${t.observacao ? `<br>📌 ${t.observacao}` : ''}
                             </div>
                         </div>
+                        <div class="transaction-actions">
+                            ${podeEditar ? `<button class="btn-action btn-edit" onclick="editarTransacao(${t.id})">✏️ Editar</button>` : ''}
+                            ${podeExcluir ? `<button class="btn-action btn-delete" onclick="excluirTransacao(${t.id})">🗑️ Excluir</button>` : ''}
+                        </div>
                     </div>
                 `;
             });
@@ -2437,9 +2640,6 @@
             listaDiv.innerHTML = html;
         }
 
-        // ============================================
-        // FUNÇÕES DE CONTAS
-        // ============================================
         async function adicionarConta() {
             const nome = document.getElementById('nomeConta').value;
             const saldoInicialInput = document.getElementById('saldoInicial').value;
@@ -2504,9 +2704,6 @@
                 }, 0);
         }
 
-        // ============================================
-        // FUNÇÕES DE ORÇAMENTO
-        // ============================================
         function preencherCategoriasPrevisao() {
             const select = document.getElementById('categoriaPrevista');
             if (!select) return;
@@ -2608,9 +2805,6 @@
             listaDiv.innerHTML = html;
         }
 
-        // ============================================
-        // FUNÇÕES DE DASHBOARD
-        // ============================================
         function atualizarDashboard() {
             let totalReceitas = 0;
             let totalDespesas = 0;
@@ -2644,9 +2838,6 @@
             document.getElementById('statSub2').innerHTML = (disp === null || disp === undefined) ? '' : `${disp} disponíveis`;
         }
 
-        // ============================================
-        // FUNÇÕES DE RELATÓRIOS
-        // ============================================
         function preencherSelectMeses() {
             const selectMes = document.getElementById('relatorioMes');
             if (selectMes) {
@@ -2660,7 +2851,6 @@
                 });
             }
         }
-
 
         function definirPeriodoRelatorio(tipo) {
             const hoje = new Date();
@@ -2681,8 +2871,6 @@
             if (df) df.value = '';
             gerarRelatorio();
         }
-
-
 
         function gerarRelatorio() {
             const mes = document.getElementById('relatorioMes').value;
@@ -2768,11 +2956,8 @@
             }
         }
 
-        // ============================================
-        // FUNÇÕES DE IMPORTAÇÃO/EXPORTAÇÃO
-        // ============================================
-
         function importarCSV() { alert('📥 Importação CSV ainda não implementada. Use JSON por enquanto.'); }
+        
         async function importarTXT() {
             try {
                 const input = document.getElementById('fileInput');
@@ -2964,6 +3149,7 @@
                 alert('Erro ao importar TXT. Veja o Console.');
             }
         }
+        
         function exportarCSV() { alert('📤 Exportação CSV ainda não implementada. Use JSON por enquanto.'); }
 
         async function importarJSON() {
@@ -3067,7 +3253,6 @@
             }
         }
 
-        
         function exportarTXT() {
             try {
                 let conteudo = `=== RELATÓRIO ${clienteConfig?.nome?.toUpperCase()} ===\n`;
@@ -3123,7 +3308,7 @@
                 <title>Relatório ${clienteConfig?.nome || 'Financeiro'}</title>
                 <style>
                     body { font-family: Arial; padding: 20px; }
-                    h1 { color: ${clienteConfig?.cor || '#333'}; }
+                    h1 { color: ${clienteConfig?.visual?.corPrincipal || clienteConfig?.cor || '#333'}; }
                     .receita { color: #28a745; }
                     .despesa { color: #dc3545; }
                     table { width: 100%; border-collapse: collapse; margin-top: 20px; }
@@ -3162,9 +3347,6 @@
             janela.document.close();
         }
 
-        // ============================================
-        // FUNÇÕES DOS PLANOS
-        // ============================================
         function togglePlanos() {
             const isAnual = document.getElementById('toggleAnual').checked;
             document.querySelectorAll('.preco-linha').forEach(linha => {
@@ -3208,9 +3390,6 @@
             document.getElementById('modalPagamento').style.display = 'none';
         }
 
-        // ============================================
-        // INICIALIZAÇÃO
-        // ============================================
         window.onload = function() {
             carregarConfigCliente();
         };
