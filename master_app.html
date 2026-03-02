@@ -1162,8 +1162,15 @@ Pix"></textarea>
 
         function mudarAba(aba, btnEl) {
             try {
-                document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+                console.log('Mudando para aba:', aba); // Para debug
+        
+                // Esconder todas as abas
+                document.querySelectorAll('.tab-content').forEach(el => {
+                    el.style.display = 'none';
+                    console.log('Escondendo:', el.id);
+                });
 
+                // Mostrar a aba selecionada
                 const idMap = {
                     visual: 'abaVisual',
                     conteudo: 'abaConteudo',
@@ -1171,16 +1178,27 @@ Pix"></textarea>
                     dados: 'abaDados',
                     codigo: 'abaCodigo'
                 };
-                const alvo = document.getElementById(idMap[aba] || 'abaVisual');
-                if (alvo) alvo.style.display = 'block';
+        
+                const abaId = idMap[aba];
+                const abaElement = document.getElementById(abaId);
+        
+                if (abaElement) {
+                    abaElement.style.display = 'block';
+                    console.log('Mostrando:', abaId);
+                } else {
+                    console.error('Aba não encontrada:', abaId);
+                }
 
+                // Atualizar botão ativo
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                if (btnEl && btnEl.classList) btnEl.classList.add('active');
+                if (btnEl && btnEl.classList) {
+                    btnEl.classList.add('active');
+                }
             } catch (e) {
                 console.error('Erro ao mudar aba:', e);
             }
         }
-
+        
         document.addEventListener('DOMContentLoaded', () => {
             const firstBtn = document.getElementById('tab-visual');
             if (firstBtn) mudarAba('visual', firstBtn);
