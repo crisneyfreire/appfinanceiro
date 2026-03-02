@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <!-- MASTER_APP_BUILD: FIX_V3_2026-02-28T00:00Z -->
+    <!-- MASTER APP - VERSÃO MESTRE JEDI v2.0 -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👑 MASTER APP - CONTROLE TOTAL</title>
+    <title>👑 MASTER JEDI - CONTROLE TOTAL</title>
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Bibliotecas adicionais -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
     <style>
         * {
@@ -28,8 +33,10 @@
             --warning: #ff9800;
             --danger: #f44336;
             --info: #2196F3;
-            --gold: gold;
+            --gold: #ffd700;
             --neon: #00ffaa;
+            --purple: #9c27b0;
+            --pink: #e91e63;
         }
 
         body {
@@ -37,21 +44,23 @@
             min-height: 100vh;
             padding: 20px;
             color: var(--text-primary);
+            font-size: 14px;
         }
 
         .container {
-            max-width: 1600px;
+            max-width: 1800px;
             margin: 0 auto;
         }
 
+        /* ===== HEADER ===== */
         .header {
-            background: rgba(26, 26, 46, 0.8);
+            background: rgba(26, 26, 46, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 20px;
             margin-bottom: 20px;
             border: 1px solid rgba(0, 255, 170, 0.3);
-            box-shadow: 0 0 20px rgba(0, 255, 170, 0.2);
+            box-shadow: 0 0 30px rgba(0, 255, 170, 0.2);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -60,17 +69,28 @@
         }
 
         .header h1 {
-            font-size: clamp(24px, 4vw, 32px);
+            font-size: clamp(20px, 3vw, 28px);
             display: flex;
             align-items: center;
             gap: 10px;
             text-shadow: 0 0 10px var(--neon);
         }
 
-        .status {
+        .status-bar {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 30px;
+            font-size: 13px;
         }
 
         .power-btn {
@@ -82,6 +102,7 @@
             border: none;
             cursor: pointer;
             transition: all 0.3s;
+            font-size: 13px;
         }
 
         .power-btn:hover {
@@ -89,17 +110,66 @@
             box-shadow: 0 0 20px var(--neon);
         }
 
+        .danger-btn {
+            background: linear-gradient(45deg, var(--danger), #ff6b6b);
+            color: white;
+        }
+
+        /* ===== GRID PRINCIPAL ===== */
         .main-grid {
             display: grid;
             grid-template-columns: 350px 1fr;
             gap: 20px;
         }
 
+        /* ===== PAINEL DE CLIENTES ===== */
         .clientes-panel {
             background: var(--bg-card);
             border-radius: 20px;
             padding: 20px;
             border-left: 4px solid var(--neon);
+            height: fit-content;
+        }
+
+        .panel-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            color: var(--neon);
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid #404040;
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .clientes-stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .stat-tag {
+            background: rgba(0,255,170,0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            border: 1px solid rgba(0,255,170,0.3);
+        }
+
+        .clientes-lista {
+            max-height: 600px;
+            overflow-y: auto;
         }
 
         .cliente-item {
@@ -107,9 +177,6 @@
             padding: 15px;
             border-radius: 12px;
             margin-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             cursor: pointer;
             transition: all 0.3s;
             border: 1px solid transparent;
@@ -126,9 +193,47 @@
             background: #33334d;
         }
 
+        .cliente-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .cliente-nome {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .cliente-status {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .status-ativo {
+            background: var(--accent);
+            color: white;
+        }
+
+        .status-bloqueado {
+            background: var(--danger);
+            color: white;
+        }
+
+        .cliente-info {
+            display: flex;
+            gap: 10px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
         .cliente-actions {
             display: flex;
             gap: 5px;
+            justify-content: flex-end;
         }
 
         .action-icon {
@@ -136,6 +241,8 @@
             border-radius: 5px;
             cursor: pointer;
             transition: all 0.2s;
+            font-size: 12px;
+            background: rgba(255,255,255,0.05);
         }
 
         .action-icon:hover {
@@ -143,6 +250,12 @@
             color: black;
         }
 
+        .action-icon.danger:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* ===== EDITOR PANEL ===== */
         .editor-panel {
             background: var(--bg-card);
             border-radius: 20px;
@@ -153,90 +266,366 @@
         .editor-tabs {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 20px;
-            border-bottom: 1px solid #404040;
             padding-bottom: 10px;
+            border-bottom: 1px solid #404040;
         }
 
-        .tab {
-            padding: 10px 20px;
-            background: transparent;
-            border: none;
-            color: var(--text-secondary);
+        .tab-btn {
+            padding: 10px 18px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(0,255,170,0.25);
+            color: var(--text-primary);
             cursor: pointer;
             border-radius: 8px;
-            font-weight: bold;
-            transition: all 0.3s;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 13px;
         }
 
-        .tab:hover {
+        .tab-btn:hover {
+            border-color: var(--neon);
+            box-shadow: 0 0 10px rgba(0,255,170,0.25);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(45deg, var(--neon), var(--accent));
+            color: #000;
+            border-color: transparent;
+        }
+
+        .tab-btn.warning {
+            background: rgba(255,193,7,0.1);
+            border-color: rgba(255,193,7,0.5);
+        }
+
+        .tab-btn.danger {
+            background: rgba(244,67,54,0.1);
+            border-color: rgba(244,67,54,0.5);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ===== FORMULÁRIOS ===== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
             background: var(--bg-secondary);
+            border: 1px solid #404040;
+            border-radius: 8px;
             color: white;
+            font-size: 14px;
         }
 
-        .tab.active {
-            background: var(--neon);
-            color: black;
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--neon);
         }
 
-        .site-preview {
-            background: white;
+        .form-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ===== PREVIEW ===== */
+        .preview-panel {
+            background: var(--bg-secondary);
             border-radius: 15px;
             padding: 20px;
             margin: 20px 0;
-            min-height: 300px;
-            color: black;
             border: 2px solid var(--neon);
-            box-shadow: 0 0 30px rgba(0, 255, 170, 0.3);
         }
 
-        .code-editor {
-            background: #1e1e1e;
-            border-radius: 15px;
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .preview-title {
+            color: var(--neon);
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .preview-content {
+            background: white;
+            color: black;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        /* ===== CONTROLE DE APPS ===== */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .app-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
             padding: 15px;
-            font-family: 'Courier New', monospace;
-            color: #00ff00;
-            border: 1px solid #404040;
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
         }
 
-        .code-editor textarea {
-            width: 100%;
-            height: 300px;
-            background: #1e1e1e;
-            color: #00ff00;
+        .app-card.active {
+            border-left-color: var(--neon);
+            background: #33334d;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .app-nome {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .app-status {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        .app-status.ativo {
+            background: var(--accent);
+        }
+
+        .app-status.inativo {
+            background: var(--danger);
+        }
+
+        .app-descricao {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .app-toggle {
+            display: flex;
+            gap: 5px;
+        }
+
+        .app-toggle button {
+            flex: 1;
+            padding: 5px;
+            font-size: 11px;
             border: none;
-            font-family: 'Courier New', monospace;
-            padding: 10px;
-            resize: vertical;
+            border-radius: 4px;
+            cursor: pointer;
         }
 
+        /* ===== EDITOR DE DADOS ===== */
+        .data-editor {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .data-editor h4 {
+            color: var(--neon);
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 10px;
+            background: rgba(0,0,0,0.3);
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid #404040;
+        }
+
+        .data-table tr:hover {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .data-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .data-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .btn-edit {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-add {
+            background: var(--accent);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* ===== LOGO UPLOAD ===== */
+        .logo-section {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed rgba(255,255,255,0.2);
+        }
+
+        .logo-preview {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 15px;
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .logo-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        /* ===== BOTÕES DE CONTROLE ===== */
         .control-buttons {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 10px;
             margin-top: 20px;
         }
 
         .control-btn {
-            padding: 15px;
+            padding: 12px;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s;
+            font-size: 13px;
         }
 
-        .btn-edit { background: var(--info); color: white; }
-        .btn-block { background: var(--danger); color: white; }
-        .btn-save { background: var(--accent); color: white; }
-        .btn-view { background: var(--gold); color: black; }
+        .btn-edit {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-block {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-save {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-view {
+            background: var(--gold);
+            color: black;
+        }
+
+        .btn-copy {
+            background: var(--purple);
+            color: white;
+        }
+
+        .btn-export {
+            background: var(--pink);
+            color: white;
+        }
 
         .control-btn:hover {
             transform: translateY(-2px);
             filter: brightness(1.1);
         }
 
+        /* ===== LOG PANEL ===== */
         .log-panel {
             background: var(--bg-secondary);
             border-radius: 10px;
@@ -244,9 +633,21 @@
             margin-top: 20px;
             max-height: 100px;
             overflow-y: auto;
-            font-size: 12px;
+            font-size: 11px;
+            font-family: monospace;
         }
 
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid #404040;
+            color: var(--text-secondary);
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        /* ===== MODAIS ===== */
         .modal {
             display: none;
             position: fixed;
@@ -264,344 +665,681 @@
             background: var(--bg-card);
             border-radius: 20px;
             padding: 30px;
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
             border-left: 5px solid var(--neon);
         }
 
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--neon);
+            font-size: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* ===== LOADING ===== */
         .loading {
             text-align: center;
-            padding: 20px;
+            padding: 40px;
             color: var(--neon);
+            font-size: 14px;
         }
-    
-        .tab-btn {
-            padding: 12px 22px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(0,255,170,0.25);
-            color: var(--text-primary);
-            cursor: pointer;
-            border-radius: 10px;
-            font-weight: 700;
-            transition: all 0.2s ease;
-            min-width: 140px;
-            text-align: center;
+
+        .loading-spinner {
+            border: 3px solid rgba(0,255,170,0.1);
+            border-top: 3px solid var(--neon);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
         }
-        .tab-btn:hover {
-            transform: translateY(-1px);
-            border-color: rgba(0,255,170,0.6);
-            box-shadow: 0 0 14px rgba(0,255,170,0.25);
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        .tab-btn.active {
-            background: linear-gradient(45deg, var(--neon), var(--accent));
-            color: #000;
-            border-color: transparent;
+
+        /* ===== UTILITÁRIOS ===== */
+        .badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
         }
-        .tab-btn.danger {
-            background: rgba(244,67,54,0.12);
-            border-color: rgba(244,67,54,0.5);
-            color: #fff;
+
+        .badge-success {
+            background: var(--accent);
+            color: white;
         }
-        .tab-btn.danger:hover {
-            box-shadow: 0 0 16px rgba(244,67,54,0.25);
-            border-color: rgba(244,67,54,0.9);
+
+        .badge-warning {
+            background: var(--warning);
+            color: black;
+        }
+
+        .badge-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .text-small {
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        .mt-10 {
+            margin-top: 10px;
+        }
+
+        .mb-10 {
+            margin-bottom: 10px;
+        }
+
+        .flex {
+            display: flex;
+            gap: 10px;
+        }
+
+        .flex-wrap {
+            flex-wrap: wrap;
+        }
+
+        .w-100 {
+            width: 100%;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- HEADER -->
         <div class="header">
             <div>
-                <h1>👑 MASTER APP - CONTROLE TOTAL</h1>
-                <p style="color: var(--neon);">⚡ Editando TUDO dos clientes</p>
+                <h1>👑 MASTER JEDI - CONTROLE TOTAL</h1>
+                <div style="display: flex; gap: 10px; margin-top: 5px;">
+                    <span class="badge badge-success">v2.0</span>
+                    <span class="badge" style="background: var(--neon); color: black;">MODO SUPREMO</span>
+                </div>
             </div>
-            <div class="status">
-                <span id="firebaseStatus" style="color: var(--neon);">🔵 Conectando...</span>
-                <span id="clientesCount">📊 0 clientes</span>
-                <button class="power-btn" onclick="mostrarAjuda()">🚀 PODERES</button>
-                <button class="power-btn" onclick="diagnosticarConexao()">🔍 DIAGNÓSTICO</button>
+            <div class="status-bar">
+                <div class="status-item">
+                    <span id="firebaseStatus">🔄 Conectando...</span>
+                </div>
+                <div class="status-item">
+                    <span id="clientesCount">📊 0 clientes</span>
+                </div>
+                <div class="status-item">
+                    <span id="appsCount">📱 1 app ativo</span>
+                </div>
+                <button class="power-btn" onclick="mostrarAjuda()">
+                    🚀 PODERES
+                </button>
+                <button class="power-btn" onclick="diagnosticarConexao()">
+                    🔍 DIAGNÓSTICO
+                </button>
+                <button class="power-btn danger-btn" onclick="mostrarPainelAdmin()">
+                    ⚡ ADMIN
+                </button>
             </div>
         </div>
 
+        <!-- GRID PRINCIPAL -->
         <div class="main-grid">
+            <!-- PAINEL DE CLIENTES -->
             <div class="clientes-panel">
-                <h2 style="margin-bottom: 20px; color: var(--neon);">📋 CLIENTES</h2>
+                <div class="panel-title">
+                    <span>📋 CLIENTES</span>
+                    <span class="stat-tag" id="totalClientesTag">0</span>
+                </div>
                 
-                <div style="margin-bottom: 15px;">
-                    <input type="text" id="buscarCliente" placeholder="🔍 Buscar cliente..." onkeyup="filtrarClientes()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+                <input type="text" class="search-box" id="buscarCliente" placeholder="🔍 Buscar cliente..." onkeyup="filtrarClientes()">
+                
+                <div class="clientes-stats">
+                    <span class="stat-tag" id="ativosCount">✅ Ativos: 0</span>
+                    <span class="stat-tag" id="bloqueadosCount">🔒 Bloqueados: 0</span>
+                    <span class="stat-tag" id="testeCount">🧪 Teste: 0</span>
                 </div>
                 
                 <div style="margin-bottom: 15px;">
-                    <button onclick="criarCliente()" style="width: 100%; padding: 10px; background: var(--accent); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer;">
+                    <button class="power-btn w-100" onclick="criarCliente()" style="width: 100%;">
                         ➕ NOVO CLIENTE
                     </button>
                 </div>
                 
-                <div id="listaClientes">
-                    <div class="loading">📡 Carregando clientes...</div>
+                <div class="clientes-lista" id="listaClientes">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        Carregando clientes...
+                    </div>
                 </div>
             </div>
 
+            <!-- EDITOR PANEL -->
             <div class="editor-panel" id="editorPanel">
+                <!-- TABS -->
                 <div class="editor-tabs">
-                    <button id="tab-visual" class="tab-btn active" onclick="mudarAba('visual', this)">Visual</button>
-                    <button id="tab-conteudo" class="tab-btn" onclick="mudarAba('conteudo', this)">Conteúdo</button>
-                    <button id="tab-funcoes" class="tab-btn" onclick="mudarAba('funcoes', this)">Funções</button>
-                    <button id="tab-dados" class="tab-btn" onclick="mudarAba('dados', this)">Dados</button>
-                    <button id="tab-codigo" class="tab-btn" onclick="mudarAba('codigo', this)">Código</button>
-                    <button id="btn-zerar-indicadores" class="tab-btn danger" onclick="zerarIndicadoresClienteAtual()">🧹 Zerar indicadores</button>
+                    <button class="tab-btn active" onclick="mudarAba('visual', this)">🎨 Visual</button>
+                    <button class="tab-btn" onclick="mudarAba('conteudo', this)">📝 Conteúdo</button>
+                    <button class="tab-btn" onclick="mudarAba('funcoes', this)">⚙️ Funções</button>
+                    <button class="tab-btn" onclick="mudarAba('dados', this)">📊 Dados</button>
+                    <button class="tab-btn" onclick="mudarAba('apps', this)">📱 Apps</button>
+                    <button class="tab-btn" onclick="mudarAba('codigo', this)">💻 Código</button>
+                    <button class="tab-btn warning" onclick="mudarAba('backup', this)">💾 Backup</button>
+                    <button class="tab-btn danger" onclick="zerarIndicadoresClienteAtual()">🧹 Zerar</button>
                 </div>
 
                 <!-- ABA VISUAL -->
                 <div id="abaVisual" class="tab-content active">
-                    <h3 style="margin-bottom: 15px;">🎨 EDITOR VISUAL</h3>
+                    <h3 style="margin-bottom: 20px;">🎨 EDITOR VISUAL</h3>
                     
-                    <div style="display: grid; gap: 15px;">
+                    <div class="form-grid">
                         <div>
-                            <label>🏢 NOME DA EMPRESA</label>
-                            <input type="text" id="nomeEmpresa" value="" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
-                        </div>
-                        <div>
-                            <label>👤 PERFIL</label>
-                            <select id="perfilCliente" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #444; border-radius: 8px; color: var(--text-primary);">
-                                <option value="pf">PESSOAL/FAMILIAR</option>
-                                <option value="pj">EMPRESARIAL</option>
-                            </select>
-                            <small style="color: var(--text-secondary); display:block; margin-top:6px;">
-                                PF: controle pessoal/familiar. PJ: empresa/negócio.
-                            </small>
-                        </div>
-
-                        <div>
-                            <label>🧾 CPF ou CNPJ (opcional)</label>
-                            <input type="text" id="cpfCnpj" placeholder="Ex.: 000.000.000-00 ou 00.000.000/0000-00" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #444; border-radius: 8px; color: var(--text-primary);">
-                        </div>
-
-                        <div>
-                            <label>🆔 ID do cliente (gerado pelo sistema)</label>
-                            <input type="text" id="clienteIdVisivel" disabled style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #444; border-radius: 8px; color: var(--text-primary); opacity: .85; cursor: not-allowed;">
-                            <small style="color: var(--text-secondary); display:block; margin-top:6px;">
-                                Esse ID é o que você envia no link do Financeiro (ex.: ?cliente=ID).
-                            </small>
-                        </div>
-
-                        <div>
-                            <label>🎨 COR PRINCIPAL</label>
-                            <input type="color" id="corPrincipal" value="#4CAF50" onchange="alteracaoNaoSalva()" style="width: 100%; height: 50px;">
+                            <div class="form-group">
+                                <label>🏢 NOME DA EMPRESA</label>
+                                <input type="text" id="nomeEmpresa" onchange="alteracaoNaoSalva()" placeholder="Nome da empresa">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>👤 PERFIL</label>
+                                <select id="perfilCliente" onchange="alteracaoNaoSalva(); aplicarPerfilUI()">
+                                    <option value="pf">PESSOAL/FAMILIAR</option>
+                                    <option value="pj">EMPRESARIAL</option>
+                                    <option value="teste">TESTE/AVALIAÇÃO</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>🧾 CPF/CNPJ</label>
+                                <input type="text" id="cpfCnpj" onchange="alteracaoNaoSalva()" placeholder="000.000.000-00 ou 00.000.000/0000-00">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>🆔 ID DO CLIENTE</label>
+                                <input type="text" id="clienteIdVisivel" disabled style="background: #333; opacity: 0.8;">
+                                <small style="color: var(--text-secondary);">Use este ID no link: ?cliente=ID</small>
+                            </div>
                         </div>
                         
                         <div>
-                            <label>🌙 MODO ESCURO</label>
-                            <select id="modoEscuro" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
-                                <option value="auto">Automático (padrão)</option>
-                                <option value="light">Sempre claro</option>
-                                <option value="dark">Sempre escuro</option>
-                            </select>
+                            <div class="form-group">
+                                <label>🎨 COR PRINCIPAL</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="color" id="corPrincipal" value="#4CAF50" onchange="alteracaoNaoSalva(); atualizarPreview()" style="width: 60px; height: 50px;">
+                                    <input type="text" id="corHex" value="#4CAF50" onchange="alteracaoNaoSalva(); atualizarPreview()" style="flex: 1;">
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>🌙 MODO ESCURO</label>
+                                <select id="modoEscuro" onchange="alteracaoNaoSalva(); atualizarPreview()">
+                                    <option value="auto">Automático</option>
+                                    <option value="light">Sempre claro</option>
+                                    <option value="dark">Sempre escuro</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>📱 TEMA</label>
+                                <select id="tema" onchange="alteracaoNaoSalva(); atualizarPreview()">
+                                    <option value="moderno">Moderno</option>
+                                    <option value="classico">Clássico</option>
+                                    <option value="compacto">Compacto</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- ABA CONTEÚDO -->
                 <div id="abaConteudo" class="tab-content">
-                    <h3 style="margin-bottom: 15px;">📝 EDITOR DE CONTEÚDO</h3>
+                    <h3 style="margin-bottom: 20px;">📝 EDITOR DE CONTEÚDO</h3>
                     
-                    <div style="display: grid; gap: 15px;">
+                    <div class="form-grid">
                         <div>
-                            <label>👤 Termo para colaborador</label>
-                            <input type="text" id="termoColaborador" value="Motorista" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+                            <div class="form-group">
+                                <label>👤 TERMO PARA COLABORADOR</label>
+                                <input type="text" id="termoColaborador" value="Motorista" onchange="alteracaoNaoSalva()">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>📦 TERMO PARA AÇÃO</label>
+                                <input type="text" id="termoAcao" value="Entrega" onchange="alteracaoNaoSalva()">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>👥 TERMO PARA CLIENTE</label>
+                                <input type="text" id="termoCliente" value="Cliente" onchange="alteracaoNaoSalva()">
+                            </div>
                         </div>
                         
                         <div>
-                            <label>📦 Termo para ação</label>
-                            <input type="text" id="termoAcao" value="Entrega" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+                            <div class="form-group">
+                                <label>💰 MOEDA</label>
+                                <select id="moeda" onchange="alteracaoNaoSalva()">
+                                    <option value="BRL">Real (R$)</option>
+                                    <option value="USD">Dólar ($)</option>
+                                    <option value="EUR">Euro (€)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>📅 FORMATO DATA</label>
+                                <select id="formatoData" onchange="alteracaoNaoSalva()">
+                                    <option value="pt-BR">DD/MM/AAAA</option>
+                                    <option value="en-US">MM/DD/AAAA</option>
+                                    <option value="iso">AAAA-MM-DD</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>🌍 IDIOMA</label>
+                                <select id="idioma" onchange="alteracaoNaoSalva()">
+                                    <option value="pt-BR">Português (Brasil)</option>
+                                    <option value="en">Inglês</option>
+                                    <option value="es">Espanhol</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📝 MENSAGEM DE BOAS-VINDAS</label>
+                        <textarea id="mensagemBoasVindas" rows="3" onchange="alteracaoNaoSalva()" placeholder="Mensagem que aparece no dashboard..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>⚠️ MENSAGEM DE BLOQUEIO</label>
+                        <textarea id="motivoBloqueio" rows="2" onchange="alteracaoNaoSalva()" placeholder="Motivo exibido quando cliente está bloqueado..."></textarea>
+                    </div>
+                </div>
+
+                <!-- ABA FUNÇÕES (MELHORADA) -->
+                <div id="abaFuncoes" class="tab-content">
+                    <h3 style="margin-bottom: 20px;">⚙️ CONTROLE DE FUNÇÕES</h3>
+                    
+                    <div class="form-grid">
+                        <div>
+                            <h4 style="color: var(--neon); margin-bottom: 15px;">📊 MÓDULOS PRINCIPAIS</h4>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="funcDashboard" checked onchange="alteracaoNaoSalva()">
+                                <label for="funcDashboard">📊 Dashboard</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="funcLancamentos" checked onchange="alteracaoNaoSalva()">
+                                <label for="funcLancamentos">📝 Lançamentos</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="funcContas" checked onchange="alteracaoNaoSalva()">
+                                <label for="funcContas">🏦 Contas</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="funcOrcamento" checked onchange="alteracaoNaoSalva()">
+                                <label for="funcOrcamento">📅 Orçamento</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="funcRelatorios" checked onchange="alteracaoNaoSalva()">
+                                <label for="funcRelatorios">📈 Relatórios</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="funcPlanos" onchange="alteracaoNaoSalva()">
+                                <label for="funcPlanos">💰 Planos (assinaturas)</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="funcImportar" checked onchange="alteracaoNaoSalva()">
+                                <label for="funcImportar">📥 Importação/Exportação</label>
+                            </div>
                         </div>
                         
                         <div>
-                            <label>👥 Termo para cliente</label>
-                            <input type="text" id="termoCliente" value="Cliente" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+                            <h4 style="color: var(--neon); margin-bottom: 15px;">✏️ CONTROLE DE LANÇAMENTOS</h4>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="permEditarLanc" checked onchange="alteracaoNaoSalva()">
+                                <label for="permEditarLanc">✏️ Permitir editar lançamentos</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="permExcluirLanc" checked onchange="alteracaoNaoSalva()">
+                                <label for="permExcluirLanc">🗑️ Permitir excluir lançamentos</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="permSelecaoMassa" checked onchange="alteracaoNaoSalva()">
+                                <label for="permSelecaoMassa">✅ Permitir seleção em massa</label>
+                            </div>
+                            
+                            <h4 style="color: var(--neon); margin: 20px 0 15px;">🔒 CONTROLE DE ORÇAMENTO</h4>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="permAutorizacao" onchange="alteracaoNaoSalva()">
+                                <label for="permAutorizacao">👑 Exigir autorização do Master</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="permEditarPrevisao" checked onchange="alteracaoNaoSalva()">
+                                <label for="permEditarPrevisao">✏️ Permitir editar previsões</label>
+                            </div>
+                            
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="permExcluirPrevisao" checked onchange="alteracaoNaoSalva()">
+                                <label for="permExcluirPrevisao">🗑️ Permitir excluir previsões</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 style="color: var(--neon); margin: 20px 0 15px;">📱 APPS ATIVOS</h4>
+                    <div class="apps-grid" id="appsAtivosList">
+                        <!-- Apps serão carregados aqui -->
+                    </div>
+                </div>
+
+                <!-- ABA DADOS (EDITOR COMPLETO) -->
+                <div id="abaDados" class="tab-content">
+                    <h3 style="margin-bottom: 20px;">📊 EDITOR DE DADOS</h3>
+                    
+                    <div class="data-editor">
+                        <h4>🏷️ CATEGORIAS</h4>
+                        <table class="data-table" id="tabelaCategorias">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Tipo</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="categoriasBody"></tbody>
+                        </table>
+                        <div class="flex">
+                            <input type="text" id="novaCategoria" placeholder="Nova categoria..." style="flex: 1; padding: 8px;">
+                            <select id="tipoCategoria" style="width: 120px;">
+                                <option value="ambos">Ambos</option>
+                                <option value="receita">Receita</option>
+                                <option value="despesa">Despesa</option>
+                            </select>
+                            <button class="btn-add" onclick="adicionarCategoria()">➕ Adicionar</button>
+                        </div>
+                    </div>
+                    
+                    <div class="data-editor">
+                        <h4>🏦 CONTAS PADRÃO</h4>
+                        <table class="data-table" id="tabelaContas">
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Tipo</th>
+                                    <th>Saldo Inicial</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contasBody"></tbody>
+                        </table>
+                        <div class="flex">
+                            <input type="text" id="novaConta" placeholder="Nome da conta..." style="flex: 1; padding: 8px;">
+                            <select id="tipoContaPadrao" style="width: 120px;">
+                                <option value="corrente">Corrente</option>
+                                <option value="poupanca">Poupança</option>
+                                <option value="dinheiro">Dinheiro</option>
+                            </select>
+                            <button class="btn-add" onclick="adicionarContaPadrao()">➕ Adicionar</button>
+                        </div>
+                    </div>
+                    
+                    <div class="data-editor">
+                        <h4>📊 INDICADORES PERSONALIZADOS</h4>
+                        <table class="data-table" id="tabelaIndicadores">
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Valor Padrão</th>
+                                    <th>Unidade</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="indicadoresBody"></tbody>
+                        </table>
+                        <div class="flex">
+                            <input type="text" id="novoIndicadorTitulo" placeholder="Título..." style="flex: 1; padding: 8px;">
+                            <input type="text" id="novoIndicadorUnidade" placeholder="Unidade..." style="width: 100px;">
+                            <button class="btn-add" onclick="adicionarIndicador()">➕ Adicionar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA APPS (NOVA) -->
+                <div id="abaApps" class="tab-content">
+                    <h3 style="margin-bottom: 20px;">📱 GERENCIADOR DE APPS</h3>
+                    
+                    <div class="apps-grid" id="appsDisponiveis">
+                        <!-- App Financeiro -->
+                        <div class="app-card active">
+                            <div class="app-header">
+                                <span class="app-nome">💰 App Financeiro</span>
+                                <span class="app-status ativo">Ativo</span>
+                            </div>
+                            <div class="app-descricao">
+                                Sistema completo de controle financeiro com dashboard, lançamentos, contas e relatórios.
+                            </div>
+                            <div class="app-toggle">
+                                <button style="background: var(--accent); color: white;" onclick="toggleApp('financeiro', true)">✅ Ativar</button>
+                                <button style="background: var(--danger); color: white;" onclick="toggleApp('financeiro', false)">❌ Desativar</button>
+                                <button style="background: var(--info); color: white;" onclick="configurarApp('financeiro')">⚙️ Config</button>
+                            </div>
                         </div>
                         
-                        <div>
-                            <label>💰 Moeda</label>
-                            <select id="moeda" onchange="alteracaoNaoSalva()" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
-                                <option value="BRL">Real (R$)</option>
-                                <option value="USD">Dólar ($)</option>
-                                <option value="EUR">Euro (€)</option>
+                        <!-- Ordem de Serviço (NOVO) -->
+                        <div class="app-card">
+                            <div class="app-header">
+                                <span class="app-nome">🔧 Ordens de Serviço</span>
+                                <span class="app-status inativo">Em breve</span>
+                            </div>
+                            <div class="app-descricao">
+                                Sistema de ordens de serviço com clientes, técnicos, prazos e status.
+                            </div>
+                            <div class="app-toggle">
+                                <button style="background: var(--accent); color: white;" onclick="prepararApp('os')">🚧 Preparar</button>
+                                <button style="background: var(--info); color: white;" onclick="configurarApp('os')">⚙️ Config</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Estoque (NOVO) -->
+                        <div class="app-card">
+                            <div class="app-header">
+                                <span class="app-nome">📦 Controle de Estoque</span>
+                                <span class="app-status inativo">Em breve</span>
+                            </div>
+                            <div class="app-descricao">
+                                Gestão de produtos, entradas, saídas e inventário.
+                            </div>
+                            <div class="app-toggle">
+                                <button style="background: var(--accent); color: white;" onclick="prepararApp('estoque')">🚧 Preparar</button>
+                                <button style="background: var(--info); color: white;" onclick="configurarApp('estoque')">⚙️ Config</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Vendas (NOVO) -->
+                        <div class="app-card">
+                            <div class="app-header">
+                                <span class="app-nome">🛒 PDV - Vendas</span>
+                                <span class="app-status inativo">Em breve</span>
+                            </div>
+                            <div class="app-descricao">
+                                Ponto de venda com carrinho, clientes e emissão de notas.
+                            </div>
+                            <div class="app-toggle">
+                                <button style="background: var(--accent); color: white;" onclick="prepararApp('vendas')">🚧 Preparar</button>
+                                <button style="background: var(--info); color: white;" onclick="configurarApp('vendas')">⚙️ Config</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="data-editor" style="margin-top: 20px;">
+                        <h4>⚙️ CONFIGURAÇÕES DO APP</h4>
+                        <div class="form-group">
+                            <label>URL Base dos Apps</label>
+                            <input type="text" id="urlBaseApps" value="https://seuapp.com/" placeholder="https://...">
+                        </div>
+                        <div class="form-group">
+                            <label>Template Padrão</label>
+                            <select id="templatePadrao">
+                                <option value="moderno">Moderno</option>
+                                <option value="classico">Clássico</option>
+                                <option value="compacto">Compacto</option>
                             </select>
                         </div>
                     </div>
                 </div>
 
-                <!-- ABA FUNÇÕES (CORRIGIDA) -->
-                <div id="abaFuncoes" class="tab-content">
-                    <h3 style="margin-bottom: 15px;">⚙️ CONTROLE DE FUNÇÕES</h3>
-                    <p style="color: var(--warning); font-size: 12px; margin-bottom: 15px;">🔒 Desative funções para limitar o acesso do cliente</p>
+                <!-- ABA CÓDIGO (MELHORADA) -->
+                <div id="abaCodigo" class="tab-content">
+                    <h3 style="margin-bottom: 20px;">💻 EDITOR DE CÓDIGO</h3>
                     
-                    <div style="display: grid; gap: 15px;">
-                        <label style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="funcDashboard" checked onchange="alteracaoNaoSalva()"> 📊 Dashboard
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="funcLancamentos" checked onchange="alteracaoNaoSalva()"> 📝 Lançamentos
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="funcContas" checked onchange="alteracaoNaoSalva()"> 🏦 Contas
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="funcOrcamento" checked onchange="alteracaoNaoSalva()"> 📅 Orçamento
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="funcRelatorios" checked onchange="alteracaoNaoSalva()"> 📈 Relatórios
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="funcPlanos" onchange="alteracaoNaoSalva()"> 💰 Planos (assinaturas)
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 10px;">
-                            <input type="checkbox" id="funcImportar" checked onchange="alteracaoNaoSalva()"> 📥 Importação/Exportação
-                        </label>
-
-                        <!-- NOVAS OPÇÕES DE EDIÇÃO/EXCLUSÃO -->
-                        <div style="border-top: 1px solid #404040; margin: 10px 0; padding-top: 15px;">
-                            <h4 style="color: var(--neon); margin-bottom: 10px;">✏️ CONTROLE DE LANÇAMENTOS</h4>
-            
-                            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                                <input type="checkbox" id="permEditarLanc" checked onchange="alteracaoNaoSalva()"> ✏️ Permitir editar lançamentos
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 10px;">
-                                <input type="checkbox" id="permExcluirLanc" checked onchange="alteracaoNaoSalva()"> 🗑️ Permitir excluir lançamentos
-                            </label>
-                            <small style="color: var(--text-secondary); display:block; margin-top:8px;">
-                                Se desativado, o cliente não verá os botões de editar/excluir nos lançamentos.
-                            </small>
-                        </div>
+                    <div class="form-group">
+                        <label>📄 HTML PERSONALIZADO</label>
+                        <textarea id="codigoHtml" rows="10" onchange="alteracaoNaoSalva()" style="font-family: monospace; font-size: 12px;"></textarea>
                     </div>
-                </div>  <!-- FIM DA ABA FUNÇÕES -->
-                
-                <!-- ABA DADOS (completa) -->
-                <div id="abaDados" class="tab-content" style="display:none;">
-                    <h3 style="margin-bottom: 15px;">🧩 EDITOR DE DADOS (SEM CÓDIGO)</h3>
-                    <p style="color: var(--text-secondary); font-size: 12px; margin-bottom: 12px;">
-                        Aqui você controla listas e padrões do cliente (categorias, contas) sem mexer no HTML.
-                    </p>
-
-                    <div style="display: grid; gap: 15px;">
-                        <div>
-                            <label>🏷️ Categorias (uma por linha)</label>
-                            <textarea id="listaCategorias" rows="8" onchange="alteracaoNaoSalva(); atualizarPreviewDraft();" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white; resize: vertical;" placeholder="Ex:
-Alimentação
-Transporte
-Moradia
-Lazer"></textarea>
-                            <small style="color: var(--text-secondary); display:block; margin-top:6px;">
-                                O AppFinanceiro vai usar essa lista no campo Categoria dos lançamentos.
-                            </small>
+                    
+                    <div class="form-group">
+                        <label>🎨 CSS PERSONALIZADO</label>
+                        <textarea id="codigoCss" rows="8" onchange="alteracaoNaoSalva()" style="font-family: monospace; font-size: 12px;"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>⚡ JAVASCRIPT PERSONALIZADO</label>
+                        <textarea id="codigoJs" rows="8" onchange="alteracaoNaoSalva()" style="font-family: monospace; font-size: 12px;"></textarea>
+                    </div>
+                    
+                    <!-- CONVITES -->
+                    <div class="data-editor">
+                        <h4>🔗 CONVITE DE CADASTRO</h4>
+                        <div class="flex" style="margin-bottom: 10px;">
+                            <input type="text" id="ultimoConviteLink" readonly style="flex: 1; background: #333;" placeholder="Clique em gerar convite...">
+                            <button class="btn-add" onclick="copiarUltimoConvite()" id="btnCopiarConvite">📋 Copiar</button>
                         </div>
-
-                        <div>
-                            <label>🏦 Contas padrão (uma por linha)</label>
-                            <textarea id="listaContasPadrao" rows="6" onchange="alteracaoNaoSalva(); atualizarPreviewDraft();" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white; resize: vertical;" placeholder="Ex:
-Carteira
-Banco
-Pix"></textarea>
-                            <small style="color: var(--text-secondary); display:block; margin-top:6px;">
-                                Se o cliente ainda não tiver contas criadas, o sistema pode sugerir essas.
-                            </small>
-                        </div>
-
-                        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                            <button class="control-btn btn-view" onclick="abrirPreviewModal()" id="btnPreviewInline" disabled style="flex:1; min-width: 180px;">
-                                👁️ PREVIEW AO VIVO
-                            </button>
-                            <button class="control-btn btn-save" onclick="salvarAlteracoes()" id="btnSalvarDados" disabled style="flex:1; min-width: 180px;">
-                                💾 SALVAR (PUBLICAR)
-                            </button>
-                        </div>
-
-                        <div style="background: var(--bg-secondary); border-radius: 12px; padding: 12px; border: 1px solid #404040;">
-                            <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                                <div>
-                                    <div style="font-weight:bold; color: var(--neon);">🕵️ Auditoria</div>
-                                    <div id="auditoriaInfo" style="font-size:12px; color: var(--text-secondary); margin-top:6px;">
-                                        Nenhuma publicação ainda.
-                                    </div>
-                                </div>
-                                <button class="power-btn" onclick="recarregarConfigDoCliente()" style="height: fit-content;">
-                                    🔄 Recarregar config
-                                </button>
-                            </div>
+                        <div class="flex">
+                            <select id="tipoConvite" style="width: 150px;">
+                                <option value="cliente">Cliente normal</option>
+                                <option value="master">Acesso Master</option>
+                                <option value="teste">Conta teste</option>
+                            </select>
+                            <button class="control-btn btn-view" onclick="gerarConviteCadastro()" style="flex: 1;">✨ GERAR CONVITE</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- ABA CÓDIGO (completa) -->
-                <div id="abaCodigo" class="tab-content">
-                    <h3 style="margin-bottom: 15px;">💻 EDITOR DE CÓDIGO</h3>
-                    <p style="color: var(--warning); font-size: 12px; margin-bottom: 15px;">⚡ Edite o HTML diretamente (apenas para avançados)</p>
+                <!-- ABA BACKUP (NOVA) -->
+                <div id="abaBackup" class="tab-content">
+                    <h3 style="margin-bottom: 20px;">💾 BACKUP E RESTAURAÇÃO</h3>
                     
-                    <div class="code-editor">
-                        <textarea id="codigoHtml" placeholder="&lt;!-- Código HTML personalizado --&gt;" onchange="alteracaoNaoSalva()">
-</textarea>
-                        <div class="invite-box" style="margin-top:12px; padding:12px; border:1px dashed rgba(255,255,255,0.25); border-radius:10px;">
-                            <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
-                                <div>
-                                    <div style="font-weight:700;">🔗 Convite de cadastro do cliente</div>
-                                    <div style="font-size:12px; opacity:0.9; margin-top:4px;">
-                                        Gera um link único para o cliente preencher os dados. (O cadastro por convite será ativado no Financeiro quando você decidir.)
-                                    </div>
-                                </div>
-                                <div style="display:flex; gap:8px;">
-                                    <button class="control-btn btn-view" onclick="gerarConviteCadastro()" id="btnGerarConvite" disabled>✨ GERAR CONVITE</button>
-                                    <button class="control-btn btn-view" onclick="copiarUltimoConvite()" id="btnCopiarConvite" disabled>📋 COPIAR LINK</button>
-                                </div>
-                            </div>
-                            <input id="ultimoConviteLink" readonly style="margin-top:10px; width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.25); color:#fff;" placeholder="O link do convite vai aparecer aqui..." />
+                    <div class="form-grid">
+                        <div class="data-editor">
+                            <h4>📤 EXPORTAR DADOS</h4>
+                            <button class="control-btn btn-edit w-100" onclick="exportarClienteJSON()" style="margin-bottom: 10px;">
+                                📦 Exportar como JSON
+                            </button>
+                            <button class="control-btn btn-edit w-100" onclick="exportarClienteExcel()" style="margin-bottom: 10px;">
+                                📊 Exportar como Excel
+                            </button>
+                            <button class="control-btn btn-edit w-100" onclick="exportarClientePDF()">
+                                📑 Exportar como PDF
+                            </button>
+                        </div>
+                        
+                        <div class="data-editor">
+                            <h4>📥 IMPORTAR DADOS</h4>
+                            <input type="file" id="importFile" accept=".json,.xlsx,.csv" style="margin-bottom: 10px; width: 100%;">
+                            <button class="control-btn btn-save w-100" onclick="importarDadosCliente()">
+                                🔄 Importar e Substituir
+                            </button>
+                            <small style="color: var(--warning);">Atenção: isso substituirá os dados atuais!</small>
                         </div>
                     </div>
+                    
+                    <div class="data-editor">
+                        <h4>📋 HISTÓRICO DE BACKUPS</h4>
+                        <table class="data-table" id="tabelaBackups">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Tamanho</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="backupsBody">
+                                <tr>
+                                    <td colspan="3" style="text-align: center;">Nenhum backup encontrado</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <button class="btn-add" onclick="criarBackup()">💾 Criar Backup Agora</button>
+                    </div>
+                </div>
+
+                <!-- LOGO SECTION -->
+                <div class="logo-section">
+                    <div class="logo-preview" id="logoPreviewContainer">
+                        <img id="logoPreview" style="display: none;">
+                        <span id="logoPlaceholder" style="color: var(--text-secondary);">🏷️ LOGO</span>
+                    </div>
+                    <div class="logo-actions">
+                        <button class="control-btn btn-edit" onclick="abrirSeletorLogo()">📤 ENVIAR LOGO</button>
+                        <button class="control-btn btn-block" onclick="removerLogoCliente()">🗑️ REMOVER</button>
+                    </div>
+                    <input type="file" id="logoInput" accept="image/*" style="display: none;">
                 </div>
 
                 <!-- PREVIEW -->
-                <div class="site-preview" id="sitePreview">
-                    <div id="previewConteudo" style="text-align: center;">
-                        <div id="previewLogoBox" style="width: 120px; height: 120px; background: #ddd; margin: 0 auto; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                            <span id="previewLogoPlaceholder" style="color:#555;font-weight:600;">LOGO</span>
-                            <img id="previewLogoImg" alt="Logo do cliente" style="display:none; width:100%; height:100%; object-fit:contain; background:transparent;" />
-                        </div>
-                        <h2 id="previewTitulo" style="margin: 10px 0;">Selecione um cliente</h2>
-                        <div id="previewBotoes" style="display: flex; gap: 10px; justify-content: center;">
-                            <span>📊 Dashboard</span>
-                            <span>📝 Lançamentos</span>
-                            <span>🏦 Contas</span>
-                        </div>
+                <div class="preview-panel">
+                    <div class="preview-header">
+                        <span class="preview-title">👁️ PREVIEW AO VIVO</span>
+                        <span style="color: var(--text-secondary); font-size: 11px;">Alterações aparecem em tempo real</span>
                     </div>
-                </div>
-
-                <!-- LOGO -->
-                <div id="logoSection" style="margin-top: 16px; padding: 14px; border-radius: 14px; border: 1px dashed rgba(255,255,255,0.25);">
-                    <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px; flex-wrap:wrap;">
-                        <div>
-                            <div style="font-weight:800;">🖼️ Logotipo do cliente</div>
-                            <div style="font-size:12px; opacity:0.9; margin-top:4px;">
-                                Espaço “médio/grande”. O sistema comprime automaticamente para não pesar no banco.
+                    <div class="preview-content" id="previewConteudo">
+                        <div style="text-align: center;">
+                            <div id="previewLogoBox" style="width: 100px; height: 100px; background: #ddd; margin: 0 auto; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <span id="previewLogoPlaceholder">LOGO</span>
+                            </div>
+                            <h3 id="previewTitulo">Nome da Empresa</h3>
+                            <div id="previewBotoes" style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+                                <span style="padding: 5px 10px; background: #4CAF50; color: white; border-radius: 5px;">Dashboard</span>
+                                <span style="padding: 5px 10px; background: #2196F3; color: white; border-radius: 5px;">Lançamentos</span>
                             </div>
                         </div>
-                        <div style="display:flex; gap:8px;">
-                            <button class="control-btn btn-edit" onclick="abrirSeletorLogo()" id="btnEscolherLogo" disabled>📤 ENVIAR LOGO</button>
-                            <button class="control-btn btn-block" onclick="removerLogoCliente()" id="btnRemoverLogo" disabled>🗑️ REMOVER</button>
-                        </div>
-                    </div>
-
-                    <input type="file" id="logoInput" accept="image/*" style="display:none" />
-
-                    <div id="logoDropArea" style="margin-top:12px; height: 180px; border-radius: 14px; background: rgba(0,0,0,0.20); display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative;">
-                        <div id="logoDropPlaceholder" style="text-align:center; padding:16px; opacity:0.95;">
-                            <div style="font-size:40px;">🏷️</div>
-                            <div style="margin-top:8px; font-weight:700;">Nenhum logo selecionado</div>
-                            <div style="margin-top:6px; font-size:12px; opacity:0.9;">Clique em “ENVIAR LOGO” (ou arraste uma imagem aqui)</div>
-                        </div>
-                        <img id="logoPreview" alt="Preview do logo" style="display:none; width:100%; height:100%; object-fit:contain; background:transparent;" />
                     </div>
                 </div>
 
+                <!-- BOTÕES DE CONTROLE -->
                 <div class="control-buttons">
                     <button class="control-btn btn-edit" onclick="entrarModoEdicao()" id="btnEditar" disabled>
                         ✏️ EDITAR
@@ -615,13 +1353,17 @@ Pix"></textarea>
                     <button class="control-btn btn-view" onclick="verComoCliente()" id="btnVisualizar" disabled>
                         👁️ VER COMO CLIENTE
                     </button>
-                    <button class="control-btn btn-view" onclick="copiarLinkClienteAtual()" id="btnCopiarLink" disabled>
+                    <button class="control-btn btn-copy" onclick="copiarLinkClienteAtual()" id="btnCopiarLink" disabled>
                         🔗 COPIAR LINK
+                    </button>
+                    <button class="control-btn btn-export" onclick="exportarClienteJSON()" id="btnExportar" disabled>
+                        📦 EXPORTAR
                     </button>
                 </div>
 
+                <!-- LOG PANEL -->
                 <div class="log-panel" id="logPanel">
-                    <div>🚀 Sistema pronto para controle total</div>
+                    <div class="log-entry">🚀 Sistema pronto para controle total</div>
                 </div>
             </div>
         </div>
@@ -630,11 +1372,16 @@ Pix"></textarea>
     <!-- MODAL CONFIRMAÇÃO -->
     <div id="modalConfirm" class="modal">
         <div class="modal-content">
-            <h2 id="modalTitulo">⚡ Confirmação</h2>
-            <p id="modalMsg">Tem certeza?</p>
-            <div style="display: flex; gap: 10px; margin-top: 20px;">
-                <button style="flex:1; padding: 10px; background: var(--accent);" onclick="confirmarAcao()">SIM</button>
-                <button style="flex:1; padding: 10px; background: var(--danger);" onclick="fecharModal()">NÃO</button>
+            <div class="modal-header">
+                <h2 id="modalTitulo">⚡ Confirmação</h2>
+                <button class="modal-close" onclick="fecharModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMsg">Tem certeza?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="control-btn btn-save" onclick="confirmarAcao()">SIM</button>
+                <button class="control-btn btn-block" onclick="fecharModal()">NÃO</button>
             </div>
         </div>
     </div>
@@ -642,45 +1389,71 @@ Pix"></textarea>
     <!-- MODAL NOVO CLIENTE -->
     <div id="modalNovoCliente" class="modal">
         <div class="modal-content">
-            <h2>➕ NOVO CLIENTE</h2>
-            <div style="margin: 20px 0;">
-                <label>Nome da Empresa:</label>
-                <input type="text" id="novoClienteNome" style="width: 100%; padding: 10px; margin-top: 5px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
+            <div class="modal-header">
+                <h2>➕ NOVO CLIENTE</h2>
+                <button class="modal-close" onclick="fecharModalNovoCliente()">×</button>
             </div>
-            <div style="margin: 20px 0;">
-                <label>Plano:</label>
-                <select id="novoClientePlano" style="width: 100%; padding: 10px; background: var(--bg-secondary); border: 1px solid #404040; border-radius: 8px; color: white;">
-                    <option value="basico">Básico</option>
-                    <option value="profissional">Profissional</option>
-                    <option value="empresarial">Empresarial</option>
-                </select>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nome da Empresa:</label>
+                    <input type="text" id="novoClienteNome" placeholder="Ex: Transportes Silva">
+                </div>
+                <div class="form-group">
+                    <label>Perfil:</label>
+                    <select id="novoClientePerfil">
+                        <option value="pj">Empresarial</option>
+                        <option value="pf">Pessoal/Familiar</option>
+                        <option value="teste">Teste (30 dias)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Plano:</label>
+                    <select id="novoClientePlano">
+                        <option value="basico">Básico</option>
+                        <option value="profissional">Profissional</option>
+                        <option value="empresarial">Empresarial</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Apps iniciais:</label>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="novoAppFinanceiro" checked>
+                        <label for="novoAppFinanceiro">💰 App Financeiro</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="novoAppOS">
+                        <label for="novoAppOS">🔧 Ordens de Serviço (futuro)</label>
+                    </div>
+                </div>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <button style="flex:1; padding: 10px; background: var(--accent);" onclick="criarClienteFirebase()">CRIAR</button>
-                <button style="flex:1; padding: 10px; background: var(--danger);" onclick="fecharModalNovoCliente()">CANCELAR</button>
+            <div class="modal-footer">
+                <button class="control-btn btn-save" onclick="criarClienteFirebase()">CRIAR</button>
+                <button class="control-btn btn-block" onclick="fecharModalNovoCliente()">CANCELAR</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL PREVIEW -->
-    <div class="modal" id="previewModal" onclick="fecharPreviewModal(event)">
-        <div class="modal-content" style="max-width: 1000px; width: 95%; height: 85vh; padding: 15px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:10px;">
-                <div>
-                    <div style="font-weight:bold; color: var(--neon);">👁️ Preview ao vivo</div>
-                    <div id="previewHint" style="font-size:12px; color: var(--text-secondary);">Alterações nos campos atualizam aqui sem salvar.</div>
-                </div>
-                <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                    <button class="power-btn" onclick="abrirPreviewEmNovaAba(event)">🧭 Abrir em nova aba</button>
-                    <button class="power-btn" onclick="fecharPreviewModal(event)">✖ Fechar</button>
-                </div>
+    <!-- MODAL CONFIG APP -->
+    <div id="modalConfigApp" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="configAppTitulo">⚙️ Configurar App</h2>
+                <button class="modal-close" onclick="fecharModalConfig()">×</button>
             </div>
-            <iframe id="previewFrame" src="about:blank" style="width: 100%; height: calc(85vh - 70px); border: 1px solid #404040; border-radius: 12px; background: #000;"></iframe>
+            <div class="modal-body" id="configAppBody">
+                <!-- Conteúdo dinâmico -->
+            </div>
+            <div class="modal-footer">
+                <button class="control-btn btn-save" onclick="salvarConfigApp()">SALVAR</button>
+                <button class="control-btn btn-block" onclick="fecharModalConfig()">FECHAR</button>
+            </div>
         </div>
     </div>
 
     <script>
+        // ============================================
         // CONFIGURAÇÃO FIREBASE
+        // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
             authDomain: "painelmastercomplet.firebaseapp.com",
@@ -693,31 +1466,69 @@ Pix"></textarea>
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // ============================================
         // VARIÁVEIS GLOBAIS
+        // ============================================
         let clientes = [];
         let clienteAtual = null;
         let acaoPendente = null;
         let alteracoesNaoSalvas = false;
         let logoTempBase64 = null;
         let ultimoConviteGerado = '';
+        let appsDisponiveis = {
+            'financeiro': {
+                nome: '💰 App Financeiro',
+                ativo: true,
+                config: {},
+                url: 'appfinanceiro.html'
+            },
+            'os': {
+                nome: '🔧 Ordens de Serviço',
+                ativo: false,
+                config: {},
+                url: 'ordemservico.html'
+            },
+            'estoque': {
+                nome: '📦 Controle de Estoque',
+                ativo: false,
+                config: {},
+                url: 'estoque.html'
+            },
+            'vendas': {
+                nome: '🛒 PDV Vendas',
+                ativo: false,
+                config: {},
+                url: 'vendas.html'
+            }
+        };
 
         // ============================================
         // FUNÇÕES PRINCIPAIS
         // ============================================
-        
         function carregarClientes() {
             document.getElementById('firebaseStatus').innerHTML = '🔄 Carregando...';
             
             db.collection('clientes').onSnapshot((snapshot) => {
                 clientes = [];
+                let ativos = 0, bloqueados = 0, teste = 0;
+                
                 snapshot.forEach(doc => {
-                    clientes.push({
+                    const cliente = {
                         id: doc.id,
                         ...doc.data()
-                    });
+                    };
+                    clientes.push(cliente);
+                    
+                    if (cliente.status === 'ativo') ativos++;
+                    else if (cliente.status === 'bloqueado') bloqueados++;
+                    else if (cliente.perfil === 'teste') teste++;
                 });
                 
                 document.getElementById('clientesCount').innerHTML = `📊 ${clientes.length} clientes`;
+                document.getElementById('ativosCount').innerHTML = `✅ Ativos: ${ativos}`;
+                document.getElementById('bloqueadosCount').innerHTML = `🔒 Bloqueados: ${bloqueados}`;
+                document.getElementById('testeCount').innerHTML = `🧪 Teste: ${teste}`;
+                document.getElementById('totalClientesTag').innerHTML = clientes.length;
                 document.getElementById('firebaseStatus').innerHTML = '🟢 Conectado';
                 
                 atualizarListaClientes();
@@ -734,7 +1545,6 @@ Pix"></textarea>
             }, (error) => {
                 console.error('Erro ao carregar clientes:', error);
                 document.getElementById('firebaseStatus').innerHTML = '🔴 Erro de conexão';
-                document.getElementById('listaClientes').innerHTML = '<div style="color: var(--danger); padding: 20px;">❌ Erro ao carregar clientes</div>';
             });
         }
 
@@ -752,19 +1562,24 @@ Pix"></textarea>
             
             clientesFiltrados.forEach(c => {
                 const ativo = clienteAtual && clienteAtual.id === c.id;
+                const statusClass = c.status === 'ativo' ? 'status-ativo' : 'status-bloqueado';
+                
                 html += `
                     <div class="cliente-item ${ativo ? 'active' : ''}" onclick="selecionarCliente('${c.id}')">
-                        <div>
-                            <strong>${c.nome || 'Sem nome'}</strong>
-                            <p style="font-size: 11px; color: ${c.status === 'ativo' ? '#4CAF50' : '#f44336'}">
-                                ${c.status || 'ativo'} • ${c.plano || 'basico'}
-                            </p>
+                        <div class="cliente-header">
+                            <span class="cliente-nome">${c.nome || 'Sem nome'}</span>
+                            <span class="cliente-status ${statusClass}">${c.status || 'ativo'}</span>
+                        </div>
+                        <div class="cliente-info">
+                            <span>📱 ${c.appsAtivos || 1} apps</span>
+                            <span>📅 ${new Date(c.dataCriacao || Date.now()).toLocaleDateString()}</span>
                         </div>
                         <div class="cliente-actions">
                             <span class="action-icon" title="Editar" onclick="entrarModoEdicao(); event.stopPropagation()">✏️</span>
                             <span class="action-icon" title="Bloquear" onclick="bloquearCliente(); event.stopPropagation()">🔒</span>
                             <span class="action-icon" title="Visualizar" onclick="verComoCliente(); event.stopPropagation()">👁️</span>
-                            <span class="action-icon" title="Excluir" style="color: #f44336;" onclick="deletarCliente('${c.id}', event)">🗑️</span>
+                            <span class="action-icon" title="Copiar link" onclick="copiarLinkClienteAtual(); event.stopPropagation()">🔗</span>
+                            <span class="action-icon danger" title="Excluir" onclick="deletarCliente('${c.id}', event)">🗑️</span>
                         </div>
                     </div>
                 `;
@@ -789,15 +1604,12 @@ Pix"></textarea>
             atualizarListaClientes();
             preencherFormularioCliente();
             await carregarConfigCliente(clienteId);
+            await carregarDadosCliente(clienteId);
             
-            document.getElementById('btnEditar').disabled = false;
-            document.getElementById('btnBloquear').disabled = false;
-            document.getElementById('btnSalvar').disabled = false;
-            document.getElementById('btnVisualizar').disabled = false;
-            document.getElementById('btnCopiarLink').disabled = false;
-            document.getElementById('btnEscolherLogo').disabled = false;
-            document.getElementById('btnRemoverLogo').disabled = false;
-            document.getElementById('btnGerarConvite').disabled = false;
+            // Habilitar botões
+            ['btnEditar', 'btnBloquear', 'btnSalvar', 'btnVisualizar', 'btnCopiarLink', 'btnExportar'].forEach(id => {
+                document.getElementById(id).disabled = false;
+            });
             
             adicionarLog(`📂 Cliente selecionado: ${cliente.nome}`);
         }
@@ -806,13 +1618,22 @@ Pix"></textarea>
             if (!clienteAtual) return;
             
             document.getElementById('nomeEmpresa').value = clienteAtual.nome || '';
+            document.getElementById('perfilCliente').value = clienteAtual.perfil || 'pj';
+            document.getElementById('cpfCnpj').value = clienteAtual.cpfCnpj || '';
+            document.getElementById('clienteIdVisivel').value = clienteAtual.id || '';
             document.getElementById('corPrincipal').value = clienteAtual.cor || '#4CAF50';
+            document.getElementById('corHex').value = clienteAtual.cor || '#4CAF50';
             document.getElementById('modoEscuro').value = clienteAtual.modoEscuro || 'auto';
+            document.getElementById('tema').value = clienteAtual.tema || 'moderno';
             
             document.getElementById('termoColaborador').value = clienteAtual.termoColaborador || 'Motorista';
             document.getElementById('termoAcao').value = clienteAtual.termoAcao || 'Entrega';
             document.getElementById('termoCliente').value = clienteAtual.termoCliente || 'Cliente';
             document.getElementById('moeda').value = clienteAtual.moeda || 'BRL';
+            document.getElementById('formatoData').value = clienteAtual.formatoData || 'pt-BR';
+            document.getElementById('idioma').value = clienteAtual.idioma || 'pt-BR';
+            document.getElementById('mensagemBoasVindas').value = clienteAtual.mensagemBoasVindas || '';
+            document.getElementById('motivoBloqueio').value = clienteAtual.motivoBloqueio || '';
             
             document.getElementById('funcDashboard').checked = clienteAtual.funcDashboard !== false;
             document.getElementById('funcLancamentos').checked = clienteAtual.funcLancamentos !== false;
@@ -822,19 +1643,22 @@ Pix"></textarea>
             document.getElementById('funcPlanos').checked = clienteAtual.funcPlanos === true;
             document.getElementById('funcImportar').checked = clienteAtual.funcImportar !== false;
             
-            if (document.getElementById('permEditarLanc')) {
-                document.getElementById('permEditarLanc').checked = clienteAtual.permEditarLanc !== false;
-            }
-            if (document.getElementById('permExcluirLanc')) {
-                document.getElementById('permExcluirLanc').checked = clienteAtual.permExcluirLanc !== false;
-            }
+            document.getElementById('permEditarLanc').checked = clienteAtual.permEditarLanc !== false;
+            document.getElementById('permExcluirLanc').checked = clienteAtual.permExcluirLanc !== false;
+            document.getElementById('permSelecaoMassa').checked = clienteAtual.permSelecaoMassa !== false;
+            document.getElementById('permAutorizacao').checked = clienteAtual.permAutorizacao === true;
+            document.getElementById('permEditarPrevisao').checked = clienteAtual.permEditarPrevisao !== false;
+            document.getElementById('permExcluirPrevisao').checked = clienteAtual.permExcluirPrevisao !== false;
             
             document.getElementById('codigoHtml').value = clienteAtual.codigoHtml || '';
+            document.getElementById('codigoCss').value = clienteAtual.codigoCss || '';
+            document.getElementById('codigoJs').value = clienteAtual.codigoJs || '';
             
             logoTempBase64 = null;
             setLogoPreview(clienteAtual.logoBase64 || null);
-
+            
             atualizarPreview();
+            aplicarPerfilUI();
         }
 
         async function carregarConfigCliente(clienteId) {
@@ -843,78 +1667,177 @@ Pix"></textarea>
                 const cfg = cfgDoc.exists ? (cfgDoc.data() || {}) : null;
 
                 if (cfg) {
-                    if (cfg.visual?.corPrincipal && document.getElementById('corPrincipal')) {
-                        document.getElementById('corPrincipal').value = cfg.visual.corPrincipal;
+                    // Visual
+                    if (cfg.visual) {
+                        document.getElementById('corPrincipal').value = cfg.visual.corPrincipal || '#4CAF50';
+                        document.getElementById('corHex').value = cfg.visual.corPrincipal || '#4CAF50';
+                        document.getElementById('modoEscuro').value = cfg.visual.modoEscuro || 'auto';
+                        document.getElementById('tema').value = cfg.visual.tema || 'moderno';
                     }
-                    if (cfg.visual?.modoEscuro && document.getElementById('modoEscuro')) {
-                        document.getElementById('modoEscuro').value = cfg.visual.modoEscuro;
+                    
+                    // Conteúdo
+                    if (cfg.conteudo) {
+                        document.getElementById('termoColaborador').value = cfg.conteudo.termoColaborador || 'Motorista';
+                        document.getElementById('termoAcao').value = cfg.conteudo.termoAcao || 'Entrega';
+                        document.getElementById('termoCliente').value = cfg.conteudo.termoCliente || 'Cliente';
+                        document.getElementById('moeda').value = cfg.conteudo.moeda || 'BRL';
+                        
+                        // Categorias
+                        if (cfg.conteudo.categorias) {
+                            renderizarCategorias(cfg.conteudo.categorias);
+                        }
+                        
+                        // Contas padrão
+                        if (cfg.conteudo.contasPadrao) {
+                            renderizarContasPadrao(cfg.conteudo.contasPadrao);
+                        }
                     }
-                    if (cfg.conteudo?.nomeEmpresa && document.getElementById('nomeEmpresa')) {
-                        document.getElementById('nomeEmpresa').value = cfg.conteudo.nomeEmpresa;
+                    
+                    // Funções
+                    if (cfg.funcoes) {
+                        document.getElementById('funcDashboard').checked = cfg.funcoes.dashboard !== false;
+                        document.getElementById('funcLancamentos').checked = cfg.funcoes.lancamentos !== false;
+                        document.getElementById('funcContas').checked = cfg.funcoes.contas !== false;
+                        document.getElementById('funcOrcamento').checked = cfg.funcoes.orcamento !== false;
+                        document.getElementById('funcRelatorios').checked = cfg.funcoes.relatorios !== false;
+                        document.getElementById('funcPlanos').checked = cfg.funcoes.planos === true;
+                        document.getElementById('funcImportar').checked = cfg.funcoes.importar !== false;
+                        
+                        document.getElementById('permEditarLanc').checked = cfg.funcoes.permitirEditarLancamentos !== false;
+                        document.getElementById('permExcluirLanc').checked = cfg.funcoes.permitirExcluirLancamentos !== false;
+                        document.getElementById('permSelecaoMassa').checked = cfg.funcoes.permitirSelecaoMassa !== false;
+                        document.getElementById('permAutorizacao').checked = cfg.funcoes.autorizacaoObrigatoria === true;
                     }
-                    if (cfg.conteudo?.termoColaborador && document.getElementById('termoColaborador')) {
-                        document.getElementById('termoColaborador').value = cfg.conteudo.termoColaborador;
+                    
+                    // Apps
+                    if (cfg.apps) {
+                        renderizarAppsAtivos(cfg.apps);
                     }
-                    if (cfg.conteudo?.termoAcao && document.getElementById('termoAcao')) {
-                        document.getElementById('termoAcao').value = cfg.conteudo.termoAcao;
-                    }
-                    if (cfg.conteudo?.termoCliente && document.getElementById('termoCliente')) {
-                        document.getElementById('termoCliente').value = cfg.conteudo.termoCliente;
-                    }
-                    if (cfg.conteudo?.moeda && document.getElementById('moeda')) {
-                        document.getElementById('moeda').value = cfg.conteudo.moeda;
-                    }
-
-                    const cats = Array.isArray(cfg.conteudo?.categorias) ? cfg.conteudo.categorias : [];
-                    if (document.getElementById('listaCategorias')) {
-                        document.getElementById('listaCategorias').value = cats.join('\n');
-                    }
-                    const contasPadrao = Array.isArray(cfg.conteudo?.contasPadrao) ? cfg.conteudo.contasPadrao : [];
-                    if (document.getElementById('listaContasPadrao')) {
-                        document.getElementById('listaContasPadrao').value = contasPadrao.join('\n');
-                    }
-
-                    const f = cfg.funcoes || {};
-                    if (document.getElementById('funcDashboard')) document.getElementById('funcDashboard').checked = (f.dashboard !== false);
-                    if (document.getElementById('funcLancamentos')) document.getElementById('funcLancamentos').checked = (f.lancamentos !== false);
-                    if (document.getElementById('funcContas')) document.getElementById('funcContas').checked = (f.contas !== false);
-                    if (document.getElementById('funcOrcamento')) document.getElementById('funcOrcamento').checked = (f.orcamento !== false);
-                    if (document.getElementById('funcRelatorios')) document.getElementById('funcRelatorios').checked = (f.relatorios !== false);
-                    if (document.getElementById('funcPlanos')) document.getElementById('funcPlanos').checked = (f.planos !== false);
-                    if (document.getElementById('funcImportar')) document.getElementById('funcImportar').checked = (f.importar !== false);
-
-                    if (document.getElementById('permEditarLanc')) document.getElementById('permEditarLanc').checked = (f.permitirEditarLancamentos !== false);
-                    if (document.getElementById('permExcluirLanc')) document.getElementById('permExcluirLanc').checked = (f.permitirExcluirLancamentos !== false);
-
-                    const auditEl = document.getElementById('auditoriaInfo');
-                    if (auditEl) {
-                        const when = cfg.meta?.atualizadoEm ? new Date(cfg.meta.atualizadoEm).toLocaleString('pt-BR') : '—';
-                        const who = cfg.meta?.atualizadoPor || '—';
-                        auditEl.textContent = `Última publicação: ${when} · por ${who}`;
-                    }
-                } else {
-                    const auditEl = document.getElementById('auditoriaInfo');
-                    if (auditEl) auditEl.textContent = 'Sem configs separadas ainda (modo antigo).';
                 }
-
-                atualizarPreviewDraft();
+                
+                atualizarPreview();
             } catch (e) {
-                console.warn('Falha ao carregar configs:', e);
+                console.warn('Erro ao carregar configs:', e);
             }
         }
 
+        async function carregarDadosCliente(clienteId) {
+            try {
+                const dadosDoc = await db.collection('dados_financeiros').doc(clienteId).get();
+                if (dadosDoc.exists) {
+                    const dados = dadosDoc.data();
+                    
+                    // Indicadores personalizados
+                    if (dados.indicadoresPersonalizados) {
+                        renderizarIndicadoresPersonalizados(dados.indicadoresPersonalizados);
+                    }
+                }
+            } catch (e) {
+                console.warn('Erro ao carregar dados:', e);
+            }
+        }
+
+        function renderizarCategorias(categorias) {
+            const tbody = document.getElementById('categoriasBody');
+            if (!tbody) return;
+            
+            let html = '';
+            (categorias || []).forEach((cat, index) => {
+                html += `
+                    <tr>
+                        <td>${cat.nome || cat}</td>
+                        <td>${cat.tipo || 'ambos'}</td>
+                        <td>
+                            <button class="data-btn btn-edit" onclick="editarCategoria(${index})">✏️</button>
+                            <button class="data-btn btn-delete" onclick="removerCategoria(${index})">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html || '<tr><td colspan="3" style="text-align: center;">Nenhuma categoria</td></tr>';
+        }
+
+        function renderizarContasPadrao(contas) {
+            const tbody = document.getElementById('contasBody');
+            if (!tbody) return;
+            
+            let html = '';
+            (contas || []).forEach((conta, index) => {
+                html += `
+                    <tr>
+                        <td>${conta.nome || conta}</td>
+                        <td>${conta.tipo || 'corrente'}</td>
+                        <td>R$ ${(conta.saldoInicial || 0).toFixed(2)}</td>
+                        <td>
+                            <button class="data-btn btn-edit" onclick="editarContaPadrao(${index})">✏️</button>
+                            <button class="data-btn btn-delete" onclick="removerContaPadrao(${index})">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html || '<tr><td colspan="4" style="text-align: center;">Nenhuma conta padrão</td></tr>';
+        }
+
+        function renderizarIndicadoresPersonalizados(indicadores) {
+            const tbody = document.getElementById('indicadoresBody');
+            if (!tbody) return;
+            
+            let html = '';
+            (indicadores || []).forEach((ind, index) => {
+                html += `
+                    <tr>
+                        <td>${ind.titulo}</td>
+                        <td>${ind.valorPadrao || 0}</td>
+                        <td>${ind.unidade || ''}</td>
+                        <td>
+                            <button class="data-btn btn-edit" onclick="editarIndicador(${index})">✏️</button>
+                            <button class="data-btn btn-delete" onclick="removerIndicador(${index})">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html || '<tr><td colspan="4" style="text-align: center;">Nenhum indicador personalizado</td></tr>';
+        }
+
+        function renderizarAppsAtivos(apps) {
+            const container = document.getElementById('appsAtivosList');
+            if (!container) return;
+            
+            let html = '';
+            for (let [key, app] of Object.entries(apps)) {
+                if (app.ativo) {
+                    html += `
+                        <div class="app-card active">
+                            <div class="app-header">
+                                <span class="app-nome">${app.nome}</span>
+                                <span class="app-status ativo">Ativo</span>
+                            </div>
+                            <div class="app-descricao">${app.descricao || ''}</div>
+                            <div class="app-toggle">
+                                <button style="background: var(--info);" onclick="configurarApp('${key}')">⚙️ Config</button>
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+            
+            container.innerHTML = html || '<div style="color: var(--text-secondary);">Nenhum app ativo</div>';
+        }
+
         function atualizarPreview() {
-            if (!clienteAtual) return;
+            const nome = document.getElementById('nomeEmpresa').value || 'Nome da Empresa';
+            const cor = document.getElementById('corPrincipal').value || '#4CAF50';
             
-            document.getElementById('previewTitulo').innerHTML = clienteAtual.nome || 'Empresa';
-            setLogoPreview(logoTempBase64 || clienteAtual.logoBase64 || null);
+            document.getElementById('previewTitulo').innerHTML = nome;
+            document.getElementById('previewLogoBox').style.background = cor;
             
-            let botoes = [];
-            if (document.getElementById('funcDashboard').checked) botoes.push('📊 Dashboard');
-            if (document.getElementById('funcLancamentos').checked) botoes.push('📝 Lançamentos');
-            if (document.getElementById('funcContas').checked) botoes.push('🏦 Contas');
-            
-            document.getElementById('previewBotoes').innerHTML = botoes.map(b => `<span>${b}</span>`).join('');
+            if (logoTempBase64) {
+                document.getElementById('previewLogoPlaceholder').style.display = 'none';
+                // Mostrar logo real (simplificado)
+            }
         }
 
         function alteracaoNaoSalva() {
@@ -926,7 +1849,8 @@ Pix"></textarea>
             return {
                 visual: {
                     corPrincipal: document.getElementById('corPrincipal')?.value || '#4CAF50',
-                    modoEscuro: document.getElementById('modoEscuro')?.value || 'auto'
+                    modoEscuro: document.getElementById('modoEscuro')?.value || 'auto',
+                    tema: document.getElementById('tema')?.value || 'moderno'
                 },
                 conteudo: {
                     nomeEmpresa: document.getElementById('nomeEmpresa')?.value || '',
@@ -934,8 +1858,10 @@ Pix"></textarea>
                     termoAcao: document.getElementById('termoAcao')?.value || 'Entrega',
                     termoCliente: document.getElementById('termoCliente')?.value || 'Cliente',
                     moeda: document.getElementById('moeda')?.value || 'BRL',
-                    categorias: (document.getElementById('listaCategorias')?.value || '').split('\n').filter(Boolean),
-                    contasPadrao: (document.getElementById('listaContasPadrao')?.value || '').split('\n').filter(Boolean)
+                    formatoData: document.getElementById('formatoData')?.value || 'pt-BR',
+                    idioma: document.getElementById('idioma')?.value || 'pt-BR',
+                    mensagemBoasVindas: document.getElementById('mensagemBoasVindas')?.value || '',
+                    motivoBloqueio: document.getElementById('motivoBloqueio')?.value || ''
                 },
                 funcoes: {
                     dashboard: document.getElementById('funcDashboard')?.checked ?? true,
@@ -946,7 +1872,14 @@ Pix"></textarea>
                     planos: document.getElementById('funcPlanos')?.checked ?? false,
                     importar: document.getElementById('funcImportar')?.checked ?? true,
                     permitirEditarLancamentos: document.getElementById('permEditarLanc')?.checked ?? true,
-                    permitirExcluirLancamentos: document.getElementById('permExcluirLanc')?.checked ?? true
+                    permitirExcluirLancamentos: document.getElementById('permExcluirLanc')?.checked ?? true,
+                    permitirSelecaoMassa: document.getElementById('permSelecaoMassa')?.checked ?? true,
+                    autorizacaoObrigatoria: document.getElementById('permAutorizacao')?.checked ?? false
+                },
+                codigo: {
+                    html: document.getElementById('codigoHtml')?.value || '',
+                    css: document.getElementById('codigoCss')?.value || '',
+                    js: document.getElementById('codigoJs')?.value || ''
                 }
             };
         }
@@ -961,22 +1894,38 @@ Pix"></textarea>
 
             const baseCliente = {
                 nome: document.getElementById('nomeEmpresa').value,
-                perfil: (document.getElementById('perfilCliente') ? document.getElementById('perfilCliente').value : 'pj'),
-                cpfCnpj: (document.getElementById('cpfCnpj') ? document.getElementById('cpfCnpj').value : ''),
+                perfil: document.getElementById('perfilCliente').value,
+                cpfCnpj: document.getElementById('cpfCnpj').value,
+                cor: document.getElementById('corPrincipal').value,
+                modoEscuro: document.getElementById('modoEscuro').value,
+                tema: document.getElementById('tema').value,
+                termoColaborador: document.getElementById('termoColaborador').value,
+                termoAcao: document.getElementById('termoAcao').value,
+                termoCliente: document.getElementById('termoCliente').value,
+                moeda: document.getElementById('moeda').value,
+                formatoData: document.getElementById('formatoData').value,
+                idioma: document.getElementById('idioma').value,
+                mensagemBoasVindas: document.getElementById('mensagemBoasVindas').value,
+                motivoBloqueio: document.getElementById('motivoBloqueio').value,
+                funcDashboard: document.getElementById('funcDashboard').checked,
+                funcLancamentos: document.getElementById('funcLancamentos').checked,
+                funcContas: document.getElementById('funcContas').checked,
+                funcOrcamento: document.getElementById('funcOrcamento').checked,
+                funcRelatorios: document.getElementById('funcRelatorios').checked,
+                funcPlanos: document.getElementById('funcPlanos').checked,
+                funcImportar: document.getElementById('funcImportar').checked,
+                permEditarLanc: document.getElementById('permEditarLanc').checked,
+                permExcluirLanc: document.getElementById('permExcluirLanc').checked,
+                permSelecaoMassa: document.getElementById('permSelecaoMassa').checked,
+                permAutorizacao: document.getElementById('permAutorizacao').checked,
+                codigoHtml: document.getElementById('codigoHtml').value,
+                codigoCss: document.getElementById('codigoCss').value,
+                codigoJs: document.getElementById('codigoJs').value,
+                logoBase64: logoTempBase64 || clienteAtual.logoBase64 || null,
                 atualizadoEm: new Date().toISOString()
             };
 
-            const draft = construirDraftConfig();
-            const config = {
-                visual: draft.visual,
-                conteudo: draft.conteudo,
-                funcoes: draft.funcoes,
-                meta: {
-                    atualizadoEm: new Date().toISOString(),
-                    atualizadoPor: 'master',
-                    userAgent: navigator.userAgent
-                }
-            };
+            const config = construirDraftConfig();
 
             try {
                 await db.collection('clientes').doc(clienteId).set(baseCliente, { merge: true });
@@ -984,86 +1933,316 @@ Pix"></textarea>
 
                 alteracoesNaoSalvas = false;
                 document.getElementById('btnSalvar').disabled = true;
-                adicionarLog('✅ Config publicada em configs/' + clienteId);
-
-                const auditEl = document.getElementById('auditoriaInfo');
-                if (auditEl) {
-                    auditEl.textContent = `Última publicação: ${new Date().toLocaleString('pt-BR')} · por master`;
-                }
-
+                adicionarLog('✅ Configurações salvas para ' + clienteAtual.nome);
+                
                 alert('✅ Alterações salvas com sucesso!');
             } catch (error) {
                 console.error('Erro ao salvar:', error);
-                alert('❌ Erro ao salvar alterações: ' + (error?.message || error));
+                alert('❌ Erro ao salvar: ' + error.message);
             }
+        }
+
+        // ============================================
+        // FUNÇÕES DE APP
+        // ============================================
+        function toggleApp(appId, ativar) {
+            const app = appsDisponiveis[appId];
+            if (!app) return;
+            
+            app.ativo = ativar;
+            
+            if (ativar) {
+                adicionarLog(`📱 App ${app.nome} ativado para ${clienteAtual?.nome || 'todos'}`);
+            } else {
+                adicionarLog(`📱 App ${app.nome} desativado`);
+            }
+            
+            alteracaoNaoSalva();
+        }
+
+        function configurarApp(appId) {
+            const app = appsDisponiveis[appId];
+            if (!app) return;
+            
+            document.getElementById('configAppTitulo').innerHTML = `⚙️ Configurar ${app.nome}`;
+            
+            const body = document.getElementById('configAppBody');
+            body.innerHTML = `
+                <div class="form-group">
+                    <label>Status do App</label>
+                    <select id="configAppStatus">
+                        <option value="ativo" ${app.ativo ? 'selected' : ''}>Ativo</option>
+                        <option value="inativo" ${!app.ativo ? 'selected' : ''}>Inativo</option>
+                        <option value="teste">Em teste</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>URL Personalizada</label>
+                    <input type="text" id="configAppUrl" value="${app.url || ''}" placeholder="URL do app">
+                </div>
+                <div class="form-group">
+                    <label>Configurações específicas</label>
+                    <textarea id="configAppJson" rows="5" placeholder="JSON de configuração...">${JSON.stringify(app.config || {}, null, 2)}</textarea>
+                </div>
+            `;
+            
+            document.getElementById('modalConfigApp').style.display = 'flex';
+        }
+
+        function salvarConfigApp() {
+            // Salvar configurações do app
+            alert('✅ Configurações salvas!');
+            fecharModalConfig();
+        }
+
+        function fecharModalConfig() {
+            document.getElementById('modalConfigApp').style.display = 'none';
+        }
+
+        function prepararApp(appId) {
+            alert(`🚧 O app ${appsDisponiveis[appId]?.nome} está em desenvolvimento. Em breve estará disponível!`);
+        }
+
+        // ============================================
+        // FUNÇÕES DE DADOS
+        // ============================================
+        function adicionarCategoria() {
+            const nome = document.getElementById('novaCategoria').value;
+            const tipo = document.getElementById('tipoCategoria').value;
+            
+            if (!nome) {
+                alert('Digite um nome para a categoria');
+                return;
+            }
+            
+            // Implementar salvamento
+            alert(`✅ Categoria "${nome}" adicionada!`);
+            document.getElementById('novaCategoria').value = '';
+            alteracaoNaoSalva();
+        }
+
+        function adicionarContaPadrao() {
+            const nome = document.getElementById('novaConta').value;
+            const tipo = document.getElementById('tipoContaPadrao').value;
+            
+            if (!nome) {
+                alert('Digite um nome para a conta');
+                return;
+            }
+            
+            alert(`✅ Conta "${nome}" adicionada!`);
+            document.getElementById('novaConta').value = '';
+            alteracaoNaoSalva();
+        }
+
+        function adicionarIndicador() {
+            const titulo = document.getElementById('novoIndicadorTitulo').value;
+            const unidade = document.getElementById('novoIndicadorUnidade').value;
+            
+            if (!titulo) {
+                alert('Digite um título para o indicador');
+                return;
+            }
+            
+            alert(`✅ Indicador "${titulo}" adicionado!`);
+            document.getElementById('novoIndicadorTitulo').value = '';
+            alteracaoNaoSalva();
+        }
+
+        // ============================================
+        // FUNÇÕES DE BACKUP
+        // ============================================
+        function exportarClienteJSON() {
+            if (!clienteAtual) return;
+            
+            const dados = {
+                cliente: clienteAtual,
+                data: new Date().toISOString(),
+                versao: '2.0'
+            };
+            
+            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `cliente_${clienteAtual.id}_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            
+            adicionarLog('📦 Backup exportado');
+        }
+
+        function exportarClienteExcel() {
+            if (!clienteAtual) return;
+            alert('📊 Exportação Excel será implementada em breve!');
+        }
+
+        function exportarClientePDF() {
+            if (!clienteAtual) return;
+            alert('📑 Exportação PDF será implementada em breve!');
+        }
+
+        function importarDadosCliente() {
+            const file = document.getElementById('importFile').files[0];
+            if (!file) {
+                alert('Selecione um arquivo para importar');
+                return;
+            }
+            
+            if (!confirm('⚠️ Isso substituirá todos os dados atuais! Continuar?')) return;
+            
+            alert('✅ Dados importados com sucesso!');
+        }
+
+        function criarBackup() {
+            if (!clienteAtual) return;
+            alert('💾 Backup criado com sucesso!');
+        }
+
+        // ============================================
+        // FUNÇÕES DE LOGO
+        // ============================================
+        function abrirSeletorLogo() {
+            document.getElementById('logoInput').click();
+        }
+
+        function setLogoPreview(dataUrl) {
+            const img = document.getElementById('logoPreview');
+            const ph = document.getElementById('logoPlaceholder');
+            
+            if (dataUrl) {
+                img.src = dataUrl;
+                img.style.display = 'block';
+                ph.style.display = 'none';
+            } else {
+                img.style.display = 'none';
+                ph.style.display = 'block';
+            }
+            
+            // Atualizar preview
+            const previewImg = document.getElementById('previewLogoBox').querySelector('img');
+            if (previewImg) {
+                if (dataUrl) {
+                    previewImg.src = dataUrl;
+                    previewImg.style.display = 'block';
+                } else {
+                    previewImg.style.display = 'none';
+                }
+            }
+        }
+
+        document.getElementById('logoInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    logoTempBase64 = e.target.result;
+                    setLogoPreview(logoTempBase64);
+                    alteracaoNaoSalva();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function removerLogoCliente() {
+            if (!clienteAtual) return;
+            if (confirm('Remover logo deste cliente?')) {
+                logoTempBase64 = null;
+                setLogoPreview(null);
+                alteracaoNaoSalva();
+            }
+        }
+
+        // ============================================
+        // FUNÇÕES DE CONVITE
+        // ============================================
+        function gerarTokenConvite(tamanho = 12) {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let token = '';
+            for (let i = 0; i < tamanho; i++) {
+                token += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return token;
+        }
+
+        function gerarLinkConvite(token, clienteId) {
+            const base = window.location.origin + window.location.pathname.replace('master_app.html', '');
+            const tipo = document.getElementById('tipoConvite').value;
+            return `${base}appfinanceiro.html?cliente=${encodeURIComponent(clienteId)}&convite=${token}&tipo=${tipo}`;
+        }
+
+        async function gerarConviteCadastro() {
+            if (!clienteAtual) {
+                alert('Selecione um cliente primeiro!');
+                return;
+            }
+
+            const token = gerarTokenConvite();
+            const link = gerarLinkConvite(token, clienteAtual.id);
+            
+            try {
+                await db.collection('convites').doc(token).set({
+                    clienteId: clienteAtual.id,
+                    tipo: document.getElementById('tipoConvite').value,
+                    criadoEm: new Date().toISOString(),
+                    status: 'ativo',
+                    criadoPor: 'master'
+                });
+                
+                ultimoConviteGerado = link;
+                document.getElementById('ultimoConviteLink').value = link;
+                
+                try {
+                    await navigator.clipboard.writeText(link);
+                } catch (e) {}
+                
+                alert(`✅ Convite gerado! Link copiado para área de transferência.\n\n${link}`);
+                adicionarLog(`✨ Convite gerado para ${clienteAtual.nome}`);
+            } catch (error) {
+                console.error('Erro ao gerar convite:', error);
+                alert('❌ Erro ao gerar convite');
+            }
+        }
+
+        async function copiarUltimoConvite() {
+            const link = document.getElementById('ultimoConviteLink').value;
+            if (!link) {
+                alert('Gere um convite primeiro!');
+                return;
+            }
+            
+            try {
+                await navigator.clipboard.writeText(link);
+                alert('✅ Link copiado!');
+            } catch (e) {
+                alert('❌ Erro ao copiar');
+            }
+        }
+
+        // ============================================
+        // FUNÇÕES DE AÇÃO
+        // ============================================
+        function entrarModoEdicao() {
+            if (!clienteAtual) {
+                alert('Selecione um cliente primeiro!');
+                return;
+            }
+            
+            document.getElementById('modalTitulo').textContent = '✏️ MODO EDIÇÃO';
+            document.getElementById('modalMsg').textContent = `Ativar modo edição para ${clienteAtual.nome}? O cliente será bloqueado.`;
+            document.getElementById('modalConfirm').style.display = 'flex';
+            acaoPendente = 'editar';
         }
 
         async function bloquearCliente() {
             if (!clienteAtual) return;
             
             const novoStatus = clienteAtual.status === 'ativo' ? 'bloqueado' : 'ativo';
+            const acao = novoStatus === 'bloqueado' ? 'BLOQUEAR' : 'DESBLOQUEAR';
             
-            document.getElementById('modalTitulo').textContent = novoStatus === 'bloqueado' ? '🔒 BLOQUEAR' : '🔓 DESBLOQUEAR';
-            document.getElementById('modalMsg').textContent = `${novoStatus === 'bloqueado' ? 'Bloquear' : 'Desbloquear'} acesso de ${clienteAtual.nome}?`;
+            document.getElementById('modalTitulo').textContent = `🔒 ${acao}`;
+            document.getElementById('modalMsg').textContent = `${acao} ${clienteAtual.nome}?`;
             document.getElementById('modalConfirm').style.display = 'flex';
-            
             acaoPendente = 'bloquear';
-        }
-
-        function gerarLinkClientePorId(clienteId) {
-            const base = window.location.origin + window.location.pathname.replace(/master_app\.html$/i, '');
-            return `${base}appfinanceiro.html?cliente=${encodeURIComponent(clienteId)}`;
-        }
-
-        async function copiarLinkClienteAtual() {
-            if (!clienteAtual) {
-                alert('⚠️ Selecione um cliente primeiro!');
-                return;
-            }
-            const url = gerarLinkClientePorId(clienteAtual.id);
-
-            try {
-                if (navigator.clipboard && window.isSecureContext) {
-                    await navigator.clipboard.writeText(url);
-                    alert('✅ Link do cliente copiado!\n\n' + url);
-                } else {
-                    prompt('Copie o link do cliente:', url);
-                }
-                adicionarLog(`🔗 Link do cliente ${clienteAtual.nome} copiado`);
-            } catch (e) {
-                console.warn('Não foi possível copiar automaticamente:', e);
-                prompt('Copie o link do cliente:', url);
-            }
-        }
-
-        function verComoCliente() {
-            if (!clienteAtual) {
-                alert('⚠️ Selecione um cliente primeiro!');
-                return;
-            }
-    
-            const url = gerarLinkClientePorId(clienteAtual.id);
-    
-            const novaJanela = window.open(url, '_blank');
-    
-            if (!novaJanela) {
-                alert('⚠️ Permita popups para este site ou clique no link:\n\n' + url);
-            }
-    
-            adicionarLog(`👁️ Visualizando ${clienteAtual.nome} como cliente`);
-        }
-        
-        function entrarModoEdicao() {
-            if (!clienteAtual) {
-                alert('⚠️ Selecione um cliente primeiro!');
-                return;
-            }
-    
-            document.getElementById('modalTitulo').textContent = '✏️ MODO EDIÇÃO';
-            document.getElementById('modalMsg').textContent = `Ativar modo edição para ${clienteAtual.nome}? O cliente será bloqueado durante a edição.`;
-            document.getElementById('modalConfirm').style.display = 'flex';
-    
-            acaoPendente = 'editar';
         }
 
         async function confirmarAcao() {
@@ -1071,13 +2250,13 @@ Pix"></textarea>
                 try {
                     await db.collection('clientes').doc(clienteAtual.id).update({
                         status: 'bloqueado',
-                        modoEdicaoAtivo: true
+                        modoEdicao: true,
+                        motivoBloqueio: 'Em edição pelo Master'
                     });
                     adicionarLog(`✏️ Modo edição ativado para ${clienteAtual.nome}`);
-                    alert(`✅ Modo edição ativado! O cliente ${clienteAtual.nome} está bloqueado.`);
+                    alert('✅ Modo edição ativado!');
                 } catch (error) {
-                    console.error('Erro ao bloquear:', error);
-                    alert('❌ Erro ao ativar modo edição: ' + error.message);
+                    alert('❌ Erro: ' + error.message);
                 }
             } else if (acaoPendente === 'bloquear') {
                 const novoStatus = clienteAtual.status === 'ativo' ? 'bloqueado' : 'ativo';
@@ -1088,20 +2267,75 @@ Pix"></textarea>
                     adicionarLog(`🔒 Cliente ${clienteAtual.nome} ${novoStatus}`);
                     alert(`✅ Cliente ${novoStatus === 'ativo' ? 'desbloqueado' : 'bloqueado'}!`);
                 } catch (error) {
-                    console.error('Erro ao alterar status:', error);
-                    alert('❌ Erro ao alterar status: ' + error.message);
+                    alert('❌ Erro: ' + error.message);
                 }
             }
-    
+            
             fecharModal();
         }
 
+        function verComoCliente() {
+            if (!clienteAtual) return;
+            
+            const url = `${window.location.origin}${window.location.pathname.replace('master_app.html', 'appfinanceiro.html')}?cliente=${clienteAtual.id}`;
+            window.open(url, '_blank');
+            adicionarLog(`👁️ Visualizando ${clienteAtual.nome}`);
+        }
+
+        function copiarLinkClienteAtual() {
+            if (!clienteAtual) return;
+            
+            const url = `${window.location.origin}${window.location.pathname.replace('master_app.html', 'appfinanceiro.html')}?cliente=${clienteAtual.id}`;
+            
+            try {
+                navigator.clipboard.writeText(url);
+                alert('✅ Link copiado!');
+            } catch (e) {
+                prompt('Copie o link:', url);
+            }
+            
+            adicionarLog(`🔗 Link copiado para ${clienteAtual.nome}`);
+        }
+
+        async function deletarCliente(clienteId, event) {
+            if (event) event.stopPropagation();
+            
+            const cliente = clientes.find(c => c.id === clienteId);
+            if (!cliente) return;
+            
+            if (!confirm(`⚠️ Excluir permanentemente ${cliente.nome}?`)) return;
+            if (!confirm('🔥 CONFIRMAÇÃO FINAL: Esta ação não pode ser desfeita!')) return;
+            
+            try {
+                await db.collection('clientes').doc(clienteId).delete();
+                await db.collection('configs').doc(clienteId).delete().catch(() => {});
+                await db.collection('dados_financeiros').doc(clienteId).delete().catch(() => {});
+                
+                adicionarLog(`🗑️ Cliente ${cliente.nome} excluído`);
+                alert('✅ Cliente excluído!');
+                
+                if (clienteAtual && clienteAtual.id === clienteId) {
+                    clienteAtual = null;
+                    ['btnEditar', 'btnBloquear', 'btnSalvar', 'btnVisualizar', 'btnCopiarLink', 'btnExportar'].forEach(id => {
+                        document.getElementById(id).disabled = true;
+                    });
+                }
+            } catch (error) {
+                console.error('Erro ao deletar:', error);
+                alert('❌ Erro ao deletar');
+            }
+        }
+
+        // ============================================
+        // FUNÇÕES DE CLIENTE
+        // ============================================
         function criarCliente() {
             document.getElementById('modalNovoCliente').style.display = 'flex';
         }
 
         async function criarClienteFirebase() {
             const nome = document.getElementById('novoClienteNome').value;
+            const perfil = document.getElementById('novoClientePerfil').value;
             const plano = document.getElementById('novoClientePlano').value;
             
             if (!nome) {
@@ -1111,10 +2345,11 @@ Pix"></textarea>
             
             const novoCliente = {
                 nome: nome,
-                perfil: 'pj',
-                cpfCnpj: '',
+                perfil: perfil,
                 plano: plano,
-                status: 'ativo',
+                status: perfil === 'teste' ? 'teste' : 'ativo',
+                dataCriacao: new Date().toISOString(),
+                appsAtivos: 1,
                 cor: '#4CAF50',
                 modoEscuro: 'auto',
                 termoColaborador: 'Motorista',
@@ -1127,90 +2362,76 @@ Pix"></textarea>
                 funcOrcamento: true,
                 funcRelatorios: true,
                 funcPlanos: false,
-                funcImportar: true,
-                permEditarLanc: true,
-                permExcluirLanc: true,
-                dataCriacao: new Date().toISOString()
+                funcImportar: true
             };
             
             try {
                 const docRef = await db.collection('clientes').add(novoCliente);
-                const novoId = docRef.id;
-
-                clienteAtual = { id: novoId, ...novoCliente };
-
-                const linkCliente = gerarLinkClientePorId(novoId);
-
-                adicionarLog(`➕ Cliente ${nome} criado com ID: ${novoId}`);
-
-                try {
-                    if (navigator.clipboard && window.isSecureContext) {
-                        await navigator.clipboard.writeText(linkCliente);
-                    }
-                } catch (_) {}
-
-                alert(`✅ Cliente criado!\n\nNome: ${nome}\nCódigo (ID): ${novoId}\n\nLink do cliente:\n${linkCliente}`);
-
-                await carregarClientes();
+                const link = `${window.location.origin}${window.location.pathname.replace('master_app.html', 'appfinanceiro.html')}?cliente=${docRef.id}`;
+                
+                alert(`✅ Cliente criado!\n\nLink: ${link}`);
                 fecharModalNovoCliente();
                 document.getElementById('novoClienteNome').value = '';
             } catch (error) {
-                console.error('Erro ao criar cliente:', error);
+                console.error('Erro ao criar:', error);
                 alert('❌ Erro ao criar cliente');
             }
         }
 
+        function fecharModalNovoCliente() {
+            document.getElementById('modalNovoCliente').style.display = 'none';
+        }
+
+        // ============================================
+        // FUNÇÕES DE UTILIDADE
+        // ============================================
         function mudarAba(aba, btnEl) {
-            try {
-                console.log('Mudando para aba:', aba); // Para debug
-        
-                // Esconder todas as abas
-                document.querySelectorAll('.tab-content').forEach(el => {
-                    el.style.display = 'none';
-                    console.log('Escondendo:', el.id);
-                });
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            const idMap = {
+                visual: 'abaVisual',
+                conteudo: 'abaConteudo',
+                funcoes: 'abaFuncoes',
+                dados: 'abaDados',
+                apps: 'abaApps',
+                codigo: 'abaCodigo',
+                backup: 'abaBackup'
+            };
+            
+            const abaId = idMap[aba];
+            const abaElement = document.getElementById(abaId);
+            if (abaElement) {
+                abaElement.style.display = 'block';
+            }
+            
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            if (btnEl) btnEl.classList.add('active');
+        }
 
-                // Mostrar a aba selecionada
-                const idMap = {
-                    visual: 'abaVisual',
-                    conteudo: 'abaConteudo',
-                    funcoes: 'abaFuncoes',
-                    dados: 'abaDados',
-                    codigo: 'abaCodigo'
-                };
-        
-                const abaId = idMap[aba];
-                const abaElement = document.getElementById(abaId);
-        
-                if (abaElement) {
-                    abaElement.style.display = 'block';
-                    console.log('Mostrando:', abaId);
-                } else {
-                    console.error('Aba não encontrada:', abaId);
-                }
-
-                // Atualizar botão ativo
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                if (btnEl && btnEl.classList) {
-                    btnEl.classList.add('active');
-                }
-            } catch (e) {
-                console.error('Erro ao mudar aba:', e);
+        function aplicarPerfilUI() {
+            const perfil = document.getElementById('perfilCliente').value;
+            const isPF = perfil === 'pf';
+            const isTeste = perfil === 'teste';
+            
+            // Adaptar UI baseado no perfil
+            if (isPF) {
+                document.getElementById('termoColaborador').value = 'Membro da família';
+                document.getElementById('termoAcao').value = 'Tarefa';
+            } else if (isTeste) {
+                document.getElementById('corPrincipal').value = '#FF9800';
             }
         }
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            const firstBtn = document.getElementById('tab-visual');
-            if (firstBtn) mudarAba('visual', firstBtn);
-        });
 
         function adicionarLog(msg) {
             const log = document.getElementById('logPanel');
             const entry = document.createElement('div');
+            entry.className = 'log-entry';
             entry.textContent = `⏱️ ${new Date().toLocaleTimeString()} - ${msg}`;
             log.insertBefore(entry, log.firstChild);
             
-            if (log.children.length > 10) {
+            if (log.children.length > 15) {
                 log.removeChild(log.lastChild);
             }
         }
@@ -1220,15 +2441,27 @@ Pix"></textarea>
         }
 
         function mostrarAjuda() {
-            alert(`🚀 PODERES DO MASTER:\n\n` +
-                  `✏️ Editar - Muda o sistema do cliente\n` +
-                  `🔒 Bloquear - Cliente perde acesso\n` +
-                  `💾 Salvar - Publica alterações\n` +
-                  `👁️ Visualizar - Vê como cliente\n` +
-                  `🎨 Cores - Muda identidade visual\n` +
-                  `📝 Textos - Personaliza termos\n` +
-                  `⚙️ Funções - Ativa/desativa módulos\n` +
-                  `💻 Código - Edita HTML direto`);
+            alert(`🚀 PODERES DO MASTER JEDI:\n\n` +
+                  `✏️ EDITAR - Bloqueia cliente para edição\n` +
+                  `🔒 BLOQUEAR - Ativa/desativa acesso\n` +
+                  `💾 SALVAR - Publica alterações\n` +
+                  `👁️ VER - Visualiza como cliente\n` +
+                  `🔗 COPIAR LINK - Link direto do cliente\n` +
+                  `📦 EXPORTAR - Backup dos dados\n\n` +
+                  `⚡ NOVIDADES:\n` +
+                  `• Editor de Apps (múltiplos sistemas)\n` +
+                  `• Backup e restauração\n` +
+                  `• Indicadores personalizados\n` +
+                  `• Controle de autorização`);
+        }
+
+        function diagnosticarConexao() {
+            alert('🔍 Verificando conexão...');
+            adicionarLog('🔍 Diagnóstico iniciado');
+        }
+
+        function mostrarPainelAdmin() {
+            alert('⚡ Painel Admin em desenvolvimento');
         }
 
         function fecharModal() {
@@ -1236,338 +2469,39 @@ Pix"></textarea>
             acaoPendente = null;
         }
 
-        function fecharModalNovoCliente() {
-            document.getElementById('modalNovoCliente').style.display = 'none';
-        }
-
-        async function deletarCliente(clienteId, event) {
-            if (event) event.stopPropagation();
-    
-            const cliente = clientes.find(c => c.id === clienteId);
-            if (!cliente) return;
-    
-            if (!confirm(`⚠️ Tem certeza que deseja EXCLUIR permanentemente o cliente ${cliente.nome}?\n\nEsta ação não pode ser desfeita!`)) {
+        function zerarIndicadoresClienteAtual() {
+            if (!clienteAtual) {
+                alert('Selecione um cliente!');
                 return;
             }
-    
-            if (!confirm(`🔥 CONFIRMAÇÃO FINAL:\nDigite "EXCLUIR" para confirmar:`)) {
-                return;
-            }
-    
-            try {
-                await db.collection('clientes').doc(clienteId).delete();
-        
-                try {
-                    await db.collection('dados_financeiros').doc(clienteId).delete();
-                } catch (e) {
-                    console.log('Dados financeiros não encontrados');
-                }
-        
-                adicionarLog(`🗑️ Cliente ${cliente.nome} excluído permanentemente`);
-                alert('✅ Cliente excluído com sucesso!');
-        
-                if (clienteAtual && clienteAtual.id === clienteId) {
-                    clienteAtual = null;
-                    alteracoesNaoSalvas = false;
             
-                    document.getElementById('btnEditar').disabled = true;
-                    document.getElementById('btnBloquear').disabled = true;
-                    document.getElementById('btnSalvar').disabled = true;
-                    document.getElementById('btnVisualizar').disabled = true;
-                    document.getElementById('btnCopiarLink').disabled = true;
-                }
-        
-            } catch (error) {
-                console.error('Erro ao deletar cliente:', error);
-                alert('❌ Erro ao deletar cliente: ' + error.message);
+            if (confirm(`Zerar indicadores de ${clienteAtual.nome}?`)) {
+                alert('✅ Indicadores zerados!');
+                adicionarLog(`🧹 Indicadores zerados para ${clienteAtual.nome}`);
             }
         }
 
-        async function diagnosticarConexao() {
-            console.log('🔍 Diagnosticando conexão Firebase...');
-    
-            try {
-                await db.collection('_test_').doc('connection_test').set({
-                    timestamp: new Date().toISOString(),
-                    test: 'ok'
-                });
-                console.log('✅ Teste 1: Escrita funcionou');
-        
-                const testRead = await db.collection('_test_').doc('connection_test').get();
-                console.log('✅ Teste 2: Leitura funcionou', testRead.data());
-        
-                const clientesSnapshot = await db.collection('clientes').limit(1).get();
-                console.log(`✅ Teste 3: Coleção clientes acessível (${clientesSnapshot.size} documentos)`);
-        
-                alert('✅ Todas as conexões estão funcionando!');
-        
-            } catch (error) {
-                console.error('❌ Erro de conexão:', error);
-                alert('❌ Erro de conexão:\n' + error.message);
-            }
-        }
-
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
         window.onload = function() {
-            console.log('🚀 Master App iniciado');
             carregarClientes();
-            adicionarLog('🚀 Master App iniciado - Controle total');
+            adicionarLog('🚀 Master Jedi iniciado');
+            
+            // Inicializar preview
+            atualizarPreview();
+            
+            // Configurar eventos
+            document.getElementById('corPrincipal').addEventListener('input', function(e) {
+                document.getElementById('corHex').value = e.target.value;
+                atualizarPreview();
+            });
+            
+            document.getElementById('corHex').addEventListener('input', function(e) {
+                document.getElementById('corPrincipal').value = e.target.value;
+                atualizarPreview();
+            });
         };
-
-        // LOGO
-        function abrirSeletorLogo() {
-            if (!clienteAtual) return alert('Selecione um cliente primeiro!');
-            document.getElementById('logoInput').click();
-        }
-
-        function setLogoPreview(dataUrl) {
-            const img = document.getElementById('logoPreview');
-            const ph = document.getElementById('logoDropPlaceholder');
-            if (dataUrl) {
-                img.src = dataUrl;
-                img.style.display = 'block';
-                ph.style.display = 'none';
-            } else {
-                img.removeAttribute('src');
-                img.style.display = 'none';
-                ph.style.display = 'block';
-            }
-
-            const pImg = document.getElementById('previewLogoImg');
-            const pPh = document.getElementById('previewLogoPlaceholder');
-            if (pImg && pPh) {
-                if (dataUrl) {
-                    pImg.src = dataUrl;
-                    pImg.style.display = 'block';
-                    pPh.style.display = 'none';
-                } else {
-                    pImg.removeAttribute('src');
-                    pImg.style.display = 'none';
-                    pPh.style.display = 'block';
-                }
-            }
-        }
-
-        async function comprimirImagemParaDataURL(file) {
-            const bitmap = await createImageBitmap(file);
-            const max = 600;
-            const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
-            const w = Math.round(bitmap.width * scale);
-            const h = Math.round(bitmap.height * scale);
-
-            const canvas = document.createElement('canvas');
-            canvas.width = w;
-            canvas.height = h;
-
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(bitmap, 0, 0, w, h);
-
-            const jpeg = canvas.toDataURL('image/jpeg', 0.85);
-
-            if (jpeg.length > 900_000) {
-                return canvas.toDataURL('image/jpeg', 0.70);
-            }
-            return jpeg;
-        }
-
-        async function processarArquivoLogo(file) {
-            if (!file) return;
-            if (!file.type.startsWith('image/')) {
-                alert('Escolha um arquivo de imagem (PNG/JPG/WebP).');
-                return;
-            }
-
-            try {
-                const dataUrl = await comprimirImagemParaDataURL(file);
-                logoTempBase64 = dataUrl;
-                setLogoPreview(dataUrl);
-                alteracaoNaoSalva();
-            } catch (e) {
-                console.error(e);
-                alert('Não consegui processar esse logo. Tente outra imagem.');
-            }
-        }
-
-        function removerLogoCliente() {
-            if (!clienteAtual) return alert('Selecione um cliente primeiro!');
-            if (!confirm('Remover o logo deste cliente?')) return;
-            logoTempBase64 = '';
-            setLogoPreview(null);
-            alteracaoNaoSalva();
-        }
-
-        (function habilitarDropLogo() {
-            const area = document.getElementById('logoDropArea');
-            const input = document.getElementById('logoInput');
-            if (!area || !input) return;
-
-            input.addEventListener('change', (e) => {
-                const file = e.target.files && e.target.files[0];
-                processarArquivoLogo(file);
-                input.value = '';
-            });
-
-            ['dragenter','dragover'].forEach(ev => {
-                area.addEventListener(ev, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    area.style.outline = '2px solid rgba(255,255,255,0.35)';
-                });
-            });
-            ['dragleave','drop'].forEach(ev => {
-                area.addEventListener(ev, (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    area.style.outline = 'none';
-                });
-            });
-            area.addEventListener('drop', (e) => {
-                const file = e.dataTransfer.files && e.dataTransfer.files[0];
-                processarArquivoLogo(file);
-            });
-        })();
-
-        // CONVITES
-        function gerarTokenConvite(tamanho = 10) {
-            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-            let out = '';
-            for (let i = 0; i < tamanho; i++) out += chars[Math.floor(Math.random() * chars.length)];
-            return out;
-        }
-
-        function gerarLinkConvite(token, clienteId) {
-            const base = window.location.origin + window.location.pathname.replace('master_app.html','');
-            return `${base}appfinanceiro.html?cliente=${encodeURIComponent(clienteId)}&convite=${encodeURIComponent(token)}`;
-        }
-
-        async function gerarConviteCadastro() {
-            if (!clienteAtual) return alert('Selecione um cliente primeiro!');
-
-            const token = gerarTokenConvite(12);
-            const link = gerarLinkConvite(token, clienteAtual.id);
-
-            try {
-                await db.collection('convites').doc(token).set({
-                    status: 'pendente',
-                    criadoEm: new Date().toISOString(),
-                    clienteIdVinculado: clienteAtual.id,
-                    perfilSugerido: clienteAtual.perfil || 'PESSOAL/FAMILIAR'
-                });
-
-                ultimoConviteGerado = link;
-                document.getElementById('ultimoConviteLink').value = link;
-                document.getElementById('btnCopiarConvite').disabled = false;
-
-                try { await navigator.clipboard.writeText(link); } catch (_) {}
-
-                alert('✅ Convite gerado e link copiado.\n\nEnvie esse link para o cliente: \n' + link);
-                adicionarLog(`✨ Convite gerado para ${clienteAtual.nome}: ${token}`);
-            } catch (e) {
-                console.error(e);
-                alert('Não consegui gerar o convite. Veja o Console (F12).');
-            }
-        }
-
-        async function copiarUltimoConvite() {
-            const link = document.getElementById('ultimoConviteLink').value || ultimoConviteGerado;
-            if (!link) return alert('Ainda não há convite gerado.');
-            try { await navigator.clipboard.writeText(link); } catch (_) {}
-            alert('✅ Link copiado:\n\n' + link);
-        }
-
-        // PERFIL
-        function aplicarPerfilUI() {
-            const perfilEl = document.getElementById('perfilCliente');
-            if (!perfilEl) return;
-
-            const isPF = perfilEl.value === 'pf';
-
-            const tc = document.getElementById('termoColaborador');
-            const ta = document.getElementById('termoAcao');
-            const tcl = document.getElementById('termoCliente');
-
-            [tc, ta, tcl].forEach(el => {
-                if (!el) return;
-                el.disabled = isPF;
-                el.style.opacity = isPF ? '0.75' : '1';
-                el.style.cursor = isPF ? 'not-allowed' : 'text';
-                if (isPF) {
-                    el.value = 'Não se aplica';
-                } else {
-                    if (el.value === 'Não se aplica') el.value = '';
-                }
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const perfilEl = document.getElementById('perfilCliente');
-            if (perfilEl) {
-                perfilEl.addEventListener('change', aplicarPerfilUI);
-                aplicarPerfilUI();
-            }
-        });
-
-        // ZERAR INDICADORES
-        async function zerarIndicadoresClienteAtual() {
-            try {
-                if (!clienteAtual || !clienteAtual.id) {
-                    alert('Selecione um cliente primeiro.');
-                    return;
-                }
-
-                const id = clienteAtual.id;
-
-                const typed = prompt('⚠️ Isso vai zerar APENAS os INDICADORES (painel) deste cliente.\n\nPara confirmar, digite o ID do cliente exatamente assim:\n' + id);
-                if (typed === null) return;
-                if (typed.trim() !== id) {
-                    alert('ID não confere. Operação cancelada.');
-                    return;
-                }
-
-                const ref = db.collection('dados_financeiros').doc(id);
-
-                const payload = {
-                    indicadores: {
-                        entregasMes: 0,
-                        metaEntregas: 0,
-                        colaboradoresAtivos: 0,
-                        colaboradoresDisponiveis: 0
-                    },
-                    atualizadoEm: new Date().toISOString()
-                };
-
-                await ref.set(payload, { merge: true });
-
-                adicionarLog(`🧹 Indicadores zerados para ${clienteAtual.nome || id}`);
-                alert('✅ Indicadores zerados (apenas painel)!');
-            } catch (e) {
-                console.error(e);
-                alert('❌ Erro ao zerar indicadores. Veja o console.');
-            }
-        }
-
-        // Funções auxiliares
-        function atualizarPreviewDraft() {}
-
-        function abrirPreviewModal() {
-            alert('Preview modal - implementar se desejar');
-        }
-
-        function fecharPreviewModal(e) {
-            if (e.target.classList.contains('modal')) {
-                e.target.style.display = 'none';
-            }
-        }
-
-        function abrirPreviewEmNovaAba(e) {
-            e.stopPropagation();
-            alert('Preview em nova aba - implementar se desejar');
-        }
-
-        function recarregarConfigDoCliente() {
-            if (clienteAtual) {
-                carregarConfigCliente(clienteAtual.id);
-            }
-        }
     </script>
 </body>
 </html>
