@@ -8,15 +8,37 @@
     <title>💰 Sistema Financeiro</title>
     
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
+// ============================================
+// CONTROLE DE TELAS (evita tela branca)
+// ============================================
+function mostrarTelaApp() {
+  const bloqueio = document.getElementById('bloqueioScreen');
+  const app = document.getElementById('appContent');
+  if (bloqueio) bloqueio.style.display = 'none';
+  if (app) app.style.display = 'block';
+}
+
+function mostrarTelaBloqueio(clienteBase) {
+  const bloqueio = document.getElementById('bloqueioScreen');
+  const app = document.getElementById('appContent');
+  const msg = document.getElementById('bloqueioMsg');
+
+  if (msg) {
+    const texto = (clienteBase && clienteBase.motivoBloqueio)
+      ? String(clienteBase.motivoBloqueio)
+      : 'Sistema bloqueado pelo administrador.';
+    msg.textContent = texto;
+  }
+
+  if (app) app.style.display = 'none';
+  if (bloqueio) bloqueio.style.display = 'block';
+}
+
+</script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- Bibliotecas para PDF -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
-    
     <style>
-        /* ========== ESTILOS GLOBAIS ========== */
         * {
             margin: 0;
             padding: 0;
@@ -38,9 +60,6 @@
             --shadow: rgba(0,0,0,0.1);
             --warning: #ff9800;
             --info: #2196F3;
-            --edit: #ffc107;
-            --delete: #dc3545;
-            --select: #17a2b8;
         }
 
         .dark-mode {
@@ -64,12 +83,11 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             width: 100%;
         }
 
-        /* ========== CABEÇALHO ========== */
         .header {
             display: flex;
             justify-content: space-between;
@@ -80,23 +98,29 @@
             gap: 15px;
         }
 
-        .brand {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            flex-wrap: wrap;
+        .header h1 {
+            font-size: 24px;
+            color: var(--text-primary);
         }
-
-        #clienteLogoImg {
-            width: 72px;
-            height: 72px;
-            object-fit: contain;
-            border-radius: 12px;
+        /* Logo do cliente (carregado do Master) */
+        .brand{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:14px;
+            flex-wrap:wrap;
+        }
+        #clienteLogoImg{
+            width:72px;
+            height:72px;
+            object-fit:contain;
+            border-radius:12px;
             background: rgba(255,255,255,0.06);
             border: 1px solid rgba(0,0,0,0.25);
-            padding: 10px;
-            display: none;
+            padding:10px;
+            display:none; /* só aparece se existir logo */
         }
+
 
         .user-info {
             display: flex;
@@ -129,23 +153,6 @@
             color: white;
         }
 
-        .cliente-meta {
-            margin-top: 6px;
-            font-size: 12px;
-            opacity: 0.9;
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        .cliente-meta-item {
-            background: rgba(255,255,255,0.15);
-            padding: 4px 8px;
-            border-radius: 999px;
-        }
-
-        /* ========== NAVEGAÇÃO ========== */
         .nav-tabs {
             display: flex;
             gap: 10px;
@@ -179,7 +186,6 @@
             display: block;
         }
 
-        /* ========== DASHBOARD ========== */
         .balance-card {
             background: linear-gradient(135deg, var(--accent), var(--accent-hover));
             color: white;
@@ -241,7 +247,6 @@
             margin-top: 5px;
         }
 
-        /* ========== FORMULÁRIOS ========== */
         .form-card {
             background: var(--card-bg);
             border-radius: 15px;
@@ -286,8 +291,70 @@
             gap: 15px;
         }
 
-        /* ========== BOTÕES ========== */
-        .btn-primary {
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: white;
+            border-color: currentColor;
+        }
+
+        .tab.income-tab.active {
+            background: var(--income);
+        }
+
+        .tab.expense-tab.active {
+            background: var(--expense);
+        }
+
+        
+        .btn-secondary {
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .btn-secondary:hover {
+            filter: brightness(1.08);
+        }
+        .btn-small {
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        .relatorio-periodo input[type="date"],
+        .relatorio-periodo select {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+.btn-primary {
+            width: 100%;
             padding: 14px;
             color: white;
             border: none;
@@ -306,48 +373,11 @@
             background: var(--expense);
         }
 
-        .btn-edit {
-            background: var(--edit);
-            color: #333;
-        }
-
-        .btn-delete {
-            background: var(--delete);
-            color: white;
-        }
-
-        .btn-select {
-            background: var(--select);
-            color: white;
-        }
-
-        .btn-secondary {
-            padding: 10px 14px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .btn-secondary:hover {
-            filter: brightness(1.08);
-        }
-
-        .btn-small {
-            padding: 8px 12px;
-            font-size: 14px;
-        }
-
         .btn-primary:hover {
             filter: brightness(1.1);
             transform: translateY(-2px);
         }
 
-        /* ========== LANÇAMENTOS E TRANSAÇÕES ========== */
         .transactions-list {
             background: var(--card-bg);
             border-radius: 15px;
@@ -364,44 +394,17 @@
             gap: 15px;
         }
 
-        .list-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
-        .select-all-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: var(--bg-secondary);
-            padding: 8px 15px;
-            border-radius: 8px;
-        }
-
         .transaction-item {
             display: flex;
+            justify-content: space-between;
             align-items: center;
             padding: 15px 0;
             border-bottom: 1px solid var(--border);
             gap: 15px;
-            transition: background-color 0.2s;
         }
 
-        .transaction-item:hover {
-            background-color: var(--bg-secondary);
-        }
-
-        .transaction-item.selected {
-            background-color: rgba(23, 162, 184, 0.1);
-            border-left: 4px solid var(--select);
-        }
-
-        .transaction-checkbox {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-            margin-left: 10px;
+        .transaction-item:last-child {
+            border-bottom: none;
         }
 
         .transaction-info {
@@ -456,38 +459,6 @@
             color: var(--text-secondary);
         }
 
-        .transaction-actions {
-            display: flex;
-            gap: 8px;
-            margin-right: 10px;
-        }
-
-        .action-btn {
-            padding: 6px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-            transition: all 0.2s;
-        }
-
-        .action-btn.edit {
-            background: var(--edit);
-            color: #333;
-        }
-
-        .action-btn.delete {
-            background: var(--delete);
-            color: white;
-        }
-
-        .action-btn:hover {
-            filter: brightness(1.1);
-            transform: translateY(-1px);
-        }
-
-        /* ========== CONTAS ========== */
         .contas-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -527,7 +498,6 @@
             margin-bottom: 10px;
         }
 
-        /* ========== ORÇAMENTO ========== */
         .orcamento-header {
             display: flex;
             justify-content: space-between;
@@ -558,33 +528,6 @@
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            border-left: 4px solid transparent;
-        }
-
-        .orcamento-item.pendente {
-            border-left-color: var(--warning);
-        }
-
-        .orcamento-item.aprovado {
-            border-left-color: var(--income);
-        }
-
-        .orcamento-item.reprovado {
-            border-left-color: var(--expense);
-            opacity: 0.7;
-        }
-
-        .orcamento-checkbox {
-            width: 20px;
-            height: 20px;
-            cursor: pointer;
-        }
-
-        .orcamento-content {
-            flex: 1;
         }
 
         .orcamento-header-item {
@@ -593,47 +536,11 @@
             margin-bottom: 10px;
         }
 
-        .orcamento-status {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-left: 10px;
-        }
-
-        .status-pendente {
-            background: var(--warning);
-            color: #333;
-        }
-
-        .status-aprovado {
-            background: var(--income);
-            color: white;
-        }
-
-        .status-reprovado {
-            background: var(--expense);
-            color: white;
-        }
-
-        .status-autorizacao {
-            background: var(--info);
-            color: white;
-        }
-
-        .orcamento-actions {
-            display: flex;
-            gap: 8px;
-        }
-
-        /* ========== RELATÓRIOS ========== */
         .relatorio-periodo {
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
             flex-wrap: wrap;
-            align-items: center;
         }
 
         .relatorio-card {
@@ -661,7 +568,12 @@
             font-weight: bold;
         }
 
-        /* ========== IMPORTAÇÃO/EXPORTAÇÃO ========== */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
         .import-export-section {
             background: var(--card-bg);
             border-radius: 15px;
@@ -728,10 +640,6 @@
             transform: translateY(-2px);
         }
 
-        .pdf-btn {
-            background: #dc3545;
-        }
-
         .import-btn {
             padding: 14px;
             border: none;
@@ -774,156 +682,260 @@
             transform: translateY(-2px);
         }
 
-        .file-input {
-            display: none;
+        .planos-section {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 40px 30px;
+            margin: 40px 0;
+            box-shadow: 0 10px 30px var(--shadow);
         }
 
-        /* ========== MODAL ========== */
-        .modal {
+        .planos-titulo {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .planos-titulo h2 {
+            font-size: 36px;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .planos-titulo p {
+            color: var(--text-secondary);
+            font-size: 18px;
+        }
+
+        .plano-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border-radius: 50px;
+        }
+
+        .toggle-label {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .economia-badge {
+            background: gold;
+            color: #333;
+            padding: 5px 15px;
+            border-radius: 25px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 100px;
+            height: 50px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--border);
+            transition: .4s;
+            border-radius: 50px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 42px;
+            width: 42px;
+            left: 4px;
+            bottom: 4px;
+            background: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(50px);
+        }
+
+        .planilha-container {
+            overflow-x: auto;
+            margin: 30px 0;
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 5px;
+        }
+
+        .planilha-tabela {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .planilha-tabela th {
+            background: var(--accent);
+            color: white;
+            padding: 20px 15px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .planilha-tabela td {
+            padding: 15px;
+            border-bottom: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .planilha-tabela td.feature-name {
+            text-align: left;
+            font-weight: 500;
+            background: var(--bg-secondary);
+        }
+
+        .planilha-tabela tr:hover td {
+            background: var(--bg-secondary);
+        }
+
+        .preco-linha td {
+            background: var(--bg-secondary);
+            font-size: 18px;
+            border-top: 2px solid var(--accent);
+        }
+
+        .economia {
+            display: block;
+            font-size: 12px;
+            color: var(--income);
+            margin-top: 5px;
+        }
+
+        .planilha-botoes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .plano-btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .plano-btn:hover {
+            filter: brightness(1.1);
+            transform: scale(1.02);
+        }
+
+        .automacoes-info {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .automacoes-opcoes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .auto-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .auto-checkbox input {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .pagamento-modal {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.5);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
         }
 
-        .modal-content {
+        .pagamento-content {
             background: var(--card-bg);
             border-radius: 20px;
-            padding: 30px;
+            padding: 40px;
             max-width: 500px;
             width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
+            text-align: center;
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h3 {
+        .pagamento-content h3 {
             color: var(--text-primary);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        .modal-body {
             margin-bottom: 20px;
         }
 
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
+        .pagamento-content p {
+            color: var(--text-secondary);
+            margin: 10px 0;
         }
 
-        /* ========== AUTORIZAÇÃO ========== */
-        .autorizacao-panel {
-            background: var(--bg-secondary);
-            border-radius: 10px;
+        .pagamento-opcoes {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .pagamento-opcoes button {
             padding: 15px;
-            margin-top: 20px;
-        }
-
-        .autorizacao-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .autorizacao-badge {
-            background: var(--info);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .autorizacao-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        .autorizacao-btn {
-            padding: 8px 15px;
             border: none;
-            border-radius: 5px;
-            cursor: pointer;
+            border-radius: 10px;
+            font-size: 16px;
             font-weight: bold;
-            transition: all 0.2s;
-        }
-
-        .btn-aprovar {
-            background: var(--income);
+            cursor: pointer;
+            transition: all 0.3s;
             color: white;
         }
 
-        .btn-reprovar {
+        .fechar-modal {
             background: var(--expense);
             color: white;
-        }
-
-        .btn-pendente {
-            background: var(--warning);
-            color: #333;
-        }
-
-        /* ========== UTILITÁRIOS ========== */
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-secondary);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 18px;
-            color: var(--accent);
-        }
-
-        .indicadores-editor {
-            margin-top: 14px;
-            padding: 14px;
-            border: 1px solid rgba(0,0,0,.12);
-            border-radius: 12px;
-            background: rgba(255,255,255,.04);
-        }
-
-        .indicadores-editor h3 {
-            margin: 0 0 10px 0;
-            font-size: 16px;
-            color: var(--text-primary);
-        }
-
-        .indicadores-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 10px;
-        }
-
-        .inline-check {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 6px;
-            font-size: 12px;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
         }
 
         .bloqueio-container {
@@ -969,42 +981,139 @@
             font-weight: bold;
         }
 
-        /* ========== RESPONSIVIDADE ========== */
-        @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .user-info {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
-            .list-actions {
-                flex-direction: column;
-                width: 100%;
-            }
-            
-            .select-all-container {
-                width: 100%;
-                justify-content: space-between;
-            }
-            
-            .transaction-item {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-            
-            .transaction-actions {
-                width: 100%;
-                justify-content: flex-end;
-            }
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: var(--accent);
         }
+    
+        .cliente-meta{
+            margin-top: 6px;
+            font-size: 12px;
+            opacity: 0.9;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .cliente-meta-item{
+            background: rgba(255,255,255,0.15);
+            padding: 4px 8px;
+            border-radius: 999px;
+        }
+        .cliente-meta-sep{
+            opacity: 0.7;
+        }
+        body.dark-mode .cliente-meta-item{
+            background: rgba(255,255,255,0.08);
+        }
+
+
+        /* Editor de Indicadores (visível só no Master) */
+        .indicadores-editor{
+            margin-top: 14px;
+            padding: 14px;
+            border: 1px solid rgba(0,0,0,.12);
+            border-radius: 12px;
+            background: rgba(255,255,255,.04);
+        }
+        .indicadores-editor h3{
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: var(--text-primary);
+        }
+        .indicadores-grid{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+        }
+        .indicadores-grid label{
+            display:block;
+            font-size: 12px;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+        .indicadores-grid input{
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,0,0,.15);
+            background: rgba(255,255,255,.08);
+            color: var(--text-primary);
+            outline: none;
+        }
+        .indicadores-actions{
+            display:flex;
+            gap:10px;
+            flex-wrap: wrap;
+            align-items:center;
+            margin-top: 10px;
+        }
+        .indicadores-actions .btn{
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .indicadores-links{
+            margin-top: 12px;
+            display: grid;
+            gap: 10px;
+        }
+        .indicadores-links .link-block label{
+            display:block;
+            font-size: 12px;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+        }
+        .indicadores-links .link-controls{
+            display:flex;
+            gap:8px;
+            align-items:center;
+        }
+        .indicadores-links .link-controls input{
+            flex: 1;
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid rgba(0,0,0,.15);
+            background: rgba(255,255,255,.08);
+            color: var(--text-primary);
+            outline: none;
+        }
+        .btn-link{
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .btn-salvar-indicadores{
+            background: #2E7D32;
+            color: #fff;
+        }
+        .btn-reset-indicadores{
+            background: rgba(244,67,54,.85);
+            color: #fff;
+        }
+        .indicadores-msg{
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .inline-check{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
     </style>
 </head>
 <body>
-    <!-- TELA DE BLOQUEIO -->
     <div id="bloqueioScreen" style="display: none;">
         <div class="bloqueio-container">
             <div class="bloqueio-card">
@@ -1017,41 +1126,39 @@
         </div>
     </div>
 
-    <!-- CONTEÚDO PRINCIPAL -->
     <div id="appContent" style="display: none;">
         <div class="container">
-            <!-- CABEÇALHO -->
             <div class="header">
                 <div class="brand">
-                    <img id="clienteLogoImg" alt="Logo do cliente" />
-                    <h1 id="empresaNome">💰 SISTEMA FINANCEIRO</h1>
-                </div>
-                <div class="cliente-meta" id="clienteMeta" style="display:none;">
+            <img id="clienteLogoImg" alt="Logo do cliente" />
+            <h1 id="empresaNome">💰 SISTEMA FINANCEIRO</h1>
+        </div>
+                                <div class="cliente-meta" id="clienteMeta" style="display:none;">
                     <span class="cliente-meta-item" id="clientePerfil"></span>
                     <span class="cliente-meta-sep">•</span>
                     <span class="cliente-meta-item" id="clienteDocumento"></span>
                     <span class="cliente-meta-sep">•</span>
                     <span class="cliente-meta-item" id="clienteIdMini"></span>
                 </div>
-                <div class="user-info">
+<div class="user-info">
                     <span class="user-badge" id="userBadge">👤 Carregando...</span>
-                    <button class="dark-mode-toggle" id="darkModeBtn">
+                    <button class="dark-mode-toggle" id="darkModeBtn" onclick="toggleDarkMode()">
                         🌙 Modo Escuro
                     </button>
                 </div>
             </div>
 
-            <!-- ABAS DE NAVEGAÇÃO -->
-            <div class="nav-tabs" id="navTabs"></div>
+            <div class="nav-tabs" id="navTabs">
+                <!-- Abas serão geradas dinamicamente -->
+            </div>
 
-            <!-- DASHBOARD -->
             <div id="dashboard" class="tab-content">
                 <div class="balance-card">
                     <div class="balance-label">Saldo Total</div>
                     <div class="balance-value" id="saldoTotal">R$ 0,00</div>
                     <div class="balance-breakdown">
-                        <span class="balance-income" id="totalReceitas">📈 Receitas: R$ 0,00</span>
-                        <span class="balance-expense" id="totalDespesas">📉 Despesas: R$ 0,00</span>
+                        <span class="balance-income" id="totalReceitas" style="color: white;">📈 Receitas: R$ 0,00</span>
+                        <span class="balance-expense" id="totalDespesas" style="color: white;">📉 Despesas: R$ 0,00</span>
                         <span id="totalPrevisto">📅 Previsto: R$ 0,00</span>
                     </div>
                 </div>
@@ -1074,48 +1181,70 @@
                     </div>
                 </div>
 
-                <!-- EDITOR DE INDICADORES (SOMENTE MASTER) -->
+                <!-- Editor de Indicadores (somente Master: usar ?master=1 na URL) -->
                 <div id="indicadoresEditor" class="indicadores-editor" style="display:none;">
                     <h3>⚙️ Indicadores do cliente (painel)</h3>
+
                     <div class="indicadores-grid">
                         <div>
                             <label for="ind_entregasMes">Entregas (mês)</label>
                             <input id="ind_entregasMes" type="number" min="0" step="1" placeholder="0">
                         </div>
+
                         <div>
                             <label for="ind_metaEntregas">Meta de entregas</label>
                             <input id="ind_metaEntregas" type="number" min="0" step="1" placeholder="0">
                         </div>
+
                         <div>
-                            <label for="ind_colabAtivos">Colaboradores ativos</label>
+                            <label for="ind_colabAtivos">Colaboradores / motoqueiros ativos</label>
                             <input id="ind_colabAtivos" type="number" min="0" step="1" placeholder="0">
                             <div class="inline-check">
                                 <input id="ind_na_colabAtivos" type="checkbox">
-                                <label for="ind_na_colabAtivos">Não se aplica</label>
+                                <label for="ind_na_colabAtivos" style="margin:0;">Não se aplica</label>
                             </div>
                         </div>
+
                         <div>
                             <label for="ind_colabDisp">Disponíveis</label>
                             <input id="ind_colabDisp" type="number" min="0" step="1" placeholder="0">
                             <div class="inline-check">
                                 <input id="ind_na_colabDisp" type="checkbox">
-                                <label for="ind_na_colabDisp">Não se aplica</label>
+                                <label for="ind_na_colabDisp" style="margin:0;">Não se aplica</label>
                             </div>
                         </div>
                     </div>
-                    <div class="indicadores-actions" style="margin-top: 15px; display: flex; gap: 10px;">
-                        <button id="btnSalvarIndicadores" class="btn-primary btn-income" style="width: auto;">Salvar</button>
-                        <button id="btnZerarIndicadores" class="btn-primary btn-delete" style="width: auto;">Zerar</button>
-                        <span id="indicadoresMsg" style="color: var(--text-secondary); font-size: 12px;"></span>
+
+                    <div class="indicadores-links">
+                        <div class="link-block">
+                            <label for="linkClienteNormal">Link do cliente (normal)</label>
+                            <div class="link-controls">
+                                <input id="linkClienteNormal" type="text" readonly>
+                                <button id="btnCopiarLinkNormal" class="btn-link">Copiar</button>
+                            </div>
+                        </div>
+
+                        <div class="link-block">
+                            <label for="linkClienteMaster">Link do cliente (Master)</label>
+                            <div class="link-controls">
+                                <input id="linkClienteMaster" type="text" readonly>
+                                <button id="btnCopiarLinkMaster" class="btn-link">Copiar</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="indicadores-actions">
+                        <button id="btnSalvarIndicadores" class="btn btn-salvar-indicadores">Salvar indicadores</button>
+                        <button id="btnZerarIndicadores" class="btn btn-reset-indicadores">Zerar (só este cliente)</button>
+                        <span id="indicadoresMsg" class="indicadores-msg"></span>
                     </div>
                 </div>
             </div>
 
-            <!-- LANÇAMENTOS -->
             <div id="lancamentos" class="tab-content">
-                <div class="tabs" style="display: flex; gap: 10px; margin-bottom: 20px;">
-                    <button class="tab income-tab active" onclick="setTipoLancamento('receita')" id="btnReceita">📈 Receita</button>
-                    <button class="tab expense-tab" onclick="setTipoLancamento('despesa')" id="btnDespesa">📉 Despesa</button>
+                <div class="tabs">
+                    <button class="tab income-tab active" onclick="setTipoLancamento('receita')" id="btnReceita">📈 Receita (Entrada)</button>
+                    <button class="tab expense-tab" onclick="setTipoLancamento('despesa')" id="btnDespesa">📉 Despesa (Saída)</button>
                 </div>
 
                 <div class="form-card">
@@ -1156,7 +1285,7 @@
                         <textarea id="observacao" rows="2" placeholder="Detalhes adicionais..."></textarea>
                     </div>
 
-                    <button class="btn-primary btn-income" onclick="lancarTransacao()" id="btnLancar" style="width: 100%;">
+                    <button class="btn-primary btn-income" onclick="lancarTransacao()" id="btnLancar">
                         ➕ LANÇAR MOVIMENTO
                     </button>
                 </div>
@@ -1164,24 +1293,11 @@
                 <div class="transactions-list">
                     <div class="list-header">
                         <h3>📋 Últimos Lançamentos</h3>
-                        <div class="list-actions">
-                            <div class="select-all-container">
-                                <input type="checkbox" id="selectAllLancamentos" onchange="selecionarTodosLancamentos()">
-                                <label for="selectAllLancamentos">Selecionar todos</label>
-                            </div>
-                            <button class="btn-secondary btn-small" onclick="excluirSelecionadosLancamentos()" style="background: var(--delete); color: white;">
-                                🗑️ Excluir selecionados
-                            </button>
-                            <button class="btn-secondary btn-small" onclick="excluirTodosLancamentos()" style="background: var(--delete); color: white;">
-                                🗑️ Excluir todos
-                            </button>
-                        </div>
                     </div>
                     <div id="listaLancamentos"></div>
                 </div>
             </div>
 
-            <!-- CONTAS -->
             <div id="contas" class="tab-content">
                 <div class="form-card">
                     <h3 style="margin-bottom: 20px;">➕ Nova Conta</h3>
@@ -1209,13 +1325,12 @@
                             <input type="color" id="corConta" value="#4CAF50">
                         </div>
                     </div>
-                    <button class="btn-primary btn-income" onclick="adicionarConta()" style="width: 100%;">➕ ADICIONAR CONTA</button>
+                    <button class="btn-primary btn-income" onclick="adicionarConta()">➕ ADICIONAR CONTA</button>
                 </div>
 
                 <div class="contas-grid" id="listaContas"></div>
             </div>
 
-            <!-- ORÇAMENTO -->
             <div id="orcamento" class="tab-content">
                 <div class="orcamento-header">
                     <h3>📅 Orçamento Mensal</h3>
@@ -1239,7 +1354,7 @@
 
                 <div class="form-card">
                     <h4 style="margin-bottom: 15px;">➕ Nova Previsão</h4>
-                    <div class="tabs" style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <div class="tabs">
                         <button class="tab income-tab active" onclick="setTipoPrevisao('receita')">📈 Receita</button>
                         <button class="tab expense-tab" onclick="setTipoPrevisao('despesa')">📉 Despesa</button>
                     </div>
@@ -1266,42 +1381,15 @@
                         </div>
                     </div>
 
-                    <button class="btn-primary btn-income" onclick="adicionarPrevisao()" style="width: 100%;">➕ ADICIONAR PREVISÃO</button>
+                    <button class="btn-primary btn-income" onclick="adicionarPrevisao()">➕ ADICIONAR PREVISÃO</button>
                 </div>
 
                 <div class="transactions-list">
-                    <div class="list-header">
-                        <h4>📋 Previsões do Mês</h4>
-                        <div class="list-actions">
-                            <!-- PAINEL DE AUTORIZAÇÃO (SOMENTE MASTER) -->
-                            <div id="autorizacaoPanel" class="autorizacao-panel" style="display: none;">
-                                <div class="autorizacao-header">
-                                    <span class="autorizacao-badge">👑 MODO MASTER</span>
-                                    <div class="autorizacao-actions">
-                                        <button class="autorizacao-btn btn-aprovar" onclick="autorizarSelecionados('aprovar')">✅ Aprovar</button>
-                                        <button class="autorizacao-btn btn-reprovar" onclick="autorizarSelecionados('reprovar')">❌ Reprovar</button>
-                                        <button class="autorizacao-btn btn-pendente" onclick="autorizarSelecionados('pendente')">⏳ Pendente</button>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div class="select-all-container">
-                                <input type="checkbox" id="selectAllPrevisoes" onchange="selecionarTodasPrevisoes()">
-                                <label for="selectAllPrevisoes">Selecionar todos</label>
-                            </div>
-                            <button class="btn-secondary btn-small" onclick="excluirSelecionadosPrevisoes()" style="background: var(--delete); color: white;">
-                                🗑️ Excluir selecionados
-                            </button>
-                            <button class="btn-secondary btn-small" onclick="excluirTodasPrevisoes()" style="background: var(--delete); color: white;">
-                                🗑️ Excluir todos
-                            </button>
-                        </div>
-                    </div>
+                    <h4>📋 Previsões do Mês</h4>
                     <div id="listaPrevisoes"></div>
                 </div>
             </div>
 
-            <!-- RELATÓRIOS -->
             <div id="relatorios" class="tab-content">
                 <div class="relatorio-periodo">
                     <select id="relatorioMes" onchange="gerarRelatorio()">
@@ -1315,8 +1403,8 @@
 
                     <input type="date" id="relatorioDataInicio" title="Data inicial" onchange="gerarRelatorio()">
                     <input type="date" id="relatorioDataFim" title="Data final" onchange="gerarRelatorio()">
-                    <button class="btn-secondary btn-small" onclick="definirPeriodoRelatorio('mesAtual')">📅 Este mês</button>
-                    <button class="btn-secondary btn-small" onclick="limparPeriodoRelatorio()">🧹 Limpar</button>
+                    <button class="btn-secondary btn-small" type="button" onclick="definirPeriodoRelatorio('mesAtual')">📅 Este mês</button>
+                    <button class="btn-secondary btn-small" type="button" onclick="limparPeriodoRelatorio()">🧹 Limpar</button>
                     <button class="btn-primary btn-income" onclick="gerarRelatorio()">📊 GERAR RELATÓRIO</button>
                 </div>
 
@@ -1329,13 +1417,16 @@
                         <div class="import-card">
                             <h4>📥 IMPORTAR DADOS</h4>
                             <div class="import-options">
-                                <button class="import-btn" onclick="document.getElementById('fileInput').click()">
-                                    <span>📄</span> Importar Arquivo
+                                <button class="import-btn" onclick="importarCSV()">
+                                    <span>📄</span> Importar CSV
                                 </button>
-                                <button class="import-btn" onclick="importarPDF()">
-                                    <span>📑</span> Importar PDF
+                                <button class="import-btn" onclick="importarTXT()">
+                                    <span>📃</span> Importar TXT
                                 </button>
-                                <input type="file" id="fileInput" class="file-input" accept=".csv,.txt,.json,.pdf" onchange="importarArquivo(this)">
+                                <button class="import-btn" onclick="importarJSON()">
+                                    <span>📦</span> Importar JSON
+                                </button>
+                                <input type="file" id="fileInput" class="file-input" accept=".csv,.txt,.json">
                             </div>
                         </div>
                         
@@ -1351,7 +1442,7 @@
                                 <button class="export-btn" onclick="exportarJSON()">
                                     <span>📦</span> Exportar JSON
                                 </button>
-                                <button class="export-btn pdf-btn" onclick="exportarPDF()">
+                                <button class="export-btn" onclick="exportarPDF()">
                                     <span>📑</span> Exportar PDF
                                 </button>
                             </div>
@@ -1370,8 +1461,8 @@
                         <thead>
                             <tr>
                                 <th>Categoria</th>
-                                <th>Receitas</th>
-                                <th>Despesas</th>
+                                <th>Receitas (Entradas)</th>
+                                <th>Despesas (Saídas)</th>
                                 <th>Saldo</th>
                             </tr>
                         </thead>
@@ -1380,98 +1471,132 @@
                 </div>
             </div>
 
-            <!-- PLANOS -->
             <div id="planos" class="tab-content">
-                <div class="planos-section" style="background: var(--card-bg); border-radius: 30px; padding: 40px 30px;">
-                    <div class="planos-titulo" style="text-align: center; margin-bottom: 40px;">
-                        <h2 style="font-size: 36px;">💰 PLANOS</h2>
-                        <p style="color: var(--text-secondary);">Soluções completas para seu negócio</p>
+                <div class="planos-section">
+                    <div class="planos-titulo">
+                        <h2>💰 PLANOS</h2>
+                        <p>Soluções completas para seu negócio</p>
                     </div>
 
-                    <div class="plano-toggle" style="display: flex; align-items: center; justify-content: center; gap: 20px; margin: 30px 0;">
+                    <div class="plano-toggle">
                         <span class="toggle-label">📅 Mensal</span>
-                        <label class="toggle-switch" style="position: relative; display: inline-block; width: 100px; height: 50px;">
-                            <input type="checkbox" id="toggleAnual" onchange="togglePlanos()" style="opacity: 0; width: 0; height: 0;">
-                            <span class="toggle-slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: var(--border); border-radius: 50px; transition: .4s;"></span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="toggleAnual" onchange="togglePlanos()">
+                            <span class="toggle-slider"></span>
                         </label>
-                        <span class="toggle-label">📆 Anual <span class="economia-badge" style="background: gold; color: #333; padding: 5px 15px; border-radius: 25px;">ECONOMIZE 60%</span></span>
+                        <span class="toggle-label">📆 Anual <span class="economia-badge">ECONOMIZE 60%</span></span>
                     </div>
 
-                    <div class="planilha-container" style="overflow-x: auto;">
-                        <table class="planilha-tabela" style="width: 100%; border-collapse: collapse;">
+                    <div class="planilha-container">
+                        <table class="planilha-tabela">
                             <thead>
                                 <tr>
-                                    <th style="background: var(--accent); color: white; padding: 20px;">FUNCIONALIDADES</th>
-                                    <th style="background: var(--accent); color: white; padding: 20px;">🚚 BÁSICO</th>
-                                    <th style="background: var(--accent); color: white; padding: 20px;">📦 PROFISSIONAL</th>
-                                    <th style="background: var(--accent); color: white; padding: 20px;">🏢 EMPRESARIAL</th>
+                                    <th>FUNCIONALIDADES</th>
+                                    <th>🚚 BÁSICO</th>
+                                    <th>📦 PROFISSIONAL</th>
+                                    <th>🏢 EMPRESARIAL</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr><td class="feature-name" style="padding: 15px; border-bottom: 1px solid var(--border);">Usuários</td><td style="padding: 15px;">1</td><td style="padding: 15px;">3</td><td style="padding: 15px;">10</td></tr>
-                                <tr><td class="feature-name" style="padding: 15px; border-bottom: 1px solid var(--border);">Transações/mês</td><td style="padding: 15px;">100</td><td style="padding: 15px;">500</td><td style="padding: 15px;">Ilimitado</td></tr>
-                                <tr><td class="feature-name" style="padding: 15px; border-bottom: 1px solid var(--border);">Relatórios avançados</td><td style="padding: 15px;">❌</td><td style="padding: 15px;">✅</td><td style="padding: 15px;">✅</td></tr>
-                                <tr><td class="feature-name" style="padding: 15px; border-bottom: 1px solid var(--border);">Suporte prioritário</td><td style="padding: 15px;">❌</td><td style="padding: 15px;">❌</td><td style="padding: 15px;">✅</td></tr>
-                                <tr class="preco-linha"><td class="feature-name" style="padding: 15px;"><strong>PREÇO MENSAL</strong></td><td id="precoBasicoMensal" style="padding: 15px;"><strong>R$ 49,90</strong></td><td id="precoProfissionalMensal" style="padding: 15px;"><strong>R$ 99,90</strong></td><td id="precoEmpresarialMensal" style="padding: 15px;"><strong>R$ 199,90</strong></td></tr>
-                                <tr class="preco-linha anual" style="display: none;"><td class="feature-name" style="padding: 15px;"><strong>PREÇO ANUAL</strong></td><td id="precoBasicoAnual" style="padding: 15px;"><strong>R$ 1.197,60</strong></td><td id="precoProfissionalAnual" style="padding: 15px;"><strong>R$ 2.397,60</strong></td><td id="precoEmpresarialAnual" style="padding: 15px;"><strong>R$ 4.797,60</strong></td></tr>
+                                <tr>
+                                    <td class="feature-name">Usuários</td>
+                                    <td>1</td>
+                                    <td>3</td>
+                                    <td>10</td>
+                                </tr>
+                                <tr>
+                                    <td class="feature-name">Transações/mês</td>
+                                    <td>100</td>
+                                    <td>500</td>
+                                    <td>Ilimitado</td>
+                                </tr>
+                                <tr>
+                                    <td class="feature-name">Relatórios avançados</td>
+                                    <td>❌</td>
+                                    <td>✅</td>
+                                    <td>✅</td>
+                                </tr>
+                                <tr>
+                                    <td class="feature-name">Suporte prioritário</td>
+                                    <td>❌</td>
+                                    <td>❌</td>
+                                    <td>✅</td>
+                                </tr>
+                                <tr class="preco-linha">
+                                    <td class="feature-name"><strong>PREÇO MENSAL</strong></td>
+                                    <td id="precoBasicoMensal"><strong>R$ 49,90</strong></td>
+                                    <td id="precoProfissionalMensal"><strong>R$ 99,90</strong></td>
+                                    <td id="precoEmpresarialMensal"><strong>R$ 199,90</strong></td>
+                                </tr>
+                                <tr class="preco-linha anual" style="display: none;">
+                                    <td class="feature-name"><strong>PREÇO ANUAL</strong></td>
+                                    <td id="precoBasicoAnual"><strong>R$ 1.197,60</strong> <span class="economia">Economize 60%</span></td>
+                                    <td id="precoProfissionalAnual"><strong>R$ 2.397,60</strong> <span class="economia">Economize 60%</span></td>
+                                    <td id="precoEmpresarialAnual"><strong>R$ 4.797,60</strong> <span class="economia">Economize 60%</span></td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <div class="planilha-botoes" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 30px;">
-                        <button class="plano-btn" style="background: #28a745; color: white; padding: 15px; border: none; border-radius: 10px; cursor: pointer;" onclick="selecionarPlano('basico')">🚚 ASSINAR BÁSICO</button>
-                        <button class="plano-btn" style="background: #17a2b8; color: white; padding: 15px; border: none; border-radius: 10px; cursor: pointer;" onclick="selecionarPlano('profissional')">📦 ASSINAR PROFISSIONAL</button>
-                        <button class="plano-btn" style="background: #ffc107; color: #333; padding: 15px; border: none; border-radius: 10px; cursor: pointer;" onclick="selecionarPlano('empresarial')">🏢 ASSINAR EMPRESARIAL</button>
+                    <div class="planilha-botoes">
+                        <button class="plano-btn" style="background: #28a745;" onclick="selecionarPlano('basico')">
+                            🚚 ASSINAR BÁSICO
+                        </button>
+                        <button class="plano-btn" style="background: #17a2b8;" onclick="selecionarPlano('profissional')">
+                            📦 ASSINAR PROFISSIONAL
+                        </button>
+                        <button class="plano-btn" style="background: #ffc107; color: #333;" onclick="selecionarPlano('empresarial')">
+                            🏢 ASSINAR EMPRESARIAL
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- MODAL DE EDIÇÃO -->
-    <div id="modalEdicao" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalEdicaoTitulo">✏️ Editar Lançamento</h3>
-                <button class="modal-close" onclick="fecharModalEdicao()">×</button>
-            </div>
-            <div class="modal-body" id="modalEdicaoBody"></div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="fecharModalEdicao()">Cancelar</button>
-                <button class="btn-primary btn-income" onclick="salvarEdicao()">Salvar</button>
-            </div>
-        </div>
-    </div>
+        <div id="modalPagamento" class="pagamento-modal">
+            <div class="pagamento-content">
+                <h3>💰 Finalizar assinatura</h3>
+                <p id="planoEscolhido"></p>
+                <p id="valorEscolhido" style="font-size: 24px; font-weight: bold; color: var(--accent);"></p>
+                
+                <div class="pagamento-opcoes">
+                    <button style="background: #28a745;" onclick="simularPagamento('cartao')">
+                        💳 Pagar com Cartão
+                    </button>
+                    <button style="background: #17a2b8;" onclick="simularPagamento('pix')">
+                        📱 Pagar com PIX
+                    </button>
+                    <button style="background: #ffc107; color: #333;" onclick="simularPagamento('boleto')">
+                        📄 Gerar Boleto
+                    </button>
+                </div>
 
-    <!-- MODAL DE PAGAMENTO -->
-    <div id="modalPagamento" class="modal">
-        <div class="modal-content">
-            <h3 style="margin-bottom: 20px;">💰 Finalizar assinatura</h3>
-            <p id="planoEscolhido"></p>
-            <p id="valorEscolhido" style="font-size: 24px; font-weight: bold; color: var(--accent);"></p>
-            
-            <div class="pagamento-opcoes" style="display: flex; flex-direction: column; gap: 15px; margin: 30px 0;">
-                <button style="background: #28a745; color: white; padding: 15px; border: none; border-radius: 10px; cursor: pointer;" onclick="simularPagamento('cartao')">💳 Pagar com Cartão</button>
-                <button style="background: #17a2b8; color: white; padding: 15px; border: none; border-radius: 10px; cursor: pointer;" onclick="simularPagamento('pix')">📱 Pagar com PIX</button>
-                <button style="background: #ffc107; color: #333; padding: 15px; border: none; border-radius: 10px; cursor: pointer;" onclick="simularPagamento('boleto')">📄 Gerar Boleto</button>
+                <button class="fechar-modal" onclick="fecharModal()">Fechar</button>
             </div>
-
-            <button class="fechar-modal" style="background: var(--expense); color: white; border: none; padding: 10px 30px; border-radius: 5px; cursor: pointer; width: 100%;" onclick="fecharModalPagamento()">Fechar</button>
         </div>
     </div>
 
     <script>
         // ============================================
-        // CONFIGURAÇÃO FIREBASE
+        // GLOBAIS (importante em <script type="module"> / modo strict)
+        // ============================================
+        // Quando este arquivo roda como módulo, qualquer variável usada sem "let/const" vira erro.
+        // Esses 3 nomes são usados em callbacks do Firestore e no modo "preview ao vivo" do Master.
+        let previewOverrideConfig = null; // objeto de override enviado pelo Master (quando existir)
+        let clienteCfg = {};              // configs/{clienteId}
+        let clienteBase = null;           // clientes/{clienteId}
+
+        // ============================================
+        // CONFIGURAÇÃO FIREBASE (MESMA DO MASTER_APP)
         // ============================================
         const firebaseConfig = {
-            apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
-            authDomain: "painelmastercomplet.firebaseapp.com",
-            projectId: "painelmastercomplet",
-            storageBucket: "painelmastercomplet.firebasestorage.app",
-            messagingSenderId: "87580974705",
-            appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
-        };
+  apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
+  authDomain: "painelmastercomplet.firebaseapp.com",
+  projectId: "painelmastercomplet",
+  storageBucket: "painelmastercomplet.firebasestorage.app",
+  messagingSenderId: "87580974705",
+  appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
+};
 
         // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
@@ -1481,108 +1606,288 @@
         // VARIÁVEIS GLOBAIS
         // ============================================
         let clienteId = null;
-        let clienteBase = null;
-        let clienteCfg = {};
-        let clienteConfig = {};
+        let clienteConfig = null;
         let transacoes = [];
         let contas = [];
         let previsoes = [];
-        let indicadores = {};
+        let indicadores = null;
         let tipoLancamento = 'receita';
         let tipoPrevisao = 'receita';
-        
-        // Controle de seleção
-        let lancamentosSelecionados = new Set();
-        let previsoesSelecionadas = new Set();
-        
-        // Modo Master (URL com ?master=1)
-        const params = new URLSearchParams(window.location.search);
-        const modoMaster = params.get('master') === '1' || localStorage.getItem('modoMaster') === '1';
-        
-        // Item em edição
-        let itemEmEdicao = null;
-        let tipoItemEmEdicao = null;
+        let automacoesAtivas = {};
+
+
+        // Modo Master: abre o editor de indicadores quando a URL tiver ?master=1
+        // (ou quando localStorage.modoMaster = '1')
+        const __params = new URLSearchParams(window.location.search);
+        const modoMaster = (__params.get('master') === '1') || (localStorage.getItem('modoMaster') === '1');
+
+
+        const categorias = {
+            receita: ['Serviços', 'Contratos', 'Frete', 'Entregas', 'Outros'],
+            despesa: ['Combustível', 'Manutenção', 'Pessoal', 'Alimentação', 'Viagem', 'Impostos', 'Outros']
+        };
 
         // ============================================
-        // FUNÇÕES DE TELA (BLOQUEIO/APP)
+        // INDICADORES DO DASHBOARD (POR CLIENTE)
         // ============================================
-        function mostrarTelaApp() {
-            document.getElementById('bloqueioScreen').style.display = 'none';
-            document.getElementById('appContent').style.display = 'block';
+        function getIndicadoresDefault() {
+            return {
+                entregasMes: 0,
+                metaEntregas: 0,
+                colaboradoresAtivos: 0,
+                colaboradoresDisponiveis: 0
+            };
         }
 
-        function mostrarTelaBloqueio(clienteBase) {
-            const msg = clienteBase?.motivoBloqueio || 'Sistema bloqueado pelo administrador.';
-            document.getElementById('bloqueioMsg').textContent = msg;
-            document.getElementById('bloqueioScreen').style.display = 'flex';
-            document.getElementById('appContent').style.display = 'none';
+        // ============================================
+        // EDITOR DE INDICADORES (SOMENTE MASTER)
+        // ============================================
+        function setIndicadoresMsg(msg) {
+            const el = document.getElementById('indicadoresMsg');
+            if (el) el.textContent = msg || '';
         }
 
-        // ============================================
-        // FUNÇÕES AUXILIARES
-        // ============================================
-        function formatarMoeda(input) {
-            let valor = input.value.replace(/\D/g, '');
-            if (valor === '') {
-                input.value = '';
+        function mostrarEditorIndicadoresSeForMaster() {
+            const box = document.getElementById('indicadoresEditor');
+            if (!box) return;
+            box.style.display = modoMaster ? 'block' : 'none';
+        }
+
+
+        // Links rápidos (normal e Master) — gerados a partir do cliente atual
+        function buildClienteLink(id, isMasterLink) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('cliente', id);
+
+            if (isMasterLink) url.searchParams.set('master', '1');
+            else url.searchParams.delete('master');
+
+            return url.toString();
+        }
+
+        async function copiarTextoParaClipboard(texto) {
+            try {
+                if (navigator?.clipboard?.writeText) {
+                    await navigator.clipboard.writeText(texto);
+                    return true;
+                }
+            } catch (_) {}
+
+            // fallback antigo
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = texto;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'absolute';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                document.body.removeChild(ta);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function atualizarLinksDoEditor() {
+            if (!modoMaster) return;
+            if (!clienteId) return;
+
+            const inputNormal = document.getElementById('linkClienteNormal');
+            const inputMaster = document.getElementById('linkClienteMaster');
+            const btnNormal = document.getElementById('btnCopiarLinkNormal');
+            const btnMaster = document.getElementById('btnCopiarLinkMaster');
+
+            if (inputNormal) inputNormal.value = buildClienteLink(clienteId, false);
+            if (inputMaster) inputMaster.value = buildClienteLink(clienteId, true);
+
+            if (btnNormal && !btnNormal.dataset.bound) {
+                btnNormal.dataset.bound = '1';
+                btnNormal.addEventListener('click', async () => {
+                    const ok = await copiarTextoParaClipboard(inputNormal?.value || '');
+                    setIndicadoresMsg(ok ? 'Link normal copiado.' : 'Não consegui copiar. Copie manualmente.');
+                });
+            }
+
+            if (btnMaster && !btnMaster.dataset.bound) {
+                btnMaster.dataset.bound = '1';
+                btnMaster.addEventListener('click', async () => {
+                    const ok = await copiarTextoParaClipboard(inputMaster?.value || '');
+                    setIndicadoresMsg(ok ? 'Link Master copiado.' : 'Não consegui copiar. Copie manualmente.');
+                });
+            }
+        }
+        function preencherEditorIndicadores() {
+            if (!modoMaster) return;
+            mostrarEditorIndicadoresSeForMaster();
+            atualizarLinksDoEditor();
+
+            const ind = indicadores || getIndicadoresDefault();
+
+            const entregasMes = document.getElementById('ind_entregasMes');
+            const metaEntregas = document.getElementById('ind_metaEntregas');
+            const colabAtivos = document.getElementById('ind_colabAtivos');
+            const colabDisp = document.getElementById('ind_colabDisp');
+
+            const naAtivos = document.getElementById('ind_na_colabAtivos');
+            const naDisp = document.getElementById('ind_na_colabDisp');
+
+            if (entregasMes) entregasMes.value = (ind.entregasMes ?? 0);
+            if (metaEntregas) metaEntregas.value = (ind.metaEntregas ?? 0);
+
+            const ativosNA = (ind.colaboradoresAtivos === null || ind.colaboradoresAtivos === undefined);
+            const dispNA = (ind.colaboradoresDisponiveis === null || ind.colaboradoresDisponiveis === undefined);
+
+            if (naAtivos) naAtivos.checked = ativosNA;
+            if (naDisp) naDisp.checked = dispNA;
+
+            if (colabAtivos) {
+                colabAtivos.disabled = ativosNA;
+                colabAtivos.value = ativosNA ? '' : (ind.colaboradoresAtivos ?? 0);
+            }
+
+            if (colabDisp) {
+                colabDisp.disabled = dispNA;
+                colabDisp.value = dispNA ? '' : (ind.colaboradoresDisponiveis ?? 0);
+            }
+
+            setIndicadoresMsg('');
+        }
+
+        function lerIndicadoresDoEditor() {
+            const entregasMes = document.getElementById('ind_entregasMes');
+            const metaEntregas = document.getElementById('ind_metaEntregas');
+            const colabAtivos = document.getElementById('ind_colabAtivos');
+            const colabDisp = document.getElementById('ind_colabDisp');
+
+            const naAtivos = document.getElementById('ind_na_colabAtivos');
+            const naDisp = document.getElementById('ind_na_colabDisp');
+
+            const parseIntSafe = (v) => {
+                const n = parseInt(String(v ?? '').trim(), 10);
+                return Number.isFinite(n) ? n : 0;
+            };
+
+            return {
+                entregasMes: parseIntSafe(entregasMes?.value),
+                metaEntregas: parseIntSafe(metaEntregas?.value),
+                colaboradoresAtivos: (naAtivos?.checked) ? null : parseIntSafe(colabAtivos?.value),
+                colaboradoresDisponiveis: (naDisp?.checked) ? null : parseIntSafe(colabDisp?.value),
+            };
+        }
+
+        async function salvarIndicadoresDoEditor() {
+            if (!modoMaster) return;
+            if (!clienteId) {
+                setIndicadoresMsg('Cliente não identificado.');
                 return;
             }
-            valor = parseInt(valor) / 100;
-            input.value = valor.toLocaleString('pt-BR', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            });
+
+            try {
+                setIndicadoresMsg('Salvando...');
+                const novos = lerIndicadoresDoEditor();
+                await db.collection('dados_financeiros').doc(clienteId).set({
+                    indicadores: novos,
+                    atualizadoEm: new Date().toISOString()
+                }, { merge: true });
+
+                indicadores = novos;
+                atualizarDashboard();
+            mostrarEditorIndicadoresSeForMaster();
+            configurarEventosEditorIndicadores();
+            preencherEditorIndicadores();
+                setIndicadoresMsg('Salvo.');
+            } catch (e) {
+                console.error('Erro ao salvar indicadores:', e);
+                setIndicadoresMsg('Erro ao salvar. Veja o Console.');
+            }
         }
 
-        function converterMoedaParaNumber(valorString) {
-            if (!valorString) return 0;
-            const valorLimpo = valorString.replace(/\./g, '').replace(',', '.');
-            return parseFloat(valorLimpo) || 0;
+        async function zerarIndicadoresDoClienteAtual() {
+            if (!modoMaster) return;
+            if (!clienteId) {
+                setIndicadoresMsg('Cliente não identificado.');
+                return;
+            }
+
+            try {
+                setIndicadoresMsg('Zerando...');
+                const zerados = getIndicadoresDefault();
+                // Mantém a lógica de "não se aplica" para colaboradores, se você quiser:
+                // zerados.colaboradoresAtivos = null; zerados.colaboradoresDisponiveis = null;
+
+                await db.collection('dados_financeiros').doc(clienteId).set({
+                    indicadores: zerados,
+                    atualizadoEm: new Date().toISOString()
+                }, { merge: true });
+
+                indicadores = zerados;
+                preencherEditorIndicadores();
+                atualizarDashboard();
+                setIndicadoresMsg('Zerado (somente este cliente).');
+            } catch (e) {
+                console.error('Erro ao zerar indicadores:', e);
+                setIndicadoresMsg('Erro ao zerar. Veja o Console.');
+            }
         }
 
+        function configurarEventosEditorIndicadores() {
+            if (!modoMaster) return;
+
+            const naAtivos = document.getElementById('ind_na_colabAtivos');
+            const naDisp = document.getElementById('ind_na_colabDisp');
+            const colabAtivos = document.getElementById('ind_colabAtivos');
+            const colabDisp = document.getElementById('ind_colabDisp');
+
+            if (naAtivos && colabAtivos) {
+                naAtivos.addEventListener('change', () => {
+                    colabAtivos.disabled = naAtivos.checked;
+                    if (naAtivos.checked) colabAtivos.value = '';
+                });
+            }
+
+            if (naDisp && colabDisp) {
+                naDisp.addEventListener('change', () => {
+                    colabDisp.disabled = naDisp.checked;
+                    if (naDisp.checked) colabDisp.value = '';
+                });
+            }
+
+            const btnSalvar = document.getElementById('btnSalvarIndicadores');
+            if (btnSalvar) btnSalvar.addEventListener('click', salvarIndicadoresDoEditor);
+
+            const btnZerar = document.getElementById('btnZerarIndicadores');
+            if (btnZerar) btnZerar.addEventListener('click', zerarIndicadoresDoClienteAtual);
+        }
+
+
+        // ============================================
+        // CARREGAR CLIENTE DA URL
+        // ============================================
         function getClienteIdFromUrl() {
-            return params.get('cliente');
-        }
-
-        function mesclarConfig(base, cfg) {
-            const b = base || {};
-            const c = cfg || {};
-
-            const out = JSON.parse(JSON.stringify(c));
-
-            out.visual = out.visual || {};
-            out.conteudo = out.conteudo || {};
-            out.funcoes = out.funcoes || {};
-            out.meta = out.meta || {};
-
-            out.clienteId = b.id || out.clienteId || null;
-            out.nome = b.nome || out.nome || '';
-            out.perfil = b.perfil || out.perfil || '';
-            out.cpfCnpj = b.cpfCnpj || out.cpfCnpj || '';
-            out.bloqueado = !!b.bloqueado;
-
-            out.visual.corPrincipal = out.visual.corPrincipal ?? b.corPrincipal ?? b.cor ?? '#4CAF50';
-            out.visual.modoEscuro = out.visual.modoEscuro ?? b.modoEscuro ?? 'auto';
-            out.visual.logoBase64 = out.visual.logoBase64 ?? b.logoBase64 ?? null;
-
-            out.conteudo.termoColaborador = out.conteudo.termoColaborador ?? b.termoColaborador ?? 'Colaborador';
-            out.conteudo.termoMotorista = out.conteudo.termoMotorista ?? b.termoMotorista ?? 'Motorista';
-            out.conteudo.termoAcao = out.conteudo.termoAcao ?? b.termoAcao ?? 'Ação';
-
-            out.meta.atualizadoEm = out.meta.atualizadoEm ?? b.atualizadoEm ?? null;
-
-            return out;
+            const params = new URLSearchParams(window.location.search);
+            return params.get("cliente");
         }
 
         // ============================================
-        // CARREGAR CLIENTE E CONFIGURAÇÕES
+        // CARREGAR CONFIGURAÇÕES DO CLIENTE
         // ============================================
+        // assinatura ativa do cliente (para não criar vários listeners)
         let unsubscribeCliente = null;
         let unsubscribeCfg = null;
         let appInicializado = false;
 
         async function carregarConfigCliente() {
             clienteId = getClienteIdFromUrl();
+            console.log("Search:", window.location.search);
+            console.log("clienteId:", clienteId);
+
+            // ✅ Salva o último cliente aberto
+            if (clienteId) {
+              localStorage.setItem("ultimoClienteId", clienteId);
+              localStorage.setItem("ultimoClienteAtualizadoEm", new Date().toISOString());
+            }
 
             if (!clienteId) {
                 document.body.innerHTML = `
@@ -1597,12 +1902,17 @@
                 return;
             }
 
-            if (unsubscribeCliente) unsubscribeCliente();
+            // evita acumular listeners se a função for chamada de novo
+            if (unsubscribeCliente) {
+                unsubscribeCliente();
+                unsubscribeCliente = null;
+            }
 
             try {
                 const ref = db.collection('clientes').doc(clienteId);
                 const refCfg = db.collection('configs').doc(clienteId);
 
+                // Base do cliente (modo antigo) + Config separado (modo profissional)
                 unsubscribeCliente = ref.onSnapshot(async (doc) => {
                     if (!doc.exists) {
                         document.body.innerHTML = `
@@ -1617,73 +1927,235 @@
                     }
 
                     clienteBase = doc.data() || {};
-                    const cfg = clienteCfg || {};
-                    clienteConfig = mesclarConfig(clienteBase, cfg);
 
+                    // Se configs já carregaram, mescla. Se não, segue com base.
+                    const cfg = (clienteCfg || {});
+                    const override = previewOverrideConfig || null;
+                    clienteConfig = mesclarConfig(clienteBase, override || cfg);
+
+                    // Bloqueio continua valendo pela base
                     if (clienteBase.bloqueado) {
                         mostrarTelaBloqueio(clienteBase);
                         return;
                     }
 
                     mostrarTelaApp();
-                    aplicarConfiguracoes();
 
+                    aplicarConfiguracoes();
+                    atualizarCamposDePermissao();
+
+                    // inicialização pesada só uma vez
                     if (!appInicializado) {
                         appInicializado = true;
                         await carregarDadosFinanceiros();
                         inicializarInterface();
                     }
+                }, (error) => {
+                    console.error('Erro no onSnapshot:', error);
+                    document.body.innerHTML = `
+                        <div class="bloqueio-container">
+                            <div class="bloqueio-card" style="border-left-color: #f44336;">
+                                <h1>❌</h1>
+                                <h2>Erro de conexão</h2>
+                                <p>Não foi possível carregar os dados.</p>
+                                <button onclick="window.location.reload()">Tentar novamente</button>
+                            </div>
+                        </div>
+                    `;
                 });
 
-                if (unsubscribeCfg) unsubscribeCfg();
+                // 🔁 Também escuta configs separadas (configs/{clienteId})
+                if (unsubscribeCfg) { try { unsubscribeCfg(); } catch(e) {} }
                 unsubscribeCfg = refCfg.onSnapshot((doc) => {
                     clienteCfg = doc.exists ? (doc.data() || {}) : {};
-                    
+
+                    // Se estiver em preview ao vivo, quem manda é o Master.
+                    if (previewOverrideConfig) return;
+
                     if (clienteBase) {
                         clienteConfig = mesclarConfig(clienteBase, clienteCfg);
                         aplicarConfiguracoes();
+                    atualizarCamposDePermissao();
+                        try { inicializarInterface(); } catch(e) {}
                     }
+                }, (err) => {
+                    console.warn('Erro no onSnapshot de configs:', err);
                 });
 
+                // Atualizar editor (se for Master)
+                preencherEditorIndicadores();
+
             } catch (error) {
-                console.error('Erro ao carregar cliente:', error);
+                console.error('Erro ao iniciar sincronização:', error);
+                document.body.innerHTML = `
+                    <div class="bloqueio-container">
+                        <div class="bloqueio-card" style="border-left-color: #f44336;">
+                            <h1>❌</h1>
+                            <h2>Erro de conexão</h2>
+                            <p>Não foi possível carregar os dados.</p>
+                            <button onclick="window.location.reload()">Tentar novamente</button>
+                        </div>
+                    </div>
+                `;
             }
         }
 
-        function aplicarConfiguracoes() {
+
+        // ============================================
+        // APLICAR CONFIGURAÇÕES DO CLIENTE
+        // ============================================
+        
+    // =============================
+    // Merge base client doc + config doc (SaaS)
+    // =============================
+    function mesclarConfig(base, cfg) {
+        const b = base || {};
+        const c = cfg || {};
+
+        // deep-ish clone of cfg to avoid mutating original
+        const out = JSON.parse(JSON.stringify(c));
+
+        // ensure sections exist
+        out.visual = out.visual || {};
+        out.conteudo = out.conteudo || {};
+        out.funcoes = out.funcoes || {};
+        out.meta = out.meta || {};
+
+        // Base (cliente) fields (these are authoritative for identity/block)
+        out.clienteId = b.id || out.clienteId || null;
+        out.nome = b.nome || out.nome || '';
+        out.perfil = b.perfil || out.perfil || '';
+        out.cpfCnpj = b.cpfCnpj || out.cpfCnpj || '';
+        out.bloqueado = !!b.bloqueado;
+
+        // Visual defaults fall back to base doc if present
+        out.visual.corPrincipal = out.visual.corPrincipal ?? b.corPrincipal ?? b.cor ?? '#4CAF50';
+        out.visual.modoEscuro = out.visual.modoEscuro ?? b.modoEscuro ?? 'auto';
+        out.visual.logoBase64 = out.visual.logoBase64 ?? b.logoBase64 ?? null;
+
+        // Content defaults fall back to base doc if present
+        out.conteudo.termoColaborador = out.conteudo.termoColaborador ?? b.termoColaborador ?? 'Colaborador';
+        out.conteudo.termoMotorista = out.conteudo.termoMotorista ?? b.termoMotorista ?? 'Motorista';
+        out.conteudo.termoAcao = out.conteudo.termoAcao ?? b.termoAcao ?? 'Ação';
+
+        // Meta (audit)
+        out.meta.atualizadoEm = out.meta.atualizadoEm ?? b.atualizadoEm ?? null;
+
+        return out;
+    }
+
+function aplicarConfiguracoes() {
             if (!clienteConfig) return;
 
+            // Nome da empresa
             document.getElementById('empresaNome').innerHTML = `💰 ${clienteConfig.nome || 'SISTEMA FINANCEIRO'}`;
             document.getElementById('userBadge').innerHTML = `👤 ${clienteConfig.nome || 'Empresa'}`;
 
+            
+            // Logo do cliente (vem do Master: logoBase64 / logoUrl)
             const logoImg = document.getElementById('clienteLogoImg');
-            const logoSrc = clienteConfig.visual?.logoBase64 || clienteConfig.logoBase64 || '';
-            if (logoImg && logoSrc) {
-                logoImg.src = logoSrc;
-                logoImg.style.display = 'block';
+            const logoSrc = clienteConfig.logoBase64 || clienteConfig.logoUrl || clienteConfig.logo || '';
+            if (logoImg) {
+                if (logoSrc && typeof logoSrc === 'string' && logoSrc.trim().length > 10) {
+                    logoImg.src = logoSrc;
+                    logoImg.style.display = 'block';
+                } else {
+                    logoImg.removeAttribute('src');
+                    logoImg.style.display = 'none';
+                }
+            }
+// Perfil / Documento / ID (para confiança do cliente)
+            const perfil = (clienteConfig.perfil || clienteConfig.tipoCliente || clienteConfig.tipoPerfil || '').toString().trim();
+            const documento = (clienteConfig.cnpj || clienteConfig.cpf || clienteConfig.documento || '').toString().trim();
+
+            const metaEl = document.getElementById('clienteMeta');
+            const perfilEl = document.getElementById('clientePerfil');
+            const docEl = document.getElementById('clienteDocumento');
+            const idEl = document.getElementById('clienteIdMini');
+
+            const idAtual = (clienteId || '').toString().trim();
+
+            const temAlgumaMeta = !!(perfil || documento || idAtual);
+
+            if (metaEl) {
+                metaEl.style.display = temAlgumaMeta ? 'flex' : 'none';
+            }
+            if (perfilEl) {
+                perfilEl.textContent = perfil ? `Perfil: ${perfil}` : 'Perfil: —';
+            }
+            if (docEl) {
+                if (documento) {
+                    const rotulo = clienteConfig.cnpj ? 'CNPJ' : (clienteConfig.cpf ? 'CPF' : 'Documento');
+                    docEl.textContent = `${rotulo}: ${documento}`;
+                } else {
+                    docEl.textContent = 'Documento: —';
+                }
+            }
+            if (idEl) {
+                idEl.textContent = idAtual ? `ID: ${idAtual}` : 'ID: —';
             }
 
-            // Mostrar/esconder painel de autorização (só para master)
-            const autorizacaoPanel = document.getElementById('autorizacaoPanel');
-            if (autorizacaoPanel) {
-                autorizacaoPanel.style.display = modoMaster ? 'block' : 'none';
+
+            // Cor principal
+            if (clienteConfig.cor) {
+                document.documentElement.style.setProperty('--accent', clienteConfig.cor);
+                document.documentElement.style.setProperty('--accent-hover', adjustColor(clienteConfig.cor, -20));
             }
 
-            // Aplicar tema
-            if (clienteConfig.visual?.modoEscuro === 'dark') {
+            // Termos personalizados
+            if (clienteConfig.termoColaborador) {
+                document.getElementById('labelMotorista').innerHTML = `🚚 ${clienteConfig.termoColaborador} (opcional)`;
+                document.getElementById('motorista').placeholder = `Nome do ${clienteConfig.termoColaborador.toLowerCase()}`;
+                document.getElementById('statTitle2').innerHTML = `📦 ${clienteConfig.termoColaborador}s ativos`;
+            }
+
+            if (clienteConfig.termoAcao) {
+                document.getElementById('statTitle1').innerHTML = `🚚 ${clienteConfig.termoAcao}s (Mês)`;
+            }
+
+            if (clienteConfig.termoCliente) {
+                // Pode usar em algum lugar
+            }
+
+            // Moeda
+            if (clienteConfig.moeda) {
+                const simbolos = {
+                    'BRL': 'R$',
+                    'USD': '$',
+                    'EUR': '€'
+                };
+                document.getElementById('moedaSimbolo').innerHTML = simbolos[clienteConfig.moeda] || 'R$';
+            }
+
+            // Modo escuro
+            if (clienteConfig.modoEscuro === 'dark') {
                 document.body.classList.add('dark-mode');
                 document.getElementById('darkModeBtn').innerHTML = '☀️ Modo Claro';
-            } else {
+            } else if (clienteConfig.modoEscuro === 'light') {
                 document.body.classList.remove('dark-mode');
                 document.getElementById('darkModeBtn').innerHTML = '🌙 Modo Escuro';
             }
         }
 
+        
+        function atualizarCamposDePermissao() {
+            // Preparação para o ponto 4 (editar/excluir lançamentos)
+            const podeEditar = (clienteConfig?.permitirEditarLancamentos !== false);
+            const podeExcluir = (clienteConfig?.permitirExcluirLancamentos !== false);
+
+            // Se no futuro você adicionar botões na lista, use essas flags.
+            window.__podeEditarLanc = podeEditar;
+            window.__podeExcluirLanc = podeExcluir;
+        }
+
+
+
         // ============================================
-        // CARREGAR DADOS FINANCEIROS
+        // CARREGAR DADOS FINANCEIROS DO CLIENTE
         // ============================================
         async function carregarDadosFinanceiros() {
             try {
+                // Tentar carregar dados existentes
                 const docRef = db.collection('dados_financeiros').doc(clienteId);
                 const doc = await docRef.get();
 
@@ -1692,23 +2164,15 @@
                     transacoes = dados.transacoes || [];
                     contas = dados.contas || [];
                     previsoes = dados.previsoes || [];
-                    indicadores = dados.indicadores || {
-                        entregasMes: 0,
-                        metaEntregas: 0,
-                        colaboradoresAtivos: 0,
-                        colaboradoresDisponiveis: 0
-                    };
+                    indicadores = dados.indicadores || getIndicadoresDefault();
                 } else {
+                    // Criar dados iniciais
                     transacoes = [];
                     contas = [];
                     previsoes = [];
-                    indicadores = {
-                        entregasMes: 0,
-                        metaEntregas: 0,
-                        colaboradoresAtivos: 0,
-                        colaboradoresDisponiveis: 0
-                    };
+                    indicadores = getIndicadoresDefault();
 
+                    // Salvar estrutura inicial
                     await docRef.set({
                         transacoes: [],
                         contas: [],
@@ -1718,17 +2182,20 @@
                     });
                 }
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
+                console.error('Erro ao carregar dados financeiros:', error);
             }
         }
 
+        // ============================================
+        // SALVAR DADOS FINANCEIROS
+        // ============================================
         async function salvarDadosFinanceiros() {
             try {
                 await db.collection('dados_financeiros').doc(clienteId).set({
                     transacoes: transacoes,
                     contas: contas,
                     previsoes: previsoes,
-                    indicadores: indicadores,
+                    indicadores: indicadores || getIndicadoresDefault(),
                     atualizadoEm: new Date().toISOString()
                 }, { merge: true });
                 return true;
@@ -1742,33 +2209,49 @@
         // INICIALIZAR INTERFACE
         // ============================================
         function inicializarInterface() {
-            // Construir abas
+            // Construir abas baseado nas funções ativas
             const navTabs = document.getElementById('navTabs');
             navTabs.innerHTML = '';
 
             const abas = [
-                { id: 'dashboard', nome: '📊 Dashboard', ativo: true },
-                { id: 'lancamentos', nome: '📝 Lançamentos', ativo: true },
-                { id: 'contas', nome: '🏦 Contas', ativo: true },
-                { id: 'orcamento', nome: '📅 Orçamento', ativo: true },
-                { id: 'relatorios', nome: '📈 Relatórios', ativo: true },
-                { id: 'planos', nome: '💰 Planos', ativo: clienteConfig.funcoes?.planos === true }
+                { id: 'dashboard', nome: '📊 Dashboard', ativo: clienteConfig.funcDashboard !== false },
+                { id: 'lancamentos', nome: '📝 Lançamentos', ativo: clienteConfig.funcLancamentos !== false },
+                { id: 'contas', nome: '🏦 Contas', ativo: clienteConfig.funcContas !== false },
+                { id: 'orcamento', nome: '📅 Orçamento', ativo: clienteConfig.funcOrcamento !== false },
+                { id: 'relatorios', nome: '📈 Relatórios', ativo: clienteConfig.funcRelatorios !== false },
+                { id: 'planos', nome: '💰 Planos', ativo: clienteConfig.funcPlanos === true }
             ];
 
-            let primeiraAba = null;
+            let primeiraAbaAtiva = null;
+
             abas.forEach(aba => {
                 if (aba.ativo) {
                     const btn = document.createElement('button');
-                    btn.className = `nav-tab ${!primeiraAba ? 'active' : ''}`;
+                    btn.className = `nav-tab ${!primeiraAbaAtiva ? 'active' : ''}`;
                     btn.setAttribute('onclick', `showTab('${aba.id}')`);
                     btn.innerHTML = aba.nome;
                     navTabs.appendChild(btn);
                     
-                    if (!primeiraAba) primeiraAba = aba.id;
+                    if (!primeiraAbaAtiva) {
+                        primeiraAbaAtiva = aba.id;
+                    }
+                } else {
+                    // Esconder a aba se não estiver ativa
+                    const tab = document.getElementById(aba.id);
+                    if (tab) tab.style.display = 'none';
                 }
             });
 
-            if (primeiraAba) showTab(primeiraAba);
+            // Se não tem planos, esconder seção de importação também?
+            if (clienteConfig.funcImportar === false) {
+                const importSection = document.querySelector('.import-export-section');
+                if (importSection) importSection.style.display = 'none';
+            }
+
+            // Mostrar primeira aba
+            if (primeiraAbaAtiva) {
+                showTab(primeiraAbaAtiva);
+            }
 
             // Configurar datas
             const hoje = new Date().toISOString().split('T')[0];
@@ -1789,21 +2272,43 @@
             atualizarListaContas();
             carregarOrcamento();
             gerarRelatorio();
-
-            // Configurar dark mode
-            document.getElementById('darkModeBtn').onclick = toggleDarkMode;
         }
 
         // ============================================
-        // NAVEGAÇÃO
+        // FUNÇÕES AUXILIARES
+        // ============================================
+        function adjustColor(hex, percent) {
+            // Simplificado - escurecer/clarear cor
+            return hex;
+        }
+
+        function formatarMoeda(input) {
+            let valor = input.value.replace(/\D/g, '');
+            if (valor === '') {
+                input.value = '';
+                return;
+            }
+            valor = parseInt(valor) / 100;
+            input.value = valor.toLocaleString('pt-BR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        }
+
+        function converterMoedaParaNumber(valorString) {
+            if (!valorString) return 0;
+            const valorLimpo = valorString.replace(/\./g, '').replace(',', '.');
+            return parseFloat(valorLimpo) || 0;
+        }
+
+        // ============================================
+        // FUNÇÕES DE NAVEGAÇÃO
         // ============================================
         function showTab(tabName) {
             document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             
-            const activeTab = document.querySelector(`[onclick="showTab('${tabName}')"]`);
-            if (activeTab) activeTab.classList.add('active');
-            
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
             document.getElementById(tabName).classList.add('active');
         }
 
@@ -1813,10 +2318,12 @@
             
             if (tipo === 'receita') {
                 document.querySelector('#lancamentos .income-tab').classList.add('active');
-                document.getElementById('btnLancar').className = 'btn-primary btn-income';
+                document.getElementById('btnLancar').classList.remove('btn-expense');
+                document.getElementById('btnLancar').classList.add('btn-income');
             } else {
                 document.querySelector('#lancamentos .expense-tab').classList.add('active');
-                document.getElementById('btnLancar').className = 'btn-primary btn-expense';
+                document.getElementById('btnLancar').classList.remove('btn-income');
+                document.getElementById('btnLancar').classList.add('btn-expense');
             }
             preencherCategorias();
         }
@@ -1830,24 +2337,26 @@
 
         function toggleDarkMode() {
             document.body.classList.toggle('dark-mode');
-            const btn = document.getElementById('darkModeBtn');
-            btn.innerHTML = document.body.classList.contains('dark-mode') ? '☀️ Modo Claro' : '🌙 Modo Escuro';
+            const btn = document.querySelector('.dark-mode-toggle');
+            
+            if (document.body.classList.contains('dark-mode')) {
+                btn.textContent = '☀️ Modo Claro';
+            } else {
+                btn.textContent = '🌙 Modo Escuro';
+            }
         }
 
         // ============================================
-        // LANÇAMENTOS
+        // FUNÇÕES DE LANÇAMENTOS
         // ============================================
         function preencherCategorias() {
             const select = document.getElementById('categoria');
             if (!select) return;
             
             select.innerHTML = '';
-            const listaCategorias = clienteConfig.conteudo?.categorias?.length 
-                ? clienteConfig.conteudo.categorias 
-                : (tipoLancamento === 'receita' 
-                    ? ['Serviços', 'Contratos', 'Frete', 'Entregas', 'Outros']
-                    : ['Combustível', 'Manutenção', 'Pessoal', 'Alimentação', 'Viagem', 'Impostos', 'Outros']);
-            
+            const listaCategorias = (clienteConfig && Array.isArray(clienteConfig.categorias) && clienteConfig.categorias.length)
+                ? clienteConfig.categorias
+                : categorias[tipoLancamento];
             listaCategorias.forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat;
@@ -1861,31 +2370,32 @@
             if (!select) return;
             
             select.innerHTML = '';
-            const listaContas = contas.length ? contas : [];
-            
-            if (listaContas.length === 0) {
+            const listaContas = (clienteConfig && Array.isArray(clienteConfig.contasPadrao) && clienteConfig.contasPadrao.length)
+                ? clienteConfig.contasPadrao
+                : contas;
+            listaContas.forEach(conta => {
                 const option = document.createElement('option');
-                option.value = '';
-                option.textContent = 'Nenhuma conta cadastrada';
+                option.value = conta.id;
+                option.textContent = `${conta.nome} (${conta.tipo})`;
                 select.appendChild(option);
-            } else {
-                listaContas.forEach(conta => {
-                    const option = document.createElement('option');
-                    option.value = conta.id;
-                    option.textContent = `${conta.nome} (${conta.tipo})`;
-                    select.appendChild(option);
-                });
-            }
+            });
         }
 
         async function lancarTransacao() {
+            const valorInput = document.getElementById('valor').value;
+            const descricao = document.getElementById('descricao').value;
+            const categoria = document.getElementById('categoria').value;
+            const contaId = parseInt(document.getElementById('contaSelect').value);
+            const motorista = document.getElementById('motorista')?.value || '';
+            const observacao = document.getElementById('observacao').value;
+            let data = document.getElementById('dataLancamento').value;
+
             if (!contas.length) {
                 alert('⚠️ Cadastre uma conta primeiro!');
                 showTab('contas');
                 return;
             }
 
-            const valorInput = document.getElementById('valor').value;
             const valorNumerico = converterMoedaParaNumber(valorInput);
 
             if (!valorNumerico || valorNumerico <= 0) {
@@ -1893,10 +2403,13 @@
                 return;
             }
 
-            const descricao = document.getElementById('descricao').value;
             if (!descricao) {
                 alert('Digite uma descrição!');
                 return;
+            }
+
+            if (!data) {
+                data = new Date().toISOString().split('T')[0];
             }
 
             const novaTransacao = {
@@ -1904,12 +2417,11 @@
                 tipo: tipoLancamento,
                 valor: valorNumerico,
                 descricao: descricao,
-                categoria: document.getElementById('categoria').value,
-                contaId: parseInt(document.getElementById('contaSelect').value),
-                motorista: document.getElementById('motorista')?.value || '',
-                observacao: document.getElementById('observacao').value,
-                data: document.getElementById('dataLancamento').value || new Date().toISOString().split('T')[0],
-                criadoEm: new Date().toISOString()
+                categoria: categoria,
+                contaId: contaId,
+                motorista: motorista,
+                observacao: observacao,
+                data: data
             };
 
             transacoes.unshift(novaTransacao);
@@ -1918,11 +2430,11 @@
             atualizarListaLancamentos();
             atualizarDashboard();
             
-            // Limpar formulário
             document.getElementById('valor').value = '';
             document.getElementById('descricao').value = '';
             document.getElementById('observacao').value = '';
             document.getElementById('motorista').value = '';
+            document.getElementById('dataLancamento').value = new Date().toISOString().split('T')[0];
             
             alert('✅ Lançamento realizado!');
         }
@@ -1937,16 +2449,13 @@
             }
 
             let html = '';
-            transacoes.slice(0, 50).forEach(t => {
+            transacoes.slice(0, 15).forEach(t => {
                 const conta = contas.find(c => c.id === t.contaId) || { nome: 'Conta' };
                 const valorFormatado = t.valor.toFixed(2).replace('.', ',');
-                const selecionado = lancamentosSelecionados.has(t.id) ? 'selected' : '';
+                const termoColaborador = clienteConfig?.termoColaborador || 'Motorista';
                 
                 html += `
-                    <div class="transaction-item ${selecionado}" data-id="${t.id}">
-                        <input type="checkbox" class="transaction-checkbox" 
-                               onchange="toggleSelecionarLancamento(${t.id})" 
-                               ${lancamentosSelecionados.has(t.id) ? 'checked' : ''}>
+                    <div class="transaction-item">
                         <div class="transaction-info">
                             <div class="transaction-header">
                                 <span class="transaction-valor ${t.tipo === 'receita' ? 'income' : 'expense'}">
@@ -1962,170 +2471,34 @@
                                 ${t.observacao ? `<br>📌 ${t.observacao}` : ''}
                             </div>
                         </div>
-                        <div class="transaction-actions">
-                            <button class="action-btn edit" onclick="editarLancamento(${t.id})">✏️</button>
-                            <button class="action-btn delete" onclick="excluirLancamento(${t.id})">🗑️</button>
-                        </div>
                     </div>
                 `;
             });
 
             listaDiv.innerHTML = html;
-            
-            // Atualizar checkbox "Selecionar todos"
-            const selectAll = document.getElementById('selectAllLancamentos');
-            if (selectAll) {
-                selectAll.checked = transacoes.length > 0 && lancamentosSelecionados.size === transacoes.length;
-            }
         }
 
         // ============================================
-        // SELEÇÃO EM MASSA - LANÇAMENTOS
-        // ============================================
-        function toggleSelecionarLancamento(id) {
-            if (lancamentosSelecionados.has(id)) {
-                lancamentosSelecionados.delete(id);
-            } else {
-                lancamentosSelecionados.add(id);
-            }
-            atualizarListaLancamentos();
-        }
-
-        function selecionarTodosLancamentos() {
-            const selectAll = document.getElementById('selectAllLancamentos');
-            if (selectAll.checked) {
-                transacoes.forEach(t => lancamentosSelecionados.add(t.id));
-            } else {
-                lancamentosSelecionados.clear();
-            }
-            atualizarListaLancamentos();
-        }
-
-        async function excluirSelecionadosLancamentos() {
-            if (lancamentosSelecionados.size === 0) {
-                alert('Nenhum lançamento selecionado.');
-                return;
-            }
-
-            if (!confirm(`Deseja excluir ${lancamentosSelecionados.size} lançamento(s)?`)) return;
-
-            transacoes = transacoes.filter(t => !lancamentosSelecionados.has(t.id));
-            lancamentosSelecionados.clear();
-            
-            await salvarDadosFinanceiros();
-            atualizarListaLancamentos();
-            atualizarDashboard();
-        }
-
-        async function excluirTodosLancamentos() {
-            if (transacoes.length === 0) return;
-            
-            if (!confirm(`Deseja excluir TODOS os ${transacoes.length} lançamentos?`)) return;
-            
-            transacoes = [];
-            lancamentosSelecionados.clear();
-            
-            await salvarDadosFinanceiros();
-            atualizarListaLancamentos();
-            atualizarDashboard();
-        }
-
-        async function excluirLancamento(id) {
-            if (!confirm('Deseja excluir este lançamento?')) return;
-            
-            transacoes = transacoes.filter(t => t.id !== id);
-            lancamentosSelecionados.delete(id);
-            
-            await salvarDadosFinanceiros();
-            atualizarListaLancamentos();
-            atualizarDashboard();
-        }
-
-        // ============================================
-        // EDIÇÃO DE LANÇAMENTOS
-        // ============================================
-        function editarLancamento(id) {
-            const item = transacoes.find(t => t.id === id);
-            if (!item) return;
-            
-            itemEmEdicao = item;
-            tipoItemEmEdicao = 'lancamento';
-            
-            const modalBody = document.getElementById('modalEdicaoBody');
-            modalBody.innerHTML = `
-                <div class="form-group">
-                    <label>💰 Valor</label>
-                    <input type="text" id="editValor" value="${item.valor.toFixed(2).replace('.', ',')}" onkeyup="formatarMoeda(this)">
-                </div>
-                <div class="form-group">
-                    <label>📝 Descrição</label>
-                    <input type="text" id="editDescricao" value="${item.descricao}">
-                </div>
-                <div class="form-group">
-                    <label>📂 Categoria</label>
-                    <input type="text" id="editCategoria" value="${item.categoria}">
-                </div>
-                <div class="form-group">
-                    <label>🚚 Motorista</label>
-                    <input type="text" id="editMotorista" value="${item.motorista || ''}">
-                </div>
-                <div class="form-group">
-                    <label>📝 Observação</label>
-                    <textarea id="editObservacao">${item.observacao || ''}</textarea>
-                </div>
-                <div class="form-group">
-                    <label>📅 Data</label>
-                    <input type="date" id="editData" value="${item.data}">
-                </div>
-            `;
-            
-            document.getElementById('modalEdicaoTitulo').innerHTML = '✏️ Editar Lançamento';
-            document.getElementById('modalEdicao').style.display = 'flex';
-        }
-
-        function salvarEdicao() {
-            if (!itemEmEdicao) return;
-            
-            if (tipoItemEmEdicao === 'lancamento') {
-                itemEmEdicao.valor = converterMoedaParaNumber(document.getElementById('editValor').value);
-                itemEmEdicao.descricao = document.getElementById('editDescricao').value;
-                itemEmEdicao.categoria = document.getElementById('editCategoria').value;
-                itemEmEdicao.motorista = document.getElementById('editMotorista').value;
-                itemEmEdicao.observacao = document.getElementById('editObservacao').value;
-                itemEmEdicao.data = document.getElementById('editData').value;
-            }
-            
-            salvarDadosFinanceiros().then(() => {
-                fecharModalEdicao();
-                atualizarListaLancamentos();
-                atualizarDashboard();
-            });
-        }
-
-        function fecharModalEdicao() {
-            document.getElementById('modalEdicao').style.display = 'none';
-            itemEmEdicao = null;
-            tipoItemEmEdicao = null;
-        }
-
-        // ============================================
-        // CONTAS
+        // FUNÇÕES DE CONTAS
         // ============================================
         async function adicionarConta() {
             const nome = document.getElementById('nomeConta').value;
+            const saldoInicialInput = document.getElementById('saldoInicial').value;
+            const saldoInicial = converterMoedaParaNumber(saldoInicialInput) || 0;
+            const tipo = document.getElementById('tipoConta').value;
+            const cor = document.getElementById('corConta').value;
+
             if (!nome) {
                 alert('Digite um nome para a conta!');
                 return;
             }
 
-            const saldoInicial = converterMoedaParaNumber(document.getElementById('saldoInicial').value) || 0;
-
             const novaConta = {
                 id: Date.now(),
                 nome: nome,
-                tipo: document.getElementById('tipoConta').value,
+                tipo: tipo,
                 saldoInicial: saldoInicial,
-                cor: document.getElementById('corConta').value
+                cor: cor
             };
 
             contas.push(novaConta);
@@ -2173,18 +2546,14 @@
         }
 
         // ============================================
-        // ORÇAMENTO
+        // FUNÇÕES DE ORÇAMENTO
         // ============================================
         function preencherCategoriasPrevisao() {
             const select = document.getElementById('categoriaPrevista');
             if (!select) return;
             
             select.innerHTML = '';
-            const categorias = tipoPrevisao === 'receita' 
-                ? ['Serviços', 'Contratos', 'Frete', 'Entregas', 'Outros']
-                : ['Combustível', 'Manutenção', 'Pessoal', 'Alimentação', 'Viagem', 'Impostos', 'Outros'];
-            
-            categorias.forEach(cat => {
+            categorias[tipoPrevisao].forEach(cat => {
                 const option = document.createElement('option');
                 option.value = cat;
                 option.textContent = cat;
@@ -2194,18 +2563,22 @@
 
         async function adicionarPrevisao() {
             const mes = document.getElementById('mesOrcamento').value;
+            const valorInput = document.getElementById('valorPrevisto').value;
+            const valor = converterMoedaParaNumber(valorInput);
+            const descricao = document.getElementById('descricaoPrevista').value;
+            const categoria = document.getElementById('categoriaPrevista').value;
+            const dia = document.getElementById('diaVencimento').value;
+
             if (!mes) {
                 alert('Selecione o mês!');
                 return;
             }
 
-            const valor = converterMoedaParaNumber(document.getElementById('valorPrevisto').value);
             if (!valor || valor <= 0) {
                 alert('Digite um valor válido!');
                 return;
             }
 
-            const descricao = document.getElementById('descricaoPrevista').value;
             if (!descricao) {
                 alert('Digite uma descrição!');
                 return;
@@ -2217,12 +2590,8 @@
                 tipo: tipoPrevisao,
                 valor: valor,
                 descricao: descricao,
-                categoria: document.getElementById('categoriaPrevista').value,
-                dia: parseInt(document.getElementById('diaVencimento').value) || 1,
-                status: 'pendente', // pendente, aprovado, reprovado
-                autorizadoPor: null,
-                autorizadoEm: null,
-                criadoEm: new Date().toISOString()
+                categoria: categoria,
+                dia: dia || 1
             };
 
             previsoes.push(novaPrevisao);
@@ -2230,6 +2599,7 @@
             
             document.getElementById('valorPrevisto').value = '';
             document.getElementById('descricaoPrevista').value = '';
+            document.getElementById('diaVencimento').value = '';
             carregarOrcamento();
         }
 
@@ -2251,10 +2621,6 @@
             document.getElementById('totalDespesasPrevistas').innerHTML = `R$ ${totalDespesas.toFixed(2).replace('.', ',')}`;
             document.getElementById('saldoPrevisto').innerHTML = `R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}`;
 
-            atualizarListaPrevisoes(previsoesMes);
-        }
-
-        function atualizarListaPrevisoes(previsoesMes) {
             const listaDiv = document.getElementById('listaPrevisoes');
             if (!listaDiv) return;
 
@@ -2266,33 +2632,16 @@
             let html = '';
             previsoesMes.sort((a, b) => a.dia - b.dia).forEach(p => {
                 const valorFormatado = p.valor.toFixed(2).replace('.', ',');
-                const statusClass = p.status === 'aprovado' ? 'status-aprovado' : 
-                                   (p.status === 'reprovado' ? 'status-reprovado' : 'status-pendente');
-                const selecionado = previsoesSelecionadas.has(p.id) ? 'selected' : '';
-                
                 html += `
-                    <div class="orcamento-item ${p.status} ${selecionado}" data-id="${p.id}">
-                        <input type="checkbox" class="orcamento-checkbox" 
-                               onchange="toggleSelecionarPrevisao(${p.id})" 
-                               ${previsoesSelecionadas.has(p.id) ? 'checked' : ''}>
-                        <div class="orcamento-content">
-                            <div class="orcamento-header-item">
-                                <span style="color: ${p.tipo === 'receita' ? 'var(--income)' : 'var(--expense)'}">
-                                    ${p.tipo === 'receita' ? '📈' : '📉'} R$ ${valorFormatado}
-                                </span>
-                                <span>
-                                    Dia ${p.dia}
-                                    <span class="orcamento-status ${statusClass}">${p.status}</span>
-                                </span>
-                            </div>
-                            <div><strong>${p.descricao}</strong></div>
-                            <div style="font-size: 12px;">${p.categoria}</div>
-                            ${p.autorizadoPor ? `<div style="font-size: 10px; color: var(--text-secondary);">Autorizado por: ${p.autorizadoPor}</div>` : ''}
+                    <div class="orcamento-item">
+                        <div class="orcamento-header-item">
+                            <span style="color: ${p.tipo === 'receita' ? 'var(--income)' : 'var(--expense)'}">
+                                ${p.tipo === 'receita' ? '📈' : '📉'} R$ ${valorFormatado}
+                            </span>
+                            <span>Dia ${p.dia}</span>
                         </div>
-                        <div class="orcamento-actions">
-                            <button class="action-btn edit" onclick="editarPrevisao(${p.id})">✏️</button>
-                            <button class="action-btn delete" onclick="excluirPrevisao(${p.id})">🗑️</button>
-                        </div>
+                        <div><strong>${p.descricao}</strong></div>
+                        <div style="font-size: 12px;">${p.categoria}</div>
                     </div>
                 `;
             });
@@ -2301,142 +2650,7 @@
         }
 
         // ============================================
-        // SELEÇÃO EM MASSA - PREVISÕES
-        // ============================================
-        function toggleSelecionarPrevisao(id) {
-            if (previsoesSelecionadas.has(id)) {
-                previsoesSelecionadas.delete(id);
-            } else {
-                previsoesSelecionadas.add(id);
-            }
-            carregarOrcamento();
-        }
-
-        function selecionarTodasPrevisoes() {
-            const selectAll = document.getElementById('selectAllPrevisoes');
-            const mes = document.getElementById('mesOrcamento').value;
-            const previsoesMes = previsoes.filter(p => p.mes === mes);
-            
-            if (selectAll.checked) {
-                previsoesMes.forEach(p => previsoesSelecionadas.add(p.id));
-            } else {
-                previsoesSelecionadas.clear();
-            }
-            carregarOrcamento();
-        }
-
-        async function excluirSelecionadosPrevisoes() {
-            if (previsoesSelecionadas.size === 0) {
-                alert('Nenhuma previsão selecionada.');
-                return;
-            }
-
-            if (!confirm(`Deseja excluir ${previsoesSelecionadas.size} previsão(ões)?`)) return;
-
-            previsoes = previsoes.filter(p => !previsoesSelecionadas.has(p.id));
-            previsoesSelecionadas.clear();
-            
-            await salvarDadosFinanceiros();
-            carregarOrcamento();
-        }
-
-        async function excluirTodasPrevisoes() {
-            const mes = document.getElementById('mesOrcamento').value;
-            const previsoesMes = previsoes.filter(p => p.mes === mes);
-            
-            if (previsoesMes.length === 0) return;
-            
-            if (!confirm(`Deseja excluir TODAS as ${previsoesMes.length} previsões deste mês?`)) return;
-            
-            previsoes = previsoes.filter(p => p.mes !== mes);
-            previsoesSelecionadas.clear();
-            
-            await salvarDadosFinanceiros();
-            carregarOrcamento();
-        }
-
-        async function excluirPrevisao(id) {
-            if (!confirm('Deseja excluir esta previsão?')) return;
-            
-            previsoes = previsoes.filter(p => p.id !== id);
-            previsoesSelecionadas.delete(id);
-            
-            await salvarDadosFinanceiros();
-            carregarOrcamento();
-        }
-
-        // ============================================
-        // AUTORIZAÇÃO (SOMENTE MASTER)
-        // ============================================
-        async function autorizarSelecionados(acao) {
-            if (!modoMaster) return;
-            if (previsoesSelecionadas.size === 0) {
-                alert('Nenhuma previsão selecionada.');
-                return;
-            }
-
-            const novoStatus = acao; // 'aprovar', 'reprovar', 'pendente'
-            
-            previsoes = previsoes.map(p => {
-                if (previsoesSelecionadas.has(p.id)) {
-                    return {
-                        ...p,
-                        status: novoStatus,
-                        autorizadoPor: 'master',
-                        autorizadoEm: new Date().toISOString()
-                    };
-                }
-                return p;
-            });
-
-            await salvarDadosFinanceiros();
-            carregarOrcamento();
-        }
-
-        // ============================================
-        // EDIÇÃO DE PREVISÕES
-        // ============================================
-        function editarPrevisao(id) {
-            const item = previsoes.find(p => p.id === id);
-            if (!item) return;
-            
-            itemEmEdicao = item;
-            tipoItemEmEdicao = 'previsao';
-            
-            const modalBody = document.getElementById('modalEdicaoBody');
-            modalBody.innerHTML = `
-                <div class="form-group">
-                    <label>💰 Valor</label>
-                    <input type="text" id="editValor" value="${item.valor.toFixed(2).replace('.', ',')}" onkeyup="formatarMoeda(this)">
-                </div>
-                <div class="form-group">
-                    <label>📝 Descrição</label>
-                    <input type="text" id="editDescricao" value="${item.descricao}">
-                </div>
-                <div class="form-group">
-                    <label>📂 Categoria</label>
-                    <input type="text" id="editCategoria" value="${item.categoria}">
-                </div>
-                <div class="form-group">
-                    <label>📅 Dia do vencimento</label>
-                    <input type="number" id="editDia" min="1" max="31" value="${item.dia}">
-                </div>
-                <div class="form-group">
-                    <label>📝 Status</label>
-                    <select id="editStatus">
-                        <option value="pendente" ${item.status === 'pendente' ? 'selected' : ''}>Pendente</option>
-                        <option value="aprovado" ${item.status === 'aprovado' ? 'selected' : ''}>Aprovado</option>
-                        <option value="reprovado" ${item.status === 'reprovado' ? 'selected' : ''}>Reprovado</option>
-                    </select>
-                </div>
-            `;
-            
-            document.getElementById('modalEdicaoTitulo').innerHTML = '✏️ Editar Previsão';
-            document.getElementById('modalEdicao').style.display = 'flex';
-        }
-
-        // ============================================
-        // DASHBOARD
+        // FUNÇÕES DE DASHBOARD
         // ============================================
         function atualizarDashboard() {
             let totalReceitas = 0;
@@ -2459,62 +2673,85 @@
             document.getElementById('statValue3').innerHTML = `R$ ${saldoContas.toFixed(2).replace('.', ',')}`;
             document.getElementById('statSub3').innerHTML = `${contas.length} contas ativas`;
 
-            // Indicadores
-            document.getElementById('statValue1').innerHTML = indicadores.entregasMes ?? 0;
-            document.getElementById('statSub1').innerHTML = `Meta: ${indicadores.metaEntregas ?? 0}`;
-            document.getElementById('statValue2').innerHTML = indicadores.colaboradoresAtivos ?? 0;
-            document.getElementById('statSub2').innerHTML = `${indicadores.colaboradoresDisponiveis ?? 0} disponíveis`;
+            // Indicadores por cliente (salvos em dados_financeiros/{clienteId}.indicadores)
+            const ind = indicadores || getIndicadoresDefault();
+
+            document.getElementById('statValue1').innerHTML = (ind.entregasMes === null || ind.entregasMes === undefined) ? 'Não se aplica' : ind.entregasMes;
+            document.getElementById('statSub1').innerHTML = (ind.metaEntregas === null || ind.metaEntregas === undefined) ? '' : `Meta: ${ind.metaEntregas}`;
+
+            const ativos = ind.colaboradoresAtivos;
+            const disp = ind.colaboradoresDisponiveis;
+
+            document.getElementById('statValue2').innerHTML = (ativos === null || ativos === undefined) ? 'Não se aplica' : ativos;
+            document.getElementById('statSub2').innerHTML = (disp === null || disp === undefined) ? '' : `${disp} disponíveis`;
         }
 
         // ============================================
-        // RELATÓRIOS
+        // FUNÇÕES DE RELATÓRIOS
         // ============================================
         function preencherSelectMeses() {
             const selectMes = document.getElementById('relatorioMes');
-            selectMes.innerHTML = '<option value="all">Todos os meses</option>';
-            const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 
-                          'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            meses.forEach((mes, index) => {
-                const option = document.createElement('option');
-                option.value = index;
-                option.textContent = mes;
-                selectMes.appendChild(option);
-            });
+            if (selectMes) {
+                selectMes.innerHTML = '<option value="all">Todos os meses</option>';
+                const meses = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+                meses.forEach((mes, index) => {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = mes;
+                    selectMes.appendChild(option);
+                });
+            }
         }
+
 
         function definirPeriodoRelatorio(tipo) {
             const hoje = new Date();
             const inicio = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
             const fim = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
 
-            document.getElementById('relatorioDataInicio').value = inicio.toISOString().slice(0, 10);
-            document.getElementById('relatorioDataFim').value = fim.toISOString().slice(0, 10);
+            if (tipo === 'mesAtual') {
+                document.getElementById('relatorioDataInicio').value = inicio.toISOString().slice(0, 10);
+                document.getElementById('relatorioDataFim').value = fim.toISOString().slice(0, 10);
+            }
             gerarRelatorio();
         }
 
         function limparPeriodoRelatorio() {
-            document.getElementById('relatorioDataInicio').value = '';
-            document.getElementById('relatorioDataFim').value = '';
+            const di = document.getElementById('relatorioDataInicio');
+            const df = document.getElementById('relatorioDataFim');
+            if (di) di.value = '';
+            if (df) df.value = '';
             gerarRelatorio();
         }
+
+
 
         function gerarRelatorio() {
             const mes = document.getElementById('relatorioMes').value;
             const ano = parseInt(document.getElementById('relatorioAno').value);
-            const dataInicio = document.getElementById('relatorioDataInicio')?.value;
-            const dataFim = document.getElementById('relatorioDataFim')?.value;
 
-            const temPeriodo = dataInicio || dataFim;
+            const dataInicioStr = document.getElementById('relatorioDataInicio')?.value || '';
+            const dataFimStr = document.getElementById('relatorioDataFim')?.value || '';
+
+            const temPeriodo = !!dataInicioStr || !!dataFimStr;
+
+            let dataInicio = null;
+            let dataFim = null;
+
+            if (dataInicioStr) dataInicio = new Date(dataInicioStr + 'T00:00:00');
+            if (dataFimStr) dataFim = new Date(dataFimStr + 'T23:59:59.999');
 
             let transacoesFiltradas = transacoes.filter(t => {
                 const data = new Date(t.data);
 
+                // Se o usuário escolheu um período (de/até), usamos esse filtro e ignoramos mês/ano
                 if (temPeriodo) {
-                    if (dataInicio && data < new Date(dataInicio)) return false;
-                    if (dataFim && data > new Date(dataFim + 'T23:59:59')) return false;
+                    if (dataInicio && data < dataInicio) return false;
+                    if (dataFim && data > dataFim) return false;
                     return true;
                 }
 
+                // Caso contrário, segue o filtro clássico por ano/mês
                 return data.getFullYear() === ano && (mes === 'all' || data.getMonth() === parseInt(mes));
             });
 
@@ -2537,205 +2774,374 @@
                 }
             });
 
-            document.getElementById('relatorioResumo').innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-title">📈 Total Receitas</div>
-                    <div class="stat-value" style="color: var(--income)">R$ ${totalReceitas.toFixed(2).replace('.', ',')}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">📉 Total Despesas</div>
-                    <div class="stat-value" style="color: var(--expense)">R$ ${totalDespesas.toFixed(2).replace('.', ',')}</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-title">💰 Saldo do Período</div>
-                    <div class="stat-value">R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}</div>
-                </div>
-            `;
-
-            let html = '';
-            for (let cat in porCategoria) {
-                const saldo = porCategoria[cat].receitas - porCategoria[cat].despesas;
-                html += `
-                    <tr>
-                        <td>${cat}</td>
-                        <td style="color: var(--income)">R$ ${porCategoria[cat].receitas.toFixed(2).replace('.', ',')}</td>
-                        <td style="color: var(--expense)">R$ ${porCategoria[cat].despesas.toFixed(2).replace('.', ',')}</td>
-                        <td style="color: ${saldo >= 0 ? 'var(--income)' : 'var(--expense)'}">
-                            R$ ${saldo.toFixed(2).replace('.', ',')}
-                        </td>
-                    </tr>
+            const resumoDiv = document.getElementById('relatorioResumo');
+            if (resumoDiv) {
+                resumoDiv.innerHTML = `
+                    <div class="stat-card">
+                        <div class="stat-title">📈 Total Receitas</div>
+                        <div class="stat-value" style="color: var(--income)">R$ ${totalReceitas.toFixed(2).replace('.', ',')}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">📉 Total Despesas</div>
+                        <div class="stat-value" style="color: var(--expense)">R$ ${totalDespesas.toFixed(2).replace('.', ',')}</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-title">💰 Saldo do Período</div>
+                        <div class="stat-value">R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}</div>
+                    </div>
                 `;
             }
-            document.getElementById('corpoTabelaCategorias').innerHTML = html;
-        }
 
-        // ============================================
-        // IMPORTAÇÃO/EXPORTAÇÃO
-        // ============================================
-        function importarArquivo(input) {
-            const file = input.files[0];
-            if (!file) return;
-
-            const extension = file.name.split('.').pop().toLowerCase();
-            
-            if (extension === 'json') {
-                importarJSON(file);
-            } else if (extension === 'csv') {
-                importarCSV(file);
-            } else if (extension === 'txt') {
-                importarTXT(file);
-            } else if (extension === 'pdf') {
-                importarPDF(file);
-            } else {
-                alert('Formato não suportado. Use JSON, CSV, TXT ou PDF.');
+            const tbody = document.getElementById('corpoTabelaCategorias');
+            if (tbody) {
+                let html = '';
+                for (let cat in porCategoria) {
+                    const saldo = porCategoria[cat].receitas - porCategoria[cat].despesas;
+                    html += `
+                        <tr>
+                            <td>${cat}</td>
+                            <td style="color: var(--income)">R$ ${porCategoria[cat].receitas.toFixed(2).replace('.', ',')}</td>
+                            <td style="color: var(--expense)">R$ ${porCategoria[cat].despesas.toFixed(2).replace('.', ',')}</td>
+                            <td style="color: ${saldo >= 0 ? 'var(--income)' : 'var(--expense)'}">
+                                R$ ${saldo.toFixed(2).replace('.', ',')}
+                            </td>
+                        </tr>
+                    `;
+                }
+                tbody.innerHTML = html;
             }
         }
 
-        function importarJSON(file) {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const dados = JSON.parse(e.target.result);
-                    
-                    if (dados.transacoes) transacoes = [...dados.transacoes, ...transacoes];
-                    if (dados.contas) contas = [...dados.contas, ...contas];
-                    if (dados.previsoes) previsoes = [...dados.previsoes, ...previsoes];
-                    
-                    await salvarDadosFinanceiros();
-                    atualizarTodasTelas();
-                    alert('✅ Dados importados com sucesso!');
-                } catch (error) {
-                    alert('❌ Erro ao importar JSON: ' + error.message);
-                }
-            };
-            reader.readAsText(file);
-        }
+        // ============================================
+        // ============================================
+        // FUNÇÕES DE IMPORTAÇÃO/EXPORTAÇÃO
+        // ============================================
 
-        function importarCSV(file) {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const linhas = e.target.result.split('\n');
-                    const novasTransacoes = [];
-                    
-                    for (let i = 1; i < linhas.length; i++) {
-                        const cols = linhas[i].split(',');
-                        if (cols.length >= 4) {
-                            novasTransacoes.push({
-                                id: Date.now() + i,
-                                data: cols[0].trim(),
-                                tipo: cols[1].trim().toLowerCase(),
-                                valor: parseFloat(cols[2].trim()),
-                                descricao: cols[3].trim(),
-                                categoria: cols[4]?.trim() || 'Outros'
-                            });
+        function importarCSV() { alert('📥 Importação CSV ainda não implementada. Use JSON por enquanto.'); }
+                async function importarTXT() {
+            try {
+                const input = document.getElementById('fileInput');
+                const file = input?.files?.[0];
+                if (!file) {
+                    alert('Selecione um arquivo .txt primeiro.');
+                    return;
+                }
+                if (!clienteId) {
+                    alert('Cliente não identificado. Abra com ?cliente=ID');
+                    return;
+                }
+
+                const texto = await file.text();
+                const linhas = texto
+                    .split(/\r?\n/)
+                    .map(l => (l || '').trim())
+                    .filter(l => l && !l.startsWith('#') && !l.startsWith('//'));
+
+                if (!linhas.length) {
+                    alert('Arquivo TXT vazio (ou só comentários).');
+                    return;
+                }
+
+                const hoje = new Date().toISOString().split('T')[0];
+                const defaultContaId = (contas && contas.length) ? contas[0].id : 1;
+
+                const normalizarTipo = (s) => {
+                    const t = (s || '').toLowerCase();
+                    if (t === 'r' || t === 'receita' || t === 'entrada' || t === '+') return 'receita';
+                    if (t === 'd' || t === 'despesa' || t === 'saida' || t === 'saída' || t === '-') return 'despesa';
+                    return null;
+                };
+
+                const parseDataFlex = (s) => {
+                    const v = (s || '').trim();
+                    // YYYY-MM-DD
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+                    // DD/MM/YYYY
+                    const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+                    if (m) return `${m[3]}-${m[2]}-${m[1]}`;
+                    return null;
+                };
+
+                const extrairValorStr = (s) => {
+                    if (!s) return null;
+                    const m = String(s).match(/-?\d{1,3}(?:\.\d{3})*(?:,\d{1,2})|-?\d+(?:[.,]\d{1,2})?/);
+                    return m ? m[0] : null;
+                };
+
+                const pickContaId = (s) => {
+                    // conta:Nome da Conta  | conta=Nome
+                    const m = String(s || '').match(/\bconta\s*[:=]\s*([^\|;]+)\b/i);
+                    if (!m) return null;
+                    const nome = m[1].trim().toLowerCase();
+                    const conta = (contas || []).find(c => (c.nome || '').toLowerCase() === nome);
+                    return conta ? conta.id : null;
+                };
+
+                const pickMotorista = (s) => {
+                    const m = String(s || '').match(/\bmotorista\s*[:=]\s*([^\|;]+)\b/i);
+                    return m ? m[1].trim() : '';
+                };
+
+                const pickObs = (s) => {
+                    const m = String(s || '').match(/\b(obs|observacao|observação)\s*[:=]\s*([^\|;]+)\b/i);
+                    return m ? m[2].trim() : '';
+                };
+
+                const pickCategoria = (s) => {
+                    const m = String(s || '').match(/\b(cat|categoria)\s*[:=]\s*([^\|;]+)\b/i);
+                    return m ? m[2].trim() : '';
+                };
+
+                const stripMeta = (s) => {
+                    return String(s || '')
+                        .replace(/\bconta\s*[:=]\s*[^\|;]+/ig, '')
+                        .replace(/\bmotorista\s*[:=]\s*[^\|;]+/ig, '')
+                        .replace(/\b(obs|observacao|observação)\s*[:=]\s*[^\|;]+/ig, '')
+                        .replace(/\b(cat|categoria)\s*[:=]\s*[^\|;]+/ig, '')
+                        .trim();
+                };
+
+                const novas = [];
+
+                for (const linhaOriginal of linhas) {
+                    const linha = linhaOriginal.trim();
+
+                    // Metadados opcionais em qualquer lugar da linha:
+                    const contaIdLinha = pickContaId(linha) ?? defaultContaId;
+                    const motoristaLinha = pickMotorista(linha);
+                    const obsLinha = pickObs(linha);
+                    const catLinha = pickCategoria(linha);
+
+                    const limpa = stripMeta(linha);
+
+                    // Separadores aceitos: ; | TAB
+                    let partes = limpa.split(/[;|\t]/).map(p => p.trim()).filter(Boolean);
+
+                    // Caso 1: formato estruturado (exemplos)
+                    // 2026-03-01; despesa; 56,90; Almoço; Alimentação
+                    // 01/03/2026; receita; 1200; Frete; Serviços
+                    let data = null;
+                    let tipo = null;
+                    let valorStr = null;
+                    let descricao = '';
+                    let categoria = '';
+
+                    if (partes.length >= 2) {
+                        const d = parseDataFlex(partes[0]);
+                        if (d) {
+                            data = d;
+                            partes.shift();
                         }
                     }
-                    
-                    transacoes = [...novasTransacoes, ...transacoes];
-                    await salvarDadosFinanceiros();
-                    atualizarTodasTelas();
-                    alert(`✅ ${novasTransacoes.length} transações importadas!`);
-                } catch (error) {
-                    alert('❌ Erro ao importar CSV: ' + error.message);
-                }
-            };
-            reader.readAsText(file);
-        }
 
-        function importarTXT(file) {
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const linhas = e.target.result.split('\n');
-                    const novasTransacoes = [];
-                    
-                    for (const linha of linhas) {
-                        const partes = linha.split(';');
-                        if (partes.length >= 3) {
-                            novasTransacoes.push({
-                                id: Date.now() + Math.random(),
-                                data: partes[0].trim(),
-                                descricao: partes[1].trim(),
-                                valor: parseFloat(partes[2].trim().replace(',', '.')),
-                                tipo: 'despesa',
-                                categoria: 'Outros'
-                            });
+                    if (partes.length >= 2) {
+                        const t = normalizarTipo(partes[0]);
+                        if (t) {
+                            tipo = t;
+                            partes.shift();
                         }
                     }
-                    
-                    transacoes = [...novasTransacoes, ...transacoes];
-                    await salvarDadosFinanceiros();
-                    atualizarTodasTelas();
-                    alert(`✅ ${novasTransacoes.length} transações importadas!`);
-                } catch (error) {
-                    alert('❌ Erro ao importar TXT: ' + error.message);
-                }
-            };
-            reader.readAsText(file);
-        }
 
-        function importarPDF(file) {
-            alert('📑 Importação de PDF será implementada em breve! Por enquanto, use JSON ou CSV.');
-            // Aqui você pode adicionar uma biblioteca como PDF.js para ler PDFs
+                    if (partes.length) {
+                        valorStr = extrairValorStr(partes[0]);
+                        if (valorStr) {
+                            partes.shift();
+                        } else {
+                            // fallback: extrai de toda a linha
+                            valorStr = extrairValorStr(limpa);
+                        }
+                    }
+
+                    // Caso 2: formato livre (exemplos)
+                    // 56,90 almoço alimentação
+                    // -80 gasolina
+                    // receita 1200 frete serviços
+                    if (!valorStr) {
+                        continue; // pula linha impossível de entender
+                    }
+
+                    let valorNum = converterMoedaParaNumber(valorStr);
+                    if (!valorNum || Number.isNaN(valorNum)) continue;
+
+                    // Se vier negativo, vira despesa e usa o absoluto
+                    if (valorNum < 0) {
+                        tipo = 'despesa';
+                        valorNum = Math.abs(valorNum);
+                    }
+
+                    // Se tipo não veio, tenta deduzir por palavra no começo
+                    if (!tipo) {
+                        const t2 = normalizarTipo(partes[0] || '');
+                        if (t2) {
+                            tipo = t2;
+                            partes.shift();
+                        } else {
+                            tipo = 'despesa'; // padrão mais seguro em importação
+                        }
+                    }
+
+                    // Descrição/categoria
+                    if (partes.length >= 2) {
+                        descricao = partes.slice(0, -1).join(' - ').trim();
+                        categoria = partes[partes.length - 1].trim();
+                    } else if (partes.length === 1) {
+                        descricao = partes[0].trim();
+                    } else {
+                        // se não sobrou nada, usa a própria linha (limpa) sem o valor
+                        descricao = limpa.replace(valorStr, '').trim() || '(Sem descrição)';
+                    }
+
+                    // categoria fallback: linha -> select padrão
+                    if (!categoria) categoria = catLinha || (categorias[tipo] ? categorias[tipo][0] : 'Outros');
+
+                    const novaTransacao = {
+                        id: Date.now() + Math.floor(Math.random() * 1000),
+                        tipo,
+                        valor: valorNum,
+                        descricao: descricao || '(Sem descrição)',
+                        categoria,
+                        contaId: contaIdLinha,
+                        motorista: motoristaLinha || '',
+                        observacao: obsLinha || '',
+                        data: data || hoje
+                    };
+
+                    novas.push(novaTransacao);
+                }
+
+                if (!novas.length) {
+                    alert('Não consegui importar nenhuma linha. Dica: use formato "data; tipo; valor; descrição; categoria" ou "valor descrição categoria".');
+                    return;
+                }
+
+                // Ordena por data desc e coloca no início
+                novas.sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+                transacoes = [...novas, ...(transacoes || [])];
+
+                await salvarDadosFinanceiros();
+                atualizarListaLancamentos();
+                atualizarDashboard();
+
+                alert(`📥 Importação TXT concluída: ${novas.length} lançamentos adicionados.`);
+            } catch (error) {
+                console.error('Erro ao importar TXT:', error);
+                alert('Erro ao importar TXT. Veja o Console.');
+            }
+        }
+        function exportarCSV() { alert('📤 Exportação CSV ainda não implementada. Use JSON por enquanto.'); }
+
+        async function importarJSON() {
+            try {
+                const input = document.getElementById('fileInput');
+                const file = input?.files?.[0];
+                if (!file) {
+                    alert('Selecione um arquivo .json primeiro.');
+                    return;
+                }
+                if (!clienteId) {
+                    alert('Cliente não identificado. Abra com ?cliente=ID');
+                    return;
+                }
+
+                const texto = await file.text();
+                let obj;
+                try {
+                    obj = JSON.parse(texto);
+                } catch (e) {
+                    alert('JSON inválido. Verifique o arquivo.');
+                    return;
+                }
+
+                // Aceita formatos diferentes:
+                // 1) { clienteId, clienteNome, dados: { transacoes, contas, previsoes, indicadores } }
+                // 2) { transacoes, contas, previsoes, indicadores }
+                // 3) { dados_financeiros: { ... } } (pega o primeiro nível)
+                let dados = null;
+
+                if (obj && typeof obj === 'object') {
+                    if (obj.dados && typeof obj.dados === 'object') dados = obj.dados;
+                    else if (obj.transacoes || obj.contas || obj.previsoes || obj.indicadores) dados = obj;
+                    else if (obj.dados_financeiros && typeof obj.dados_financeiros === 'object') dados = obj.dados_financeiros;
+                }
+
+                if (!dados) {
+                    alert('Estrutura do JSON não reconhecida.');
+                    return;
+                }
+
+                const ok = confirm('Importar vai SUBSTITUIR os dados financeiros deste cliente (transações/contas/previsões/indicadores). Continuar?');
+                if (!ok) return;
+
+                transacoes = Array.isArray(dados.transacoes) ? dados.transacoes : [];
+                contas = Array.isArray(dados.contas) ? dados.contas : [];
+                previsoes = Array.isArray(dados.previsoes) ? dados.previsoes : [];
+                indicadores = (dados.indicadores && typeof dados.indicadores === 'object') ? dados.indicadores : null;
+
+                await db.collection('dados_financeiros').doc(clienteId).set({
+                    transacoes,
+                    contas,
+                    previsoes,
+                    indicadores,
+                    atualizadoEm: new Date().toISOString(),
+                    importadoEm: new Date().toISOString()
+                }, { merge: true });
+
+                // Atualiza UI
+                atualizarDashboard();
+                atualizarListaTransacoes?.();
+                atualizarListaContas?.();
+                atualizarListaPrevisoes?.();
+                preencherEditorIndicadores?.();
+
+                alert('✅ Importação concluída!');
+                input.value = '';
+            } catch (e) {
+                console.error('Erro ao importar JSON:', e);
+                alert('❌ Erro na importação. Veja o Console.');
+            }
         }
 
         function exportarJSON() {
-            const dados = {
-                transacoes: transacoes,
-                contas: contas,
-                previsoes: previsoes,
-                exportadoEm: new Date().toISOString()
-            };
-            
-            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `dados_financeiros_${new Date().toISOString().slice(0,10)}.json`;
-            a.click();
-        }
-
-        function exportarCSV() {
-            let csv = 'Data,Tipo,Valor,Descrição,Categoria\n';
-            transacoes.forEach(t => {
-                csv += `${t.data},${t.tipo},${t.valor},${t.descricao},${t.categoria}\n`;
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `transacoes_${new Date().toISOString().slice(0,10)}.csv`;
-            a.click();
-        }
-
-        function exportarTXT() {
-            let txt = 'RELATÓRIO FINANCEIRO\n';
-            txt += '='.repeat(50) + '\n\n';
-            
-            transacoes.forEach(t => {
-                txt += `${t.data} - ${t.descricao}: R$ ${t.valor.toFixed(2)} (${t.tipo})\n`;
-            });
-            
-            const blob = new Blob([txt], { type: 'text/plain' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `relatorio_${new Date().toISOString().slice(0,10)}.txt`;
-            a.click();
-        }
-
-        function exportarPDF() {
             try {
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                doc.setFontSize(18);
-                doc.text('Relatório Financeiro', 14, 22);
-                
-                doc.setFontSize(11);
-                doc.text(`Gerado em: ${new Date().toLocaleDateString('pt-BR')}`, 14, 32);
+                if (!clienteId) {
+                    alert('Cliente não identificado. Abra com ?cliente=ID');
+                    return;
+                }
+
+                const payload = {
+                    versao: 1,
+                    exportadoEm: new Date().toISOString(),
+                    clienteId: clienteId,
+                    clienteNome: clienteConfig?.nome || null,
+                    dados: {
+                        transacoes: transacoes || [],
+                        contas: contas || [],
+                        previsoes: previsoes || [],
+                        indicadores: indicadores || null
+                    }
+                };
+
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${(clienteConfig?.nome || 'cliente').replace(/\s+/g,'_')}_dados_financeiros.json`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                console.error('Erro ao exportar JSON:', e);
+                alert('❌ Erro ao exportar JSON. Veja o Console.');
+            }
+        }
+
+        
+        function exportarTXT() {
+            try {
+                let conteudo = `=== RELATÓRIO ${clienteConfig?.nome?.toUpperCase()} ===\n`;
+                conteudo += `Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
+                conteudo += "=".repeat(50) + "\n\n";
                 
                 let totalReceitas = 0, totalDespesas = 0;
                 transacoes.forEach(t => {
@@ -2743,47 +3149,90 @@
                     else totalDespesas += t.valor;
                 });
                 
-                doc.text(`Total Receitas: R$ ${totalReceitas.toFixed(2)}`, 14, 42);
-                doc.text(`Total Despesas: R$ ${totalDespesas.toFixed(2)}`, 14, 52);
-                doc.text(`Saldo: R$ ${(totalReceitas - totalDespesas).toFixed(2)}`, 14, 62);
+                conteudo += "📊 RESUMO GERAL\n";
+                conteudo += `Receitas: R$ ${totalReceitas.toFixed(2).replace('.', ',')}\n`;
+                conteudo += `Despesas: R$ ${totalDespesas.toFixed(2).replace('.', ',')}\n`;
+                conteudo += `Saldo: R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}\n\n`;
                 
-                const tableColumn = ["Data", "Descrição", "Valor", "Tipo"];
-                const tableRows = [];
-                
+                conteudo += "📝 ÚLTIMAS TRANSAÇÕES\n";
+                conteudo += "-".repeat(50) + "\n";
                 transacoes.slice(0, 20).forEach(t => {
-                    const row = [
-                        t.data,
-                        t.descricao,
-                        `R$ ${t.valor.toFixed(2)}`,
-                        t.tipo === 'receita' ? 'Receita' : 'Despesa'
-                    ];
-                    tableRows.push(row);
+                    const data = new Date(t.data).toLocaleDateString('pt-BR');
+                    const valor = t.valor.toFixed(2).replace('.', ',');
+                    conteudo += `${data} | ${t.descricao} | ${t.tipo === 'receita' ? '+' : '-'} R$ ${valor}\n`;
                 });
                 
-                doc.autoTable({
-                    head: [tableColumn],
-                    body: tableRows,
-                    startY: 70,
-                    theme: 'striped'
-                });
+                const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${clienteConfig?.nome || 'relatorio'}_${new Date().toISOString().slice(0,10)}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
                 
-                doc.save(`relatorio_${new Date().toISOString().slice(0,10)}.pdf`);
+                alert('✅ Arquivo TXT exportado!');
             } catch (error) {
-                console.error('Erro ao gerar PDF:', error);
-                alert('❌ Erro ao gerar PDF. Verifique se a biblioteca jsPDF está carregada.');
+                alert('❌ Erro ao exportar TXT');
             }
         }
 
-        function atualizarTodasTelas() {
-            atualizarDashboard();
-            atualizarListaLancamentos();
-            atualizarListaContas();
-            carregarOrcamento();
-            gerarRelatorio();
+        function exportarPDF() {
+            const janela = window.open('', '_blank');
+            const hoje = new Date().toLocaleDateString('pt-BR');
+            
+            let totalReceitas = 0, totalDespesas = 0;
+            transacoes.forEach(t => {
+                if (t.tipo === 'receita') totalReceitas += t.valor;
+                else totalDespesas += t.valor;
+            });
+            
+            const html = `
+            <html>
+            <head>
+                <title>Relatório ${clienteConfig?.nome || 'Financeiro'}</title>
+                <style>
+                    body { font-family: Arial; padding: 20px; }
+                    h1 { color: ${clienteConfig?.cor || '#333'}; }
+                    .receita { color: #28a745; }
+                    .despesa { color: #dc3545; }
+                    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                    th { background: #f5f5f5; padding: 10px; }
+                    td { padding: 10px; border-bottom: 1px solid #ddd; }
+                </style>
+            </head>
+            <body>
+                <h1>📊 ${clienteConfig?.nome || 'Relatório Financeiro'}</h1>
+                <p>Gerado em: ${hoje}</p>
+                
+                <h3>Resumo</h3>
+                <p class="receita">Receitas: R$ ${totalReceitas.toFixed(2).replace('.', ',')}</p>
+                <p class="despesa">Despesas: R$ ${totalDespesas.toFixed(2).replace('.', ',')}</p>
+                <p>Saldo: R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}</p>
+                
+                <h3>Últimas movimentações</h3>
+                <table>
+                    <tr><th>Data</th><th>Descrição</th><th>Valor</th></tr>
+                    ${transacoes.slice(0, 10).map(t => `
+                        <tr>
+                            <td>${new Date(t.data).toLocaleDateString('pt-BR')}</td>
+                            <td>${t.descricao}</td>
+                            <td class="${t.tipo === 'receita' ? 'receita' : 'despesa'}">
+                                R$ ${t.valor.toFixed(2).replace('.', ',')}
+                            </td>
+                        </tr>
+                    `).join('')}
+                </table>
+                <p><button onclick="window.print()">Imprimir</button></p>
+            </body>
+            </html>
+            `;
+            
+            janela.document.write(html);
+            janela.document.close();
         }
 
         // ============================================
-        // PLANOS
+        // FUNÇÕES DOS PLANOS
         // ============================================
         function togglePlanos() {
             const isAnual = document.getElementById('toggleAnual').checked;
@@ -2797,32 +3246,34 @@
         }
 
         function selecionarPlano(plano) {
-            const nomePlano = {
+            let nomePlano = {
                 'basico': 'Básico',
                 'profissional': 'Profissional',
                 'empresarial': 'Empresarial'
-            }[plano];
+            }[plano] || plano;
             
             const isAnual = document.getElementById('toggleAnual').checked;
             const periodo = isAnual ? 'anual' : 'mensal';
             
-            const valores = {
-                'basico': isAnual ? 1197.60 : 49.90,
-                'profissional': isAnual ? 2397.60 : 99.90,
-                'empresarial': isAnual ? 4797.60 : 199.90
-            };
+            let valor = 0;
+            if (plano === 'basico') valor = isAnual ? 1197.60 : 49.90;
+            if (plano === 'profissional') valor = isAnual ? 2397.60 : 99.90;
+            if (plano === 'empresarial') valor = isAnual ? 4797.60 : 199.90;
             
-            document.getElementById('planoEscolhido').innerHTML = `<strong>Plano:</strong> ${nomePlano} (${periodo})`;
-            document.getElementById('valorEscolhido').innerHTML = `R$ ${valores[plano].toFixed(2).replace('.', ',')}`;
+            document.getElementById('planoEscolhido').innerHTML = 
+                `<strong>Plano:</strong> ${nomePlano} (${periodo})`;
+            document.getElementById('valorEscolhido').innerHTML = 
+                `R$ ${valor.toFixed(2).replace('.', ',')}`;
+            
             document.getElementById('modalPagamento').style.display = 'flex';
         }
 
         function simularPagamento(tipo) {
             alert(`✅ Pagamento ${tipo} simulado! (Modo demonstração)`);
-            fecharModalPagamento();
+            fecharModal();
         }
 
-        function fecharModalPagamento() {
+        function fecharModal() {
             document.getElementById('modalPagamento').style.display = 'none';
         }
 
