@@ -8,34 +8,7 @@
     <title>💰 Sistema Financeiro</title>
     
     <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
-// ============================================
-// CONTROLE DE TELAS (evita tela branca)
-// ============================================
-function mostrarTelaApp() {
-  const bloqueio = document.getElementById('bloqueioScreen');
-  const app = document.getElementById('appContent');
-  if (bloqueio) bloqueio.style.display = 'none';
-  if (app) app.style.display = 'block';
-}
-
-function mostrarTelaBloqueio(clienteBase) {
-  const bloqueio = document.getElementById('bloqueioScreen');
-  const app = document.getElementById('appContent');
-  const msg = document.getElementById('bloqueioMsg');
-
-  if (msg) {
-    const texto = (clienteBase && clienteBase.motivoBloqueio)
-      ? String(clienteBase.motivoBloqueio)
-      : 'Sistema bloqueado pelo administrador.';
-    msg.textContent = texto;
-  }
-
-  if (app) app.style.display = 'none';
-  if (bloqueio) bloqueio.style.display = 'block';
-}
-
-</script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
     <style>
@@ -788,8 +761,6 @@ function mostrarTelaBloqueio(clienteBase) {
         }
 
         .planilha-tabela th {
-            background: var(--accent);
-            color: white;
             padding: 20px 15px;
             font-size: 16px;
             text-align: center;
@@ -1472,83 +1443,8 @@ function mostrarTelaBloqueio(clienteBase) {
             </div>
 
             <div id="planos" class="tab-content">
-                <div class="planos-section">
-                    <div class="planos-titulo">
-                        <h2>💰 PLANOS</h2>
-                        <p>Soluções completas para seu negócio</p>
-                    </div>
-
-                    <div class="plano-toggle">
-                        <span class="toggle-label">📅 Mensal</span>
-                        <label class="toggle-switch">
-                            <input type="checkbox" id="toggleAnual" onchange="togglePlanos()">
-                            <span class="toggle-slider"></span>
-                        </label>
-                        <span class="toggle-label">📆 Anual <span class="economia-badge">ECONOMIZE 60%</span></span>
-                    </div>
-
-                    <div class="planilha-container">
-                        <table class="planilha-tabela">
-                            <thead>
-                                <tr>
-                                    <th>FUNCIONALIDADES</th>
-                                    <th>🚚 BÁSICO</th>
-                                    <th>📦 PROFISSIONAL</th>
-                                    <th>🏢 EMPRESARIAL</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class="feature-name">Usuários</td>
-                                    <td>1</td>
-                                    <td>3</td>
-                                    <td>10</td>
-                                </tr>
-                                <tr>
-                                    <td class="feature-name">Transações/mês</td>
-                                    <td>100</td>
-                                    <td>500</td>
-                                    <td>Ilimitado</td>
-                                </tr>
-                                <tr>
-                                    <td class="feature-name">Relatórios avançados</td>
-                                    <td>❌</td>
-                                    <td>✅</td>
-                                    <td>✅</td>
-                                </tr>
-                                <tr>
-                                    <td class="feature-name">Suporte prioritário</td>
-                                    <td>❌</td>
-                                    <td>❌</td>
-                                    <td>✅</td>
-                                </tr>
-                                <tr class="preco-linha">
-                                    <td class="feature-name"><strong>PREÇO MENSAL</strong></td>
-                                    <td id="precoBasicoMensal"><strong>R$ 49,90</strong></td>
-                                    <td id="precoProfissionalMensal"><strong>R$ 99,90</strong></td>
-                                    <td id="precoEmpresarialMensal"><strong>R$ 199,90</strong></td>
-                                </tr>
-                                <tr class="preco-linha anual" style="display: none;">
-                                    <td class="feature-name"><strong>PREÇO ANUAL</strong></td>
-                                    <td id="precoBasicoAnual"><strong>R$ 1.197,60</strong> <span class="economia">Economize 60%</span></td>
-                                    <td id="precoProfissionalAnual"><strong>R$ 2.397,60</strong> <span class="economia">Economize 60%</span></td>
-                                    <td id="precoEmpresarialAnual"><strong>R$ 4.797,60</strong> <span class="economia">Economize 60%</span></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div class="planilha-botoes">
-                        <button class="plano-btn" style="background: #28a745;" onclick="selecionarPlano('basico')">
-                            🚚 ASSINAR BÁSICO
-                        </button>
-                        <button class="plano-btn" style="background: #17a2b8;" onclick="selecionarPlano('profissional')">
-                            📦 ASSINAR PROFISSIONAL
-                        </button>
-                        <button class="plano-btn" style="background: #ffc107; color: #333;" onclick="selecionarPlano('empresarial')">
-                            🏢 ASSINAR EMPRESARIAL
-                        </button>
-                    </div>
+                <div class="planos-section" id="planosContainer" style="display: none;">
+                    <!-- Conteúdo será gerado dinamicamente pelo JavaScript -->
                 </div>
             </div>
         </div>
@@ -1578,27 +1474,24 @@ function mostrarTelaBloqueio(clienteBase) {
 
     <script>
         // ============================================
-        // GLOBAIS (importante em <script type="module"> / modo strict)
+        // GLOBAIS
         // ============================================
-        // Quando este arquivo roda como módulo, qualquer variável usada sem "let/const" vira erro.
-        // Esses 3 nomes são usados em callbacks do Firestore e no modo "preview ao vivo" do Master.
-        let previewOverrideConfig = null; // objeto de override enviado pelo Master (quando existir)
-        let clienteCfg = {};              // configs/{clienteId}
-        let clienteBase = null;           // clientes/{clienteId}
+        let previewOverrideConfig = null;
+        let clienteCfg = {};
+        let clienteBase = null;
 
         // ============================================
-        // CONFIGURAÇÃO FIREBASE (MESMA DO MASTER_APP)
+        // CONFIGURAÇÃO FIREBASE
         // ============================================
         const firebaseConfig = {
-  apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
-  authDomain: "painelmastercomplet.firebaseapp.com",
-  projectId: "painelmastercomplet",
-  storageBucket: "painelmastercomplet.firebasestorage.app",
-  messagingSenderId: "87580974705",
-  appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
-};
+            apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
+            authDomain: "painelmastercomplet.firebaseapp.com",
+            projectId: "painelmastercomplet",
+            storageBucket: "painelmastercomplet.firebasestorage.app",
+            messagingSenderId: "87580974705",
+            appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
+        };
 
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
@@ -1615,12 +1508,8 @@ function mostrarTelaBloqueio(clienteBase) {
         let tipoPrevisao = 'receita';
         let automacoesAtivas = {};
 
-
-        // Modo Master: abre o editor de indicadores quando a URL tiver ?master=1
-        // (ou quando localStorage.modoMaster = '1')
         const __params = new URLSearchParams(window.location.search);
         const modoMaster = (__params.get('master') === '1') || (localStorage.getItem('modoMaster') === '1');
-
 
         const categorias = {
             receita: ['Serviços', 'Contratos', 'Frete', 'Entregas', 'Outros'],
@@ -1628,7 +1517,33 @@ function mostrarTelaBloqueio(clienteBase) {
         };
 
         // ============================================
-        // INDICADORES DO DASHBOARD (POR CLIENTE)
+        // FUNÇÕES DE TELA
+        // ============================================
+        function mostrarTelaApp() {
+            const bloqueio = document.getElementById('bloqueioScreen');
+            const app = document.getElementById('appContent');
+            if (bloqueio) bloqueio.style.display = 'none';
+            if (app) app.style.display = 'block';
+        }
+
+        function mostrarTelaBloqueio(clienteBase) {
+            const bloqueio = document.getElementById('bloqueioScreen');
+            const app = document.getElementById('appContent');
+            const msg = document.getElementById('bloqueioMsg');
+
+            if (msg) {
+                const texto = (clienteBase && clienteBase.motivoBloqueio)
+                    ? String(clienteBase.motivoBloqueio)
+                    : 'Sistema bloqueado pelo administrador.';
+                msg.textContent = texto;
+            }
+
+            if (app) app.style.display = 'none';
+            if (bloqueio) bloqueio.style.display = 'block';
+        }
+
+        // ============================================
+        // INDICADORES DO DASHBOARD
         // ============================================
         function getIndicadoresDefault() {
             return {
@@ -1653,15 +1568,11 @@ function mostrarTelaBloqueio(clienteBase) {
             box.style.display = modoMaster ? 'block' : 'none';
         }
 
-
-        // Links rápidos (normal e Master) — gerados a partir do cliente atual
         function buildClienteLink(id, isMasterLink) {
             const url = new URL(window.location.href);
             url.searchParams.set('cliente', id);
-
             if (isMasterLink) url.searchParams.set('master', '1');
             else url.searchParams.delete('master');
-
             return url.toString();
         }
 
@@ -1672,8 +1583,6 @@ function mostrarTelaBloqueio(clienteBase) {
                     return true;
                 }
             } catch (_) {}
-
-            // fallback antigo
             try {
                 const ta = document.createElement('textarea');
                 ta.value = texto;
@@ -1718,6 +1627,7 @@ function mostrarTelaBloqueio(clienteBase) {
                 });
             }
         }
+
         function preencherEditorIndicadores() {
             if (!modoMaster) return;
             mostrarEditorIndicadoresSeForMaster();
@@ -1760,7 +1670,6 @@ function mostrarTelaBloqueio(clienteBase) {
             const metaEntregas = document.getElementById('ind_metaEntregas');
             const colabAtivos = document.getElementById('ind_colabAtivos');
             const colabDisp = document.getElementById('ind_colabDisp');
-
             const naAtivos = document.getElementById('ind_na_colabAtivos');
             const naDisp = document.getElementById('ind_na_colabDisp');
 
@@ -1794,9 +1703,9 @@ function mostrarTelaBloqueio(clienteBase) {
 
                 indicadores = novos;
                 atualizarDashboard();
-            mostrarEditorIndicadoresSeForMaster();
-            configurarEventosEditorIndicadores();
-            preencherEditorIndicadores();
+                mostrarEditorIndicadoresSeForMaster();
+                configurarEventosEditorIndicadores();
+                preencherEditorIndicadores();
                 setIndicadoresMsg('Salvo.');
             } catch (e) {
                 console.error('Erro ao salvar indicadores:', e);
@@ -1814,9 +1723,6 @@ function mostrarTelaBloqueio(clienteBase) {
             try {
                 setIndicadoresMsg('Zerando...');
                 const zerados = getIndicadoresDefault();
-                // Mantém a lógica de "não se aplica" para colaboradores, se você quiser:
-                // zerados.colaboradoresAtivos = null; zerados.colaboradoresDisponiveis = null;
-
                 await db.collection('dados_financeiros').doc(clienteId).set({
                     indicadores: zerados,
                     atualizadoEm: new Date().toISOString()
@@ -1861,7 +1767,6 @@ function mostrarTelaBloqueio(clienteBase) {
             if (btnZerar) btnZerar.addEventListener('click', zerarIndicadoresDoClienteAtual);
         }
 
-
         // ============================================
         // CARREGAR CLIENTE DA URL
         // ============================================
@@ -1873,7 +1778,6 @@ function mostrarTelaBloqueio(clienteBase) {
         // ============================================
         // CARREGAR CONFIGURAÇÕES DO CLIENTE
         // ============================================
-        // assinatura ativa do cliente (para não criar vários listeners)
         let unsubscribeCliente = null;
         let unsubscribeCfg = null;
         let appInicializado = false;
@@ -1883,10 +1787,9 @@ function mostrarTelaBloqueio(clienteBase) {
             console.log("Search:", window.location.search);
             console.log("clienteId:", clienteId);
 
-            // ✅ Salva o último cliente aberto
             if (clienteId) {
-              localStorage.setItem("ultimoClienteId", clienteId);
-              localStorage.setItem("ultimoClienteAtualizadoEm", new Date().toISOString());
+                localStorage.setItem("ultimoClienteId", clienteId);
+                localStorage.setItem("ultimoClienteAtualizadoEm", new Date().toISOString());
             }
 
             if (!clienteId) {
@@ -1902,7 +1805,6 @@ function mostrarTelaBloqueio(clienteBase) {
                 return;
             }
 
-            // evita acumular listeners se a função for chamada de novo
             if (unsubscribeCliente) {
                 unsubscribeCliente();
                 unsubscribeCliente = null;
@@ -1912,7 +1814,6 @@ function mostrarTelaBloqueio(clienteBase) {
                 const ref = db.collection('clientes').doc(clienteId);
                 const refCfg = db.collection('configs').doc(clienteId);
 
-                // Base do cliente (modo antigo) + Config separado (modo profissional)
                 unsubscribeCliente = ref.onSnapshot(async (doc) => {
                     if (!doc.exists) {
                         document.body.innerHTML = `
@@ -1928,12 +1829,10 @@ function mostrarTelaBloqueio(clienteBase) {
 
                     clienteBase = doc.data() || {};
 
-                    // Se configs já carregaram, mescla. Se não, segue com base.
                     const cfg = (clienteCfg || {});
                     const override = previewOverrideConfig || null;
                     clienteConfig = mesclarConfig(clienteBase, override || cfg);
 
-                    // Bloqueio continua valendo pela base
                     if (clienteBase.bloqueado) {
                         mostrarTelaBloqueio(clienteBase);
                         return;
@@ -1944,12 +1843,14 @@ function mostrarTelaBloqueio(clienteBase) {
                     aplicarConfiguracoes();
                     atualizarCamposDePermissao();
 
-                    // inicialização pesada só uma vez
                     if (!appInicializado) {
                         appInicializado = true;
                         await carregarDadosFinanceiros();
                         inicializarInterface();
                     }
+                    
+                    // NOVO: Renderizar planos quando configs mudarem
+                    renderizarPlanos();
                 }, (error) => {
                     console.error('Erro no onSnapshot:', error);
                     document.body.innerHTML = `
@@ -1964,25 +1865,24 @@ function mostrarTelaBloqueio(clienteBase) {
                     `;
                 });
 
-                // 🔁 Também escuta configs separadas (configs/{clienteId})
                 if (unsubscribeCfg) { try { unsubscribeCfg(); } catch(e) {} }
                 unsubscribeCfg = refCfg.onSnapshot((doc) => {
                     clienteCfg = doc.exists ? (doc.data() || {}) : {};
 
-                    // Se estiver em preview ao vivo, quem manda é o Master.
                     if (previewOverrideConfig) return;
 
                     if (clienteBase) {
                         clienteConfig = mesclarConfig(clienteBase, clienteCfg);
                         aplicarConfiguracoes();
-                    atualizarCamposDePermissao();
+                        atualizarCamposDePermissao();
                         try { inicializarInterface(); } catch(e) {}
+                        // NOVO: Renderizar planos
+                        renderizarPlanos();
                     }
                 }, (err) => {
                     console.warn('Erro no onSnapshot de configs:', err);
                 });
 
-                // Atualizar editor (se for Master)
                 preencherEditorIndicadores();
 
             } catch (error) {
@@ -2000,59 +1900,45 @@ function mostrarTelaBloqueio(clienteBase) {
             }
         }
 
-
         // ============================================
-        // APLICAR CONFIGURAÇÕES DO CLIENTE
+        // MERGE CONFIG
         // ============================================
-        
-    // =============================
-    // Merge base client doc + config doc (SaaS)
-    // =============================
-    function mesclarConfig(base, cfg) {
-        const b = base || {};
-        const c = cfg || {};
+        function mesclarConfig(base, cfg) {
+            const b = base || {};
+            const c = cfg || {};
 
-        // deep-ish clone of cfg to avoid mutating original
-        const out = JSON.parse(JSON.stringify(c));
+            const out = JSON.parse(JSON.stringify(c));
 
-        // ensure sections exist
-        out.visual = out.visual || {};
-        out.conteudo = out.conteudo || {};
-        out.funcoes = out.funcoes || {};
-        out.meta = out.meta || {};
+            out.visual = out.visual || {};
+            out.conteudo = out.conteudo || {};
+            out.funcoes = out.funcoes || {};
+            out.meta = out.meta || {};
 
-        // Base (cliente) fields (these are authoritative for identity/block)
-        out.clienteId = b.id || out.clienteId || null;
-        out.nome = b.nome || out.nome || '';
-        out.perfil = b.perfil || out.perfil || '';
-        out.cpfCnpj = b.cpfCnpj || out.cpfCnpj || '';
-        out.bloqueado = !!b.bloqueado;
+            out.clienteId = b.id || out.clienteId || null;
+            out.nome = b.nome || out.nome || '';
+            out.perfil = b.perfil || out.perfil || '';
+            out.cpfCnpj = b.cpfCnpj || out.cpfCnpj || '';
+            out.bloqueado = !!b.bloqueado;
 
-        // Visual defaults fall back to base doc if present
-        out.visual.corPrincipal = out.visual.corPrincipal ?? b.corPrincipal ?? b.cor ?? '#4CAF50';
-        out.visual.modoEscuro = out.visual.modoEscuro ?? b.modoEscuro ?? 'auto';
-        out.visual.logoBase64 = out.visual.logoBase64 ?? b.logoBase64 ?? null;
+            out.visual.corPrincipal = out.visual.corPrincipal ?? b.corPrincipal ?? b.cor ?? '#4CAF50';
+            out.visual.modoEscuro = out.visual.modoEscuro ?? b.modoEscuro ?? 'auto';
+            out.visual.logoBase64 = out.visual.logoBase64 ?? b.logoBase64 ?? null;
 
-        // Content defaults fall back to base doc if present
-        out.conteudo.termoColaborador = out.conteudo.termoColaborador ?? b.termoColaborador ?? 'Colaborador';
-        out.conteudo.termoMotorista = out.conteudo.termoMotorista ?? b.termoMotorista ?? 'Motorista';
-        out.conteudo.termoAcao = out.conteudo.termoAcao ?? b.termoAcao ?? 'Ação';
+            out.conteudo.termoColaborador = out.conteudo.termoColaborador ?? b.termoColaborador ?? 'Colaborador';
+            out.conteudo.termoMotorista = out.conteudo.termoMotorista ?? b.termoMotorista ?? 'Motorista';
+            out.conteudo.termoAcao = out.conteudo.termoAcao ?? b.termoAcao ?? 'Ação';
 
-        // Meta (audit)
-        out.meta.atualizadoEm = out.meta.atualizadoEm ?? b.atualizadoEm ?? null;
+            out.meta.atualizadoEm = out.meta.atualizadoEm ?? b.atualizadoEm ?? null;
 
-        return out;
-    }
+            return out;
+        }
 
-function aplicarConfiguracoes() {
+        function aplicarConfiguracoes() {
             if (!clienteConfig) return;
 
-            // Nome da empresa
             document.getElementById('empresaNome').innerHTML = `💰 ${clienteConfig.nome || 'SISTEMA FINANCEIRO'}`;
             document.getElementById('userBadge').innerHTML = `👤 ${clienteConfig.nome || 'Empresa'}`;
 
-            
-            // Logo do cliente (vem do Master: logoBase64 / logoUrl)
             const logoImg = document.getElementById('clienteLogoImg');
             const logoSrc = clienteConfig.logoBase64 || clienteConfig.logoUrl || clienteConfig.logo || '';
             if (logoImg) {
@@ -2064,7 +1950,7 @@ function aplicarConfiguracoes() {
                     logoImg.style.display = 'none';
                 }
             }
-// Perfil / Documento / ID (para confiança do cliente)
+
             const perfil = (clienteConfig.perfil || clienteConfig.tipoCliente || clienteConfig.tipoPerfil || '').toString().trim();
             const documento = (clienteConfig.cnpj || clienteConfig.cpf || clienteConfig.documento || '').toString().trim();
 
@@ -2095,14 +1981,11 @@ function aplicarConfiguracoes() {
                 idEl.textContent = idAtual ? `ID: ${idAtual}` : 'ID: —';
             }
 
-
-            // Cor principal
             if (clienteConfig.cor) {
                 document.documentElement.style.setProperty('--accent', clienteConfig.cor);
                 document.documentElement.style.setProperty('--accent-hover', adjustColor(clienteConfig.cor, -20));
             }
 
-            // Termos personalizados
             if (clienteConfig.termoColaborador) {
                 document.getElementById('labelMotorista').innerHTML = `🚚 ${clienteConfig.termoColaborador} (opcional)`;
                 document.getElementById('motorista').placeholder = `Nome do ${clienteConfig.termoColaborador.toLowerCase()}`;
@@ -2113,11 +1996,6 @@ function aplicarConfiguracoes() {
                 document.getElementById('statTitle1').innerHTML = `🚚 ${clienteConfig.termoAcao}s (Mês)`;
             }
 
-            if (clienteConfig.termoCliente) {
-                // Pode usar em algum lugar
-            }
-
-            // Moeda
             if (clienteConfig.moeda) {
                 const simbolos = {
                     'BRL': 'R$',
@@ -2127,7 +2005,6 @@ function aplicarConfiguracoes() {
                 document.getElementById('moedaSimbolo').innerHTML = simbolos[clienteConfig.moeda] || 'R$';
             }
 
-            // Modo escuro
             if (clienteConfig.modoEscuro === 'dark') {
                 document.body.classList.add('dark-mode');
                 document.getElementById('darkModeBtn').innerHTML = '☀️ Modo Claro';
@@ -2137,25 +2014,23 @@ function aplicarConfiguracoes() {
             }
         }
 
-        
         function atualizarCamposDePermissao() {
-            // Preparação para o ponto 4 (editar/excluir lançamentos)
             const podeEditar = (clienteConfig?.permitirEditarLancamentos !== false);
             const podeExcluir = (clienteConfig?.permitirExcluirLancamentos !== false);
 
-            // Se no futuro você adicionar botões na lista, use essas flags.
             window.__podeEditarLanc = podeEditar;
             window.__podeExcluirLanc = podeExcluir;
         }
 
-
+        function adjustColor(hex, percent) {
+            return hex;
+        }
 
         // ============================================
-        // CARREGAR DADOS FINANCEIROS DO CLIENTE
+        // CARREGAR DADOS FINANCEIROS
         // ============================================
         async function carregarDadosFinanceiros() {
             try {
-                // Tentar carregar dados existentes
                 const docRef = db.collection('dados_financeiros').doc(clienteId);
                 const doc = await docRef.get();
 
@@ -2166,13 +2041,11 @@ function aplicarConfiguracoes() {
                     previsoes = dados.previsoes || [];
                     indicadores = dados.indicadores || getIndicadoresDefault();
                 } else {
-                    // Criar dados iniciais
                     transacoes = [];
                     contas = [];
                     previsoes = [];
                     indicadores = getIndicadoresDefault();
 
-                    // Salvar estrutura inicial
                     await docRef.set({
                         transacoes: [],
                         contas: [],
@@ -2206,20 +2079,135 @@ function aplicarConfiguracoes() {
         }
 
         // ============================================
+        // RENDERIZAR PLANOS DINÂMICOS (NOVO)
+        // ============================================
+        function renderizarPlanos() {
+            const container = document.getElementById('planosContainer');
+            if (!container) return;
+
+            const planosConfig = clienteConfig?.planosConfig;
+            
+            if (!planosConfig || !planosConfig.ativo) {
+                container.style.display = 'none';
+                return;
+            }
+
+            const planos = planosConfig.planos || [];
+            const funcionalidades = planosConfig.funcionalidades || [];
+            const valores = planosConfig.valoresFuncionalidades || {};
+
+            let html = `
+                <div class="planos-titulo">
+                    <h2 style="color: ${planosConfig.cor || '#4CAF50'}">${planosConfig.titulo || '💰 PLANOS'}</h2>
+                    <p>${planosConfig.subtitulo || 'Soluções completas para seu negócio'}</p>
+                </div>
+
+                <div class="plano-toggle">
+                    <span class="toggle-label">${planosConfig.toggleMensal || '📅 Mensal'}</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggleAnual" onchange="togglePlanos()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">${planosConfig.toggleAnual || '📆 Anual'} <span class="economia-badge">${planosConfig.economiaBadge || 'ECONOMIZE 60%'}</span></span>
+                </div>
+
+                <div class="planilha-container">
+                    <table class="planilha-tabela">
+                        <thead>
+                            <tr>
+                                <th>FUNCIONALIDADES</th>
+                                ${planos.map(p => `
+                                    <th style="background: ${p.cor}20; color: ${p.cor};">${p.nome}</th>
+                                `).join('')}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${funcionalidades.map(func => `
+                                <tr>
+                                    <td class="feature-name">${func}</td>
+                                    ${planos.map(p => {
+                                        const valor = valores[func]?.[p.id] || '—';
+                                        return `<td>${valor}</td>`;
+                                    }).join('')}
+                                </tr>
+                            `).join('')}
+                            <tr class="preco-linha">
+                                <td class="feature-name"><strong>PREÇO MENSAL</strong></td>
+                                ${planos.map(p => `
+                                    <td id="precoMensal_${p.id}"><strong>R$ ${(p.precoMensal || 0).toFixed(2).replace('.', ',')}</strong></td>
+                                `).join('')}
+                            </tr>
+                            <tr class="preco-linha anual" style="display: none;">
+                                <td class="feature-name"><strong>PREÇO ANUAL</strong></td>
+                                ${planos.map(p => `
+                                    <td id="precoAnual_${p.id}">
+                                        <strong>R$ ${(p.precoAnual || 0).toFixed(2).replace('.', ',')}</strong>
+                                        <span class="economia">Economize ${p.economiaAnual || 60}%</span>
+                                    </td>
+                                `).join('')}
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="planilha-botoes">
+                    ${planos.map(p => `
+                        <button class="plano-btn" style="background: ${p.cor}; ${p.destaque ? 'transform: scale(1.05);' : ''}" 
+                                onclick="selecionarPlano('${p.id}')">
+                            ${p.nome}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+
+            container.innerHTML = html;
+            container.style.display = 'block';
+        }
+
+        // ============================================
+        // FUNÇÕES DOS PLANOS (NOVO)
+        // ============================================
+        window.togglePlanos = function() {
+            const isAnual = document.getElementById('toggleAnual')?.checked || false;
+            document.querySelectorAll('.preco-linha.anual').forEach(linha => {
+                linha.style.display = isAnual ? 'table-row' : 'none';
+            });
+            document.querySelectorAll('.preco-linha:not(.anual)').forEach(linha => {
+                linha.style.display = isAnual ? 'none' : 'table-row';
+            });
+        };
+
+        window.selecionarPlano = function(planoId) {
+            const config = clienteConfig?.planosConfig;
+            const plano = config?.planos?.find(p => p.id === planoId);
+            if (!plano) return;
+
+            const isAnual = document.getElementById('toggleAnual')?.checked || false;
+            const periodo = isAnual ? 'anual' : 'mensal';
+            const valor = isAnual ? plano.precoAnual : plano.precoMensal;
+
+            document.getElementById('planoEscolhido').innerHTML = 
+                `<strong>Plano:</strong> ${plano.nome} (${periodo})`;
+            document.getElementById('valorEscolhido').innerHTML = 
+                `R$ ${valor.toFixed(2).replace('.', ',')}`;
+
+            document.getElementById('modalPagamento').style.display = 'flex';
+        };
+
+        // ============================================
         // INICIALIZAR INTERFACE
         // ============================================
         function inicializarInterface() {
-            // Construir abas baseado nas funções ativas
             const navTabs = document.getElementById('navTabs');
             navTabs.innerHTML = '';
 
             const abas = [
-                { id: 'dashboard', nome: '📊 Dashboard', ativo: clienteConfig.funcDashboard !== false },
-                { id: 'lancamentos', nome: '📝 Lançamentos', ativo: clienteConfig.funcLancamentos !== false },
-                { id: 'contas', nome: '🏦 Contas', ativo: clienteConfig.funcContas !== false },
-                { id: 'orcamento', nome: '📅 Orçamento', ativo: clienteConfig.funcOrcamento !== false },
-                { id: 'relatorios', nome: '📈 Relatórios', ativo: clienteConfig.funcRelatorios !== false },
-                { id: 'planos', nome: '💰 Planos', ativo: clienteConfig.funcPlanos === true }
+                { id: 'dashboard', nome: '📊 Dashboard', ativo: clienteConfig.funcoes?.dashboard !== false },
+                { id: 'lancamentos', nome: '📝 Lançamentos', ativo: clienteConfig.funcoes?.lancamentos !== false },
+                { id: 'contas', nome: '🏦 Contas', ativo: clienteConfig.funcoes?.contas !== false },
+                { id: 'orcamento', nome: '📅 Orçamento', ativo: clienteConfig.funcoes?.orcamento !== false },
+                { id: 'relatorios', nome: '📈 Relatórios', ativo: clienteConfig.funcoes?.relatorios !== false },
+                { id: 'planos', nome: '💰 Planos', ativo: clienteConfig.funcoes?.planos === true }
             ];
 
             let primeiraAbaAtiva = null;
@@ -2231,42 +2219,36 @@ function aplicarConfiguracoes() {
                     btn.setAttribute('onclick', `showTab('${aba.id}')`);
                     btn.innerHTML = aba.nome;
                     navTabs.appendChild(btn);
-                    
+
                     if (!primeiraAbaAtiva) {
                         primeiraAbaAtiva = aba.id;
                     }
                 } else {
-                    // Esconder a aba se não estiver ativa
                     const tab = document.getElementById(aba.id);
                     if (tab) tab.style.display = 'none';
                 }
             });
 
-            // Se não tem planos, esconder seção de importação também?
-            if (clienteConfig.funcImportar === false) {
+            if (clienteConfig.funcoes?.importar === false) {
                 const importSection = document.querySelector('.import-export-section');
                 if (importSection) importSection.style.display = 'none';
             }
 
-            // Mostrar primeira aba
             if (primeiraAbaAtiva) {
                 showTab(primeiraAbaAtiva);
             }
 
-            // Configurar datas
             const hoje = new Date().toISOString().split('T')[0];
             document.getElementById('dataLancamento').value = hoje;
-            
+
             const mesAtual = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
             document.getElementById('mesOrcamento').value = mesAtual;
 
-            // Preencher selects
             preencherCategorias();
             preencherSelectContas();
             preencherCategoriasPrevisao();
             preencherSelectMeses();
 
-            // Atualizar dados
             atualizarDashboard();
             atualizarListaLancamentos();
             atualizarListaContas();
@@ -2274,12 +2256,49 @@ function aplicarConfiguracoes() {
             gerarRelatorio();
         }
 
-        // ============================================
-        // FUNÇÕES AUXILIARES
-        // ============================================
-        function adjustColor(hex, percent) {
-            // Simplificado - escurecer/clarear cor
-            return hex;
+        function showTab(tabName) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            const btn = document.querySelector(`[onclick="showTab('${tabName}')"]`);
+            if (btn) btn.classList.add('active');
+
+            const tab = document.getElementById(tabName);
+            if (tab) tab.classList.add('active');
+        }
+
+        function setTipoLancamento(tipo) {
+            tipoLancamento = tipo;
+            document.querySelectorAll('#lancamentos .tab').forEach(t => t.classList.remove('active'));
+
+            if (tipo === 'receita') {
+                document.querySelector('#lancamentos .income-tab').classList.add('active');
+                document.getElementById('btnLancar').classList.remove('btn-expense');
+                document.getElementById('btnLancar').classList.add('btn-income');
+            } else {
+                document.querySelector('#lancamentos .expense-tab').classList.add('active');
+                document.getElementById('btnLancar').classList.remove('btn-income');
+                document.getElementById('btnLancar').classList.add('btn-expense');
+            }
+            preencherCategorias();
+        }
+
+        function setTipoPrevisao(tipo) {
+            tipoPrevisao = tipo;
+            document.querySelectorAll('#orcamento .tab').forEach(t => t.classList.remove('active'));
+            if (event && event.target) event.target.classList.add('active');
+            preencherCategoriasPrevisao();
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const btn = document.querySelector('.dark-mode-toggle');
+
+            if (document.body.classList.contains('dark-mode')) {
+                btn.textContent = '☀️ Modo Claro';
+            } else {
+                btn.textContent = '🌙 Modo Escuro';
+            }
         }
 
         function formatarMoeda(input) {
@@ -2301,58 +2320,10 @@ function aplicarConfiguracoes() {
             return parseFloat(valorLimpo) || 0;
         }
 
-        // ============================================
-        // FUNÇÕES DE NAVEGAÇÃO
-        // ============================================
-        function showTab(tabName) {
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            
-            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
-            document.getElementById(tabName).classList.add('active');
-        }
-
-        function setTipoLancamento(tipo) {
-            tipoLancamento = tipo;
-            document.querySelectorAll('#lancamentos .tab').forEach(t => t.classList.remove('active'));
-            
-            if (tipo === 'receita') {
-                document.querySelector('#lancamentos .income-tab').classList.add('active');
-                document.getElementById('btnLancar').classList.remove('btn-expense');
-                document.getElementById('btnLancar').classList.add('btn-income');
-            } else {
-                document.querySelector('#lancamentos .expense-tab').classList.add('active');
-                document.getElementById('btnLancar').classList.remove('btn-income');
-                document.getElementById('btnLancar').classList.add('btn-expense');
-            }
-            preencherCategorias();
-        }
-
-        function setTipoPrevisao(tipo) {
-            tipoPrevisao = tipo;
-            document.querySelectorAll('#orcamento .tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            preencherCategoriasPrevisao();
-        }
-
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const btn = document.querySelector('.dark-mode-toggle');
-            
-            if (document.body.classList.contains('dark-mode')) {
-                btn.textContent = '☀️ Modo Claro';
-            } else {
-                btn.textContent = '🌙 Modo Escuro';
-            }
-        }
-
-        // ============================================
-        // FUNÇÕES DE LANÇAMENTOS
-        // ============================================
         function preencherCategorias() {
             const select = document.getElementById('categoria');
             if (!select) return;
-            
+
             select.innerHTML = '';
             const listaCategorias = (clienteConfig && Array.isArray(clienteConfig.categorias) && clienteConfig.categorias.length)
                 ? clienteConfig.categorias
@@ -2368,7 +2339,7 @@ function aplicarConfiguracoes() {
         function preencherSelectContas() {
             const select = document.getElementById('contaSelect');
             if (!select) return;
-            
+
             select.innerHTML = '';
             const listaContas = (clienteConfig && Array.isArray(clienteConfig.contasPadrao) && clienteConfig.contasPadrao.length)
                 ? clienteConfig.contasPadrao
@@ -2426,16 +2397,16 @@ function aplicarConfiguracoes() {
 
             transacoes.unshift(novaTransacao);
             await salvarDadosFinanceiros();
-            
+
             atualizarListaLancamentos();
             atualizarDashboard();
-            
+
             document.getElementById('valor').value = '';
             document.getElementById('descricao').value = '';
             document.getElementById('observacao').value = '';
             document.getElementById('motorista').value = '';
             document.getElementById('dataLancamento').value = new Date().toISOString().split('T')[0];
-            
+
             alert('✅ Lançamento realizado!');
         }
 
@@ -2453,7 +2424,7 @@ function aplicarConfiguracoes() {
                 const conta = contas.find(c => c.id === t.contaId) || { nome: 'Conta' };
                 const valorFormatado = t.valor.toFixed(2).replace('.', ',');
                 const termoColaborador = clienteConfig?.termoColaborador || 'Motorista';
-                
+
                 html += `
                     <div class="transaction-item">
                         <div class="transaction-info">
@@ -2478,9 +2449,6 @@ function aplicarConfiguracoes() {
             listaDiv.innerHTML = html;
         }
 
-        // ============================================
-        // FUNÇÕES DE CONTAS
-        // ============================================
         async function adicionarConta() {
             const nome = document.getElementById('nomeConta').value;
             const saldoInicialInput = document.getElementById('saldoInicial').value;
@@ -2503,10 +2471,10 @@ function aplicarConfiguracoes() {
 
             contas.push(novaConta);
             await salvarDadosFinanceiros();
-            
+
             document.getElementById('nomeConta').value = '';
             document.getElementById('saldoInicial').value = '0,00';
-            
+
             atualizarListaContas();
             preencherSelectContas();
         }
@@ -2524,7 +2492,7 @@ function aplicarConfiguracoes() {
             contas.forEach(conta => {
                 const saldo = calcularSaldoConta(conta.id) + (conta.saldoInicial || 0);
                 const saldoFormatado = saldo.toFixed(2).replace('.', ',');
-                
+
                 html += `
                     <div class="conta-card" style="border-left: 4px solid ${conta.cor}">
                         <span class="conta-tipo">${conta.tipo}</span>
@@ -2545,13 +2513,10 @@ function aplicarConfiguracoes() {
                 }, 0);
         }
 
-        // ============================================
-        // FUNÇÕES DE ORÇAMENTO
-        // ============================================
         function preencherCategoriasPrevisao() {
             const select = document.getElementById('categoriaPrevista');
             if (!select) return;
-            
+
             select.innerHTML = '';
             categorias[tipoPrevisao].forEach(cat => {
                 const option = document.createElement('option');
@@ -2596,7 +2561,7 @@ function aplicarConfiguracoes() {
 
             previsoes.push(novaPrevisao);
             await salvarDadosFinanceiros();
-            
+
             document.getElementById('valorPrevisto').value = '';
             document.getElementById('descricaoPrevista').value = '';
             document.getElementById('diaVencimento').value = '';
@@ -2649,46 +2614,6 @@ function aplicarConfiguracoes() {
             listaDiv.innerHTML = html;
         }
 
-        // ============================================
-        // FUNÇÕES DE DASHBOARD
-        // ============================================
-        function atualizarDashboard() {
-            let totalReceitas = 0;
-            let totalDespesas = 0;
-
-            transacoes.forEach(t => {
-                if (t.tipo === 'receita') totalReceitas += t.valor;
-                else totalDespesas += t.valor;
-            });
-
-            document.getElementById('saldoTotal').innerHTML = `R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}`;
-            document.getElementById('totalReceitas').innerHTML = `📈 Receitas: R$ ${totalReceitas.toFixed(2).replace('.', ',')}`;
-            document.getElementById('totalDespesas').innerHTML = `📉 Despesas: R$ ${totalDespesas.toFixed(2).replace('.', ',')}`;
-
-            let saldoContas = 0;
-            contas.forEach(conta => {
-                saldoContas += calcularSaldoConta(conta.id) + (conta.saldoInicial || 0);
-            });
-            
-            document.getElementById('statValue3').innerHTML = `R$ ${saldoContas.toFixed(2).replace('.', ',')}`;
-            document.getElementById('statSub3').innerHTML = `${contas.length} contas ativas`;
-
-            // Indicadores por cliente (salvos em dados_financeiros/{clienteId}.indicadores)
-            const ind = indicadores || getIndicadoresDefault();
-
-            document.getElementById('statValue1').innerHTML = (ind.entregasMes === null || ind.entregasMes === undefined) ? 'Não se aplica' : ind.entregasMes;
-            document.getElementById('statSub1').innerHTML = (ind.metaEntregas === null || ind.metaEntregas === undefined) ? '' : `Meta: ${ind.metaEntregas}`;
-
-            const ativos = ind.colaboradoresAtivos;
-            const disp = ind.colaboradoresDisponiveis;
-
-            document.getElementById('statValue2').innerHTML = (ativos === null || ativos === undefined) ? 'Não se aplica' : ativos;
-            document.getElementById('statSub2').innerHTML = (disp === null || disp === undefined) ? '' : `${disp} disponíveis`;
-        }
-
-        // ============================================
-        // FUNÇÕES DE RELATÓRIOS
-        // ============================================
         function preencherSelectMeses() {
             const selectMes = document.getElementById('relatorioMes');
             if (selectMes) {
@@ -2702,7 +2627,6 @@ function aplicarConfiguracoes() {
                 });
             }
         }
-
 
         function definirPeriodoRelatorio(tipo) {
             const hoje = new Date();
@@ -2724,8 +2648,6 @@ function aplicarConfiguracoes() {
             gerarRelatorio();
         }
 
-
-
         function gerarRelatorio() {
             const mes = document.getElementById('relatorioMes').value;
             const ano = parseInt(document.getElementById('relatorioAno').value);
@@ -2744,14 +2666,12 @@ function aplicarConfiguracoes() {
             let transacoesFiltradas = transacoes.filter(t => {
                 const data = new Date(t.data);
 
-                // Se o usuário escolheu um período (de/até), usamos esse filtro e ignoramos mês/ano
                 if (temPeriodo) {
                     if (dataInicio && data < dataInicio) return false;
                     if (dataFim && data > dataFim) return false;
                     return true;
                 }
 
-                // Caso contrário, segue o filtro clássico por ano/mês
                 return data.getFullYear() === ano && (mes === 'all' || data.getMonth() === parseInt(mes));
             });
 
@@ -2766,7 +2686,7 @@ function aplicarConfiguracoes() {
                 if (!porCategoria[t.categoria]) {
                     porCategoria[t.categoria] = { receitas: 0, despesas: 0 };
                 }
-                
+
                 if (t.tipo === 'receita') {
                     porCategoria[t.categoria].receitas += t.valor;
                 } else {
@@ -2813,12 +2733,11 @@ function aplicarConfiguracoes() {
         }
 
         // ============================================
-        // ============================================
         // FUNÇÕES DE IMPORTAÇÃO/EXPORTAÇÃO
         // ============================================
-
         function importarCSV() { alert('📥 Importação CSV ainda não implementada. Use JSON por enquanto.'); }
-                async function importarTXT() {
+
+        async function importarTXT() {
             try {
                 const input = document.getElementById('fileInput');
                 const file = input?.files?.[0];
@@ -2854,9 +2773,7 @@ function aplicarConfiguracoes() {
 
                 const parseDataFlex = (s) => {
                     const v = (s || '').trim();
-                    // YYYY-MM-DD
                     if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
-                    // DD/MM/YYYY
                     const m = v.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
                     if (m) return `${m[3]}-${m[2]}-${m[1]}`;
                     return null;
@@ -2869,7 +2786,6 @@ function aplicarConfiguracoes() {
                 };
 
                 const pickContaId = (s) => {
-                    // conta:Nome da Conta  | conta=Nome
                     const m = String(s || '').match(/\bconta\s*[:=]\s*([^\|;]+)\b/i);
                     if (!m) return null;
                     const nome = m[1].trim().toLowerCase();
@@ -2906,7 +2822,6 @@ function aplicarConfiguracoes() {
                 for (const linhaOriginal of linhas) {
                     const linha = linhaOriginal.trim();
 
-                    // Metadados opcionais em qualquer lugar da linha:
                     const contaIdLinha = pickContaId(linha) ?? defaultContaId;
                     const motoristaLinha = pickMotorista(linha);
                     const obsLinha = pickObs(linha);
@@ -2914,12 +2829,8 @@ function aplicarConfiguracoes() {
 
                     const limpa = stripMeta(linha);
 
-                    // Separadores aceitos: ; | TAB
                     let partes = limpa.split(/[;|\t]/).map(p => p.trim()).filter(Boolean);
 
-                    // Caso 1: formato estruturado (exemplos)
-                    // 2026-03-01; despesa; 56,90; Almoço; Alimentação
-                    // 01/03/2026; receita; 1200; Frete; Serviços
                     let data = null;
                     let tipo = null;
                     let valorStr = null;
@@ -2947,51 +2858,41 @@ function aplicarConfiguracoes() {
                         if (valorStr) {
                             partes.shift();
                         } else {
-                            // fallback: extrai de toda a linha
                             valorStr = extrairValorStr(limpa);
                         }
                     }
 
-                    // Caso 2: formato livre (exemplos)
-                    // 56,90 almoço alimentação
-                    // -80 gasolina
-                    // receita 1200 frete serviços
                     if (!valorStr) {
-                        continue; // pula linha impossível de entender
+                        continue;
                     }
 
                     let valorNum = converterMoedaParaNumber(valorStr);
                     if (!valorNum || Number.isNaN(valorNum)) continue;
 
-                    // Se vier negativo, vira despesa e usa o absoluto
                     if (valorNum < 0) {
                         tipo = 'despesa';
                         valorNum = Math.abs(valorNum);
                     }
 
-                    // Se tipo não veio, tenta deduzir por palavra no começo
                     if (!tipo) {
                         const t2 = normalizarTipo(partes[0] || '');
                         if (t2) {
                             tipo = t2;
                             partes.shift();
                         } else {
-                            tipo = 'despesa'; // padrão mais seguro em importação
+                            tipo = 'despesa';
                         }
                     }
 
-                    // Descrição/categoria
                     if (partes.length >= 2) {
                         descricao = partes.slice(0, -1).join(' - ').trim();
                         categoria = partes[partes.length - 1].trim();
                     } else if (partes.length === 1) {
                         descricao = partes[0].trim();
                     } else {
-                        // se não sobrou nada, usa a própria linha (limpa) sem o valor
                         descricao = limpa.replace(valorStr, '').trim() || '(Sem descrição)';
                     }
 
-                    // categoria fallback: linha -> select padrão
                     if (!categoria) categoria = catLinha || (categorias[tipo] ? categorias[tipo][0] : 'Outros');
 
                     const novaTransacao = {
@@ -3014,7 +2915,6 @@ function aplicarConfiguracoes() {
                     return;
                 }
 
-                // Ordena por data desc e coloca no início
                 novas.sort((a, b) => (b.data || '').localeCompare(a.data || ''));
                 transacoes = [...novas, ...(transacoes || [])];
 
@@ -3028,6 +2928,7 @@ function aplicarConfiguracoes() {
                 alert('Erro ao importar TXT. Veja o Console.');
             }
         }
+
         function exportarCSV() { alert('📤 Exportação CSV ainda não implementada. Use JSON por enquanto.'); }
 
         async function importarJSON() {
@@ -3052,10 +2953,6 @@ function aplicarConfiguracoes() {
                     return;
                 }
 
-                // Aceita formatos diferentes:
-                // 1) { clienteId, clienteNome, dados: { transacoes, contas, previsoes, indicadores } }
-                // 2) { transacoes, contas, previsoes, indicadores }
-                // 3) { dados_financeiros: { ... } } (pega o primeiro nível)
                 let dados = null;
 
                 if (obj && typeof obj === 'object') {
@@ -3086,11 +2983,10 @@ function aplicarConfiguracoes() {
                     importadoEm: new Date().toISOString()
                 }, { merge: true });
 
-                // Atualiza UI
                 atualizarDashboard();
-                atualizarListaTransacoes?.();
-                atualizarListaContas?.();
-                atualizarListaPrevisoes?.();
+                atualizarListaLancamentos();
+                atualizarListaContas();
+                carregarOrcamento();
                 preencherEditorIndicadores?.();
 
                 alert('✅ Importação concluída!');
@@ -3136,24 +3032,23 @@ function aplicarConfiguracoes() {
             }
         }
 
-        
         function exportarTXT() {
             try {
                 let conteudo = `=== RELATÓRIO ${clienteConfig?.nome?.toUpperCase()} ===\n`;
                 conteudo += `Data: ${new Date().toLocaleDateString('pt-BR')}\n`;
                 conteudo += "=".repeat(50) + "\n\n";
-                
+
                 let totalReceitas = 0, totalDespesas = 0;
                 transacoes.forEach(t => {
                     if (t.tipo === 'receita') totalReceitas += t.valor;
                     else totalDespesas += t.valor;
                 });
-                
+
                 conteudo += "📊 RESUMO GERAL\n";
                 conteudo += `Receitas: R$ ${totalReceitas.toFixed(2).replace('.', ',')}\n`;
                 conteudo += `Despesas: R$ ${totalDespesas.toFixed(2).replace('.', ',')}\n`;
                 conteudo += `Saldo: R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}\n\n`;
-                
+
                 conteudo += "📝 ÚLTIMAS TRANSAÇÕES\n";
                 conteudo += "-".repeat(50) + "\n";
                 transacoes.slice(0, 20).forEach(t => {
@@ -3161,7 +3056,7 @@ function aplicarConfiguracoes() {
                     const valor = t.valor.toFixed(2).replace('.', ',');
                     conteudo += `${data} | ${t.descricao} | ${t.tipo === 'receita' ? '+' : '-'} R$ ${valor}\n`;
                 });
-                
+
                 const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -3169,7 +3064,7 @@ function aplicarConfiguracoes() {
                 a.download = `${clienteConfig?.nome || 'relatorio'}_${new Date().toISOString().slice(0,10)}.txt`;
                 a.click();
                 URL.revokeObjectURL(url);
-                
+
                 alert('✅ Arquivo TXT exportado!');
             } catch (error) {
                 alert('❌ Erro ao exportar TXT');
@@ -3179,13 +3074,13 @@ function aplicarConfiguracoes() {
         function exportarPDF() {
             const janela = window.open('', '_blank');
             const hoje = new Date().toLocaleDateString('pt-BR');
-            
+
             let totalReceitas = 0, totalDespesas = 0;
             transacoes.forEach(t => {
                 if (t.tipo === 'receita') totalReceitas += t.valor;
                 else totalDespesas += t.valor;
             });
-            
+
             const html = `
             <html>
             <head>
@@ -3203,12 +3098,12 @@ function aplicarConfiguracoes() {
             <body>
                 <h1>📊 ${clienteConfig?.nome || 'Relatório Financeiro'}</h1>
                 <p>Gerado em: ${hoje}</p>
-                
+
                 <h3>Resumo</h3>
                 <p class="receita">Receitas: R$ ${totalReceitas.toFixed(2).replace('.', ',')}</p>
                 <p class="despesa">Despesas: R$ ${totalDespesas.toFixed(2).replace('.', ',')}</p>
                 <p>Saldo: R$ ${(totalReceitas - totalDespesas).toFixed(2).replace('.', ',')}</p>
-                
+
                 <h3>Últimas movimentações</h3>
                 <table>
                     <tr><th>Data</th><th>Descrição</th><th>Valor</th></tr>
@@ -3226,46 +3121,9 @@ function aplicarConfiguracoes() {
             </body>
             </html>
             `;
-            
+
             janela.document.write(html);
             janela.document.close();
-        }
-
-        // ============================================
-        // FUNÇÕES DOS PLANOS
-        // ============================================
-        function togglePlanos() {
-            const isAnual = document.getElementById('toggleAnual').checked;
-            document.querySelectorAll('.preco-linha').forEach(linha => {
-                if (linha.classList.contains('anual')) {
-                    linha.style.display = isAnual ? 'table-row' : 'none';
-                } else {
-                    linha.style.display = isAnual ? 'none' : 'table-row';
-                }
-            });
-        }
-
-        function selecionarPlano(plano) {
-            let nomePlano = {
-                'basico': 'Básico',
-                'profissional': 'Profissional',
-                'empresarial': 'Empresarial'
-            }[plano] || plano;
-            
-            const isAnual = document.getElementById('toggleAnual').checked;
-            const periodo = isAnual ? 'anual' : 'mensal';
-            
-            let valor = 0;
-            if (plano === 'basico') valor = isAnual ? 1197.60 : 49.90;
-            if (plano === 'profissional') valor = isAnual ? 2397.60 : 99.90;
-            if (plano === 'empresarial') valor = isAnual ? 4797.60 : 199.90;
-            
-            document.getElementById('planoEscolhido').innerHTML = 
-                `<strong>Plano:</strong> ${nomePlano} (${periodo})`;
-            document.getElementById('valorEscolhido').innerHTML = 
-                `R$ ${valor.toFixed(2).replace('.', ',')}`;
-            
-            document.getElementById('modalPagamento').style.display = 'flex';
         }
 
         function simularPagamento(tipo) {
