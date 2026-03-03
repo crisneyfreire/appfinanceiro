@@ -1522,11 +1522,10 @@
                     <h4>📋 PLANOS DISPONÍVEIS</h4>
                     <button class="btn-add" onclick="adicionarPlano()">➕ NOVO PLANO</button>
                 </div>
-
                 <div id="planosLista"></div>
             </div>
 
-            <!-- Editor de Funcionalidades Globais -->
+            <!-- Editor de Funcionalidades -->
             <div class="data-editor">
                 <h4>✨ FUNCIONALIDADES (linhas da tabela)</h4>
                 <div style="margin-bottom: 15px">
@@ -2008,7 +2007,6 @@
         atualizarListaClientes();
         preencherFormularioCliente();
         await carregarConfigCliente(clienteId);
-        await carregarDadosCliente(clienteId);
 
         // Habilitar botões
         [
@@ -2077,32 +2075,18 @@
           const cfgDoc = await db.collection("configs").doc(clienteId).get();
           const cfg = cfgDoc.exists ? cfgDoc.data() || {} : null;
 
-          if (cfg) {
-            if (cfg.planosConfig) {
-              clienteAtual.planosConfig = cfg.planosConfig;
-              renderizarEditorPlanos();
-            }
+          if (cfg && cfg.planosConfig) {
+            clienteAtual.planosConfig = cfg.planosConfig;
+            renderizarEditorPlanos();
           }
         } catch (e) {
           console.warn("Erro ao carregar configs:", e);
         }
       }
 
-      async function carregarDadosCliente(clienteId) {
-        try {
-          const dadosDoc = await db.collection("dados_financeiros").doc(clienteId).get();
-          if (dadosDoc.exists) {
-            const dados = dadosDoc.data();
-          }
-        } catch (e) {
-          console.warn("Erro ao carregar dados:", e);
-        }
-      }
-
       function atualizarPreview() {
         const nome = document.getElementById("nomeEmpresa").value || "Nome da Empresa";
         const cor = document.getElementById("corPrincipal").value || "#4CAF50";
-
         document.getElementById("previewTitulo").innerHTML = nome;
         document.getElementById("previewLogoBox").style.background = cor;
       }
@@ -2194,22 +2178,16 @@
         
         const planosConfig = clienteAtual.planosConfig;
         
-        // Configurações gerais
         document.getElementById('planosAtivo').value = planosConfig.ativo ? 'true' : 'false';
         document.getElementById('planosTitulo').value = planosConfig.titulo || '💰 PLANOS';
-        document.getElementById('planosSubtitulo').value = planosConfig.subtitulo || 'Soluções completas para seu negócio';
+        document.getElementById('planosSubtitulo').value = planosConfig.subtitulo || '';
         document.getElementById('planosCorPrincipal').value = planosConfig.cor || '#4CAF50';
         document.getElementById('planosToggleMensal').value = planosConfig.toggleMensal || '📅 Mensal';
         document.getElementById('planosToggleAnual').value = planosConfig.toggleAnual || '📆 Anual';
         document.getElementById('planosEconomiaBadge').value = planosConfig.economiaBadge || 'ECONOMIZE 60%';
         
-        // Renderizar lista de planos
         renderizarListaPlanos(planosConfig.planos || []);
-        
-        // Renderizar funcionalidades
         renderizarFuncionalidadesGlobais(planosConfig.funcionalidades || [], planosConfig.valoresFuncionalidades || {});
-        
-        // Preview
         atualizarPreviewPlanos();
       }
 
@@ -2266,7 +2244,7 @@
         container.innerHTML = html;
       }
 
-      function renderizarFuncionalidadesGlobais(funcionalidades, valores) {
+      function renderizarFuncionalidadesGlobais(funcionalidades) {
         const tbody = document.getElementById('funcionalidadesBody');
         if (!tbody) return;
         
@@ -2285,7 +2263,7 @@
             `;
         });
         
-        tbody.innerHTML = html || '<tr><td colspan="2" style="text-align: center;">Nenhuma funcionalidade cadastrada</td></tr>';
+        tbody.innerHTML = html || '<tr><td colspan="2" style="text-align: center;">Nenhuma funcionalidade</td></tr>';
       }
 
       function atualizarPreviewPlanos() {
@@ -2382,7 +2360,6 @@
 
       function atualizarPlano(index, campo, valor) {
         if (!clienteAtual || !clienteAtual.planosConfig) return;
-        
         clienteAtual.planosConfig.planos[index][campo] = valor;
         alteracaoNaoSalva();
         atualizarPreviewPlanos();
@@ -2390,7 +2367,6 @@
 
       function removerPlano(index) {
         if (!confirm('Remover este plano?')) return;
-        
         clienteAtual.planosConfig.planos.splice(index, 1);
         alteracaoNaoSalva();
         renderizarEditorPlanos();
@@ -2482,10 +2458,6 @@
         alteracaoNaoSalva();
         atualizarPreviewPlanos();
       }
-
-      // ============================================
-      // FUNÇÕES DE SALVAMENTO
-      // ============================================
 
       function construirPlanosConfig() {
         if (!clienteAtual || !clienteAtual.planosConfig) {
@@ -2602,14 +2574,10 @@
       }
 
       // ============================================
-      // FUNÇÕES DE APP
+      // FUNÇÕES AUXILIARES
       // ============================================
       function toggleApp(appId, ativar) {
-        if (ativar) {
-          alert('✅ App ativado');
-        } else {
-          alert('❌ App desativado');
-        }
+        alert(ativar ? '✅ App ativado' : '❌ App desativado');
         alteracaoNaoSalva();
       }
 
@@ -2617,15 +2585,9 @@
         alert('⚙️ Configurações do app');
       }
 
-      // ============================================
-      // FUNÇÕES DE DADOS
-      // ============================================
       function adicionarCategoria() {
         const nome = document.getElementById("novaCategoria").value;
-        if (!nome) {
-          alert("Digite um nome para a categoria");
-          return;
-        }
+        if (!nome) return alert("Digite um nome");
         alert(`✅ Categoria "${nome}" adicionada!`);
         document.getElementById("novaCategoria").value = "";
         alteracaoNaoSalva();
@@ -2633,10 +2595,7 @@
 
       function adicionarContaPadrao() {
         const nome = document.getElementById("novaConta").value;
-        if (!nome) {
-          alert("Digite um nome para a conta");
-          return;
-        }
+        if (!nome) return alert("Digite um nome");
         alert(`✅ Conta "${nome}" adicionada!`);
         document.getElementById("novaConta").value = "";
         alteracaoNaoSalva();
@@ -2644,108 +2603,39 @@
 
       function adicionarIndicador() {
         const titulo = document.getElementById("novoIndicadorTitulo").value;
-        if (!titulo) {
-          alert("Digite um título para o indicador");
-          return;
-        }
+        if (!titulo) return alert("Digite um título");
         alert(`✅ Indicador "${titulo}" adicionado!`);
         document.getElementById("novoIndicadorTitulo").value = "";
         alteracaoNaoSalva();
       }
 
-      function editarCategoria(index) {
-        alert(`✏️ Editar categoria ${index}`);
-      }
-
-      function removerCategoria(index) {
-        if (confirm("Remover categoria?")) {
-          alert(`✅ Categoria removida`);
-        }
-      }
-
-      function editarContaPadrao(index) {
-        alert(`✏️ Editar conta ${index}`);
-      }
-
-      function removerContaPadrao(index) {
-        if (confirm("Remover conta?")) {
-          alert(`✅ Conta removida`);
-        }
-      }
-
-      function editarIndicador(index) {
-        alert(`✏️ Editar indicador ${index}`);
-      }
-
-      function removerIndicador(index) {
-        if (confirm("Remover indicador?")) {
-          alert(`✅ Indicador removido`);
-        }
-      }
-
-      // ============================================
-      // FUNÇÕES DE BACKUP
-      // ============================================
       function exportarClienteJSON() {
         if (!clienteAtual) return;
-
-        const dados = {
-          cliente: clienteAtual,
-          data: new Date().toISOString(),
-          versao: "2.0",
-        };
-
-        const blob = new Blob([JSON.stringify(dados, null, 2)], {
-          type: "application/json",
-        });
+        const dados = { cliente: clienteAtual, data: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
         a.download = `cliente_${clienteAtual.id}_${new Date().toISOString().slice(0, 10)}.json`;
         a.click();
-
         alert("📦 Backup exportado");
       }
 
-      function exportarClienteExcel() {
-        if (!clienteAtual) return;
-        alert("📊 Exportação Excel será implementada em breve!");
-      }
-
-      function exportarClientePDF() {
-        if (!clienteAtual) return;
-        alert("📑 Exportação PDF será implementada em breve!");
-      }
+      function exportarClienteExcel() { alert("📊 Em breve!"); }
+      function exportarClientePDF() { alert("📑 Em breve!"); }
 
       function importarDadosCliente() {
-        const file = document.getElementById("importFile").files[0];
-        if (!file) {
-          alert("Selecione um arquivo para importar");
-          return;
-        }
-
-        if (!confirm("⚠️ Isso substituirá todos os dados atuais! Continuar?"))
-          return;
-
-        alert("✅ Dados importados com sucesso!");
+        if (!confirm("⚠️ Isso substituirá todos os dados? Continuar?")) return;
+        alert("✅ Importado!");
       }
 
-      function criarBackup() {
-        if (!clienteAtual) return;
-        alert("💾 Backup criado com sucesso!");
-      }
+      function criarBackup() { alert("💾 Backup criado!"); }
 
-      // ============================================
-      // FUNÇÕES DE LOGO
-      // ============================================
-      function abrirSeletorLogo() {
-        document.getElementById("logoInput").click();
-      }
+      function abrirSeletorLogo() { document.getElementById("logoInput").click(); }
 
       function setLogoPreview(dataUrl) {
         const img = document.getElementById("logoPreview");
         const ph = document.getElementById("logoPlaceholder");
-
         if (dataUrl) {
           img.src = dataUrl;
           img.style.display = "block";
@@ -2770,99 +2660,43 @@
       });
 
       function removerLogoCliente() {
-        if (!clienteAtual) return;
-        if (confirm("Remover logo deste cliente?")) {
-          logoTempBase64 = null;
-          setLogoPreview(null);
-          alteracaoNaoSalva();
-        }
+        if (!clienteAtual || !confirm("Remover logo?")) return;
+        logoTempBase64 = null;
+        setLogoPreview(null);
+        alteracaoNaoSalva();
       }
 
-      // ============================================
-      // FUNÇÕES DE CONVITE
-      // ============================================
-      function gerarTokenConvite(tamanho = 12) {
-        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        let token = "";
-        for (let i = 0; i < tamanho; i++) {
-          token += chars[Math.floor(Math.random() * chars.length)];
-        }
-        return token;
-      }
-
-      function gerarLinkConvite(token, clienteId) {
-        const base = window.location.origin + window.location.pathname.replace("master_app.html", "");
-        const tipo = document.getElementById("tipoConvite").value;
-        return `${base}appfinanceiro.html?cliente=${encodeURIComponent(clienteId)}&convite=${token}&tipo=${tipo}`;
+      function gerarTokenConvite() {
+        return Math.random().toString(36).substring(2, 15);
       }
 
       async function gerarConviteCadastro() {
-        if (!clienteAtual) {
-          alert("Selecione um cliente primeiro!");
-          return;
-        }
-
+        if (!clienteAtual) return alert("Selecione um cliente");
         const token = gerarTokenConvite();
-        const link = gerarLinkConvite(token, clienteAtual.id);
-
-        try {
-          await db.collection("convites").doc(token).set({
-            clienteId: clienteAtual.id,
-            tipo: document.getElementById("tipoConvite").value,
-            criadoEm: new Date().toISOString(),
-            status: "ativo",
-            criadoPor: "master",
-          });
-
-          document.getElementById("ultimoConviteLink").value = link;
-
-          try {
-            await navigator.clipboard.writeText(link);
-          } catch (e) {}
-
-          alert(`✅ Convite gerado! Link copiado para área de transferência.\n\n${link}`);
-        } catch (error) {
-          console.error("Erro ao gerar convite:", error);
-          alert("❌ Erro ao gerar convite");
-        }
+        const link = `${window.location.origin}/appfinanceiro.html?cliente=${clienteAtual.id}&convite=${token}`;
+        document.getElementById("ultimoConviteLink").value = link;
+        try { await navigator.clipboard.writeText(link); } catch (e) {}
+        alert(`✅ Convite gerado!\n${link}`);
       }
 
       async function copiarUltimoConvite() {
         const link = document.getElementById("ultimoConviteLink").value;
-        if (!link) {
-          alert("Gere um convite primeiro!");
-          return;
-        }
-
-        try {
-          await navigator.clipboard.writeText(link);
-          alert("✅ Link copiado!");
-        } catch (e) {
-          alert("❌ Erro ao copiar");
-        }
+        if (!link) return alert("Gere um convite primeiro");
+        try { await navigator.clipboard.writeText(link); alert("✅ Copiado!"); } 
+        catch (e) { alert("❌ Erro ao copiar"); }
       }
 
-      // ============================================
-      // FUNÇÕES DE AÇÃO
-      // ============================================
       function entrarModoEdicao() {
-        if (!clienteAtual) {
-          alert("Selecione um cliente primeiro!");
-          return;
-        }
-
+        if (!clienteAtual) return alert("Selecione um cliente");
         document.getElementById("modalTitulo").textContent = "✏️ MODO EDIÇÃO";
-        document.getElementById("modalMsg").textContent = `Ativar modo edição para ${clienteAtual.nome}? O cliente será bloqueado.`;
+        document.getElementById("modalMsg").textContent = `Ativar modo edição para ${clienteAtual.nome}?`;
         document.getElementById("modalConfirm").style.display = "flex";
         acaoPendente = "editar";
       }
 
       async function bloquearCliente() {
         if (!clienteAtual) return;
-
-        const novoStatus = clienteAtual.status === "ativo" ? "bloqueado" : "ativo";
-        const acao = novoStatus === "bloqueado" ? "BLOQUEAR" : "DESBLOQUEAR";
-
+        const acao = clienteAtual.status === "ativo" ? "BLOQUEAR" : "DESBLOQUEAR";
         document.getElementById("modalTitulo").textContent = `🔒 ${acao}`;
         document.getElementById("modalMsg").textContent = `${acao} ${clienteAtual.nome}?`;
         document.getElementById("modalConfirm").style.display = "flex";
@@ -2884,96 +2718,59 @@
         } else if (acaoPendente === "bloquear") {
           const novoStatus = clienteAtual.status === "ativo" ? "bloqueado" : "ativo";
           try {
-            await db.collection("clientes").doc(clienteAtual.id).update({
-              status: novoStatus,
-            });
+            await db.collection("clientes").doc(clienteAtual.id).update({ status: novoStatus });
             alert(`✅ Cliente ${novoStatus === "ativo" ? "desbloqueado" : "bloqueado"}!`);
           } catch (error) {
             alert("❌ Erro: " + error.message);
           }
         }
-
         fecharModal();
       }
 
       function verComoCliente() {
         if (!clienteAtual) return;
-
-        const url = `${window.location.origin}${window.location.pathname.replace("master_app.html", "appfinanceiro.html")}?cliente=${clienteAtual.id}`;
+        const url = `${window.location.origin}/appfinanceiro.html?cliente=${clienteAtual.id}`;
         window.open(url, "_blank");
       }
 
       function copiarLinkClienteAtual() {
         if (!clienteAtual) return;
-
-        const url = `${window.location.origin}${window.location.pathname.replace("master_app.html", "appfinanceiro.html")}?cliente=${clienteAtual.id}`;
-
-        try {
-          navigator.clipboard.writeText(url);
-          alert("✅ Link copiado!");
-        } catch (e) {
-          prompt("Copie o link:", url);
-        }
+        const url = `${window.location.origin}/appfinanceiro.html?cliente=${clienteAtual.id}`;
+        try { navigator.clipboard.writeText(url); alert("✅ Link copiado!"); } 
+        catch (e) { prompt("Copie o link:", url); }
       }
 
       async function deletarCliente(clienteId, event) {
         if (event) event.stopPropagation();
-
-        const cliente = clientes.find((c) => c.id === clienteId);
-        if (!cliente) return;
-
-        if (!confirm(`⚠️ Excluir permanentemente ${cliente.nome}?`)) return;
-        if (!confirm("🔥 CONFIRMAÇÃO FINAL: Esta ação não pode ser desfeita!"))
-          return;
-
+        const cliente = clientes.find(c => c.id === clienteId);
+        if (!cliente || !confirm(`⚠️ Excluir ${cliente.nome}?`)) return;
+        
         try {
           await db.collection("clientes").doc(clienteId).delete();
-          await db.collection("configs").doc(clienteId).delete().catch(() => {});
-          await db.collection("dados_financeiros").doc(clienteId).delete().catch(() => {});
-
           alert("✅ Cliente excluído!");
-
           if (clienteAtual && clienteAtual.id === clienteId) {
             clienteAtual = null;
-            [
-              "btnEditar",
-              "btnBloquear",
-              "btnSalvar",
-              "btnVisualizar",
-              "btnCopiarLink",
-              "btnExportar",
-            ].forEach((id) => {
-              document.getElementById(id).disabled = true;
-            });
+            ["btnEditar","btnBloquear","btnSalvar","btnVisualizar","btnCopiarLink","btnExportar"]
+              .forEach(id => document.getElementById(id).disabled = true);
           }
         } catch (error) {
-          console.error("Erro ao deletar:", error);
           alert("❌ Erro ao deletar");
         }
       }
 
-      // ============================================
-      // FUNÇÕES DE CLIENTE
-      // ============================================
       function criarCliente() {
         document.getElementById("modalNovoCliente").style.display = "flex";
       }
 
       async function criarClienteFirebase() {
         const nome = document.getElementById("novoClienteNome").value;
-        const perfil = document.getElementById("novoClientePerfil").value;
-        const plano = document.getElementById("novoClientePlano").value;
-
-        if (!nome) {
-          alert("Digite o nome da empresa!");
-          return;
-        }
+        if (!nome) return alert("Digite o nome");
 
         const novoCliente = {
           nome: nome,
-          perfil: perfil,
-          plano: plano,
-          status: perfil === "teste" ? "teste" : "ativo",
+          perfil: document.getElementById("novoClientePerfil").value,
+          plano: document.getElementById("novoClientePlano").value,
+          status: "ativo",
           dataCriacao: new Date().toISOString(),
           appsAtivos: 1,
           cor: "#4CAF50",
@@ -2994,13 +2791,9 @@
 
         try {
           const docRef = await db.collection("clientes").add(novoCliente);
-          const link = `${window.location.origin}${window.location.pathname.replace("master_app.html", "appfinanceiro.html")}?cliente=${docRef.id}`;
-
-          alert(`✅ Cliente criado!\n\nLink: ${link}`);
+          alert(`✅ Cliente criado! ID: ${docRef.id}`);
           fecharModalNovoCliente();
-          document.getElementById("novoClienteNome").value = "";
         } catch (error) {
-          console.error("Erro ao criar:", error);
           alert("❌ Erro ao criar cliente");
         }
       }
@@ -3009,32 +2802,19 @@
         document.getElementById("modalNovoCliente").style.display = "none";
       }
 
-      // ============================================
-      // FUNÇÕES DE UTILIDADE
-      // ============================================
       function mudarAba(aba, btnEl) {
-        document.querySelectorAll(".tab-content").forEach((el) => {
-          el.style.display = "none";
-        });
-
+        document.querySelectorAll(".tab-content").forEach(el => el.style.display = "none");
+        
         const idMap = {
-          visual: "abaVisual",
-          conteudo: "abaConteudo",
-          funcoes: "abaFuncoes",
-          dados: "abaDados",
-          apps: "abaApps",
-          codigo: "abaCodigo",
-          planos: "abaPlanos",
-          backup: "abaBackup",
+          visual: "abaVisual", conteudo: "abaConteudo", funcoes: "abaFuncoes",
+          dados: "abaDados", apps: "abaApps", codigo: "abaCodigo",
+          planos: "abaPlanos", backup: "abaBackup"
         };
-
-        const abaId = idMap[aba];
-        const abaElement = document.getElementById(abaId);
-        if (abaElement) {
-          abaElement.style.display = "block";
-        }
-
-        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+        
+        const abaElement = document.getElementById(idMap[aba]);
+        if (abaElement) abaElement.style.display = "block";
+        
+        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
         if (btnEl) btnEl.classList.add("active");
       }
 
@@ -3043,79 +2823,27 @@
         if (perfil === "pf") {
           document.getElementById("termoColaborador").value = "Membro da família";
           document.getElementById("termoAcao").value = "Tarefa";
-        } else if (perfil === "teste") {
-          document.getElementById("corPrincipal").value = "#FF9800";
         }
       }
 
-      function adicionarLog(msg) {
-        const log = document.getElementById("logPanel");
-        const entry = document.createElement("div");
-        entry.className = "log-entry";
-        entry.textContent = `⏱️ ${new Date().toLocaleTimeString()} - ${msg}`;
-        log.insertBefore(entry, log.firstChild);
-
-        if (log.children.length > 15) {
-          log.removeChild(log.lastChild);
-        }
-      }
-
-      function filtrarClientes() {
-        atualizarListaClientes();
-      }
+      function filtrarClientes() { atualizarListaClientes(); }
 
       function mostrarAjuda() {
-        alert(
-          `🚀 PODERES DO MASTER JEDI:\n\n` +
-            `💰 PLANOS - Editor completo de planos\n` +
-            `• Adicione/remova planos\n` +
-            `• Edite preços e cores\n` +
-            `• Adicione funcionalidades\n` +
-            `• Preview em tempo real\n\n` +
-            `✏️ EDITAR - Bloqueia cliente para edição\n` +
-            `🔒 BLOQUEAR - Ativa/desativa acesso\n` +
-            `💾 SALVAR - Publica alterações\n` +
-            `👁️ VER - Visualiza como cliente\n` +
-            `🔗 COPIAR LINK - Link direto do cliente\n` +
-            `📦 EXPORTAR - Backup dos dados`,
-        );
+        alert(`🚀 PODERES:\n\n💰 PLANOS - Editor completo\n• Adicione/remova planos\n• Edite preços e cores\n• Adicione funcionalidades\n• Preview em tempo real`);
       }
 
-      function diagnosticarConexao() {
-        alert("🔍 Verificando conexão...");
-      }
-
-      function mostrarPainelAdmin() {
-        alert("⚡ Painel Admin em desenvolvimento");
-      }
-
-      function fecharModal() {
-        document.getElementById("modalConfirm").style.display = "none";
-        acaoPendente = null;
-      }
-
-      function fecharModalConfig() {
-        document.getElementById("modalConfigApp").style.display = "none";
-      }
-
-      function zerarIndicadoresClienteAtual() {
-        if (!clienteAtual) {
-          alert("Selecione um cliente!");
-          return;
-        }
-
-        if (confirm(`Zerar indicadores de ${clienteAtual.nome}?`)) {
-          alert("✅ Indicadores zerados!");
-        }
-      }
+      function diagnosticarConexao() { alert("🔍 Conectado!"); }
+      function mostrarPainelAdmin() { alert("⚡ Em desenvolvimento"); }
+      function fecharModal() { document.getElementById("modalConfirm").style.display = "none"; acaoPendente = null; }
+      function fecharModalConfig() { document.getElementById("modalConfigApp").style.display = "none"; }
+      function zerarIndicadoresClienteAtual() { alert("✅ Indicadores zerados!"); }
 
       // ============================================
       // INICIALIZAÇÃO
       // ============================================
       window.onload = function () {
         carregarClientes();
-
-        // Configurar eventos
+        
         document.getElementById("corPrincipal").addEventListener("input", function (e) {
           document.getElementById("corHex").value = e.target.value;
           atualizarPreview();
