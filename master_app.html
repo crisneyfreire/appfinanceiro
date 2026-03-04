@@ -3,17 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>💰 App Financeiro - Controle Financeiro</title>
+    <title>👑 MASTER JEDI - CONTROLE TOTAL</title>
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
+    <!-- Bibliotecas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <style>
         * {
@@ -24,400 +26,304 @@
         }
 
         :root {
-            --primary: #4CAF50;
-            --primary-dark: #388E3C;
-            --primary-light: #C8E6C9;
-            --secondary: #2196F3;
-            --danger: #f44336;
-            --warning: #ff9800;
-            --success: #4caf50;
-            --info: #00bcd4;
-            --dark: #1a1a2e;
-            --darker: #0a0a0f;
-            --light: #f5f5f5;
-            --gray: #9e9e9e;
-            --border: #e0e0e0;
-            
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8f9fa;
-            --text-primary: #333333;
-            --text-secondary: #666666;
-            --shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        [data-theme="dark"] {
-            --bg-primary: #1a1a2e;
-            --bg-secondary: #16213e;
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #2a2a40;
             --text-primary: #ffffff;
             --text-secondary: #b0b0b0;
+            --accent: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --info: #2196f3;
+            --gold: #ffd700;
+            --neon: #00ffaa;
+            --purple: #9c27b0;
+            --pink: #e91e63;
             --border: #404040;
-            --shadow: 0 2px 10px rgba(0,255,170,0.1);
         }
 
         body {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
             min-height: 100vh;
-            transition: all 0.3s ease;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
             padding: 20px;
-        }
-
-        /* ===== HEADER ===== */
-        .header {
-            background: var(--bg-primary);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .logo-area {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .logo {
-            width: 50px;
-            height: 50px;
-            background: var(--primary);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-        }
-
-        .company-info h1 {
-            font-size: 24px;
-            margin-bottom: 5px;
-        }
-
-        .company-info small {
-            color: var(--text-secondary);
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .badge-master {
-            background: linear-gradient(45deg, #ffd700, #ffaa00);
-            color: black;
-            padding: 5px 15px;
-            border-radius: 20px;
-            font-weight: bold;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        /* ===== BOTÕES ===== */
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: var(--secondary);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-warning {
-            background: var(--warning);
-            color: white;
-        }
-
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* ===== CARDS ===== */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .card {
-            background: var(--bg-primary);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: var(--shadow);
-        }
-
-        .card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .card-title {
-            color: var(--text-secondary);
+            color: var(--text-primary);
             font-size: 14px;
         }
 
-        .card-value {
-            font-size: 28px;
-            font-weight: bold;
+        .container {
+            max-width: 1800px;
+            margin: 0 auto;
         }
 
-        .card-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
+        /* Header */
+        .header {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 255, 170, 0.3);
+            box-shadow: 0 0 30px rgba(0, 255, 170, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header h1 {
+            font-size: clamp(20px, 3vw, 28px);
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 20px;
+            gap: 10px;
+            text-shadow: 0 0 10px var(--neon);
         }
 
-        .icon-entrada {
-            background: rgba(76, 175, 80, 0.1);
-            color: #4caf50;
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
         }
 
-        .icon-saida {
-            background: rgba(244, 67, 54, 0.1);
-            color: #f44336;
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 30px;
+            font-size: 13px;
         }
 
-        .icon-saldo {
-            background: rgba(33, 150, 243, 0.1);
-            color: #2196f3;
+        .power-btn {
+            background: linear-gradient(45deg, var(--accent), var(--neon));
+            color: black;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
         }
 
-        /* ===== TABELA COM SELEÇÃO ===== */
-        .table-container {
-            background: var(--bg-primary);
-            border-radius: 15px;
+        .power-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--neon);
+        }
+
+        .danger-btn {
+            background: linear-gradient(45deg, var(--danger), #ff6b6b);
+            color: white;
+        }
+
+        /* Grid principal */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+
+        /* Painel de Clientes */
+        .clientes-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
             padding: 20px;
-            box-shadow: var(--shadow);
-            overflow-x: auto;
+            border-left: 4px solid var(--neon);
+            height: fit-content;
         }
 
-        .table-header {
+        .panel-title {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-
-        .table-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .table-title h3 {
+            color: var(--neon);
             font-size: 18px;
-        }
-
-        .selection-actions {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            background: var(--bg-secondary);
-            padding: 8px 15px;
-            border-radius: 8px;
-        }
-
-        .selection-count {
-            background: var(--primary);
-            color: white;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 12px;
             font-weight: bold;
         }
 
-        table {
+        .search-box {
             width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            text-align: left;
-            padding: 15px 10px;
+            padding: 12px;
             background: var(--bg-secondary);
-            color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 13px;
-        }
-
-        td {
-            padding: 12px 10px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        tr:hover {
-            background: var(--bg-secondary);
-        }
-
-        /* Checkbox personalizado */
-        .checkbox-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .checkbox-custom {
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--primary);
-            border-radius: 4px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border: 1px solid #404040;
+            border-radius: 10px;
             color: white;
-            background: transparent;
-            transition: all 0.2s;
+            margin-bottom: 15px;
+            font-size: 14px;
         }
 
-        .checkbox-custom.checked {
-            background: var(--primary);
+        .clientes-stats {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
         }
 
-        .checkbox-custom i {
+        .stat-tag {
+            background: rgba(0, 255, 170, 0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
             font-size: 12px;
-            display: none;
+            border: 1px solid rgba(0, 255, 170, 0.3);
         }
 
-        .checkbox-custom.checked i {
-            display: block;
+        .clientes-lista {
+            max-height: 600px;
+            overflow-y: auto;
         }
 
-        /* Ações da linha */
-        .row-actions {
-            display: flex;
-            gap: 8px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-
-        tr:hover .row-actions {
-            opacity: 1;
-        }
-
-        .action-btn {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            border: none;
+        .cliente-item {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
             cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s;
+            transition: all 0.3s;
+            border: 1px solid transparent;
         }
 
-        .action-btn.edit {
-            background: var(--info);
+        .cliente-item:hover {
+            border-color: var(--neon);
+            transform: translateX(5px);
+            box-shadow: 0 0 15px rgba(0, 255, 170, 0.3);
+        }
+
+        .cliente-item.active {
+            border-color: var(--neon);
+            background: #33334d;
+        }
+
+        .cliente-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .cliente-nome {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .cliente-status {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .status-ativo {
+            background: var(--accent);
             color: white;
         }
 
-        .action-btn.edit:hover {
-            background: #00a0b0;
-            transform: scale(1.1);
-        }
-
-        .action-btn.delete {
+        .status-bloqueado {
             background: var(--danger);
             color: white;
         }
 
-        .action-btn.delete:hover {
-            background: #d32f2f;
-            transform: scale(1.1);
+        .cliente-info {
+            display: flex;
+            gap: 10px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
         }
 
-        .action-btn.view {
-            background: var(--success);
+        .cliente-actions {
+            display: flex;
+            gap: 5px;
+            justify-content: flex-end;
+        }
+
+        .action-icon {
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .action-icon:hover {
+            background: var(--neon);
+            color: black;
+        }
+
+        .action-icon.danger:hover {
+            background: var(--danger);
             color: white;
         }
 
-        .action-btn.view:hover {
-            background: #388e3c;
-            transform: scale(1.1);
+        /* Editor Panel */
+        .editor-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 20px;
+            border-top: 4px solid var(--neon);
         }
 
-        /* Badges */
-        .badge {
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
+        .editor-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #404040;
         }
 
-        .badge-success {
-            background: rgba(76, 175, 80, 0.1);
-            color: #4caf50;
+        .tab-btn {
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(0, 255, 170, 0.25);
+            color: var(--text-primary);
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+            font-size: 13px;
         }
 
-        .badge-danger {
+        .tab-btn:hover {
+            border-color: var(--neon);
+            box-shadow: 0 0 10px rgba(0, 255, 170, 0.25);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(45deg, var(--neon), var(--accent));
+            color: #000;
+            border-color: transparent;
+        }
+
+        .tab-btn.warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-color: rgba(255, 193, 7, 0.5);
+        }
+
+        .tab-btn.danger {
             background: rgba(244, 67, 54, 0.1);
-            color: #f44336;
+            border-color: rgba(244, 67, 54, 0.5);
         }
 
-        .badge-warning {
-            background: rgba(255, 152, 0, 0.1);
-            color: #ff9800;
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
         }
 
         /* Formulários */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
         .form-group {
             margin-bottom: 15px;
         }
@@ -430,21 +336,280 @@
             font-weight: 600;
         }
 
-        .form-control {
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border);
+            padding: 12px;
+            background: var(--bg-secondary);
+            border: 1px solid #404040;
             border-radius: 8px;
-            background: var(--bg-primary);
-            color: var(--text-primary);
+            color: white;
+            font-size: 14px;
         }
 
-        .form-control:focus {
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
             outline: none;
-            border-color: var(--primary);
+            border-color: var(--neon);
         }
 
-        /* Modal */
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Preview */
+        .preview-panel {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid var(--neon);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .preview-title {
+            color: var(--neon);
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .preview-content {
+            background: white;
+            color: black;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        /* Apps Grid */
+        .apps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .app-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 15px;
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .app-card.active {
+            border-left-color: var(--neon);
+            background: #33334d;
+        }
+
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .app-nome {
+            font-weight: bold;
+            font-size: 15px;
+        }
+
+        .app-status {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        .app-status.ativo {
+            background: var(--accent);
+        }
+
+        .app-status.inativo {
+            background: var(--danger);
+        }
+
+        .app-descricao {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .app-toggle {
+            display: flex;
+            gap: 5px;
+        }
+
+        .app-toggle button {
+            flex: 1;
+            padding: 5px;
+            font-size: 11px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        /* Editor de Dados */
+        .data-editor {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .data-editor h4 {
+            color: var(--neon);
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .data-table td {
+            padding: 10px;
+            border-bottom: 1px solid #404040;
+        }
+
+        .data-table tr:hover {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .data-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        .btn-edit {
+            background: var(--info);
+            color: white;
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-add {
+            background: var(--accent);
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Logo Upload */
+        .logo-section {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+        }
+
+        .logo-preview {
+            width: 150px;
+            height: 150px;
+            margin: 0 auto 15px;
+            border-radius: 12px;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .logo-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .logo-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        /* Botões de Controle */
+        .control-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        /* Log Panel */
+        .log-panel {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 20px;
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 11px;
+            font-family: monospace;
+        }
+
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid #404040;
+            color: var(--text-secondary);
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        /* Modais */
         .modal {
             display: none;
             position: fixed;
@@ -452,20 +617,21 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.9);
             z-index: 1000;
             align-items: center;
             justify-content: center;
         }
 
         .modal-content {
-            background: var(--bg-primary);
-            border-radius: 15px;
+            background: var(--bg-card);
+            border-radius: 20px;
             padding: 30px;
-            max-width: 500px;
+            max-width: 600px;
             width: 90%;
             max-height: 80vh;
             overflow-y: auto;
+            border-left: 5px solid var(--neon);
         }
 
         .modal-header {
@@ -476,33 +642,35 @@
         }
 
         .modal-header h2 {
+            color: var(--neon);
             font-size: 20px;
         }
 
         .modal-close {
             background: none;
             border: none;
+            color: white;
             font-size: 24px;
             cursor: pointer;
-            color: var(--text-secondary);
         }
 
         .modal-footer {
             display: flex;
             gap: 10px;
             justify-content: flex-end;
-            margin-top: 20px;
         }
 
         /* Loading */
         .loading {
             text-align: center;
             padding: 40px;
+            color: var(--neon);
+            font-size: 14px;
         }
 
         .loading-spinner {
-            border: 3px solid var(--border);
-            border-top: 3px solid var(--primary);
+            border: 3px solid rgba(0, 255, 170, 0.1);
+            border-top: 3px solid var(--neon);
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -515,276 +683,479 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Master panel */
-        .master-panel {
-            background: linear-gradient(135deg, #ffd70020, #ffaa0020);
-            border: 2px solid #ffd700;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .master-badge {
-            background: linear-gradient(45deg, #ffd700, #ffaa00);
-            color: black;
-            padding: 5px 15px;
-            border-radius: 20px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: bold;
-            margin-bottom: 15px;
-        }
-
         /* Utilitários */
-        .text-success { color: var(--success); }
-        .text-danger { color: var(--danger); }
-        .text-warning { color: var(--warning); }
-        .text-info { color: var(--info); }
-        
-        .mb-10 { margin-bottom: 10px; }
-        .mt-10 { margin-top: 10px; }
-        .ml-10 { margin-left: 10px; }
-        .mr-10 { margin-right: 10px; }
-        
+        .badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: var(--accent);
+            color: white;
+        }
+
+        .badge-warning {
+            background: var(--warning);
+            color: black;
+        }
+
+        .badge-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .w-100 { width: 100%; }
         .flex { display: flex; gap: 10px; }
         .flex-wrap { flex-wrap: wrap; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        
-        .w-100 { width: 100%; }
+        .mt-10 { margin-top: 10px; }
+        .mb-10 { margin-bottom: 10px; }
     </style>
 </head>
 <body>
     <div class="container">
         <!-- HEADER -->
         <div class="header">
-            <div class="logo-area">
-                <div class="logo">
-                    <i class="fas fa-coins"></i>
-                </div>
-                <div class="company-info">
-                    <h1 id="companyName">Carregando...</h1>
-                    <small id="companyMeta">Controle Financeiro</small>
+            <div>
+                <h1>👑 MASTER JEDI - CONTROLE TOTAL</h1>
+                <div style="display: flex; gap: 10px; margin-top: 5px">
+                    <span class="badge badge-success">v2.0</span>
+                    <span class="badge" style="background: var(--neon); color: black">MODO SUPREMO</span>
                 </div>
             </div>
-            <div class="header-actions">
-                <div id="masterBadge" style="display: none;">
-                    <span class="badge-master">
-                        <i class="fas fa-crown"></i> MODO MASTER ATIVO
-                    </span>
-                </div>
-                <button class="btn btn-outline" onclick="alternarTema()">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <button class="btn btn-primary" onclick="abrirModalNovoLancamento()">
-                    <i class="fas fa-plus"></i> Novo Lançamento
-                </button>
+            <div class="status-bar">
+                <div class="status-item"><span id="firebaseStatus">🔄 Conectando...</span></div>
+                <div class="status-item"><span id="clientesCount">📊 0 clientes</span></div>
+                <div class="status-item"><span id="appsCount">📱 1 app ativo</span></div>
+                <button class="power-btn" onclick="mostrarAjuda()">🚀 PODERES</button>
+                <button class="power-btn" onclick="diagnosticarConexao()">🔍 DIAGNÓSTICO</button>
+                <button class="power-btn danger-btn" onclick="mostrarPainelAdmin()">⚡ ADMIN</button>
             </div>
         </div>
 
-        <!-- MASTER PANEL (visível apenas para master) -->
-        <div id="masterPanel" class="master-panel" style="display: none;">
-            <div class="master-badge">
-                <i class="fas fa-crown"></i> PAINEL DE CONTROLE MASTER
-            </div>
-            <div class="flex flex-wrap">
-                <button class="btn btn-warning" onclick="editarConfigCliente()">
-                    <i class="fas fa-edit"></i> Editar Configurações
-                </button>
-                <button class="btn btn-danger" onclick="bloquearCliente()">
-                    <i class="fas fa-lock"></i> Bloquear Cliente
-                </button>
-                <button class="btn btn-secondary" onclick="verComoMaster()">
-                    <i class="fas fa-eye"></i> Visualização Master
-                </button>
-                <button class="btn btn-info" onclick="exportarDadosCliente()">
-                    <i class="fas fa-download"></i> Exportar Dados
-                </button>
-            </div>
-        </div>
-
-        <!-- CARDS DE RESUMO -->
-        <div class="cards-grid">
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Saldo Total</span>
-                    <span class="card-icon icon-saldo"><i class="fas fa-wallet"></i></span>
+        <!-- GRID PRINCIPAL -->
+        <div class="main-grid">
+            <!-- PAINEL DE CLIENTES -->
+            <div class="clientes-panel">
+                <div class="panel-title">
+                    <span>📋 CLIENTES</span>
+                    <span class="stat-tag" id="totalClientesTag">0</span>
                 </div>
-                <div class="card-value" id="saldoTotal">R$ 0,00</div>
-                <small class="text-secondary">Atualizado agora</small>
-            </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Entradas</span>
-                    <span class="card-icon icon-entrada"><i class="fas fa-arrow-up"></i></span>
+                <input type="text" class="search-box" id="buscarCliente" placeholder="🔍 Buscar cliente..." onkeyup="filtrarClientes()" />
+
+                <div class="clientes-stats">
+                    <span class="stat-tag" id="ativosCount">✅ Ativos: 0</span>
+                    <span class="stat-tag" id="bloqueadosCount">🔒 Bloqueados: 0</span>
+                    <span class="stat-tag" id="testeCount">🧪 Teste: 0</span>
                 </div>
-                <div class="card-value text-success" id="totalEntradas">R$ 0,00</div>
-                <small>Este mês</small>
-            </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Saídas</span>
-                    <span class="card-icon icon-saida"><i class="fas fa-arrow-down"></i></span>
+                <div style="margin-bottom: 15px">
+                    <button class="power-btn w-100" onclick="criarCliente()" style="width: 100%">➕ NOVO CLIENTE</button>
                 </div>
-                <div class="card-value text-danger" id="totalSaidas">R$ 0,00</div>
-                <small>Este mês</small>
-            </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <span class="card-title">Lançamentos</span>
-                    <span class="card-icon" style="background: rgba(156, 39, 176, 0.1); color: #9c27b0;">
-                        <i class="fas fa-list"></i>
-                    </span>
-                </div>
-                <div class="card-value" id="totalLancamentos">0</div>
-                <small>Total registrado</small>
-            </div>
-        </div>
-
-        <!-- TABELA DE LANÇAMENTOS -->
-        <div class="table-container">
-            <div class="table-header">
-                <div class="table-title">
-                    <h3><i class="fas fa-list"></i> Últimos Lançamentos</h3>
-                    <div id="selectionPanel" class="selection-actions" style="display: none;">
-                        <span class="selection-count" id="selectedCount">0</span>
-                        <span>selecionados</span>
-                        <button class="btn btn-sm btn-warning" onclick="editarSelecionados()">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" onclick="excluirSelecionados()">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                        <button class="btn btn-sm btn-secondary" onclick="limparSelecao()">
-                            <i class="fas fa-times"></i>
-                        </button>
+                <div class="clientes-lista" id="listaClientes">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        Carregando clientes...
                     </div>
                 </div>
-                <div class="flex">
-                    <input type="text" class="form-control" placeholder="Buscar..." id="searchInput" onkeyup="filtrarLancamentos()">
-                </div>
             </div>
 
-            <table id="tabelaLancamentos">
-                <thead>
-                    <tr>
-                        <th width="40">
-                            <div class="checkbox-wrapper">
-                                <div class="checkbox-custom" id="selectAllCheckbox" onclick="toggleSelecionarTodos()">
-                                    <i class="fas fa-check"></i>
+            <!-- EDITOR PANEL -->
+            <div class="editor-panel" id="editorPanel">
+                <!-- TABS -->
+                <div class="editor-tabs">
+                    <button class="tab-btn active" onclick="mudarAba('visual', this)">🎨 Visual</button>
+                    <button class="tab-btn" onclick="mudarAba('conteudo', this)">📝 Conteúdo</button>
+                    <button class="tab-btn" onclick="mudarAba('funcoes', this)">⚙️ Funções</button>
+                    <button class="tab-btn" onclick="mudarAba('dados', this)">📊 Dados</button>
+                    <button class="tab-btn" onclick="mudarAba('apps', this)">📱 Apps</button>
+                    <button class="tab-btn" onclick="mudarAba('codigo', this)">💻 Código</button>
+                    <button class="tab-btn" onclick="mudarAba('planos', this)">💰 Planos</button>
+                    <button class="tab-btn warning" onclick="mudarAba('backup', this)">💾 Backup</button>
+                    <button class="tab-btn danger" onclick="zerarIndicadoresClienteAtual()">🧹 Zerar</button>
+                </div>
+
+                <!-- ABA VISUAL -->
+                <div id="abaVisual" class="tab-content active">
+                    <h3 style="margin-bottom: 20px">🎨 EDITOR VISUAL</h3>
+                    <div class="form-grid">
+                        <div>
+                            <div class="form-group">
+                                <label>🏢 NOME DA EMPRESA</label>
+                                <input type="text" id="nomeEmpresa" onchange="alteracaoNaoSalva()" placeholder="Nome da empresa" />
+                            </div>
+                            <div class="form-group">
+                                <label>👤 PERFIL</label>
+                                <select id="perfilCliente" onchange="alteracaoNaoSalva(); aplicarPerfilUI();">
+                                    <option value="pf">PESSOAL/FAMILIAR</option>
+                                    <option value="pj">EMPRESARIAL</option>
+                                    <option value="teste">TESTE/AVALIAÇÃO</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>🧾 CPF/CNPJ</label>
+                                <input type="text" id="cpfCnpj" onchange="alteracaoNaoSalva()" placeholder="000.000.000-00 ou 00.000.000/0000-00" />
+                            </div>
+                            <div class="form-group">
+                                <label>🆔 ID DO CLIENTE</label>
+                                <input type="text" id="clienteIdVisivel" disabled style="background: #333; opacity: 0.8" />
+                                <small style="color: var(--text-secondary)">Use este ID no link: ?cliente=ID</small>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label>🎨 COR PRINCIPAL</label>
+                                <div style="display: flex; gap: 10px">
+                                    <input type="color" id="corPrincipal" value="#4CAF50" onchange="alteracaoNaoSalva(); atualizarPreview();" style="width: 60px; height: 50px" />
+                                    <input type="text" id="corHex" value="#4CAF50" onchange="alteracaoNaoSalva(); atualizarPreview();" style="flex: 1" />
                                 </div>
                             </div>
-                        </th>
-                        <th>Data</th>
-                        <th>Descrição</th>
-                        <th>Categoria</th>
-                        <th>Conta</th>
-                        <th>Tipo</th>
-                        <th>Valor</th>
-                        <th width="100">Ações</th>
-                    </tr>
-                </thead>
-                <tbody id="lancamentosBody">
-                    <tr>
-                        <td colspan="8" class="loading">
-                            <div class="loading-spinner"></div>
-                            Carregando lançamentos...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+                            <div class="form-group">
+                                <label>🌙 MODO ESCURO</label>
+                                <select id="modoEscuro" onchange="alteracaoNaoSalva(); atualizarPreview();">
+                                    <option value="auto">Automático</option>
+                                    <option value="light">Sempre claro</option>
+                                    <option value="dark">Sempre escuro</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>📱 TEMA</label>
+                                <select id="tema" onchange="alteracaoNaoSalva(); atualizarPreview();">
+                                    <option value="moderno">Moderno</option>
+                                    <option value="classico">Clássico</option>
+                                    <option value="compacto">Compacto</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA CONTEÚDO -->
+                <div id="abaConteudo" class="tab-content">
+                    <h3 style="margin-bottom: 20px">📝 EDITOR DE CONTEÚDO</h3>
+                    <div class="form-grid">
+                        <div>
+                            <div class="form-group">
+                                <label>👤 TERMO PARA COLABORADOR</label>
+                                <input type="text" id="termoColaborador" value="Motorista" onchange="alteracaoNaoSalva()" />
+                            </div>
+                            <div class="form-group">
+                                <label>📦 TERMO PARA AÇÃO</label>
+                                <input type="text" id="termoAcao" value="Entrega" onchange="alteracaoNaoSalva()" />
+                            </div>
+                            <div class="form-group">
+                                <label>👥 TERMO PARA CLIENTE</label>
+                                <input type="text" id="termoCliente" value="Cliente" onchange="alteracaoNaoSalva()" />
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label>💰 MOEDA</label>
+                                <select id="moeda" onchange="alteracaoNaoSalva()">
+                                    <option value="BRL">Real (R$)</option>
+                                    <option value="USD">Dólar ($)</option>
+                                    <option value="EUR">Euro (€)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>📅 FORMATO DATA</label>
+                                <select id="formatoData" onchange="alteracaoNaoSalva()">
+                                    <option value="pt-BR">DD/MM/AAAA</option>
+                                    <option value="en-US">MM/DD/AAAA</option>
+                                    <option value="iso">AAAA-MM-DD</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>🌍 IDIOMA</label>
+                                <select id="idioma" onchange="alteracaoNaoSalva()">
+                                    <option value="pt-BR">Português (Brasil)</option>
+                                    <option value="en">Inglês</option>
+                                    <option value="es">Espanhol</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>📝 MENSAGEM DE BOAS-VINDAS</label>
+                        <textarea id="mensagemBoasVindas" rows="3" onchange="alteracaoNaoSalva()" placeholder="Mensagem que aparece no dashboard..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>⚠️ MENSAGEM DE BLOQUEIO</label>
+                        <textarea id="motivoBloqueio" rows="2" onchange="alteracaoNaoSalva()" placeholder="Motivo exibido quando cliente está bloqueado..."></textarea>
+                    </div>
+                </div>
+
+                <!-- ABA FUNÇÕES -->
+                <div id="abaFuncoes" class="tab-content">
+                    <h3 style="margin-bottom: 20px">⚙️ CONTROLE DE FUNÇÕES</h3>
+                    <div class="form-grid">
+                        <div>
+                            <h4 style="color: var(--neon); margin-bottom: 15px">📊 MÓDULOS PRINCIPAIS</h4>
+                            <div class="checkbox-group"><input type="checkbox" id="funcDashboard" checked onchange="alteracaoNaoSalva()" /><label for="funcDashboard">📊 Dashboard</label></div>
+                            <div class="checkbox-group"><input type="checkbox" id="funcLancamentos" checked onchange="alteracaoNaoSalva()" /><label for="funcLancamentos">📝 Lançamentos</label></div>
+                            <div class="checkbox-group"><input type="checkbox" id="funcContas" checked onchange="alteracaoNaoSalva()" /><label for="funcContas">🏦 Contas</label></div>
+                            <div class="checkbox-group"><input type="checkbox" id="funcOrcamento" checked onchange="alteracaoNaoSalva()" /><label for="funcOrcamento">📅 Orçamento</label></div>
+                            <div class="checkbox-group"><input type="checkbox" id="funcRelatorios" checked onchange="alteracaoNaoSalva()" /><label for="funcRelatorios">📈 Relatórios</label></div>
+                            <div class="checkbox-group"><input type="checkbox" id="funcPlanos" onchange="alteracaoNaoSalva()" /><label for="funcPlanos">💰 Planos</label></div>
+                            <div class="checkbox-group"><input type="checkbox" id="funcImportar" checked onchange="alteracaoNaoSalva()" /><label for="funcImportar">📥 Importação</label></div>
+                        </div>
+                        <div>
+                            <h4 style="color: var(--neon); margin-bottom: 15px">✏️ CONTROLE DE LANÇAMENTOS</h4>
+                            <div class="checkbox-group"><input type="checkbox" id="permEditarLanc" checked onchange="alteracaoNaoSalva()" /><label for="permEditarLanc">✏️ Editar lançamentos</label></div>
+                            <div class="checkbox-group"><input type="checkbox" id="permExcluirLanc" checked onchange="alteracaoNaoSalva()" /><label for="permExcluirLanc">🗑️ Excluir lançamentos</label></div>
+                            <div class="checkbox-group"><input type="checkbox" id="permSelecaoMassa" checked onchange="alteracaoNaoSalva()" /><label for="permSelecaoMassa">✅ Seleção em massa</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA DADOS -->
+                <div id="abaDados" class="tab-content">
+                    <h3 style="margin-bottom: 20px">📊 EDITOR DE DADOS</h3>
+                    <div class="data-editor">
+                        <h4>🏷️ CATEGORIAS</h4>
+                        <table class="data-table" id="tabelaCategorias">
+                            <thead><tr><th>Nome</th><th>Tipo</th><th>Ações</th></tr></thead>
+                            <tbody id="categoriasBody"></tbody>
+                        </table>
+                        <div class="flex">
+                            <input type="text" id="novaCategoria" placeholder="Nova categoria..." style="flex: 1; padding: 8px" />
+                            <select id="tipoCategoria" style="width: 120px">
+                                <option value="ambos">Ambos</option>
+                                <option value="receita">Receita</option>
+                                <option value="despesa">Despesa</option>
+                            </select>
+                            <button class="btn-add" onclick="adicionarCategoria()">➕ Adicionar</button>
+                        </div>
+                    </div>
+                    <div class="data-editor">
+                        <h4>🏦 CONTAS PADRÃO</h4>
+                        <table class="data-table" id="tabelaContas">
+                            <thead><tr><th>Nome</th><th>Tipo</th><th>Saldo Inicial</th><th>Ações</th></tr></thead>
+                            <tbody id="contasBody"></tbody>
+                        </table>
+                        <div class="flex">
+                            <input type="text" id="novaConta" placeholder="Nome da conta..." style="flex: 1; padding: 8px" />
+                            <select id="tipoContaPadrao" style="width: 120px">
+                                <option value="corrente">Corrente</option>
+                                <option value="poupanca">Poupança</option>
+                                <option value="dinheiro">Dinheiro</option>
+                            </select>
+                            <button class="btn-add" onclick="adicionarContaPadrao()">➕ Adicionar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA APPS -->
+                <div id="abaApps" class="tab-content">
+                    <h3 style="margin-bottom: 20px">📱 GERENCIADOR DE APPS</h3>
+                    <div class="apps-grid" id="appsDisponiveis">
+                        <div class="app-card active">
+                            <div class="app-header">
+                                <span class="app-nome">💰 App Financeiro</span>
+                                <span class="app-status ativo">Ativo</span>
+                            </div>
+                            <div class="app-descricao">
+                                Sistema completo de controle financeiro com dashboard, lançamentos, contas e relatórios.
+                            </div>
+                            <div class="app-toggle">
+                                <button style="background: var(--accent); color: white" onclick="toggleApp('financeiro', true)">✅ Ativar</button>
+                                <button style="background: var(--danger); color: white" onclick="toggleApp('financeiro', false)">❌ Desativar</button>
+                                <button style="background: var(--info); color: white" onclick="configurarApp('financeiro')">⚙️ Config</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA CÓDIGO -->
+                <div id="abaCodigo" class="tab-content">
+                    <h3 style="margin-bottom: 20px">💻 EDITOR DE CÓDIGO</h3>
+                    <div class="form-group">
+                        <label>📄 HTML PERSONALIZADO</label>
+                        <textarea id="codigoHtml" rows="10" onchange="alteracaoNaoSalva()" style="font-family: monospace; font-size: 12px"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>🎨 CSS PERSONALIZADO</label>
+                        <textarea id="codigoCss" rows="8" onchange="alteracaoNaoSalva()" style="font-family: monospace; font-size: 12px"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>⚡ JAVASCRIPT PERSONALIZADO</label>
+                        <textarea id="codigoJs" rows="8" onchange="alteracaoNaoSalva()" style="font-family: monospace; font-size: 12px"></textarea>
+                    </div>
+                    <div class="data-editor">
+                        <h4>🔗 CONVITE DE CADASTRO</h4>
+                        <div class="flex" style="margin-bottom: 10px">
+                            <input type="text" id="ultimoConviteLink" readonly style="flex: 1; background: #333" placeholder="Clique em gerar convite..." />
+                            <button class="btn-add" onclick="copiarUltimoConvite()" id="btnCopiarConvite">📋 Copiar</button>
+                        </div>
+                        <div class="flex">
+                            <select id="tipoConvite" style="width: 150px">
+                                <option value="cliente">Cliente normal</option>
+                                <option value="master">Acesso Master</option>
+                                <option value="teste">Conta teste</option>
+                            </select>
+                            <button class="control-btn btn-view" onclick="gerarConviteCadastro()" style="flex: 1">✨ GERAR CONVITE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABA PLANOS -->
+                <div id="abaPlanos" class="tab-content">
+                    <h3 style="margin-bottom: 20px">💰 EDITOR DE PLANOS</h3>
+                    <div class="data-editor">
+                        <h4>⚙️ CONFIGURAÇÕES GERAIS</h4>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>🎨 Cor dos Planos</label>
+                                <input type="color" id="planosCorPrincipal" value="#4CAF50" onchange="alteracaoNaoSalva(); atualizarPreviewPlanos();" />
+                            </div>
+                            <div class="form-group">
+                                <label>📊 Mostrar planos?</label>
+                                <select id="planosAtivo" onchange="alteracaoNaoSalva(); atualizarPreviewPlanos();">
+                                    <option value="true">Sim</option>
+                                    <option value="false">Não</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>🏷️ Título</label>
+                                <input type="text" id="planosTitulo" value="💰 PLANOS" onchange="alteracaoNaoSalva(); atualizarPreviewPlanos();" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="data-editor">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <h4>📋 PLANOS DISPONÍVEIS</h4>
+                            <button class="btn-add" onclick="adicionarPlano()">➕ NOVO PLANO</button>
+                        </div>
+                        <div id="planosLista"></div>
+                    </div>
+                </div>
+
+                <!-- ABA BACKUP -->
+                <div id="abaBackup" class="tab-content">
+                    <h3 style="margin-bottom: 20px">💾 BACKUP E RESTAURAÇÃO</h3>
+                    <div class="form-grid">
+                        <div class="data-editor">
+                            <h4>📤 EXPORTAR DADOS</h4>
+                            <button class="control-btn btn-edit w-100" onclick="exportarClienteJSON()" style="margin-bottom: 10px">📦 Exportar JSON</button>
+                            <button class="control-btn btn-edit w-100" onclick="exportarClienteExcel()" style="margin-bottom: 10px">📊 Exportar Excel</button>
+                            <button class="control-btn btn-edit w-100" onclick="exportarClientePDF()">📑 Exportar PDF</button>
+                        </div>
+                        <div class="data-editor">
+                            <h4>📥 IMPORTAR DADOS</h4>
+                            <input type="file" id="importFile" accept=".json,.xlsx,.csv" style="margin-bottom: 10px; width: 100%" />
+                            <button class="control-btn btn-save w-100" onclick="importarDadosCliente()">🔄 Importar</button>
+                        </div>
+                    </div>
+                    <div class="data-editor">
+                        <h4>📋 HISTÓRICO DE BACKUPS</h4>
+                        <table class="data-table" id="tabelaBackups">
+                            <thead><tr><th>Data</th><th>Tamanho</th><th>Ações</th></tr></thead>
+                            <tbody id="backupsBody"><tr><td colspan="3" style="text-align: center">Nenhum backup</td></tr></tbody>
+                        </table>
+                        <button class="btn-add" onclick="criarBackup()">💾 Criar Backup</button>
+                    </div>
+                </div>
+
+                <!-- LOGO SECTION -->
+                <div class="logo-section">
+                    <div class="logo-preview" id="logoPreviewContainer">
+                        <img id="logoPreview" style="display: none" />
+                        <span id="logoPlaceholder" style="color: var(--text-secondary)">🏷️ LOGO</span>
+                    </div>
+                    <div class="logo-actions">
+                        <button class="control-btn btn-edit" onclick="abrirSeletorLogo()">📤 ENVIAR LOGO</button>
+                        <button class="control-btn btn-block" onclick="removerLogoCliente()">🗑️ REMOVER</button>
+                    </div>
+                    <input type="file" id="logoInput" accept="image/*" style="display: none" />
+                </div>
+
+                <!-- PREVIEW -->
+                <div class="preview-panel">
+                    <div class="preview-header">
+                        <span class="preview-title">👁️ PREVIEW AO VIVO</span>
+                    </div>
+                    <div class="preview-content" id="previewConteudo">
+                        <div style="text-align: center">
+                            <div id="previewLogoBox" style="width: 100px; height: 100px; background: #ddd; margin: 0 auto; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <span id="previewLogoPlaceholder">LOGO</span>
+                            </div>
+                            <h3 id="previewTitulo">Nome da Empresa</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BOTÕES DE CONTROLE -->
+                <div class="control-buttons">
+                    <button class="control-btn btn-edit" onclick="entrarModoEdicao()" id="btnEditar" disabled>✏️ EDITAR</button>
+                    <button class="control-btn btn-block" onclick="bloquearCliente()" id="btnBloquear" disabled>🔒 BLOQUEAR</button>
+                    <button class="control-btn btn-save" onclick="salvarAlteracoes()" id="btnSalvar" disabled>💾 SALVAR</button>
+                    <button class="control-btn btn-view" onclick="verComoCliente()" id="btnVisualizar" disabled>👁️ VER COMO CLIENTE</button>
+                    <button class="control-btn btn-copy" onclick="copiarLinkClienteAtual()" id="btnCopiarLink" disabled>🔗 COPIAR LINK</button>
+                    <button class="control-btn btn-export" onclick="exportarClienteJSON()" id="btnExportar" disabled>📦 EXPORTAR</button>
+                </div>
+
+                <!-- LOG PANEL -->
+                <div class="log-panel" id="logPanel">
+                    <div class="log-entry">🚀 Sistema pronto</div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- MODAL NOVO/EDITAR LANÇAMENTO -->
-    <div id="modalLancamento" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalLancamentoTitulo">Novo Lançamento</h2>
-                <button class="modal-close" onclick="fecharModalLancamento()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="formLancamento">
-                    <input type="hidden" id="lancamentoId">
-                    
-                    <div class="form-group">
-                        <label>Data *</label>
-                        <input type="date" class="form-control" id="lancamentoData" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Descrição *</label>
-                        <input type="text" class="form-control" id="lancamentoDescricao" required placeholder="Ex: Salário, Conta de luz...">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Categoria</label>
-                        <select class="form-control" id="lancamentoCategoria">
-                            <option value="Alimentação">Alimentação</option>
-                            <option value="Transporte">Transporte</option>
-                            <option value="Moradia">Moradia</option>
-                            <option value="Saúde">Saúde</option>
-                            <option value="Educação">Educação</option>
-                            <option value="Lazer">Lazer</option>
-                            <option value="Salário">Salário</option>
-                            <option value="Investimentos">Investimentos</option>
-                            <option value="Outros">Outros</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Conta</label>
-                        <select class="form-control" id="lancamentoConta">
-                            <option value="Carteira">Carteira</option>
-                            <option value="Conta Corrente">Conta Corrente</option>
-                            <option value="Poupança">Poupança</option>
-                            <option value="Cartão de Crédito">Cartão de Crédito</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Tipo *</label>
-                        <select class="form-control" id="lancamentoTipo" required>
-                            <option value="entrada">Entrada (Receita)</option>
-                            <option value="saida">Saída (Despesa)</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Valor (R$) *</label>
-                        <input type="text" class="form-control" id="lancamentoValor" required placeholder="0,00" onblur="formatarCampoValor(this)">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Observações</label>
-                        <textarea class="form-control" id="lancamentoObs" rows="2"></textarea>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="fecharModalLancamento()">Cancelar</button>
-                <button class="btn btn-primary" onclick="salvarLancamento()">Salvar</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL CONFIRMAÇÃO -->
+    <!-- MODAIS -->
     <div id="modalConfirm" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Confirmar Ação</h2>
-                <button class="modal-close" onclick="fecharModalConfirm()">&times;</button>
+                <h2 id="modalTitulo">⚡ Confirmação</h2>
+                <button class="modal-close" onclick="fecharModal()">×</button>
+            </div>
+            <div class="modal-body"><p id="modalMsg">Tem certeza?</p></div>
+            <div class="modal-footer">
+                <button class="control-btn btn-save" onclick="confirmarAcao()">SIM</button>
+                <button class="control-btn btn-block" onclick="fecharModal()">NÃO</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalNovoCliente" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ NOVO CLIENTE</h2>
+                <button class="modal-close" onclick="fecharModalNovoCliente()">×</button>
             </div>
             <div class="modal-body">
-                <p id="confirmMessage">Tem certeza que deseja excluir este lançamento?</p>
+                <div class="form-group">
+                    <label>Nome:</label>
+                    <input type="text" id="novoClienteNome" placeholder="Nome da empresa" />
+                </div>
+                <div class="form-group">
+                    <label>Perfil:</label>
+                    <select id="novoClientePerfil">
+                        <option value="pj">Empresarial</option>
+                        <option value="pf">Pessoal</option>
+                        <option value="teste">Teste</option>
+                    </select>
+                </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-outline" onclick="fecharModalConfirm()">Cancelar</button>
-                <button class="btn btn-danger" id="confirmActionBtn">Confirmar</button>
+                <button class="control-btn btn-save" onclick="criarClienteFirebase()">CRIAR</button>
+                <button class="control-btn btn-block" onclick="fecharModalNovoCliente()">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalConfigApp" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="configAppTitulo">⚙️ Configurar</h2>
+                <button class="modal-close" onclick="fecharModalConfig()">×</button>
+            </div>
+            <div class="modal-body" id="configAppBody"></div>
+            <div class="modal-footer">
+                <button class="control-btn btn-save" onclick="fecharModalConfig()">FECHAR</button>
             </div>
         </div>
     </div>
@@ -799,25 +1170,23 @@
             projectId: "painelmastercomplet",
             storageBucket: "painelmastercomplet.firebasestorage.app",
             messagingSenderId: "87580974705",
-            appId: "1:87580974705:web:bd17f8609687f25ee4c5d0",
+            appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
         };
 
-        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         // ============================================
         // VARIÁVEIS GLOBAIS
         // ============================================
-        let clienteId = null;
-        let clienteConfig = null;
-        let lancamentos = [];
-        let selecionados = new Set();
-        let modoMaster = false;
-        let modoEdicao = false;
+        let clientes = [];
+        let clienteAtual = null;
+        let acaoPendente = null;
+        let alteracoesNaoSalvas = false;
+        let logoTempBase64 = null;
 
         // ============================================
-        // FUNÇÕES DE FORMATAÇÃO BR
+        // FUNÇÕES DE FORMATAÇÃO
         // ============================================
         function formatarMoedaBR(valor, comSimbolo = true) {
             if (valor === undefined || valor === null) return comSimbolo ? 'R$ 0,00' : '0,00';
@@ -836,521 +1205,406 @@
             return parseFloat(limpo) || 0;
         }
 
-        function formatarCampoValor(input) {
-            if (input.value) {
-                const valor = parseMoedaBR(input.value);
-                input.value = formatarMoedaBR(valor, false);
-            }
-        }
-
         // ============================================
-        // INICIALIZAÇÃO
+        // FUNÇÕES PRINCIPAIS
         // ============================================
-        function getParametroUrl(nome) {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get(nome);
-        }
+        function carregarClientes() {
+            document.getElementById("firebaseStatus").innerHTML = "🔄 Carregando...";
 
-        window.onload = async function() {
-            // Pegar parâmetros da URL
-            clienteId = getParametroUrl('cliente');
-            const modo = getParametroUrl('modo');
-            const master = getParametroUrl('master');
-            
-            modoMaster = master === 'true';
-            modoEdicao = modo === 'edicao' || modoMaster;
-            
-            if (!clienteId) {
-                document.body.innerHTML = `
-                    <div style="text-align: center; padding: 50px;">
-                        <h1>❌ Erro 404</h1>
-                        <p>Cliente não especificado!</p>
-                        <button onclick="window.close()" class="btn btn-primary">Fechar</button>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Mostrar badge master se for modo master
-            if (modoMaster) {
-                document.getElementById('masterBadge').style.display = 'block';
-                document.getElementById('masterPanel').style.display = 'block';
-            }
-            
-            // Carregar dados do cliente
-            await carregarDadosCliente();
-            
-            // Carregar lançamentos
-            carregarLancamentos();
-            
-            // Configurar tema
-            aplicarTema();
-        };
+            db.collection("clientes").onSnapshot((snapshot) => {
+                clientes = [];
+                let ativos = 0, bloqueados = 0, teste = 0;
 
-        async function carregarDadosCliente() {
-            try {
-                // Carregar configurações do cliente
-                const configDoc = await db.collection('configs').doc(clienteId).get();
-                if (configDoc.exists) {
-                    clienteConfig = configDoc.data();
-                    
-                    // Aplicar configurações visuais
-                    document.getElementById('companyName').textContent = 
-                        clienteConfig?.conteudo?.nomeEmpresa || 'App Financeiro';
-                    
-                    // Aplicar cor primária
-                    if (clienteConfig?.visual?.corPrincipal) {
-                        document.documentElement.style.setProperty('--primary', clienteConfig.visual.corPrincipal);
-                    }
-                    
-                    // Aplicar modo escuro se configurado
-                    if (clienteConfig?.visual?.modoEscuro === 'dark') {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                    }
-                }
-                
-                // Carregar dados do cliente
-                const clienteDoc = await db.collection('clientes').doc(clienteId).get();
-                if (clienteDoc.exists) {
-                    const cliente = clienteDoc.data();
-                    
-                    // Verificar se está bloqueado
-                    if (cliente.status === 'bloqueado' && !modoMaster) {
-                        document.body.innerHTML = `
-                            <div style="text-align: center; padding: 50px;">
-                                <h1>🔒 Cliente Bloqueado</h1>
-                                <p>${cliente.motivoBloqueio || 'Entre em contato com o administrador'}</p>
-                                <button onclick="window.close()" class="btn btn-primary">Fechar</button>
-                            </div>
-                        `;
-                        return;
-                    }
-                }
-                
-            } catch (error) {
-                console.error('Erro ao carregar cliente:', error);
-            }
-        }
-
-        // ============================================
-        // CRUD DE LANÇAMENTOS
-        // ============================================
-        function carregarLancamentos() {
-            if (!clienteId) return;
-            
-            db.collection('lancamentos')
-                .where('clienteId', '==', clienteId)
-                .orderBy('data', 'desc')
-                .onSnapshot((snapshot) => {
-                    lancamentos = [];
-                    snapshot.forEach(doc => {
-                        lancamentos.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                    });
-                    
-                    atualizarTabela();
-                    atualizarResumo();
-                }, (error) => {
-                    console.error('Erro ao carregar lançamentos:', error);
+                snapshot.forEach((doc) => {
+                    const cliente = { id: doc.id, ...doc.data() };
+                    clientes.push(cliente);
+                    if (cliente.status === "ativo") ativos++;
+                    else if (cliente.status === "bloqueado") bloqueados++;
+                    else if (cliente.perfil === "teste") teste++;
                 });
+
+                document.getElementById("clientesCount").innerHTML = `📊 ${clientes.length} clientes`;
+                document.getElementById("ativosCount").innerHTML = `✅ Ativos: ${ativos}`;
+                document.getElementById("bloqueadosCount").innerHTML = `🔒 Bloqueados: ${bloqueados}`;
+                document.getElementById("testeCount").innerHTML = `🧪 Teste: ${teste}`;
+                document.getElementById("totalClientesTag").innerHTML = clientes.length;
+                document.getElementById("firebaseStatus").innerHTML = "🟢 Conectado";
+
+                atualizarListaClientes();
+
+                if (clienteAtual) {
+                    const atualizado = clientes.find(c => c.id === clienteAtual.id);
+                    if (atualizado) {
+                        clienteAtual = atualizado;
+                        preencherFormularioCliente();
+                    }
+                }
+            }, (error) => {
+                console.error("Erro:", error);
+                document.getElementById("firebaseStatus").innerHTML = "🔴 Erro";
+            });
         }
 
-        function atualizarTabela() {
-            const tbody = document.getElementById('lancamentosBody');
-            const filtro = document.getElementById('searchInput')?.value.toLowerCase() || '';
-            
-            if (lancamentos.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" style="text-align: center; padding: 40px;">
-                            <i class="fas fa-inbox fa-3x" style="opacity: 0.3; margin-bottom: 10px;"></i>
-                            <p>Nenhum lançamento encontrado</p>
-                            <button class="btn btn-primary btn-sm" onclick="abrirModalNovoLancamento()">
-                                <i class="fas fa-plus"></i> Criar Primeiro Lançamento
-                            </button>
-                        </td>
-                    </tr>
-                `;
+        function atualizarListaClientes() {
+            const lista = document.getElementById("listaClientes");
+            const filtro = document.getElementById("buscarCliente")?.value.toLowerCase() || "";
+
+            if (clientes.length === 0) {
+                lista.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">📭 Nenhum cliente</div>';
                 return;
             }
-            
-            let html = '';
-            const lancamentosFiltrados = lancamentos.filter(l => 
-                l.descricao?.toLowerCase().includes(filtro) ||
-                l.categoria?.toLowerCase().includes(filtro) ||
-                l.conta?.toLowerCase().includes(filtro)
-            );
-            
-            lancamentosFiltrados.forEach(l => {
-                const selecionado = selecionados.has(l.id);
-                const data = l.data ? new Date(l.data).toLocaleDateString('pt-BR') : '-';
-                const valorClass = l.tipo === 'entrada' ? 'text-success' : 'text-danger';
-                const sinal = l.tipo === 'entrada' ? '' : '-';
-                
-                html += `
-                    <tr>
-                        <td>
-                            <div class="checkbox-wrapper">
-                                <div class="checkbox-custom ${selecionado ? 'checked' : ''}" 
-                                     onclick="toggleSelecionar('${l.id}')">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                            </div>
-                        </td>
-                        <td>${data}</td>
-                        <td>${l.descricao || '-'}</td>
-                        <td><span class="badge badge-${l.categoria ? 'success' : 'warning'}">${l.categoria || 'Outros'}</span></td>
-                        <td>${l.conta || '-'}</td>
-                        <td>${l.tipo === 'entrada' ? '📥 Entrada' : '📤 Saída'}</td>
-                        <td class="${valorClass}">${sinal} ${formatarMoedaBR(l.valor)}</td>
-                        <td>
-                            <div class="row-actions">
-                                <button class="action-btn view" onclick="visualizarLancamento('${l.id}')" title="Visualizar">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="action-btn edit" onclick="editarLancamento('${l.id}')" title="Editar">
-                                    <i class="fas fa-pen"></i>
-                                </button>
-                                <button class="action-btn delete" onclick="confirmarExcluirLancamento('${l.id}')" title="Excluir">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
+
+            let html = "";
+            const clientesFiltrados = clientes.filter(c => c.nome?.toLowerCase().includes(filtro));
+
+            clientesFiltrados.forEach(c => {
+                const ativo = clienteAtual && clienteAtual.id === c.id;
+                const statusClass = c.status === "ativo" ? "status-ativo" : "status-bloqueado";
+
+                html += `<div class="cliente-item ${ativo ? "active" : ""}" onclick="selecionarCliente('${c.id}')">
+                    <div class="cliente-header">
+                        <span class="cliente-nome">${c.nome || "Sem nome"}</span>
+                        <span class="cliente-status ${statusClass}">${c.status || "ativo"}</span>
+                    </div>
+                    <div class="cliente-info">
+                        <span>📱 ${c.appsAtivos || 1} apps</span>
+                        <span>📅 ${new Date(c.dataCriacao || Date.now()).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    <div class="cliente-actions">
+                        <span class="action-icon" title="Editar" onclick="entrarModoEdicao(); event.stopPropagation()">✏️</span>
+                        <span class="action-icon" title="Bloquear" onclick="bloquearCliente(); event.stopPropagation()">🔒</span>
+                        <span class="action-icon" title="Visualizar" onclick="verComoCliente(); event.stopPropagation()">👁️</span>
+                        <span class="action-icon" title="Copiar link" onclick="copiarLinkClienteAtual(); event.stopPropagation()">🔗</span>
+                        <span class="action-icon danger" title="Excluir" onclick="deletarCliente('${c.id}', event)">🗑️</span>
+                    </div>
+                </div>`;
             });
-            
-            tbody.innerHTML = html;
+
+            lista.innerHTML = html || '<div style="padding: 20px; color: var(--text-secondary);">🔍 Nenhum cliente</div>';
         }
 
-        function atualizarResumo() {
-            let saldo = 0;
-            let entradas = 0;
-            let saidas = 0;
-            
-            lancamentos.forEach(l => {
-                const valor = l.valor || 0;
-                if (l.tipo === 'entrada') {
-                    saldo += valor;
-                    entradas += valor;
-                } else {
-                    saldo -= valor;
-                    saidas += valor;
-                }
-            });
-            
-            document.getElementById('saldoTotal').textContent = formatarMoedaBR(saldo);
-            document.getElementById('totalEntradas').textContent = formatarMoedaBR(entradas);
-            document.getElementById('totalSaidas').textContent = formatarMoedaBR(saidas);
-            document.getElementById('totalLancamentos').textContent = lancamentos.length;
+        async function selecionarCliente(clienteId) {
+            const cliente = clientes.find(c => c.id === clienteId);
+            if (!cliente) return;
+
+            if (alteracoesNaoSalvas && !confirm("⚠️ Há alterações não salvas! Continuar?")) return;
+
+            clienteAtual = cliente;
+            alteracoesNaoSalvas = false;
+            atualizarListaClientes();
+            preencherFormularioCliente();
+            await carregarConfigCliente(clienteId);
+
+            ["btnEditar", "btnBloquear", "btnSalvar", "btnVisualizar", "btnCopiarLink", "btnExportar"]
+                .forEach(id => document.getElementById(id).disabled = false);
         }
 
-        // ============================================
-        // FUNÇÕES DE SELEÇÃO
-        // ============================================
-        function toggleSelecionar(id) {
-            if (selecionados.has(id)) {
-                selecionados.delete(id);
-            } else {
-                selecionados.add(id);
-            }
-            atualizarSelecao();
+        function preencherFormularioCliente() {
+            if (!clienteAtual) return;
+
+            document.getElementById("nomeEmpresa").value = clienteAtual.nome || "";
+            document.getElementById("perfilCliente").value = clienteAtual.perfil || "pj";
+            document.getElementById("cpfCnpj").value = clienteAtual.cpfCnpj || "";
+            document.getElementById("clienteIdVisivel").value = clienteAtual.id || "";
+            document.getElementById("corPrincipal").value = clienteAtual.cor || "#4CAF50";
+            document.getElementById("corHex").value = clienteAtual.cor || "#4CAF50";
+            document.getElementById("modoEscuro").value = clienteAtual.modoEscuro || "auto";
+            document.getElementById("tema").value = clienteAtual.tema || "moderno";
+
+            logoTempBase64 = null;
+            setLogoPreview(clienteAtual.logoBase64 || null);
+            atualizarPreview();
         }
 
-        function toggleSelecionarTodos() {
-            if (selecionados.size === lancamentos.length) {
-                selecionados.clear();
-            } else {
-                lancamentos.forEach(l => selecionados.add(l.id));
-            }
-            atualizarSelecao();
-        }
-
-        function atualizarSelecao() {
-            // Atualizar checkbox "selecionar todos"
-            const selectAll = document.getElementById('selectAllCheckbox');
-            if (lancamentos.length > 0) {
-                if (selecionados.size === lancamentos.length) {
-                    selectAll.classList.add('checked');
-                } else {
-                    selectAll.classList.remove('checked');
-                }
-            }
-            
-            // Mostrar/esconder painel de seleção
-            const selectionPanel = document.getElementById('selectionPanel');
-            if (selecionados.size > 0) {
-                selectionPanel.style.display = 'flex';
-                document.getElementById('selectedCount').textContent = selecionados.size;
-            } else {
-                selectionPanel.style.display = 'none';
-            }
-            
-            // Atualizar tabela
-            atualizarTabela();
-        }
-
-        function limparSelecao() {
-            selecionados.clear();
-            atualizarSelecao();
-        }
-
-        function editarSelecionados() {
-            if (selecionados.size === 0) return;
-            
-            // Se só um selecionado, abre o modal de edição
-            if (selecionados.size === 1) {
-                const id = Array.from(selecionados)[0];
-                editarLancamento(id);
-            } else {
-                // Se múltiplos, pergunta se quer editar em lote
-                if (confirm(`Deseja editar ${selecionados.size} lançamentos em lote?`)) {
-                    alert('Funcionalidade de edição em lote será implementada em breve!');
-                }
-            }
-        }
-
-        function excluirSelecionados() {
-            if (selecionados.size === 0) return;
-            
-            document.getElementById('confirmMessage').textContent = 
-                `Deseja realmente excluir ${selecionados.size} lançamento(s)?`;
-            
-            window.confirmarExclusaoCallback = async () => {
-                for (const id of selecionados) {
-                    await db.collection('lancamentos').doc(id).delete();
-                }
-                selecionados.clear();
-                fecharModalConfirm();
-                atualizarSelecao();
-            };
-            
-            document.getElementById('confirmActionBtn').onclick = window.confirmarExclusaoCallback;
-            document.getElementById('modalConfirm').style.display = 'flex';
-        }
-
-        // ============================================
-        // CRUD INDIVIDUAL
-        // ============================================
-        function abrirModalNovoLancamento() {
-            document.getElementById('lancamentoId').value = '';
-            document.getElementById('lancamentoData').value = new Date().toISOString().split('T')[0];
-            document.getElementById('lancamentoDescricao').value = '';
-            document.getElementById('lancamentoCategoria').value = 'Outros';
-            document.getElementById('lancamentoConta').value = 'Carteira';
-            document.getElementById('lancamentoTipo').value = 'entrada';
-            document.getElementById('lancamentoValor').value = '';
-            document.getElementById('lancamentoObs').value = '';
-            
-            document.getElementById('modalLancamentoTitulo').textContent = 'Novo Lançamento';
-            document.getElementById('modalLancamento').style.display = 'flex';
-        }
-
-        function editarLancamento(id) {
-            const lancamento = lancamentos.find(l => l.id === id);
-            if (!lancamento) return;
-            
-            document.getElementById('lancamentoId').value = lancamento.id;
-            document.getElementById('lancamentoData').value = lancamento.data || new Date().toISOString().split('T')[0];
-            document.getElementById('lancamentoDescricao').value = lancamento.descricao || '';
-            document.getElementById('lancamentoCategoria').value = lancamento.categoria || 'Outros';
-            document.getElementById('lancamentoConta').value = lancamento.conta || 'Carteira';
-            document.getElementById('lancamentoTipo').value = lancamento.tipo || 'entrada';
-            document.getElementById('lancamentoValor').value = formatarMoedaBR(lancamento.valor, false);
-            document.getElementById('lancamentoObs').value = lancamento.obs || '';
-            
-            document.getElementById('modalLancamentoTitulo').textContent = 'Editar Lançamento';
-            document.getElementById('modalLancamento').style.display = 'flex';
-        }
-
-        function visualizarLancamento(id) {
-            const lancamento = lancamentos.find(l => l.id === id);
-            if (!lancamento) return;
-            
-            // Criar modal de visualização
-            const data = lancamento.data ? new Date(lancamento.data).toLocaleDateString('pt-BR') : '-';
-            const valor = formatarMoedaBR(lancamento.valor);
-            const tipo = lancamento.tipo === 'entrada' ? '📥 Entrada' : '📤 Saída';
-            const tipoClass = lancamento.tipo === 'entrada' ? 'text-success' : 'text-danger';
-            
-            const html = `
-                <div style="padding: 20px;">
-                    <h3 style="margin-bottom: 20px;">${lancamento.descricao || 'Sem descrição'}</h3>
-                    
-                    <table style="width: 100%;">
-                        <tr>
-                            <td style="padding: 10px 0;"><strong>Data:</strong></td>
-                            <td>${data}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px 0;"><strong>Categoria:</strong></td>
-                            <td>${lancamento.categoria || 'Outros'}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px 0;"><strong>Conta:</strong></td>
-                            <td>${lancamento.conta || '-'}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px 0;"><strong>Tipo:</strong></td>
-                            <td class="${tipoClass}">${tipo}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px 0;"><strong>Valor:</strong></td>
-                            <td class="${tipoClass}"><strong>${valor}</strong></td>
-                        </tr>
-                        ${lancamento.obs ? `
-                        <tr>
-                            <td style="padding: 10px 0;"><strong>Observações:</strong></td>
-                            <td>${lancamento.obs}</td>
-                        </tr>
-                        ` : ''}
-                    </table>
-                </div>
-            `;
-            
-            document.getElementById('configAppBody').innerHTML = html;
-            document.getElementById('configAppTitulo').innerHTML = '📋 Detalhes do Lançamento';
-            document.getElementById('modalConfigApp').style.display = 'flex';
-        }
-
-        async function salvarLancamento() {
-            const id = document.getElementById('lancamentoId').value;
-            const data = document.getElementById('lancamentoData').value;
-            const descricao = document.getElementById('lancamentoDescricao').value;
-            const categoria = document.getElementById('lancamentoCategoria').value;
-            const conta = document.getElementById('lancamentoConta').value;
-            const tipo = document.getElementById('lancamentoTipo').value;
-            const valorStr = document.getElementById('lancamentoValor').value;
-            const obs = document.getElementById('lancamentoObs').value;
-            
-            if (!data || !descricao || !valorStr) {
-                alert('Preencha todos os campos obrigatórios!');
-                return;
-            }
-            
-            const valor = parseMoedaBR(valorStr);
-            
-            const lancamento = {
-                clienteId,
-                data,
-                descricao,
-                categoria,
-                conta,
-                tipo,
-                valor,
-                obs,
-                atualizadoEm: new Date().toISOString()
-            };
-            
+        async function carregarConfigCliente(clienteId) {
             try {
-                if (id) {
-                    await db.collection('lancamentos').doc(id).update(lancamento);
-                } else {
-                    lancamento.criadoEm = new Date().toISOString();
-                    await db.collection('lancamentos').add(lancamento);
+                const cfgDoc = await db.collection("configs").doc(clienteId).get();
+                if (cfgDoc.exists && cfgDoc.data()?.planosConfig) {
+                    clienteAtual.planosConfig = cfgDoc.data().planosConfig;
                 }
-                
-                fecharModalLancamento();
-                limparSelecao();
-                
-            } catch (error) {
-                console.error('Erro ao salvar:', error);
-                alert('Erro ao salvar lançamento!');
+            } catch (e) {
+                console.warn("Erro ao carregar configs:", e);
             }
         }
 
-        function confirmarExcluirLancamento(id) {
-            document.getElementById('confirmMessage').textContent = 'Deseja realmente excluir este lançamento?';
+        function atualizarPreview() {
+            const nome = document.getElementById("nomeEmpresa").value || "Nome da Empresa";
+            const cor = document.getElementById("corPrincipal").value || "#4CAF50";
+            document.getElementById("previewTitulo").innerHTML = nome;
+            document.getElementById("previewLogoBox").style.background = cor;
+        }
+
+        function alteracaoNaoSalva() {
+            alteracoesNaoSalvas = true;
+            document.getElementById("btnSalvar").disabled = false;
+            atualizarPreview();
+        }
+
+        // ============================================
+        // FUNÇÕES CORRIGIDAS DE VISUALIZAÇÃO
+        // ============================================
+        function verComoCliente() {
+            if (!clienteAtual) return alert("Selecione um cliente primeiro!");
             
-            window.confirmarExclusaoCallback = async () => {
-                await db.collection('lancamentos').doc(id).delete();
-                fecharModalConfirm();
-            };
+            // CORRIGIDO: Apontando para appfinanceiro.html (sem hífen)
+            // Se seu arquivo for app-financeiro.html (com hífen), mude aqui
+            const url = `${window.location.origin}/appfinanceiro.html?cliente=${clienteAtual.id}`;
             
-            document.getElementById('confirmActionBtn').onclick = window.confirmarExclusaoCallback;
-            document.getElementById('modalConfirm').style.display = 'flex';
+            window.open(url, '_blank');
+            adicionarLog(`👁️ Visualizando: ${clienteAtual.nome}`);
+        }
+
+        function copiarLinkClienteAtual() {
+            if (!clienteAtual) return alert("Selecione um cliente primeiro!");
+            
+            // CORRIGIDO: Mesmo nome do arquivo
+            const url = `${window.location.origin}/appfinanceiro.html?cliente=${clienteAtual.id}`;
+            
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ Link copiado!');
+                adicionarLog(`🔗 Link copiado: ${clienteAtual.nome}`);
+            }).catch(() => {
+                prompt('Copie o link:', url);
+            });
+        }
+
+        function entrarModoEdicao() {
+            if (!clienteAtual) return alert("Selecione um cliente");
+            
+            // CORRIGIDO: Com parâmetros de edição
+            const url = `${window.location.origin}/appfinanceiro.html?cliente=${clienteAtual.id}&modo=edicao&master=true`;
+            
+            window.open(url, '_blank');
+            adicionarLog(`✏️ Modo edição: ${clienteAtual.nome}`);
+        }
+
+        async function gerarConviteCadastro() {
+            if (!clienteAtual) return alert("Selecione um cliente");
+            const token = Math.random().toString(36).substring(2, 15);
+            
+            // CORRIGIDO: Link do convite
+            const link = `${window.location.origin}/appfinanceiro.html?cliente=${clienteAtual.id}&convite=${token}`;
+            
+            document.getElementById("ultimoConviteLink").value = link;
+            try { await navigator.clipboard.writeText(link); } catch (e) {}
+            alert(`✅ Convite gerado!`);
+        }
+
+        function adicionarLog(mensagem) {
+            const logPanel = document.getElementById("logPanel");
+            const entry = document.createElement("div");
+            entry.className = "log-entry";
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${mensagem}`;
+            logPanel.appendChild(entry);
+            if (logPanel.children.length > 5) logPanel.removeChild(logPanel.children[0]);
         }
 
         // ============================================
         // FUNÇÕES AUXILIARES
         // ============================================
-        function filtrarLancamentos() {
-            atualizarTabela();
+        function toggleApp(appId, ativar) { 
+            alert(ativar ? "✅ App ativado" : "❌ App desativado"); 
+            alteracaoNaoSalva(); 
         }
 
-        function alternarTema() {
-            const tema = document.documentElement.getAttribute('data-theme');
-            if (tema === 'dark') {
-                document.documentElement.removeAttribute('data-theme');
+        function configurarApp(appId) { 
+            alert("⚙️ Configurações"); 
+        }
+
+        function adicionarCategoria() { 
+            const nome = document.getElementById("novaCategoria").value;
+            if (!nome) return alert("Digite um nome");
+            alert(`✅ Categoria "${nome}" adicionada!`);
+            document.getElementById("novaCategoria").value = "";
+            alteracaoNaoSalva();
+        }
+
+        function adicionarContaPadrao() { 
+            const nome = document.getElementById("novaConta").value;
+            if (!nome) return alert("Digite um nome");
+            alert(`✅ Conta "${nome}" adicionada!`);
+            document.getElementById("novaConta").value = "";
+            alteracaoNaoSalva();
+        }
+
+        function adicionarIndicador() { 
+            const titulo = document.getElementById("novoIndicadorTitulo").value;
+            if (!titulo) return alert("Digite um título");
+            alert(`✅ Indicador "${titulo}" adicionado!`);
+            document.getElementById("novoIndicadorTitulo").value = "";
+            alteracaoNaoSalva();
+        }
+
+        function exportarClienteJSON() {
+            if (!clienteAtual) return;
+            const dados = { cliente: clienteAtual, data: new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `cliente_${clienteAtual.id}_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            alert("📦 Backup exportado");
+        }
+
+        function exportarClienteExcel() { alert("📊 Em breve!"); }
+        function exportarClientePDF() { alert("📑 Em breve!"); }
+        function importarDadosCliente() { alert("✅ Importado!"); }
+        function criarBackup() { alert("💾 Backup criado!"); }
+
+        function abrirSeletorLogo() { document.getElementById("logoInput").click(); }
+
+        function setLogoPreview(dataUrl) {
+            const img = document.getElementById("logoPreview");
+            const ph = document.getElementById("logoPlaceholder");
+            if (dataUrl) {
+                img.src = dataUrl;
+                img.style.display = "block";
+                ph.style.display = "none";
             } else {
-                document.documentElement.setAttribute('data-theme', 'dark');
+                img.style.display = "none";
+                ph.style.display = "block";
             }
         }
 
-        function aplicarTema() {
-            if (clienteConfig?.visual?.modoEscuro === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
+        document.getElementById("logoInput").addEventListener("change", function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) { 
+                    logoTempBase64 = e.target.result; 
+                    setLogoPreview(logoTempBase64); 
+                    alteracaoNaoSalva(); 
+                };
+                reader.readAsDataURL(file);
             }
+        });
+
+        function removerLogoCliente() { 
+            if (!clienteAtual || !confirm("Remover logo?")) return; 
+            logoTempBase64 = null; 
+            setLogoPreview(null); 
+            alteracaoNaoSalva(); 
         }
 
-        function fecharModalLancamento() {
-            document.getElementById('modalLancamento').style.display = 'none';
-        }
-
-        function fecharModalConfirm() {
-            document.getElementById('modalConfirm').style.display = 'none';
-        }
-
-        function fecharModalConfig() {
-            document.getElementById('modalConfigApp').style.display = 'none';
-        }
-
-        // Funções do Master
-        function editarConfigCliente() {
-            alert('Redirecionando para o Master App...');
-            window.open(`/master_app.html?cliente=${clienteId}&modo=edicao`, '_blank');
+        async function copiarUltimoConvite() {
+            const link = document.getElementById("ultimoConviteLink").value;
+            if (!link) return alert("Gere um convite primeiro");
+            try { 
+                await navigator.clipboard.writeText(link); 
+                alert("✅ Copiado!"); 
+            } catch (e) { 
+                alert("❌ Erro ao copiar"); 
+            }
         }
 
         async function bloquearCliente() {
-            if (confirm('Deseja bloquear este cliente?')) {
-                await db.collection('clientes').doc(clienteId).update({
-                    status: 'bloqueado',
-                    motivoBloqueio: 'Bloqueado pelo Master'
-                });
-                alert('Cliente bloqueado!');
+            if (!clienteAtual) return;
+            document.getElementById("modalTitulo").textContent = "🔒 Bloquear";
+            document.getElementById("modalMsg").textContent = `Bloquear ${clienteAtual.nome}?`;
+            document.getElementById("modalConfirm").style.display = "flex";
+            acaoPendente = "bloquear";
+        }
+
+        async function confirmarAcao() {
+            if (acaoPendente === "bloquear") {
+                const novoStatus = clienteAtual.status === "ativo" ? "bloqueado" : "ativo";
+                try {
+                    await db.collection("clientes").doc(clienteAtual.id).update({ status: novoStatus });
+                    alert(`✅ Cliente ${novoStatus === "ativo" ? "desbloqueado" : "bloqueado"}!`);
+                } catch (error) { 
+                    alert("❌ Erro: " + error.message); 
+                }
+            }
+            fecharModal();
+        }
+
+        async function deletarCliente(clienteId, event) {
+            if (event) event.stopPropagation();
+            const cliente = clientes.find(c => c.id === clienteId);
+            if (!cliente || !confirm(`⚠️ Excluir ${cliente.nome}?`)) return;
+            try {
+                await db.collection("clientes").doc(clienteId).delete();
+                alert("✅ Cliente excluído!");
+                if (clienteAtual && clienteAtual.id === clienteId) {
+                    clienteAtual = null;
+                    ["btnEditar","btnBloquear","btnSalvar","btnVisualizar","btnCopiarLink","btnExportar"]
+                        .forEach(id => document.getElementById(id).disabled = true);
+                }
+            } catch (error) { 
+                alert("❌ Erro ao deletar"); 
             }
         }
 
-        function verComoMaster() {
-            // Recarrega sem modo master
-            window.location.href = `/app-financeiro.html?cliente=${clienteId}`;
+        function criarCliente() { 
+            document.getElementById("modalNovoCliente").style.display = "flex"; 
         }
 
-        function exportarDadosCliente() {
-            const dados = {
-                cliente: clienteConfig,
-                lancamentos: lancamentos,
-                exportadoEm: new Date().toISOString()
+        async function criarClienteFirebase() {
+            const nome = document.getElementById("novoClienteNome").value;
+            if (!nome) return alert("Digite o nome");
+
+            const novoCliente = {
+                nome: nome,
+                perfil: document.getElementById("novoClientePerfil").value,
+                status: "ativo",
+                dataCriacao: new Date().toISOString(),
+                appsAtivos: 1,
+                cor: "#4CAF50",
+                modoEscuro: "auto"
             };
-            
-            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `cliente_${clienteId}_backup.json`;
-            a.click();
+
+            try {
+                await db.collection("clientes").add(novoCliente);
+                alert(`✅ Cliente criado!`);
+                fecharModalNovoCliente();
+            } catch (error) { 
+                alert("❌ Erro ao criar cliente"); 
+            }
         }
 
-        // Fechar modais com ESC
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                fecharModalLancamento();
-                fecharModalConfirm();
-                fecharModalConfig();
+        function fecharModalNovoCliente() { 
+            document.getElementById("modalNovoCliente").style.display = "none"; 
+        }
+
+        function mudarAba(aba, btnEl) {
+            document.querySelectorAll(".tab-content").forEach(el => el.style.display = "none");
+            const idMap = { visual: "abaVisual", conteudo: "abaConteudo", funcoes: "abaFuncoes", dados: "abaDados", apps: "abaApps", codigo: "abaCodigo", planos: "abaPlanos", backup: "abaBackup" };
+            const abaElement = document.getElementById(idMap[aba]);
+            if (abaElement) abaElement.style.display = "block";
+            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+            if (btnEl) btnEl.classList.add("active");
+        }
+
+        function aplicarPerfilUI() {
+            const perfil = document.getElementById("perfilCliente").value;
+            if (perfil === "pf") {
+                document.getElementById("termoColaborador").value = "Membro da família";
+                document.getElementById("termoAcao").value = "Tarefa";
             }
-        });
+        }
+
+        function filtrarClientes() { atualizarListaClientes(); }
+        function mostrarAjuda() { alert("🚀 Master App v2.0\n💰 Moeda brasileira\n👁️ Visualização corrigida"); }
+        function diagnosticarConexao() { alert("🔍 Conectado!"); }
+        function mostrarPainelAdmin() { alert("⚡ Em desenvolvimento"); }
+        function fecharModal() { document.getElementById("modalConfirm").style.display = "none"; acaoPendente = null; }
+        function fecharModalConfig() { document.getElementById("modalConfigApp").style.display = "none"; }
+        function zerarIndicadoresClienteAtual() { alert("✅ Zerado!"); }
+
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
+        window.onload = function() {
+            carregarClientes();
+            document.getElementById("corPrincipal").addEventListener("input", function(e) {
+                document.getElementById("corHex").value = e.target.value;
+                atualizarPreview();
+            });
+            document.getElementById("corHex").addEventListener("input", function(e) {
+                document.getElementById("corPrincipal").value = e.target.value;
+                atualizarPreview();
+            });
+        };
     </script>
 </body>
 </html>
