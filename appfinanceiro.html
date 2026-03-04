@@ -15,8 +15,14 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- SheetJS (Excel) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <style>
-        /* ESTILOS COMPLETOS - MANTIDOS IGUAIS AO ORIGINAL */
         * {
             margin: 0;
             padding: 0;
@@ -113,6 +119,7 @@
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
+            align-items: center;
         }
 
         .badge-master {
@@ -138,6 +145,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            font-size: 14px;
         }
 
         .btn-primary {
@@ -150,30 +158,87 @@
             transform: translateY(-2px);
         }
 
-        .btn-secondary {
-            background: var(--secondary);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-warning {
-            background: var(--warning);
-            color: white;
-        }
-
         .btn-outline {
             background: transparent;
             border: 1px solid var(--primary);
             color: var(--primary);
         }
 
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 12px;
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Menu Dropdown */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: var(--bg-primary);
+            min-width: 220px;
+            box-shadow: var(--shadow);
+            border-radius: 10px;
+            z-index: 1000;
+            margin-top: 5px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            color: var(--primary);
+        }
+
+        .dropdown-item span {
+            flex: 1;
+        }
+
+        .dropdown-item small {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 5px 0;
+        }
+
+        .dropdown-header {
+            padding: 8px 20px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--bg-secondary);
         }
 
         /* Cards */
@@ -614,6 +679,37 @@
             color: white;
         }
 
+        /* Alertas / Notificações */
+        .alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 10px;
+            background: var(--bg-primary);
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .alert.success {
+            border-left-color: var(--success);
+        }
+
+        .alert.error {
+            border-left-color: var(--danger);
+        }
+
+        .alert.warning {
+            border-left-color: var(--warning);
+        }
+
         /* Utilitários */
         .text-success { color: var(--success); }
         .text-danger { color: var(--danger); }
@@ -652,14 +748,91 @@
                         <i class="fas fa-crown"></i> MODO MASTER ATIVO
                     </span>
                 </div>
-                <button class="btn btn-outline" onclick="alternarTema()">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <button class="btn btn-outline" onclick="exportarRelatorio()">
-                    <i class="fas fa-download"></i> Exportar
-                </button>
+                
+                <!-- MENU DROPDOWN DE AÇÕES -->
+                <div class="dropdown">
+                    <button class="btn btn-outline">
+                        <i class="fas fa-file-export"></i> Ações
+                        <i class="fas fa-chevron-down" style="font-size: 12px;"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <div class="dropdown-header">📤 EXPORTAR</div>
+                        <div class="dropdown-item" onclick="exportarPDF()">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Exportar PDF</span>
+                            <small>Relatório completo</small>
+                        </div>
+                        <div class="dropdown-item" onclick="exportarExcel()">
+                            <i class="fas fa-file-excel"></i>
+                            <span>Exportar Excel</span>
+                            <small>Planilha de dados</small>
+                        </div>
+                        <div class="dropdown-item" onclick="exportarCSV()">
+                            <i class="fas fa-file-csv"></i>
+                            <span>Exportar CSV</span>
+                            <small>Dados brutos</small>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <div class="dropdown-header">📥 IMPORTAR</div>
+                        <div class="dropdown-item" onclick="importarDados()">
+                            <i class="fas fa-upload"></i>
+                            <span>Importar Dados</span>
+                            <small>JSON / Excel / CSV</small>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <div class="dropdown-header">📊 RELATÓRIOS</div>
+                        <div class="dropdown-item" onclick="gerarRelatorioMensal()">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Relatório Mensal</span>
+                            <small>Resumo do mês</small>
+                        </div>
+                        <div class="dropdown-item" onclick="gerarRelatorioAnual()">
+                            <i class="fas fa-calendar"></i>
+                            <span>Relatório Anual</span>
+                            <small>Comparativo anual</small>
+                        </div>
+                        <div class="dropdown-item" onclick="gerarRelatorioCategorias()">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Por Categoria</span>
+                            <small>Análise por categoria</small>
+                        </div>
+                        <div class="dropdown-item" onclick="gerarRelatorioContas()">
+                            <i class="fas fa-wallet"></i>
+                            <span>Por Conta</span>
+                            <small>Saldo por conta</small>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <div class="dropdown-header">⚙️ FERRAMENTAS</div>
+                        <div class="dropdown-item" onclick="backupDados()">
+                            <i class="fas fa-database"></i>
+                            <span>Backup Completo</span>
+                            <small>Salvar todos os dados</small>
+                        </div>
+                        <div class="dropdown-item" onclick="restaurarBackup()">
+                            <i class="fas fa-undo"></i>
+                            <span>Restaurar Backup</span>
+                            <small>Recuperar dados</small>
+                        </div>
+                        <div class="dropdown-item" onclick="limparDados()">
+                            <i class="fas fa-trash"></i>
+                            <span>Limpar Dados</span>
+                            <small style="color: var(--danger);">Cuidado!</small>
+                        </div>
+                    </div>
+                </div>
+                
                 <button class="btn btn-primary" onclick="abrirModalNovoLancamento()">
                     <i class="fas fa-plus"></i> Novo Lançamento
+                </button>
+                
+                <button class="btn btn-outline" onclick="alternarTema()">
+                    <i class="fas fa-moon"></i>
                 </button>
             </div>
         </div>
@@ -681,9 +854,6 @@
                 </button>
                 <button class="btn btn-info" onclick="exportarDadosCliente()">
                     <i class="fas fa-download"></i> Exportar Dados
-                </button>
-                <button class="btn btn-success" onclick="recarregarConfig()">
-                    <i class="fas fa-sync"></i> Recarregar Config
                 </button>
             </div>
         </div>
@@ -712,13 +882,6 @@
                 <label>Categoria:</label>
                 <select class="filter-input" id="filtroCategoria" onchange="aplicarFiltros()">
                     <option value="todos">Todas</option>
-                    <option value="Alimentação">Alimentação</option>
-                    <option value="Transporte">Transporte</option>
-                    <option value="Moradia">Moradia</option>
-                    <option value="Saúde">Saúde</option>
-                    <option value="Educação">Educação</option>
-                    <option value="Lazer">Lazer</option>
-                    <option value="Salário">Salário</option>
                 </select>
             </div>
             <div class="filter-group">
@@ -739,7 +902,7 @@
                     <span class="card-icon icon-saldo"><i class="fas fa-wallet"></i></span>
                 </div>
                 <div class="card-value" id="saldoTotal">R$ 0,00</div>
-                <small class="text-secondary" id="saldoVariacao">↗️ +12% que ontem</small>
+                <small class="text-secondary" id="saldoVariacao"></small>
             </div>
 
             <div class="card">
@@ -847,9 +1010,7 @@
             </table>
 
             <!-- Paginação -->
-            <div class="pagination" id="paginacao">
-                <!-- Gerado dinamicamente -->
-            </div>
+            <div class="pagination" id="paginacao"></div>
         </div>
     </div>
 
@@ -876,17 +1037,7 @@
                     
                     <div class="form-group">
                         <label>Categoria</label>
-                        <select class="form-control" id="lancamentoCategoria">
-                            <option value="Alimentação">Alimentação</option>
-                            <option value="Transporte">Transporte</option>
-                            <option value="Moradia">Moradia</option>
-                            <option value="Saúde">Saúde</option>
-                            <option value="Educação">Educação</option>
-                            <option value="Lazer">Lazer</option>
-                            <option value="Salário">Salário</option>
-                            <option value="Investimentos">Investimentos</option>
-                            <option value="Outros">Outros</option>
-                        </select>
+                        <select class="form-control" id="lancamentoCategoria"></select>
                     </div>
                     
                     <div class="form-group">
@@ -914,12 +1065,7 @@
                     
                     <div class="form-group">
                         <label>Observações</label>
-                        <textarea class="form-control" id="lancamentoObs" rows="2" placeholder="Observações adicionais..."></textarea>
-                    </div>
-
-                    <div class="form-group" id="lancamentoAnexoGroup" style="display: none;">
-                        <label>Anexo</label>
-                        <input type="file" class="form-control" id="lancamentoAnexo" accept="image/*,.pdf">
+                        <textarea class="form-control" id="lancamentoObs" rows="2"></textarea>
                     </div>
                 </form>
             </div>
@@ -937,9 +1083,7 @@
                 <h2>📋 Detalhes do Lançamento</h2>
                 <button class="modal-close" onclick="fecharModalView()">&times;</button>
             </div>
-            <div class="modal-body" id="viewLancamentoBody">
-                <!-- Conteúdo preenchido dinamicamente -->
-            </div>
+            <div class="modal-body" id="viewLancamentoBody"></div>
             <div class="modal-footer">
                 <button class="btn btn-primary" onclick="fecharModalView()">Fechar</button>
             </div>
@@ -954,7 +1098,7 @@
                 <button class="modal-close" onclick="fecharModalConfirm()">&times;</button>
             </div>
             <div class="modal-body">
-                <p id="confirmMessage">Tem certeza que deseja excluir este lançamento?</p>
+                <p id="confirmMessage">Tem certeza?</p>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="fecharModalConfirm()">Cancelar</button>
@@ -963,26 +1107,42 @@
         </div>
     </div>
 
-    <!-- MODAL EXPORTAÇÃO -->
-    <div id="modalExport" class="modal">
+    <!-- MODAL IMPORTAÇÃO -->
+    <div id="modalImport" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>📤 Exportar Dados</h2>
-                <button class="modal-close" onclick="fecharModalExport()">&times;</button>
+                <h2>📥 Importar Dados</h2>
+                <button class="modal-close" onclick="fecharModalImport()">&times;</button>
             </div>
             <div class="modal-body">
-                <p>Escolha o formato para exportação:</p>
-                <div class="flex" style="margin-top: 20px;">
-                    <button class="btn btn-outline" onclick="exportarPDF()">
-                        <i class="fas fa-file-pdf"></i> PDF
-                    </button>
-                    <button class="btn btn-outline" onclick="exportarExcel()">
-                        <i class="fas fa-file-excel"></i> Excel
-                    </button>
-                    <button class="btn btn-outline" onclick="exportarCSV()">
-                        <i class="fas fa-file-csv"></i> CSV
-                    </button>
+                <p>Selecione um arquivo para importar (JSON, Excel ou CSV)</p>
+                <input type="file" id="importFile" accept=".json,.xlsx,.xls,.csv" class="form-control" style="margin: 15px 0;">
+                <div class="flex">
+                    <label class="checkbox-custom" style="margin-right: 10px;">
+                        <input type="checkbox" id="importSubstituir"> Substituir dados existentes
+                    </label>
                 </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="fecharModalImport()">Cancelar</button>
+                <button class="btn btn-primary" onclick="processarImportacao()">Importar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RELATÓRIO -->
+    <div id="modalRelatorio" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="modalRelatorioTitulo">📊 Relatório</h2>
+                <button class="modal-close" onclick="fecharModalRelatorio()">&times;</button>
+            </div>
+            <div class="modal-body" id="relatorioBody" style="max-height: 500px; overflow-y: auto;"></div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="fecharModalRelatorio()">Fechar</button>
+                <button class="btn btn-primary" onclick="exportarRelatorioPDF()">
+                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                </button>
             </div>
         </div>
     </div>
@@ -1021,7 +1181,7 @@
         let graficoPizza = null;
 
         // ============================================
-        // FUNÇÕES DE FORMATAÇÃO BR
+        // FUNÇÕES DE FORMATAÇÃO
         // ============================================
         function formatarMoedaBR(valor, comSimbolo = true) {
             if (valor === undefined || valor === null) return comSimbolo ? 'R$ 0,00' : '0,00';
@@ -1052,6 +1212,17 @@
             return new Date(data).toLocaleDateString('pt-BR');
         }
 
+        function mostrarAlerta(mensagem, tipo = 'success') {
+            const alert = document.createElement('div');
+            alert.className = `alert ${tipo}`;
+            alert.innerHTML = mensagem;
+            document.body.appendChild(alert);
+            
+            setTimeout(() => {
+                alert.remove();
+            }, 3000);
+        }
+
         // ============================================
         // INICIALIZAÇÃO
         // ============================================
@@ -1061,7 +1232,6 @@
         }
 
         window.onload = async function() {
-            // Pegar parâmetros da URL
             clienteId = getParametroUrl('cliente');
             const modo = getParametroUrl('modo');
             const master = getParametroUrl('master');
@@ -1074,20 +1244,15 @@
                 return;
             }
             
-            // Mostrar badge master se for modo master
             if (modoMaster) {
                 document.getElementById('masterBadge').style.display = 'block';
                 document.getElementById('masterPanel').style.display = 'block';
             }
             
-            // Carregar dados do cliente
             await carregarDadosCliente();
-            
-            // Carregar lançamentos
             carregarLancamentos();
-            
-            // Configurar tema
             aplicarTema();
+            carregarCategorias();
         };
 
         function mostrarErro(mensagem) {
@@ -1102,32 +1267,26 @@
 
         async function carregarDadosCliente() {
             try {
-                // Carregar configurações do cliente
                 const configDoc = await db.collection('configs').doc(clienteId).get();
                 if (configDoc.exists) {
                     clienteConfig = configDoc.data();
                     
-                    // Aplicar configurações visuais
                     document.getElementById('companyName').textContent = 
                         clienteConfig?.conteudo?.nomeEmpresa || 'App Financeiro';
                     
-                    // Aplicar cor primária
                     if (clienteConfig?.visual?.corPrincipal) {
                         document.documentElement.style.setProperty('--primary', clienteConfig.visual.corPrincipal);
                     }
                     
-                    // Aplicar modo escuro se configurado
                     if (clienteConfig?.visual?.modoEscuro === 'dark') {
                         document.documentElement.setAttribute('data-theme', 'dark');
                     }
                 }
                 
-                // Carregar dados do cliente
                 const clienteDoc = await db.collection('clientes').doc(clienteId).get();
                 if (clienteDoc.exists) {
                     clienteData = clienteDoc.data();
                     
-                    // Verificar se está bloqueado
                     if (clienteData.status === 'bloqueado' && !modoMaster) {
                         mostrarErro('Cliente Bloqueado!\n' + (clienteData.motivoBloqueio || 'Entre em contato com o administrador'));
                         return;
@@ -1136,6 +1295,25 @@
                 
             } catch (error) {
                 console.error('Erro ao carregar cliente:', error);
+            }
+        }
+
+        function carregarCategorias() {
+            const categorias = [
+                'Alimentação', 'Transporte', 'Moradia', 'Saúde', 
+                'Educação', 'Lazer', 'Salário', 'Investimentos', 'Outros'
+            ];
+            
+            const selectCategoria = document.getElementById('lancamentoCategoria');
+            const filtroCategoria = document.getElementById('filtroCategoria');
+            
+            if (selectCategoria) {
+                selectCategoria.innerHTML = categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+            }
+            
+            if (filtroCategoria) {
+                filtroCategoria.innerHTML = '<option value="todos">Todas</option>' + 
+                    categorias.map(c => `<option value="${c}">${c}</option>`).join('');
             }
         }
 
@@ -1359,6 +1537,452 @@
         }
 
         // ============================================
+        // FUNÇÕES DE EXPORTAÇÃO/IMPORTAÇÃO/RELATÓRIOS
+        // ============================================
+        
+        function exportarPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFontSize(18);
+                doc.text('Relatório Financeiro', 14, 22);
+                
+                doc.setFontSize(11);
+                doc.text(`Cliente: ${document.getElementById('companyName').textContent}`, 14, 32);
+                doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, 14, 38);
+                
+                // Resumo
+                doc.setFontSize(12);
+                doc.text('Resumo', 14, 48);
+                
+                doc.setFontSize(10);
+                doc.text(`Saldo Total: ${document.getElementById('saldoTotal').textContent}`, 14, 56);
+                doc.text(`Entradas: ${document.getElementById('totalEntradas').textContent}`, 14, 62);
+                doc.text(`Saídas: ${document.getElementById('totalSaidas').textContent}`, 14, 68);
+                doc.text(`Total de Lançamentos: ${document.getElementById('totalLancamentos').textContent}`, 14, 74);
+                
+                // Tabela
+                const tableColumn = ['Data', 'Descrição', 'Categoria', 'Tipo', 'Valor'];
+                const tableRows = [];
+                
+                lancamentosFiltrados.slice(0, 20).forEach(l => {
+                    tableRows.push([
+                        l.data ? new Date(l.data).toLocaleDateString('pt-BR') : '-',
+                        l.descricao || '-',
+                        l.categoria || '-',
+                        l.tipo === 'entrada' ? 'Entrada' : 'Saída',
+                        formatarMoedaBR(l.valor)
+                    ]);
+                });
+                
+                doc.autoTable({
+                    head: [tableColumn],
+                    body: tableRows,
+                    startY: 80,
+                });
+                
+                doc.save(`relatorio_${new Date().toISOString().slice(0,10)}.pdf`);
+                mostrarAlerta('✅ PDF exportado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao exportar PDF:', error);
+                mostrarAlerta('❌ Erro ao exportar PDF', 'error');
+            }
+        }
+
+        function exportarExcel() {
+            try {
+                const dados = lancamentosFiltrados.map(l => ({
+                    Data: l.data ? new Date(l.data).toLocaleDateString('pt-BR') : '-',
+                    Descrição: l.descricao || '-',
+                    Categoria: l.categoria || '-',
+                    Conta: l.conta || '-',
+                    Tipo: l.tipo === 'entrada' ? 'Entrada' : 'Saída',
+                    Valor: l.valor || 0,
+                    Observações: l.obs || ''
+                }));
+                
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(dados);
+                XLSX.utils.book_append_sheet(wb, ws, 'Lançamentos');
+                XLSX.writeFile(wb, `lancamentos_${new Date().toISOString().slice(0,10)}.xlsx`);
+                
+                mostrarAlerta('✅ Excel exportado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao exportar Excel:', error);
+                mostrarAlerta('❌ Erro ao exportar Excel', 'error');
+            }
+        }
+
+        function exportarCSV() {
+            try {
+                const dados = lancamentosFiltrados.map(l => ({
+                    Data: l.data || '-',
+                    Descrição: l.descricao || '-',
+                    Categoria: l.categoria || '-',
+                    Conta: l.conta || '-',
+                    Tipo: l.tipo || '-',
+                    Valor: l.valor || 0,
+                    Obs: l.obs || ''
+                }));
+                
+                const ws = XLSX.utils.json_to_sheet(dados);
+                const csv = XLSX.utils.sheet_to_csv(ws);
+                
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `lancamentos_${new Date().toISOString().slice(0,10)}.csv`;
+                a.click();
+                
+                mostrarAlerta('✅ CSV exportado com sucesso!');
+            } catch (error) {
+                console.error('Erro ao exportar CSV:', error);
+                mostrarAlerta('❌ Erro ao exportar CSV', 'error');
+            }
+        }
+
+        function importarDados() {
+            document.getElementById('modalImport').style.display = 'flex';
+        }
+
+        function fecharModalImport() {
+            document.getElementById('modalImport').style.display = 'none';
+            document.getElementById('importFile').value = '';
+        }
+
+        function processarImportacao() {
+            const file = document.getElementById('importFile').files[0];
+            const substituir = document.getElementById('importSubstituir').checked;
+            
+            if (!file) {
+                mostrarAlerta('Selecione um arquivo!', 'warning');
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = async function(e) {
+                try {
+                    const extensao = file.name.split('.').pop().toLowerCase();
+                    let dados = [];
+                    
+                    if (extensao === 'json') {
+                        dados = JSON.parse(e.target.result);
+                    } else if (['xlsx', 'xls'].includes(extensao)) {
+                        const workbook = XLSX.read(e.target.result, { type: 'binary' });
+                        const sheetName = workbook.SheetNames[0];
+                        dados = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                    } else if (extensao === 'csv') {
+                        const workbook = XLSX.read(e.target.result, { type: 'binary' });
+                        dados = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                    }
+                    
+                    if (substituir) {
+                        // Apagar todos os lançamentos existentes
+                        const batch = db.batch();
+                        lancamentos.forEach(l => {
+                            batch.delete(db.collection('lancamentos').doc(l.id));
+                        });
+                        await batch.commit();
+                    }
+                    
+                    // Importar novos dados
+                    const batch = db.batch();
+                    dados.forEach(item => {
+                        const novoLancamento = {
+                            clienteId,
+                            data: item.Data || item.data || new Date().toISOString().split('T')[0],
+                            descricao: item.Descrição || item.descricao || 'Importado',
+                            categoria: item.Categoria || item.categoria || 'Outros',
+                            conta: item.Conta || item.conta || 'Carteira',
+                            tipo: item.Tipo === 'Saída' || item.tipo === 'saida' ? 'saida' : 'entrada',
+                            valor: parseFloat(item.Valor || item.valor || 0),
+                            obs: item.Observações || item.obs || '',
+                            criadoEm: new Date().toISOString()
+                        };
+                        
+                        const ref = db.collection('lancamentos').doc();
+                        batch.set(ref, novoLancamento);
+                    });
+                    
+                    await batch.commit();
+                    
+                    mostrarAlerta(`✅ ${dados.length} lançamentos importados com sucesso!`);
+                    fecharModalImport();
+                    
+                } catch (error) {
+                    console.error('Erro ao importar:', error);
+                    mostrarAlerta('❌ Erro ao importar arquivo', 'error');
+                }
+            };
+            
+            reader.readAsBinaryString(file);
+        }
+
+        function gerarRelatorioMensal() {
+            const hoje = new Date();
+            const mes = hoje.getMonth();
+            const ano = hoje.getFullYear();
+            
+            const lancamentosMes = lancamentos.filter(l => {
+                const data = new Date(l.data);
+                return data.getMonth() === mes && data.getFullYear() === ano;
+            });
+            
+            let entradas = 0, saidas = 0;
+            lancamentosMes.forEach(l => {
+                if (l.tipo === 'entrada') entradas += l.valor;
+                else saidas += l.valor;
+            });
+            
+            const html = `
+                <h3 style="margin-bottom: 20px;">📅 Relatório Mensal - ${hoje.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</h3>
+                
+                <div style="background: var(--bg-secondary); padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <p><strong>Total de Lançamentos:</strong> ${lancamentosMes.length}</p>
+                    <p><strong>Total de Entradas:</strong> <span class="text-success">${formatarMoedaBR(entradas)}</span></p>
+                    <p><strong>Total de Saídas:</strong> <span class="text-danger">${formatarMoedaBR(saidas)}</span></p>
+                    <p><strong>Saldo do Mês:</strong> <span class="${entradas - saidas >= 0 ? 'text-success' : 'text-danger'}">${formatarMoedaBR(entradas - saidas)}</span></p>
+                </div>
+                
+                <h4>📊 Por Categoria</h4>
+                <table style="width: 100%; margin-top: 10px;">
+                    <thead>
+                        <tr>
+                            <th style="text-align: left;">Categoria</th>
+                            <th style="text-align: right;">Valor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            const categorias = {};
+            lancamentosMes.forEach(l => {
+                const cat = l.categoria || 'Outros';
+                if (!categorias[cat]) categorias[cat] = 0;
+                categorias[cat] += l.valor;
+            });
+            
+            let categoriasHtml = '';
+            Object.entries(categorias).forEach(([cat, valor]) => {
+                categoriasHtml += `
+                    <tr>
+                        <td>${cat}</td>
+                        <td style="text-align: right;">${formatarMoedaBR(valor)}</td>
+                    </tr>
+                `;
+            });
+            
+            document.getElementById('relatorioBody').innerHTML = html + categoriasHtml + '</tbody></table>';
+            document.getElementById('modalRelatorioTitulo').textContent = '📅 Relatório Mensal';
+            document.getElementById('modalRelatorio').style.display = 'flex';
+        }
+
+        function gerarRelatorioAnual() {
+            const hoje = new Date();
+            const ano = hoje.getFullYear();
+            
+            const lancamentosAno = lancamentos.filter(l => new Date(l.data).getFullYear() === ano);
+            
+            const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+            let html = `
+                <h3 style="margin-bottom: 20px;">📆 Relatório Anual - ${ano}</h3>
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Mês</th>
+                            <th style="text-align: right;">Entradas</th>
+                            <th style="text-align: right;">Saídas</th>
+                            <th style="text-align: right;">Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            let totalEntradas = 0, totalSaidas = 0;
+            
+            for (let i = 0; i < 12; i++) {
+                const lancamentosMes = lancamentosAno.filter(l => new Date(l.data).getMonth() === i);
+                let entradas = 0, saidas = 0;
+                
+                lancamentosMes.forEach(l => {
+                    if (l.tipo === 'entrada') entradas += l.valor;
+                    else saidas += l.valor;
+                });
+                
+                totalEntradas += entradas;
+                totalSaidas += saidas;
+                
+                const saldo = entradas - saidas;
+                html += `
+                    <tr>
+                        <td>${meses[i]}</td>
+                        <td style="text-align: right;" class="text-success">${formatarMoedaBR(entradas)}</td>
+                        <td style="text-align: right;" class="text-danger">${formatarMoedaBR(saidas)}</td>
+                        <td style="text-align: right;" class="${saldo >= 0 ? 'text-success' : 'text-danger'}">${formatarMoedaBR(saldo)}</td>
+                    </tr>
+                `;
+            }
+            
+            html += `
+                    </tbody>
+                    <tfoot style="background: var(--bg-secondary); font-weight: bold;">
+                        <tr>
+                            <td>TOTAL</td>
+                            <td style="text-align: right;" class="text-success">${formatarMoedaBR(totalEntradas)}</td>
+                            <td style="text-align: right;" class="text-danger">${formatarMoedaBR(totalSaidas)}</td>
+                            <td style="text-align: right;" class="${totalEntradas - totalSaidas >= 0 ? 'text-success' : 'text-danger'}">${formatarMoedaBR(totalEntradas - totalSaidas)}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            `;
+            
+            document.getElementById('relatorioBody').innerHTML = html;
+            document.getElementById('modalRelatorioTitulo').textContent = '📆 Relatório Anual';
+            document.getElementById('modalRelatorio').style.display = 'flex';
+        }
+
+        function gerarRelatorioCategorias() {
+            const categorias = {};
+            
+            lancamentos.forEach(l => {
+                const cat = l.categoria || 'Outros';
+                if (!categorias[cat]) {
+                    categorias[cat] = { entradas: 0, saidas: 0 };
+                }
+                if (l.tipo === 'entrada') {
+                    categorias[cat].entradas += l.valor;
+                } else {
+                    categorias[cat].saidas += l.valor;
+                }
+            });
+            
+            let html = `
+                <h3 style="margin-bottom: 20px;">📊 Relatório por Categoria</h3>
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Categoria</th>
+                            <th style="text-align: right;">Entradas</th>
+                            <th style="text-align: right;">Saídas</th>
+                            <th style="text-align: right;">Saldo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            Object.entries(categorias).forEach(([cat, valores]) => {
+                const saldo = valores.entradas - valores.saidas;
+                html += `
+                    <tr>
+                        <td><strong>${cat}</strong></td>
+                        <td style="text-align: right;" class="text-success">${formatarMoedaBR(valores.entradas)}</td>
+                        <td style="text-align: right;" class="text-danger">${formatarMoedaBR(valores.saidas)}</td>
+                        <td style="text-align: right;" class="${saldo >= 0 ? 'text-success' : 'text-danger'}">${formatarMoedaBR(saldo)}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            
+            document.getElementById('relatorioBody').innerHTML = html;
+            document.getElementById('modalRelatorioTitulo').textContent = '📊 Relatório por Categoria';
+            document.getElementById('modalRelatorio').style.display = 'flex';
+        }
+
+        function gerarRelatorioContas() {
+            const contas = {};
+            
+            lancamentos.forEach(l => {
+                const conta = l.conta || 'Carteira';
+                if (!contas[conta]) {
+                    contas[conta] = 0;
+                }
+                if (l.tipo === 'entrada') {
+                    contas[conta] += l.valor;
+                } else {
+                    contas[conta] -= l.valor;
+                }
+            });
+            
+            let html = `
+                <h3 style="margin-bottom: 20px;">🏦 Relatório por Conta</h3>
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>Conta</th>
+                            <th style="text-align: right;">Saldo Atual</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            Object.entries(contas).forEach(([conta, saldo]) => {
+                html += `
+                    <tr>
+                        <td><strong>${conta}</strong></td>
+                        <td style="text-align: right;" class="${saldo >= 0 ? 'text-success' : 'text-danger'}">${formatarMoedaBR(saldo)}</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table>';
+            
+            document.getElementById('relatorioBody').innerHTML = html;
+            document.getElementById('modalRelatorioTitulo').textContent = '🏦 Relatório por Conta';
+            document.getElementById('modalRelatorio').style.display = 'flex';
+        }
+
+        function backupDados() {
+            const dados = {
+                cliente: clienteData,
+                config: clienteConfig,
+                lancamentos: lancamentos,
+                dataBackup: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `backup_${clienteId}_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            
+            mostrarAlerta('✅ Backup completo exportado!');
+        }
+
+        function restaurarBackup() {
+            document.getElementById('modalImport').style.display = 'flex';
+            document.getElementById('importSubstituir').checked = true;
+        }
+
+        async function limparDados() {
+            if (confirm('⚠️ ATENÇÃO! Isso apagará TODOS os lançamentos. Tem certeza?')) {
+                try {
+                    const batch = db.batch();
+                    lancamentos.forEach(l => {
+                        batch.delete(db.collection('lancamentos').doc(l.id));
+                    });
+                    await batch.commit();
+                    mostrarAlerta('✅ Todos os dados foram removidos!');
+                } catch (error) {
+                    console.error('Erro ao limpar dados:', error);
+                    mostrarAlerta('❌ Erro ao limpar dados', 'error');
+                }
+            }
+        }
+
+        function exportarRelatorioPDF() {
+            exportarPDF();
+        }
+
+        function fecharModalRelatorio() {
+            document.getElementById('modalRelatorio').style.display = 'none';
+        }
+
+        // ============================================
         // GRÁFICOS
         // ============================================
         function atualizarGraficos() {
@@ -1369,7 +1993,6 @@
         function atualizarGraficoFluxo() {
             const ctx = document.getElementById('graficoFluxo').getContext('2d');
             
-            // Agrupar por mês
             const meses = {};
             lancamentos.forEach(l => {
                 const data = new Date(l.data);
@@ -1430,7 +2053,6 @@
         function atualizarGraficoPizza() {
             const ctx = document.getElementById('graficoPizza').getContext('2d');
             
-            // Agrupar por categoria (apenas saídas)
             const categorias = {};
             lancamentos.filter(l => l.tipo === 'saida').forEach(l => {
                 const cat = l.categoria || 'Outros';
@@ -1498,7 +2120,6 @@
         }
 
         function atualizarSelecao() {
-            // Atualizar checkbox "selecionar todos"
             const selectAll = document.getElementById('selectAllCheckbox');
             if (lancamentosFiltrados.length > 0) {
                 if (selecionados.size === lancamentosFiltrados.length) {
@@ -1508,7 +2129,6 @@
                 }
             }
             
-            // Mostrar/esconder painel de seleção
             const selectionPanel = document.getElementById('selectionPanel');
             if (selecionados.size > 0) {
                 selectionPanel.style.display = 'flex';
@@ -1517,7 +2137,6 @@
                 selectionPanel.style.display = 'none';
             }
             
-            // Atualizar tabela
             atualizarTabela();
         }
 
@@ -1533,8 +2152,7 @@
                 const id = Array.from(selecionados)[0];
                 editarLancamento(id);
             } else {
-                // Edição em lote
-                alert(`Funcionalidade de edição em lote para ${selecionados.size} itens será implementada em breve!`);
+                mostrarAlerta('Selecione apenas um item para editar', 'warning');
             }
         }
 
@@ -1545,12 +2163,15 @@
                 `Deseja realmente excluir ${selecionados.size} lançamento(s)?`;
             
             window.confirmarExclusaoCallback = async () => {
+                const batch = db.batch();
                 for (const id of selecionados) {
-                    await db.collection('lancamentos').doc(id).delete();
+                    batch.delete(db.collection('lancamentos').doc(id));
                 }
+                await batch.commit();
                 selecionados.clear();
                 fecharModalConfirm();
                 atualizarSelecao();
+                mostrarAlerta(`✅ ${selecionados.size} itens excluídos!`);
             };
             
             document.getElementById('confirmActionBtn').onclick = window.confirmarExclusaoCallback;
@@ -1654,7 +2275,7 @@
             const obs = document.getElementById('lancamentoObs').value;
             
             if (!data || !descricao || !valorStr) {
-                alert('Preencha todos os campos obrigatórios!');
+                mostrarAlerta('Preencha todos os campos obrigatórios!', 'warning');
                 return;
             }
             
@@ -1675,9 +2296,11 @@
             try {
                 if (id) {
                     await db.collection('lancamentos').doc(id).update(lancamento);
+                    mostrarAlerta('✅ Lançamento atualizado!');
                 } else {
                     lancamento.criadoEm = new Date().toISOString();
                     await db.collection('lancamentos').add(lancamento);
+                    mostrarAlerta('✅ Lançamento criado!');
                 }
                 
                 fecharModalLancamento();
@@ -1685,7 +2308,7 @@
                 
             } catch (error) {
                 console.error('Erro ao salvar:', error);
-                alert('Erro ao salvar lançamento!');
+                mostrarAlerta('❌ Erro ao salvar lançamento!', 'error');
             }
         }
 
@@ -1695,6 +2318,7 @@
             window.confirmarExclusaoCallback = async () => {
                 await db.collection('lancamentos').doc(id).delete();
                 fecharModalConfirm();
+                mostrarAlerta('✅ Lançamento excluído!');
             };
             
             document.getElementById('confirmActionBtn').onclick = window.confirmarExclusaoCallback;
@@ -1719,28 +2343,8 @@
             }
         }
 
-        function exportarRelatorio() {
-            document.getElementById('modalExport').style.display = 'flex';
-        }
-
-        function exportarPDF() {
-            alert('Exportando PDF...');
-            fecharModalExport();
-        }
-
-        function exportarExcel() {
-            alert('Exportando Excel...');
-            fecharModalExport();
-        }
-
-        function exportarCSV() {
-            alert('Exportando CSV...');
-            fecharModalExport();
-        }
-
         // Funções do Master
         function editarConfigCliente() {
-            alert('Redirecionando para o Master App...');
             window.open(`/master_app.html?cliente=${clienteId}&modo=edicao`, '_blank');
         }
 
@@ -1750,7 +2354,7 @@
                     status: 'bloqueado',
                     motivoBloqueio: 'Bloqueado pelo Master'
                 });
-                alert('Cliente bloqueado!');
+                mostrarAlerta('Cliente bloqueado!');
             }
         }
 
@@ -1758,24 +2362,8 @@
             window.location.href = `/appfinanceiro.html?cliente=${clienteId}`;
         }
 
-        function recarregarConfig() {
-            window.location.reload();
-        }
-
         function exportarDadosCliente() {
-            const dados = {
-                cliente: clienteData,
-                config: clienteConfig,
-                lancamentos: lancamentos,
-                exportadoEm: new Date().toISOString()
-            };
-            
-            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `cliente_${clienteId}_backup.json`;
-            a.click();
+            backupDados();
         }
 
         // Fechar modais
@@ -1791,17 +2379,14 @@
             document.getElementById('modalConfirm').style.display = 'none';
         }
 
-        function fecharModalExport() {
-            document.getElementById('modalExport').style.display = 'none';
-        }
-
         // Fechar modais com ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 fecharModalLancamento();
                 fecharModalView();
                 fecharModalConfirm();
-                fecharModalExport();
+                fecharModalImport();
+                fecharModalRelatorio();
             }
         });
     </script>
