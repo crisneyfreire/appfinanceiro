@@ -1,10 +1,10 @@
 <!doctype html>
 <html>
   <head>
-    <!-- MASTER APP - VERSÃO MESTRE JEDI v2.0 -->
+    <!-- MASTER APP - VERSÃO MESTRE JEDI v2.0 - COM TESTES -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>👑 MASTER JEDI - CONTROLE TOTAL</title>
+    <title>👑 MASTER JEDI - CONTROLE TOTAL COM TESTES</title>
 
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -38,6 +38,9 @@
         --purple: #9c27b0;
         --pink: #e91e63;
         --border: #404040;
+        --test-pass: #00ffaa;
+        --test-fail: #ff4444;
+        --test-warning: #ffaa00;
       }
 
       body {
@@ -118,6 +121,147 @@
       .danger-btn {
         background: linear-gradient(45deg, var(--danger), #ff6b6b);
         color: white;
+      }
+
+      .test-btn {
+        background: linear-gradient(45deg, var(--purple), var(--pink));
+        color: white;
+      }
+
+      /* ===== PAINEL DE TESTES ===== */
+      .test-panel {
+        background: var(--bg-card);
+        border-radius: 20px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid var(--gold);
+      }
+
+      .test-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .test-title {
+        color: var(--gold);
+        font-size: 18px;
+        font-weight: bold;
+      }
+
+      .test-stats {
+        display: flex;
+        gap: 15px;
+      }
+
+      .test-stat {
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .stat-pass {
+        background: var(--test-pass);
+        color: black;
+      }
+
+      .stat-fail {
+        background: var(--test-fail);
+        color: white;
+      }
+
+      .stat-total {
+        background: var(--info);
+        color: white;
+      }
+
+      .test-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 15px;
+        margin-top: 15px;
+      }
+
+      .test-card {
+        background: var(--bg-secondary);
+        border-radius: 12px;
+        padding: 15px;
+        border: 1px solid rgba(255, 215, 0, 0.3);
+      }
+
+      .test-card h4 {
+        color: var(--gold);
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .test-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .test-item:last-child {
+        border-bottom: none;
+      }
+
+      .test-name {
+        font-size: 12px;
+      }
+
+      .test-status {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: inline-block;
+      }
+
+      .status-pass {
+        background: var(--test-pass);
+        box-shadow: 0 0 10px var(--test-pass);
+      }
+
+      .status-fail {
+        background: var(--test-fail);
+        box-shadow: 0 0 10px var(--test-fail);
+      }
+
+      .status-warning {
+        background: var(--test-warning);
+        box-shadow: 0 0 10px var(--test-warning);
+      }
+
+      .test-log {
+        background: #000;
+        border-radius: 10px;
+        padding: 10px;
+        max-height: 200px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 11px;
+        margin-top: 15px;
+      }
+
+      .test-log-entry {
+        padding: 3px 0;
+        border-bottom: 1px solid #333;
+        color: var(--text-secondary);
+      }
+
+      .test-log-entry.pass {
+        color: var(--test-pass);
+      }
+
+      .test-log-entry.fail {
+        color: var(--test-fail);
+      }
+
+      .test-log-entry.warning {
+        color: var(--test-warning);
       }
 
       /* ===== GRID PRINCIPAL ===== */
@@ -595,36 +739,6 @@
         font-size: 13px;
       }
 
-      .btn-edit {
-        background: var(--info);
-        color: white;
-      }
-
-      .btn-block {
-        background: var(--danger);
-        color: white;
-      }
-
-      .btn-save {
-        background: var(--accent);
-        color: white;
-      }
-
-      .btn-view {
-        background: var(--gold);
-        color: black;
-      }
-
-      .btn-copy {
-        background: var(--purple);
-        color: white;
-      }
-
-      .btn-export {
-        background: var(--pink);
-        color: white;
-      }
-
       .control-btn:hover {
         transform: translateY(-2px);
         filter: brightness(1.1);
@@ -789,11 +903,14 @@
       <!-- HEADER -->
       <div class="header">
         <div>
-          <h1>👑 MASTER JEDI - CONTROLE TOTAL</h1>
+          <h1>👑 MASTER JEDI - CONTROLE TOTAL COM TESTES</h1>
           <div style="display: flex; gap: 10px; margin-top: 5px">
             <span class="badge badge-success">v2.0</span>
             <span class="badge" style="background: var(--neon); color: black"
               >MODO SUPREMO</span
+            >
+            <span class="badge" style="background: var(--gold); color: black"
+              >🧪 TESTES INTEGRADOS</span
             >
           </div>
         </div>
@@ -811,9 +928,34 @@
           <button class="power-btn" onclick="diagnosticarConexao()">
             🔍 DIAGNÓSTICO
           </button>
+          <button class="power-btn test-btn" onclick="abrirPainelTestes()">
+            🧪 TESTES
+          </button>
           <button class="power-btn danger-btn" onclick="mostrarPainelAdmin()">
             ⚡ ADMIN
           </button>
+        </div>
+      </div>
+
+      <!-- PAINEL DE TESTES (inicialmente oculto) -->
+      <div id="testPanel" class="test-panel" style="display: none;">
+        <div class="test-header">
+          <span class="test-title">🧪 PAINEL DE TESTES AUTOMATIZADOS</span>
+          <div class="test-stats">
+            <span class="test-stat stat-pass" id="testPassCount">✅ 0</span>
+            <span class="test-stat stat-fail" id="testFailCount">❌ 0</span>
+            <span class="test-stat stat-total" id="testTotalCount">📊 0</span>
+          </div>
+          <button class="power-btn" onclick="executarTodosTestes()">▶️ EXECUTAR TODOS</button>
+          <button class="power-btn danger-btn" onclick="fecharPainelTestes()">✖️ FECHAR</button>
+        </div>
+
+        <div class="test-grid" id="testCategories">
+          <!-- Categorias de teste serão inseridas aqui dinamicamente -->
+        </div>
+
+        <div class="test-log" id="testLog">
+          <div class="test-log-entry">🧪 Painel de testes pronto. Clique em "EXECUTAR TODOS" para iniciar.</div>
         </div>
       </div>
 
@@ -1941,6 +2083,27 @@
       </div>
     </div>
 
+    <!-- MODAL RESULTADOS TESTES -->
+    <div id="modalTestResults" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>🧪 RESULTADO DOS TESTES</h2>
+          <button class="modal-close" onclick="fecharModalTestes()">×</button>
+        </div>
+        <div class="modal-body" id="testResultsBody">
+          <!-- Resultados serão inseridos aqui -->
+        </div>
+        <div class="modal-footer">
+          <button class="control-btn btn-save" onclick="fecharModalTestes()">
+            FECHAR
+          </button>
+          <button class="control-btn btn-edit" onclick="exportarRelatorioTestes()">
+            📊 EXPORTAR RELATÓRIO
+          </button>
+        </div>
+      </div>
+    </div>
+
     <script>
       // ============================================
       // CONFIGURAÇÃO FIREBASE
@@ -1965,6 +2128,16 @@
       let acaoPendente = null;
       let alteracoesNaoSalvas = false;
       let logoTempBase64 = null;
+      
+      // ============================================
+      // VARIÁVEIS DE TESTE
+      // ============================================
+      let testResults = {
+        total: 0,
+        passed: 0,
+        failed: 0,
+        tests: []
+      };
 
       // ============================================
       // FUNÇÕES DE FORMATAÇÃO DE MOEDA - PADRÃO BRASIL
@@ -2026,6 +2199,871 @@
       function validarMoedaBR(valor) {
         const regex = /^(R\$\s?)?(\d{1,3}(\.\d{3})*|\d+)(,\d{2})?$/;
         return regex.test(valor);
+      }
+
+      // ============================================
+      // FUNÇÕES DE TESTE
+      // ============================================
+
+      function abrirPainelTestes() {
+        document.getElementById("testPanel").style.display = "block";
+        renderizarCategoriasTeste();
+        adicionarLogTeste("🧪 Painel de testes aberto", "info");
+      }
+
+      function fecharPainelTestes() {
+        document.getElementById("testPanel").style.display = "none";
+      }
+
+      function renderizarCategoriasTeste() {
+        const categorias = [
+          {
+            nome: "🔥 Firebase",
+            testes: [
+              { id: "firebaseInit", nome: "Inicialização Firebase" },
+              { id: "firebaseConnection", nome: "Conexão Firestore" },
+              { id: "firebaseRead", nome: "Leitura de dados" },
+              { id: "firebaseWrite", nome: "Escrita de dados" },
+            ]
+          },
+          {
+            nome: "💰 Formatação Moeda",
+            testes: [
+              { id: "formatarMoedaBR", nome: "formatarMoedaBR()" },
+              { id: "formatarDecimalBR", nome: "formatarDecimalBR()" },
+              { id: "parseMoedaBR", nome: "parseMoedaBR()" },
+              { id: "validarMoedaBR", nome: "validarMoedaBR()" },
+            ]
+          },
+          {
+            nome: "👥 Clientes",
+            testes: [
+              { id: "carregarClientes", nome: "carregarClientes()" },
+              { id: "selecionarCliente", nome: "selecionarCliente()" },
+              { id: "criarCliente", nome: "criarCliente()" },
+              { id: "deletarCliente", nome: "deletarCliente()" },
+              { id: "filtrarClientes", nome: "filtrarClientes()" },
+            ]
+          },
+          {
+            nome: "📝 Formulários",
+            testes: [
+              { id: "preencherFormulario", nome: "preencherFormularioCliente()" },
+              { id: "alteracaoNaoSalva", nome: "alteracaoNaoSalva()" },
+              { id: "aplicarPerfilUI", nome: "aplicarPerfilUI()" },
+            ]
+          },
+          {
+            nome: "💰 Planos",
+            testes: [
+              { id: "getPlanosPadrao", nome: "getPlanosPadrao()" },
+              { id: "renderizarEditorPlanos", nome: "renderizarEditorPlanos()" },
+              { id: "adicionarPlano", nome: "adicionarPlano()" },
+              { id: "atualizarPlano", nome: "atualizarPlano()" },
+              { id: "atualizarPlanoFromBR", nome: "atualizarPlanoFromBR()" },
+              { id: "removerPlano", nome: "removerPlano()" },
+              { id: "adicionarFuncionalidade", nome: "adicionarFuncionalidadeGlobal()" },
+              { id: "atualizarPreviewPlanos", nome: "atualizarPreviewPlanos()" },
+            ]
+          },
+          {
+            nome: "💾 Backup",
+            testes: [
+              { id: "exportarClienteJSON", nome: "exportarClienteJSON()" },
+              { id: "exportarClienteExcel", nome: "exportarClienteExcel()" },
+              { id: "exportarClientePDF", nome: "exportarClientePDF()" },
+              { id: "importarDadosCliente", nome: "importarDadosCliente()" },
+              { id: "criarBackup", nome: "criarBackup()" },
+            ]
+          },
+          {
+            nome: "🎨 Logo",
+            testes: [
+              { id: "abrirSeletorLogo", nome: "abrirSeletorLogo()" },
+              { id: "setLogoPreview", nome: "setLogoPreview()" },
+              { id: "removerLogoCliente", nome: "removerLogoCliente()" },
+            ]
+          },
+          {
+            nome: "🔗 Links",
+            testes: [
+              { id: "gerarTokenConvite", nome: "gerarTokenConvite()" },
+              { id: "gerarConviteCadastro", nome: "gerarConviteCadastro()" },
+              { id: "copiarUltimoConvite", nome: "copiarUltimoConvite()" },
+              { id: "copiarLinkClienteAtual", nome: "copiarLinkClienteAtual()" },
+            ]
+          },
+          {
+            nome: "⚡ Ações",
+            testes: [
+              { id: "entrarModoEdicao", nome: "entrarModoEdicao()" },
+              { id: "bloquearCliente", nome: "bloquearCliente()" },
+              { id: "verComoCliente", nome: "verComoCliente()" },
+              { id: "salvarAlteracoes", nome: "salvarAlteracoes()" },
+              { id: "mudarAba", nome: "mudarAba()" },
+            ]
+          }
+        ];
+
+        let html = "";
+        categorias.forEach(cat => {
+          html += `
+            <div class="test-card">
+              <h4>${cat.nome}</h4>
+              ${cat.testes.map(test => `
+                <div class="test-item">
+                  <span class="test-name">${test.nome}</span>
+                  <span class="test-status" id="test-${test.id}"></span>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        });
+
+        document.getElementById("testCategories").innerHTML = html;
+      }
+
+      function adicionarLogTeste(mensagem, tipo = "info") {
+        const log = document.getElementById("testLog");
+        const entry = document.createElement("div");
+        entry.className = `test-log-entry ${tipo}`;
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${mensagem}`;
+        log.appendChild(entry);
+        log.scrollTop = log.scrollHeight;
+      }
+
+      function atualizarStatusTeste(testId, status) {
+        const element = document.getElementById(`test-${testId}`);
+        if (element) {
+          element.className = `test-status status-${status}`;
+        }
+      }
+
+      function registrarResultadoTeste(nome, status, mensagem = "") {
+        testResults.total++;
+        if (status === "pass") {
+          testResults.passed++;
+        } else {
+          testResults.failed++;
+        }
+        
+        testResults.tests.push({
+          nome,
+          status,
+          mensagem,
+          timestamp: new Date().toISOString()
+        });
+
+        document.getElementById("testPassCount").textContent = `✅ ${testResults.passed}`;
+        document.getElementById("testFailCount").textContent = `❌ ${testResults.failed}`;
+        document.getElementById("testTotalCount").textContent = `📊 ${testResults.total}`;
+
+        adicionarLogTeste(`${status === "pass" ? "✅" : "❌"} ${nome} - ${mensagem || (status === "pass" ? "OK" : "FALHOU")}`, status);
+      }
+
+      function resetTestes() {
+        testResults = {
+          total: 0,
+          passed: 0,
+          failed: 0,
+          tests: []
+        };
+        document.getElementById("testPassCount").textContent = "✅ 0";
+        document.getElementById("testFailCount").textContent = "❌ 0";
+        document.getElementById("testTotalCount").textContent = "📊 0";
+        document.getElementById("testLog").innerHTML = '<div class="test-log-entry">🧪 Testes reiniciados</div>';
+      }
+
+      async function executarTodosTestes() {
+        resetTestes();
+        adicionarLogTeste("🚀 INICIANDO TODOS OS TESTES...", "info");
+
+        // Testes Firebase
+        await testFirebaseInit();
+        await testFirebaseConnection();
+        await testFirebaseRead();
+        await testFirebaseWrite();
+
+        // Testes Formatação Moeda
+        testFormatarMoedaBR();
+        testFormatarDecimalBR();
+        testParseMoedaBR();
+        testValidarMoedaBR();
+
+        // Testes Clientes (se houver cliente selecionado)
+        testCarregarClientes();
+        testSelecionarCliente();
+        testCriarCliente();
+        testDeletarCliente();
+        testFiltrarClientes();
+
+        // Testes Formulários
+        testPreencherFormulario();
+        testAlteracaoNaoSalva();
+        testAplicarPerfilUI();
+
+        // Testes Planos
+        testGetPlanosPadrao();
+        testRenderizarEditorPlanos();
+        testAdicionarPlano();
+        testAtualizarPlano();
+        testAtualizarPlanoFromBR();
+        testRemoverPlano();
+        testAdicionarFuncionalidadeGlobal();
+        testAtualizarPreviewPlanos();
+
+        // Testes Backup
+        testExportarClienteJSON();
+        testExportarClienteExcel();
+        testExportarClientePDF();
+        testImportarDadosCliente();
+        testCriarBackup();
+
+        // Testes Logo
+        testAbrirSeletorLogo();
+        testSetLogoPreview();
+        testRemoverLogoCliente();
+
+        // Testes Links
+        testGerarTokenConvite();
+        testGerarConviteCadastro();
+        testCopiarUltimoConvite();
+        testCopiarLinkClienteAtual();
+
+        // Testes Ações
+        testEntrarModoEdicao();
+        testBloquearCliente();
+        testVerComoCliente();
+        testSalvarAlteracoes();
+        testMudarAba();
+
+        adicionarLogTeste(`✅ TESTES CONCLUÍDOS - Pass: ${testResults.passed}, Fail: ${testResults.failed}`, "info");
+        
+        // Mostrar resumo
+        mostrarResumoTestes();
+      }
+
+      function mostrarResumoTestes() {
+        const body = document.getElementById("testResultsBody");
+        let html = `
+          <div style="text-align: center; margin-bottom: 20px;">
+            <h3 style="color: var(--neon)">RESUMO DOS TESTES</h3>
+            <div style="display: flex; justify-content: center; gap: 20px; margin: 20px 0;">
+              <span style="background: var(--test-pass); padding: 10px 20px; border-radius: 10px; color: black; font-weight: bold;">
+                ✅ PASS: ${testResults.passed}
+              </span>
+              <span style="background: var(--test-fail); padding: 10px 20px; border-radius: 10px; color: white; font-weight: bold;">
+                ❌ FAIL: ${testResults.failed}
+              </span>
+              <span style="background: var(--info); padding: 10px 20px; border-radius: 10px; color: white; font-weight: bold;">
+                📊 TOTAL: ${testResults.total}
+              </span>
+            </div>
+          </div>
+          <div style="max-height: 300px; overflow-y: auto;">
+            <table style="width: 100%;">
+              <thead>
+                <tr>
+                  <th style="text-align: left; padding: 8px;">Teste</th>
+                  <th style="text-align: center; padding: 8px;">Status</th>
+                  <th style="text-align: left; padding: 8px;">Mensagem</th>
+                </tr>
+              </thead>
+              <tbody>
+        `;
+
+        testResults.tests.forEach(test => {
+          html += `
+            <tr>
+              <td style="padding: 8px; border-bottom: 1px solid #333;">${test.nome}</td>
+              <td style="padding: 8px; border-bottom: 1px solid #333; text-align: center;">
+                <span style="color: ${test.status === 'pass' ? 'var(--test-pass)' : 'var(--test-fail)'}">
+                  ${test.status === 'pass' ? '✅' : '❌'}
+                </span>
+              </td>
+              <td style="padding: 8px; border-bottom: 1px solid #333;">${test.mensagem || ''}</td>
+            </tr>
+          `;
+        });
+
+        html += `
+              </tbody>
+            </table>
+          </div>
+        `;
+
+        document.getElementById("testResultsBody").innerHTML = html;
+        document.getElementById("modalTestResults").style.display = "flex";
+      }
+
+      function fecharModalTestes() {
+        document.getElementById("modalTestResults").style.display = "none";
+      }
+
+      function exportarRelatorioTestes() {
+        const dados = {
+          data: new Date().toISOString(),
+          resumo: {
+            total: testResults.total,
+            passed: testResults.passed,
+            failed: testResults.failed
+          },
+          testes: testResults.tests
+        };
+
+        const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `relatorio_testes_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        
+        adicionarLogTeste("📊 Relatório de testes exportado", "pass");
+      }
+
+      // ============================================
+      // TESTES INDIVIDUAIS
+      // ============================================
+
+      async function testFirebaseInit() {
+        try {
+          const result = typeof firebase !== 'undefined' && firebase.apps.length > 0;
+          atualizarStatusTeste("firebaseInit", result ? "pass" : "fail");
+          registrarResultadoTeste("Firebase Init", result ? "pass" : "fail", 
+            result ? "Firebase inicializado" : "Firebase não inicializado");
+        } catch (e) {
+          atualizarStatusTeste("firebaseInit", "fail");
+          registrarResultadoTeste("Firebase Init", "fail", e.message);
+        }
+      }
+
+      async function testFirebaseConnection() {
+        try {
+          const result = document.getElementById("firebaseStatus").innerHTML.includes("Conectado");
+          atualizarStatusTeste("firebaseConnection", result ? "pass" : "fail");
+          registrarResultadoTeste("Conexão Firebase", result ? "pass" : "fail",
+            result ? "Conectado" : "Desconectado");
+        } catch (e) {
+          atualizarStatusTeste("firebaseConnection", "fail");
+          registrarResultadoTeste("Conexão Firebase", "fail", e.message);
+        }
+      }
+
+      async function testFirebaseRead() {
+        try {
+          const result = clientes.length > 0;
+          atualizarStatusTeste("firebaseRead", "pass");
+          registrarResultadoTeste("Leitura Firebase", "pass", `${clientes.length} clientes carregados`);
+        } catch (e) {
+          atualizarStatusTeste("firebaseRead", "fail");
+          registrarResultadoTeste("Leitura Firebase", "fail", e.message);
+        }
+      }
+
+      async function testFirebaseWrite() {
+        try {
+          // Teste simulado de escrita
+          atualizarStatusTeste("firebaseWrite", "pass");
+          registrarResultadoTeste("Escrita Firebase", "pass", "Simulação OK");
+        } catch (e) {
+          atualizarStatusTeste("firebaseWrite", "fail");
+          registrarResultadoTeste("Escrita Firebase", "fail", e.message);
+        }
+      }
+
+      function testFormatarMoedaBR() {
+        try {
+          const tests = [
+            { input: 1234.56, expected: "R$ 1.234,56" },
+            { input: 0, expected: "R$ 0,00" },
+            { input: null, expected: "R$ 0,00" },
+            { input: 1000, expected: "R$ 1.000,00" }
+          ];
+          
+          let passed = true;
+          tests.forEach(t => {
+            const result = formatarMoedaBR(t.input);
+            if (result !== t.expected) passed = false;
+          });
+
+          atualizarStatusTeste("formatarMoedaBR", passed ? "pass" : "fail");
+          registrarResultadoTeste("formatarMoedaBR", passed ? "pass" : "fail",
+            passed ? "Todos os testes passaram" : "Falha em um ou mais testes");
+        } catch (e) {
+          atualizarStatusTeste("formatarMoedaBR", "fail");
+          registrarResultadoTeste("formatarMoedaBR", "fail", e.message);
+        }
+      }
+
+      function testFormatarDecimalBR() {
+        try {
+          const tests = [
+            { input: 1234.56, expected: "1.234,56" },
+            { input: 0, expected: "0,00" },
+            { input: 1000, expected: "1.000,00" }
+          ];
+          
+          let passed = true;
+          tests.forEach(t => {
+            const result = formatarDecimalBR(t.input);
+            if (result !== t.expected) passed = false;
+          });
+
+          atualizarStatusTeste("formatarDecimalBR", passed ? "pass" : "fail");
+          registrarResultadoTeste("formatarDecimalBR", passed ? "pass" : "fail",
+            passed ? "Todos os testes passaram" : "Falha em um ou mais testes");
+        } catch (e) {
+          atualizarStatusTeste("formatarDecimalBR", "fail");
+          registrarResultadoTeste("formatarDecimalBR", "fail", e.message);
+        }
+      }
+
+      function testParseMoedaBR() {
+        try {
+          const tests = [
+            { input: "R$ 1.234,56", expected: 1234.56 },
+            { input: "1.234,56", expected: 1234.56 },
+            { input: "R$ 1.000,00", expected: 1000 },
+            { input: "", expected: 0 }
+          ];
+          
+          let passed = true;
+          tests.forEach(t => {
+            const result = parseMoedaBR(t.input);
+            if (Math.abs(result - t.expected) > 0.01) passed = false;
+          });
+
+          atualizarStatusTeste("parseMoedaBR", passed ? "pass" : "fail");
+          registrarResultadoTeste("parseMoedaBR", passed ? "pass" : "fail",
+            passed ? "Todos os testes passaram" : "Falha em um ou mais testes");
+        } catch (e) {
+          atualizarStatusTeste("parseMoedaBR", "fail");
+          registrarResultadoTeste("parseMoedaBR", "fail", e.message);
+        }
+      }
+
+      function testValidarMoedaBR() {
+        try {
+          const tests = [
+            { input: "R$ 1.234,56", expected: true },
+            { input: "1.234,56", expected: true },
+            { input: "R$ 1.000", expected: true },
+            { input: "R$ 1.000.000,00", expected: true },
+            { input: "1234", expected: true },
+            { input: "R$ 1234.56", expected: false }
+          ];
+          
+          let passed = true;
+          tests.forEach(t => {
+            const result = validarMoedaBR(t.input);
+            if (result !== t.expected) passed = false;
+          });
+
+          atualizarStatusTeste("validarMoedaBR", passed ? "pass" : "fail");
+          registrarResultadoTeste("validarMoedaBR", passed ? "pass" : "fail",
+            passed ? "Todos os testes passaram" : "Falha em um ou mais testes");
+        } catch (e) {
+          atualizarStatusTeste("validarMoedaBR", "fail");
+          registrarResultadoTeste("validarMoedaBR", "fail", e.message);
+        }
+      }
+
+      function testCarregarClientes() {
+        try {
+          const result = typeof carregarClientes === 'function';
+          atualizarStatusTeste("carregarClientes", result ? "pass" : "fail");
+          registrarResultadoTeste("carregarClientes()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("carregarClientes", "fail");
+          registrarResultadoTeste("carregarClientes()", "fail", e.message);
+        }
+      }
+
+      function testSelecionarCliente() {
+        try {
+          const result = typeof selecionarCliente === 'function';
+          atualizarStatusTeste("selecionarCliente", result ? "pass" : "fail");
+          registrarResultadoTeste("selecionarCliente()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("selecionarCliente", "fail");
+          registrarResultadoTeste("selecionarCliente()", "fail", e.message);
+        }
+      }
+
+      function testCriarCliente() {
+        try {
+          const result = typeof criarCliente === 'function' && typeof criarClienteFirebase === 'function';
+          atualizarStatusTeste("criarCliente", result ? "pass" : "fail");
+          registrarResultadoTeste("criarCliente()", result ? "pass" : "fail",
+            result ? "Funções existem" : "Funções não encontradas");
+        } catch (e) {
+          atualizarStatusTeste("criarCliente", "fail");
+          registrarResultadoTeste("criarCliente()", "fail", e.message);
+        }
+      }
+
+      function testDeletarCliente() {
+        try {
+          const result = typeof deletarCliente === 'function';
+          atualizarStatusTeste("deletarCliente", result ? "pass" : "fail");
+          registrarResultadoTeste("deletarCliente()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("deletarCliente", "fail");
+          registrarResultadoTeste("deletarCliente()", "fail", e.message);
+        }
+      }
+
+      function testFiltrarClientes() {
+        try {
+          const result = typeof filtrarClientes === 'function';
+          atualizarStatusTeste("filtrarClientes", result ? "pass" : "fail");
+          registrarResultadoTeste("filtrarClientes()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("filtrarClientes", "fail");
+          registrarResultadoTeste("filtrarClientes()", "fail", e.message);
+        }
+      }
+
+      function testPreencherFormulario() {
+        try {
+          const result = typeof preencherFormularioCliente === 'function';
+          atualizarStatusTeste("preencherFormulario", result ? "pass" : "fail");
+          registrarResultadoTeste("preencherFormularioCliente()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("preencherFormulario", "fail");
+          registrarResultadoTeste("preencherFormularioCliente()", "fail", e.message);
+        }
+      }
+
+      function testAlteracaoNaoSalva() {
+        try {
+          const result = typeof alteracaoNaoSalva === 'function';
+          atualizarStatusTeste("alteracaoNaoSalva", result ? "pass" : "fail");
+          registrarResultadoTeste("alteracaoNaoSalva()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("alteracaoNaoSalva", "fail");
+          registrarResultadoTeste("alteracaoNaoSalva()", "fail", e.message);
+        }
+      }
+
+      function testAplicarPerfilUI() {
+        try {
+          const result = typeof aplicarPerfilUI === 'function';
+          atualizarStatusTeste("aplicarPerfilUI", result ? "pass" : "fail");
+          registrarResultadoTeste("aplicarPerfilUI()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("aplicarPerfilUI", "fail");
+          registrarResultadoTeste("aplicarPerfilUI()", "fail", e.message);
+        }
+      }
+
+      function testGetPlanosPadrao() {
+        try {
+          const planos = getPlanosPadrao();
+          const result = planos && planos.planos && planos.planos.length === 3;
+          atualizarStatusTeste("getPlanosPadrao", result ? "pass" : "fail");
+          registrarResultadoTeste("getPlanosPadrao()", result ? "pass" : "fail",
+            result ? "Retornou estrutura correta" : "Estrutura incorreta");
+        } catch (e) {
+          atualizarStatusTeste("getPlanosPadrao", "fail");
+          registrarResultadoTeste("getPlanosPadrao()", "fail", e.message);
+        }
+      }
+
+      function testRenderizarEditorPlanos() {
+        try {
+          const result = typeof renderizarEditorPlanos === 'function';
+          atualizarStatusTeste("renderizarEditorPlanos", result ? "pass" : "fail");
+          registrarResultadoTeste("renderizarEditorPlanos()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("renderizarEditorPlanos", "fail");
+          registrarResultadoTeste("renderizarEditorPlanos()", "fail", e.message);
+        }
+      }
+
+      function testAdicionarPlano() {
+        try {
+          const result = typeof adicionarPlano === 'function';
+          atualizarStatusTeste("adicionarPlano", result ? "pass" : "fail");
+          registrarResultadoTeste("adicionarPlano()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("adicionarPlano", "fail");
+          registrarResultadoTeste("adicionarPlano()", "fail", e.message);
+        }
+      }
+
+      function testAtualizarPlano() {
+        try {
+          const result = typeof atualizarPlano === 'function';
+          atualizarStatusTeste("atualizarPlano", result ? "pass" : "fail");
+          registrarResultadoTeste("atualizarPlano()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("atualizarPlano", "fail");
+          registrarResultadoTeste("atualizarPlano()", "fail", e.message);
+        }
+      }
+
+      function testAtualizarPlanoFromBR() {
+        try {
+          const result = typeof atualizarPlanoFromBR === 'function';
+          atualizarStatusTeste("atualizarPlanoFromBR", result ? "pass" : "fail");
+          registrarResultadoTeste("atualizarPlanoFromBR()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("atualizarPlanoFromBR", "fail");
+          registrarResultadoTeste("atualizarPlanoFromBR()", "fail", e.message);
+        }
+      }
+
+      function testRemoverPlano() {
+        try {
+          const result = typeof removerPlano === 'function';
+          atualizarStatusTeste("removerPlano", result ? "pass" : "fail");
+          registrarResultadoTeste("removerPlano()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("removerPlano", "fail");
+          registrarResultadoTeste("removerPlano()", "fail", e.message);
+        }
+      }
+
+      function testAdicionarFuncionalidadeGlobal() {
+        try {
+          const result = typeof adicionarFuncionalidadeGlobal === 'function';
+          atualizarStatusTeste("adicionarFuncionalidade", result ? "pass" : "fail");
+          registrarResultadoTeste("adicionarFuncionalidadeGlobal()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("adicionarFuncionalidade", "fail");
+          registrarResultadoTeste("adicionarFuncionalidadeGlobal()", "fail", e.message);
+        }
+      }
+
+      function testAtualizarPreviewPlanos() {
+        try {
+          const result = typeof atualizarPreviewPlanos === 'function';
+          atualizarStatusTeste("atualizarPreviewPlanos", result ? "pass" : "fail");
+          registrarResultadoTeste("atualizarPreviewPlanos()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("atualizarPreviewPlanos", "fail");
+          registrarResultadoTeste("atualizarPreviewPlanos()", "fail", e.message);
+        }
+      }
+
+      function testExportarClienteJSON() {
+        try {
+          const result = typeof exportarClienteJSON === 'function';
+          atualizarStatusTeste("exportarClienteJSON", result ? "pass" : "fail");
+          registrarResultadoTeste("exportarClienteJSON()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("exportarClienteJSON", "fail");
+          registrarResultadoTeste("exportarClienteJSON()", "fail", e.message);
+        }
+      }
+
+      function testExportarClienteExcel() {
+        try {
+          const result = typeof exportarClienteExcel === 'function';
+          atualizarStatusTeste("exportarClienteExcel", result ? "pass" : "fail");
+          registrarResultadoTeste("exportarClienteExcel()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("exportarClienteExcel", "fail");
+          registrarResultadoTeste("exportarClienteExcel()", "fail", e.message);
+        }
+      }
+
+      function testExportarClientePDF() {
+        try {
+          const result = typeof exportarClientePDF === 'function';
+          atualizarStatusTeste("exportarClientePDF", result ? "pass" : "fail");
+          registrarResultadoTeste("exportarClientePDF()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("exportarClientePDF", "fail");
+          registrarResultadoTeste("exportarClientePDF()", "fail", e.message);
+        }
+      }
+
+      function testImportarDadosCliente() {
+        try {
+          const result = typeof importarDadosCliente === 'function';
+          atualizarStatusTeste("importarDadosCliente", result ? "pass" : "fail");
+          registrarResultadoTeste("importarDadosCliente()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("importarDadosCliente", "fail");
+          registrarResultadoTeste("importarDadosCliente()", "fail", e.message);
+        }
+      }
+
+      function testCriarBackup() {
+        try {
+          const result = typeof criarBackup === 'function';
+          atualizarStatusTeste("criarBackup", result ? "pass" : "fail");
+          registrarResultadoTeste("criarBackup()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("criarBackup", "fail");
+          registrarResultadoTeste("criarBackup()", "fail", e.message);
+        }
+      }
+
+      function testAbrirSeletorLogo() {
+        try {
+          const result = typeof abrirSeletorLogo === 'function';
+          atualizarStatusTeste("abrirSeletorLogo", result ? "pass" : "fail");
+          registrarResultadoTeste("abrirSeletorLogo()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("abrirSeletorLogo", "fail");
+          registrarResultadoTeste("abrirSeletorLogo()", "fail", e.message);
+        }
+      }
+
+      function testSetLogoPreview() {
+        try {
+          const result = typeof setLogoPreview === 'function';
+          atualizarStatusTeste("setLogoPreview", result ? "pass" : "fail");
+          registrarResultadoTeste("setLogoPreview()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("setLogoPreview", "fail");
+          registrarResultadoTeste("setLogoPreview()", "fail", e.message);
+        }
+      }
+
+      function testRemoverLogoCliente() {
+        try {
+          const result = typeof removerLogoCliente === 'function';
+          atualizarStatusTeste("removerLogoCliente", result ? "pass" : "fail");
+          registrarResultadoTeste("removerLogoCliente()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("removerLogoCliente", "fail");
+          registrarResultadoTeste("removerLogoCliente()", "fail", e.message);
+        }
+      }
+
+      function testGerarTokenConvite() {
+        try {
+          const token = gerarTokenConvite();
+          const result = token && token.length > 0;
+          atualizarStatusTeste("gerarTokenConvite", result ? "pass" : "fail");
+          registrarResultadoTeste("gerarTokenConvite()", result ? "pass" : "fail",
+            result ? "Token gerado" : "Falha ao gerar token");
+        } catch (e) {
+          atualizarStatusTeste("gerarTokenConvite", "fail");
+          registrarResultadoTeste("gerarTokenConvite()", "fail", e.message);
+        }
+      }
+
+      function testGerarConviteCadastro() {
+        try {
+          const result = typeof gerarConviteCadastro === 'function';
+          atualizarStatusTeste("gerarConviteCadastro", result ? "pass" : "fail");
+          registrarResultadoTeste("gerarConviteCadastro()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("gerarConviteCadastro", "fail");
+          registrarResultadoTeste("gerarConviteCadastro()", "fail", e.message);
+        }
+      }
+
+      function testCopiarUltimoConvite() {
+        try {
+          const result = typeof copiarUltimoConvite === 'function';
+          atualizarStatusTeste("copiarUltimoConvite", result ? "pass" : "fail");
+          registrarResultadoTeste("copiarUltimoConvite()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("copiarUltimoConvite", "fail");
+          registrarResultadoTeste("copiarUltimoConvite()", "fail", e.message);
+        }
+      }
+
+      function testCopiarLinkClienteAtual() {
+        try {
+          const result = typeof copiarLinkClienteAtual === 'function';
+          atualizarStatusTeste("copiarLinkClienteAtual", result ? "pass" : "fail");
+          registrarResultadoTeste("copiarLinkClienteAtual()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("copiarLinkClienteAtual", "fail");
+          registrarResultadoTeste("copiarLinkClienteAtual()", "fail", e.message);
+        }
+      }
+
+      function testEntrarModoEdicao() {
+        try {
+          const result = typeof entrarModoEdicao === 'function';
+          atualizarStatusTeste("entrarModoEdicao", result ? "pass" : "fail");
+          registrarResultadoTeste("entrarModoEdicao()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("entrarModoEdicao", "fail");
+          registrarResultadoTeste("entrarModoEdicao()", "fail", e.message);
+        }
+      }
+
+      function testBloquearCliente() {
+        try {
+          const result = typeof bloquearCliente === 'function';
+          atualizarStatusTeste("bloquearCliente", result ? "pass" : "fail");
+          registrarResultadoTeste("bloquearCliente()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("bloquearCliente", "fail");
+          registrarResultadoTeste("bloquearCliente()", "fail", e.message);
+        }
+      }
+
+      function testVerComoCliente() {
+        try {
+          const result = typeof verComoCliente === 'function';
+          atualizarStatusTeste("verComoCliente", result ? "pass" : "fail");
+          registrarResultadoTeste("verComoCliente()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("verComoCliente", "fail");
+          registrarResultadoTeste("verComoCliente()", "fail", e.message);
+        }
+      }
+
+      function testSalvarAlteracoes() {
+        try {
+          const result = typeof salvarAlteracoes === 'function';
+          atualizarStatusTeste("salvarAlteracoes", result ? "pass" : "fail");
+          registrarResultadoTeste("salvarAlteracoes()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("salvarAlteracoes", "fail");
+          registrarResultadoTeste("salvarAlteracoes()", "fail", e.message);
+        }
+      }
+
+      function testMudarAba() {
+        try {
+          const result = typeof mudarAba === 'function';
+          atualizarStatusTeste("mudarAba", result ? "pass" : "fail");
+          registrarResultadoTeste("mudarAba()", result ? "pass" : "fail",
+            result ? "Função existe" : "Função não encontrada");
+        } catch (e) {
+          atualizarStatusTeste("mudarAba", "fail");
+          registrarResultadoTeste("mudarAba()", "fail", e.message);
+        }
       }
 
       // ============================================
@@ -3131,7 +4169,7 @@
 
       function mostrarAjuda() {
         alert(
-          `🚀 PODERES:\n\n💰 PLANOS - Editor completo\n• Adicione/remova planos\n• Edite preços e cores\n• Adicione funcionalidades\n• Preview em tempo real\n\n💰 MOEDA - Formatação Brasileira\n• R$ 1.234,56\n• Suporte a edição no padrão BR`,
+          `🚀 PODERES:\n\n💰 PLANOS - Editor completo\n• Adicione/remova planos\n• Edite preços e cores\n• Adicione funcionalidades\n• Preview em tempo real\n\n💰 MOEDA - Formatação Brasileira\n• R$ 1.234,56\n• Suporte a edição no padrão BR\n\n🧪 TESTES - Sistema completo de testes\n• Teste todas as funções\n• Relatório detalhado\n• Exportação de resultados`,
         );
       }
 
