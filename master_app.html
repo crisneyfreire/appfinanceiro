@@ -1480,76 +1480,151 @@
 
             <!-- Configurações Gerais -->
             <div class="data-editor">
-                <h4>⚙️ CONFIGURAÇÕES GERAIS</h4>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>🎨 Cor dos Planos</label>
-                        <input type="color" id="planosCorPrincipal" value="#4CAF50" onchange="alteracaoNaoSalva(); atualizarPreviewPlanos()">
-                    </div>
-                    <div class="form-group">
-                        <label>📊 Mostrar planos?</label>
-                        <select id="planosAtivo" onchange="alteracaoNaoSalva(); atualizarPreviewPlanos()">
-                            <option value="true">Sim - Mostrar planos</option>
-                            <option value="false">Não - Ocultar planos</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>🏷️ Título da seção</label>
-                        <input type="text" id="planosTitulo" value="💰 PLANOS" onchange="alteracaoNaoSalva(); atualizarPreviewPlanos()">
-                    </div>
-                    <div class="form-group">
-                        <label>📝 Subtítulo</label>
-                        <input type="text" id="planosSubtitulo" value="Soluções completas para seu negócio" onchange="alteracaoNaoSalva(); atualizarPreviewPlanos()">
-                    </div>
-                    <div class="form-group">
-                        <label>🏷️ Texto do toggle mensal</label>
-                        <input type="text" id="planosToggleMensal" value="📅 Mensal" onchange="alteracaoNaoSalva(); atualizarPreviewPlanos()">
-                    </div>
-                    <div class="form-group">
-                        <label>🏷️ Texto do toggle anual</label>
-                        <input type="text" id="planosToggleAnual" value="📆 Anual" onchange="alteracaoNaoSalva(); atualizarPreviewPlanos()">
-                    </div>
-                    <div class="form-group">
-                        <label>🏷️ Badge de economia</label>
-                        <input type="text" id="planosEconomiaBadge" value="ECONOMIZE 60%" onchange="alteracaoNaoSalva(); atualizarPreviewPlanos()">
-                    </div>
+              <h4>⚙️ CONFIGURAÇÕES GERAIS</h4>
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>🎨 Cor dos Planos</label>
+                  <input
+                    type="color"
+                    id="planosCorPrincipal"
+                    value="#4CAF50"
+                    onchange="
+                      alteracaoNaoSalva();
+                      atualizarPreviewPlanos();
+                    "
+                  />
                 </div>
+                <div class="form-group">
+                  <label>📊 Mostrar planos?</label>
+                  <select
+                    id="planosAtivo"
+                    onchange="
+                      alteracaoNaoSalva();
+                      atualizarPreviewPlanos();
+                    "
+                  >
+                    <option value="true">Sim - Mostrar planos</option>
+                    <option value="false">Não - Ocultar planos</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>🏷️ Título da seção</label>
+                  <input
+                    type="text"
+                    id="planosTitulo"
+                    value="💰 PLANOS"
+                    onchange="
+                      alteracaoNaoSalva();
+                      atualizarPreviewPlanos();
+                    "
+                  />
+                </div>
+                <div class="form-group">
+                  <label>📝 Subtítulo</label>
+                  <input
+                    type="text"
+                    id="planosSubtitulo"
+                    value="Soluções completas para seu negócio"
+                    onchange="
+                      alteracaoNaoSalva();
+                      atualizarPreviewPlanos();
+                    "
+                  />
+                </div>
+                <div class="form-group">
+                  <label>🏷️ Texto do toggle mensal</label>
+                  <input
+                    type="text"
+                    id="planosToggleMensal"
+                    value="📅 Mensal"
+                    onchange="
+                      alteracaoNaoSalva();
+                      atualizarPreviewPlanos();
+                    "
+                  />
+                </div>
+                <div class="form-group">
+                  <label>🏷️ Texto do toggle anual</label>
+                  <input
+                    type="text"
+                    id="planosToggleAnual"
+                    value="📆 Anual"
+                    onchange="
+                      alteracaoNaoSalva();
+                      atualizarPreviewPlanos();
+                    "
+                  />
+                </div>
+                <div class="form-group">
+                  <label>🏷️ Badge de economia</label>
+                  <input
+                    type="text"
+                    id="planosEconomiaBadge"
+                    value="ECONOMIZE 60%"
+                    onchange="
+                      alteracaoNaoSalva();
+                      atualizarPreviewPlanos();
+                    "
+                  />
+                </div>
+              </div>
             </div>
 
             <!-- Editor de Planos -->
             <div class="data-editor">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h4>📋 PLANOS DISPONÍVEIS</h4>
-                    <button class="btn-add" onclick="adicionarPlano()">➕ NOVO PLANO</button>
-                </div>
-                <div id="planosLista"></div>
+              <div
+                style="
+                  display: flex;
+                  justify-content: space-between;
+                  align-items: center;
+                  margin-bottom: 20px;
+                "
+              >
+                <h4>📋 PLANOS DISPONÍVEIS</h4>
+                <button class="btn-add" onclick="adicionarPlano()">
+                  ➕ NOVO PLANO
+                </button>
+              </div>
+              <div id="planosLista"></div>
             </div>
 
             <!-- Editor de Funcionalidades -->
             <div class="data-editor">
-                <h4>✨ FUNCIONALIDADES (linhas da tabela)</h4>
-                <div style="margin-bottom: 15px">
-                    <button class="btn-add" onclick="adicionarFuncionalidadeGlobal()">➕ Adicionar Funcionalidade</button>
-                </div>
-                <table class="data-table" id="tabelaFuncionalidades">
-                    <thead>
-                        <tr>
-                            <th>Funcionalidade</th>
-                            <th>Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="funcionalidadesBody"></tbody>
-                </table>
+              <h4>✨ FUNCIONALIDADES (linhas da tabela)</h4>
+              <div style="margin-bottom: 15px">
+                <button
+                  class="btn-add"
+                  onclick="adicionarFuncionalidadeGlobal()"
+                >
+                  ➕ Adicionar Funcionalidade
+                </button>
+              </div>
+              <table class="data-table" id="tabelaFuncionalidades">
+                <thead>
+                  <tr>
+                    <th>Funcionalidade</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="funcionalidadesBody"></tbody>
+              </table>
             </div>
 
             <!-- Preview dos Planos -->
             <div class="preview-panel">
-                <div class="preview-header">
-                    <span class="preview-title">👁️ PREVIEW DOS PLANOS</span>
-                </div>
-                <div class="preview-content" id="previewPlanos" style="background: var(--bg-primary); color: var(--text-primary);">
-                    <!-- Preview será renderizado aqui -->
-                </div>
+              <div class="preview-header">
+                <span class="preview-title">👁️ PREVIEW DOS PLANOS</span>
+              </div>
+              <div
+                class="preview-content"
+                id="previewPlanos"
+                style="
+                  background: var(--bg-primary);
+                  color: var(--text-primary);
+                "
+              >
+                <!-- Preview será renderizado aqui -->
+              </div>
             </div>
           </div>
 
@@ -1892,6 +1967,68 @@
       let logoTempBase64 = null;
 
       // ============================================
+      // FUNÇÕES DE FORMATAÇÃO DE MOEDA - PADRÃO BRASIL
+      // ============================================
+      
+      /**
+       * Formata um valor numérico para o padrão de moeda brasileiro (R$)
+       * @param {number} valor - O valor a ser formatado
+       * @param {boolean} comSimbolo - Se deve incluir o símbolo R$
+       * @returns {string} Valor formatado (ex: R$ 1.234,56 ou 1.234,56)
+       */
+      function formatarMoedaBR(valor, comSimbolo = true) {
+        if (valor === undefined || valor === null) return comSimbolo ? 'R$ 0,00' : '0,00';
+        
+        // Garantir que é número
+        const numero = typeof valor === 'string' ? parseFloat(valor) : valor;
+        
+        // Formatar com 2 casas decimais, separador de milhar ponto e decimal vírgula
+        const valorFormatado = numero.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        
+        return comSimbolo ? `R$ ${valorFormatado}` : valorFormatado;
+      }
+
+      /**
+       * Formata um valor numérico com 2 casas decimais no padrão brasileiro
+       * @param {number} valor - O valor a ser formatado
+       * @returns {string} Valor formatado com 2 casas decimais (ex: 1.234,56)
+       */
+      function formatarDecimalBR(valor) {
+        if (valor === undefined || valor === null) return '0,00';
+        
+        const numero = typeof valor === 'string' ? parseFloat(valor) : valor;
+        return numero.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      }
+
+      /**
+       * Converte uma string formatada no padrão brasileiro para número
+       * @param {string} valorStr - String no formato brasileiro (ex: "1.234,56")
+       * @returns {number} Número (ex: 1234.56)
+       */
+      function parseMoedaBR(valorStr) {
+        if (!valorStr) return 0;
+        
+        // Remove R$ e espaços, troca ponto por nada e vírgula por ponto
+        const limpo = valorStr.toString()
+          .replace('R$', '')
+          .replace(/\s/g, '')
+          .replace(/\./g, '')
+          .replace(',', '.');
+        
+        return parseFloat(limpo) || 0;
+      }
+
+      /**
+       * Valida se um valor tem o formato de moeda brasileiro
+       * @param {string} valor - Valor a ser validado
+       * @returns {boolean} True se válido
+       */
+      function validarMoedaBR(valor) {
+        const regex = /^(R\$\s?)?(\d{1,3}(\.\d{3})*|\d+)(,\d{2})?$/;
+        return regex.test(valor);
+      }
+
+      // ============================================
       // FUNÇÕES PRINCIPAIS
       // ============================================
       function carregarClientes() {
@@ -1954,7 +2091,8 @@
           document.getElementById("buscarCliente")?.value.toLowerCase() || "";
 
         if (clientes.length === 0) {
-          lista.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">📭 Nenhum cliente cadastrado</div>';
+          lista.innerHTML =
+            '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">📭 Nenhum cliente cadastrado</div>';
           return;
         }
 
@@ -1965,7 +2103,8 @@
 
         clientesFiltrados.forEach((c) => {
           const ativo = clienteAtual && clienteAtual.id === c.id;
-          const statusClass = c.status === "ativo" ? "status-ativo" : "status-bloqueado";
+          const statusClass =
+            c.status === "ativo" ? "status-ativo" : "status-bloqueado";
 
           html += `
             <div class="cliente-item ${ativo ? "active" : ""}" onclick="selecionarCliente('${c.id}')">
@@ -1975,7 +2114,7 @@
               </div>
               <div class="cliente-info">
                 <span>📱 ${c.appsAtivos || 1} apps</span>
-                <span>📅 ${new Date(c.dataCriacao || Date.now()).toLocaleDateString()}</span>
+                <span>📅 ${new Date(c.dataCriacao || Date.now()).toLocaleDateString('pt-BR')}</span>
               </div>
               <div class="cliente-actions">
                 <span class="action-icon" title="Editar" onclick="entrarModoEdicao(); event.stopPropagation()">✏️</span>
@@ -1988,7 +2127,9 @@
           `;
         });
 
-        lista.innerHTML = html || '<div style="padding: 20px; color: var(--text-secondary);">🔍 Nenhum cliente encontrado</div>';
+        lista.innerHTML =
+          html ||
+          '<div style="padding: 20px; color: var(--text-secondary);">🔍 Nenhum cliente encontrado</div>';
       }
 
       async function selecionarCliente(clienteId) {
@@ -1996,7 +2137,11 @@
         if (!cliente) return;
 
         if (alteracoesNaoSalvas) {
-          if (!confirm("⚠️ Há alterações não salvas! Deseja realmente mudar de cliente?")) {
+          if (
+            !confirm(
+              "⚠️ Há alterações não salvas! Deseja realmente mudar de cliente?",
+            )
+          ) {
             return;
           }
         }
@@ -2025,40 +2170,66 @@
         if (!clienteAtual) return;
 
         document.getElementById("nomeEmpresa").value = clienteAtual.nome || "";
-        document.getElementById("perfilCliente").value = clienteAtual.perfil || "pj";
+        document.getElementById("perfilCliente").value =
+          clienteAtual.perfil || "pj";
         document.getElementById("cpfCnpj").value = clienteAtual.cpfCnpj || "";
-        document.getElementById("clienteIdVisivel").value = clienteAtual.id || "";
-        document.getElementById("corPrincipal").value = clienteAtual.cor || "#4CAF50";
+        document.getElementById("clienteIdVisivel").value =
+          clienteAtual.id || "";
+        document.getElementById("corPrincipal").value =
+          clienteAtual.cor || "#4CAF50";
         document.getElementById("corHex").value = clienteAtual.cor || "#4CAF50";
-        document.getElementById("modoEscuro").value = clienteAtual.modoEscuro || "auto";
+        document.getElementById("modoEscuro").value =
+          clienteAtual.modoEscuro || "auto";
         document.getElementById("tema").value = clienteAtual.tema || "moderno";
 
-        document.getElementById("termoColaborador").value = clienteAtual.termoColaborador || "Motorista";
-        document.getElementById("termoAcao").value = clienteAtual.termoAcao || "Entrega";
-        document.getElementById("termoCliente").value = clienteAtual.termoCliente || "Cliente";
+        document.getElementById("termoColaborador").value =
+          clienteAtual.termoColaborador || "Motorista";
+        document.getElementById("termoAcao").value =
+          clienteAtual.termoAcao || "Entrega";
+        document.getElementById("termoCliente").value =
+          clienteAtual.termoCliente || "Cliente";
         document.getElementById("moeda").value = clienteAtual.moeda || "BRL";
-        document.getElementById("formatoData").value = clienteAtual.formatoData || "pt-BR";
-        document.getElementById("idioma").value = clienteAtual.idioma || "pt-BR";
-        document.getElementById("mensagemBoasVindas").value = clienteAtual.mensagemBoasVindas || "";
-        document.getElementById("motivoBloqueio").value = clienteAtual.motivoBloqueio || "";
+        document.getElementById("formatoData").value =
+          clienteAtual.formatoData || "pt-BR";
+        document.getElementById("idioma").value =
+          clienteAtual.idioma || "pt-BR";
+        document.getElementById("mensagemBoasVindas").value =
+          clienteAtual.mensagemBoasVindas || "";
+        document.getElementById("motivoBloqueio").value =
+          clienteAtual.motivoBloqueio || "";
 
-        document.getElementById("funcDashboard").checked = clienteAtual.funcDashboard !== false;
-        document.getElementById("funcLancamentos").checked = clienteAtual.funcLancamentos !== false;
-        document.getElementById("funcContas").checked = clienteAtual.funcContas !== false;
-        document.getElementById("funcOrcamento").checked = clienteAtual.funcOrcamento !== false;
-        document.getElementById("funcRelatorios").checked = clienteAtual.funcRelatorios !== false;
-        document.getElementById("funcPlanos").checked = clienteAtual.funcPlanos === true;
-        document.getElementById("funcImportar").checked = clienteAtual.funcImportar !== false;
+        document.getElementById("funcDashboard").checked =
+          clienteAtual.funcDashboard !== false;
+        document.getElementById("funcLancamentos").checked =
+          clienteAtual.funcLancamentos !== false;
+        document.getElementById("funcContas").checked =
+          clienteAtual.funcContas !== false;
+        document.getElementById("funcOrcamento").checked =
+          clienteAtual.funcOrcamento !== false;
+        document.getElementById("funcRelatorios").checked =
+          clienteAtual.funcRelatorios !== false;
+        document.getElementById("funcPlanos").checked =
+          clienteAtual.funcPlanos === true;
+        document.getElementById("funcImportar").checked =
+          clienteAtual.funcImportar !== false;
 
-        document.getElementById("permEditarLanc").checked = clienteAtual.permEditarLanc !== false;
-        document.getElementById("permExcluirLanc").checked = clienteAtual.permExcluirLanc !== false;
-        document.getElementById("permSelecaoMassa").checked = clienteAtual.permSelecaoMassa !== false;
-        document.getElementById("permAutorizacao").checked = clienteAtual.permAutorizacao === true;
-        document.getElementById("permEditarPrevisao").checked = clienteAtual.permEditarPrevisao !== false;
-        document.getElementById("permExcluirPrevisao").checked = clienteAtual.permExcluirPrevisao !== false;
+        document.getElementById("permEditarLanc").checked =
+          clienteAtual.permEditarLanc !== false;
+        document.getElementById("permExcluirLanc").checked =
+          clienteAtual.permExcluirLanc !== false;
+        document.getElementById("permSelecaoMassa").checked =
+          clienteAtual.permSelecaoMassa !== false;
+        document.getElementById("permAutorizacao").checked =
+          clienteAtual.permAutorizacao === true;
+        document.getElementById("permEditarPrevisao").checked =
+          clienteAtual.permEditarPrevisao !== false;
+        document.getElementById("permExcluirPrevisao").checked =
+          clienteAtual.permExcluirPrevisao !== false;
 
-        document.getElementById("codigoHtml").value = clienteAtual.codigoHtml || "";
-        document.getElementById("codigoCss").value = clienteAtual.codigoCss || "";
+        document.getElementById("codigoHtml").value =
+          clienteAtual.codigoHtml || "";
+        document.getElementById("codigoCss").value =
+          clienteAtual.codigoCss || "";
         document.getElementById("codigoJs").value = clienteAtual.codigoJs || "";
 
         logoTempBase64 = null;
@@ -2085,7 +2256,8 @@
       }
 
       function atualizarPreview() {
-        const nome = document.getElementById("nomeEmpresa").value || "Nome da Empresa";
+        const nome =
+          document.getElementById("nomeEmpresa").value || "Nome da Empresa";
         const cor = document.getElementById("corPrincipal").value || "#4CAF50";
         document.getElementById("previewTitulo").innerHTML = nome;
         document.getElementById("previewLogoBox").style.background = cor;
@@ -2097,111 +2269,122 @@
       }
 
       // ============================================
-      // EDITOR DE PLANOS
+      // EDITOR DE PLANOS COM FORMATAÇÃO BRASILEIRA
       // ============================================
 
       function getPlanosPadrao() {
         return {
-            ativo: true,
-            titulo: "💰 PLANOS",
-            subtitulo: "Soluções completas para seu negócio",
-            cor: "#4CAF50",
-            toggleMensal: "📅 Mensal",
-            toggleAnual: "📆 Anual",
-            economiaBadge: "ECONOMIZE 60%",
-            planos: [
-                {
-                    id: "basico",
-                    nome: "🚚 BÁSICO",
-                    cor: "#28a745",
-                    precoMensal: 49.90,
-                    precoAnual: 1197.60,
-                    economiaAnual: 60,
-                    destaque: false
-                },
-                {
-                    id: "profissional",
-                    nome: "📦 PROFISSIONAL",
-                    cor: "#17a2b8",
-                    precoMensal: 99.90,
-                    precoAnual: 2397.60,
-                    economiaAnual: 60,
-                    destaque: false
-                },
-                {
-                    id: "empresarial",
-                    nome: "🏢 EMPRESARIAL",
-                    cor: "#ffc107",
-                    precoMensal: 199.90,
-                    precoAnual: 4797.60,
-                    economiaAnual: 60,
-                    destaque: true
-                }
-            ],
-            funcionalidades: [
-                "Usuários",
-                "Transações/mês",
-                "Relatórios avançados",
-                "Suporte prioritário"
-            ],
-            valoresFuncionalidades: {
-                "Usuários": {
-                    "basico": "1",
-                    "profissional": "3",
-                    "empresarial": "10"
-                },
-                "Transações/mês": {
-                    "basico": "100",
-                    "profissional": "500",
-                    "empresarial": "Ilimitado"
-                },
-                "Relatórios avançados": {
-                    "basico": "❌",
-                    "profissional": "✅",
-                    "empresarial": "✅"
-                },
-                "Suporte prioritário": {
-                    "basico": "❌",
-                    "profissional": "❌",
-                    "empresarial": "✅"
-                }
-            }
+          ativo: true,
+          titulo: "💰 PLANOS",
+          subtitulo: "Soluções completas para seu negócio",
+          cor: "#4CAF50",
+          toggleMensal: "📅 Mensal",
+          toggleAnual: "📆 Anual",
+          economiaBadge: "ECONOMIZE 60%",
+          planos: [
+            {
+              id: "basico",
+              nome: "🚚 BÁSICO",
+              cor: "#28a745",
+              precoMensal: 49.9,
+              precoAnual: 1197.6,
+              economiaAnual: 60,
+              destaque: false,
+            },
+            {
+              id: "profissional",
+              nome: "📦 PROFISSIONAL",
+              cor: "#17a2b8",
+              precoMensal: 99.9,
+              precoAnual: 2397.6,
+              economiaAnual: 60,
+              destaque: false,
+            },
+            {
+              id: "empresarial",
+              nome: "🏢 EMPRESARIAL",
+              cor: "#ffc107",
+              precoMensal: 199.9,
+              precoAnual: 4797.6,
+              economiaAnual: 60,
+              destaque: true,
+            },
+          ],
+          funcionalidades: [
+            "Usuários",
+            "Transações/mês",
+            "Relatórios avançados",
+            "Suporte prioritário",
+          ],
+          valoresFuncionalidades: {
+            Usuários: {
+              basico: "1",
+              profissional: "3",
+              empresarial: "10",
+            },
+            "Transações/mês": {
+              basico: "100",
+              profissional: "500",
+              empresarial: "Ilimitado",
+            },
+            "Relatórios avançados": {
+              basico: "❌",
+              profissional: "✅",
+              empresarial: "✅",
+            },
+            "Suporte prioritário": {
+              basico: "❌",
+              profissional: "❌",
+              empresarial: "✅",
+            },
+          },
         };
       }
 
       function renderizarEditorPlanos() {
         if (!clienteAtual) return;
-        
+
         if (!clienteAtual.planosConfig) {
-            clienteAtual.planosConfig = getPlanosPadrao();
+          clienteAtual.planosConfig = getPlanosPadrao();
         }
-        
+
         const planosConfig = clienteAtual.planosConfig;
-        
-        document.getElementById('planosAtivo').value = planosConfig.ativo ? 'true' : 'false';
-        document.getElementById('planosTitulo').value = planosConfig.titulo || '💰 PLANOS';
-        document.getElementById('planosSubtitulo').value = planosConfig.subtitulo || '';
-        document.getElementById('planosCorPrincipal').value = planosConfig.cor || '#4CAF50';
-        document.getElementById('planosToggleMensal').value = planosConfig.toggleMensal || '📅 Mensal';
-        document.getElementById('planosToggleAnual').value = planosConfig.toggleAnual || '📆 Anual';
-        document.getElementById('planosEconomiaBadge').value = planosConfig.economiaBadge || 'ECONOMIZE 60%';
-        
+
+        document.getElementById("planosAtivo").value = planosConfig.ativo
+          ? "true"
+          : "false";
+        document.getElementById("planosTitulo").value =
+          planosConfig.titulo || "💰 PLANOS";
+        document.getElementById("planosSubtitulo").value =
+          planosConfig.subtitulo || "";
+        document.getElementById("planosCorPrincipal").value =
+          planosConfig.cor || "#4CAF50";
+        document.getElementById("planosToggleMensal").value =
+          planosConfig.toggleMensal || "📅 Mensal";
+        document.getElementById("planosToggleAnual").value =
+          planosConfig.toggleAnual || "📆 Anual";
+        document.getElementById("planosEconomiaBadge").value =
+          planosConfig.economiaBadge || "ECONOMIZE 60%";
+
         renderizarListaPlanos(planosConfig.planos || []);
-        renderizarFuncionalidadesGlobais(planosConfig.funcionalidades || [], planosConfig.valoresFuncionalidades || {});
+        renderizarFuncionalidadesGlobais(
+          planosConfig.funcionalidades || [],
+          planosConfig.valoresFuncionalidades || {},
+        );
         atualizarPreviewPlanos();
       }
 
       function renderizarListaPlanos(planos) {
-        const container = document.getElementById('planosLista');
+        const container = document.getElementById("planosLista");
         if (!container) return;
-        
-        let html = '';
+
+        let html = "";
         planos.forEach((plano, index) => {
-            html += `
-                <div class="app-card" style="margin-bottom: 15px; border-left: 4px solid ${plano.cor || '#4CAF50'}">
+          html += `
+                <div class="app-card" style="margin-bottom: 15px; border-left: 4px solid ${plano.cor || "#4CAF50"}">
                     <div class="app-header">
                         <span class="app-nome" style="color: ${plano.cor}">${plano.nome}</span>
-                        ${plano.destaque ? '<span class="badge badge-warning">⭐ Destaque</span>' : ''}
+                        ${plano.destaque ? '<span class="badge badge-warning">⭐ Destaque</span>' : ""}
                     </div>
                     
                     <div class="form-grid" style="grid-template-columns: 1fr 1fr; margin-top: 10px;">
@@ -2215,11 +2398,15 @@
                         </div>
                         <div class="form-group">
                             <label>Preço Mensal (R$)</label>
-                            <input type="number" step="0.01" value="${plano.precoMensal}" onchange="atualizarPlano(${index}, 'precoMensal', parseFloat(this.value))">
+                            <input type="text" value="${formatarMoedaBR(plano.precoMensal, false)}" 
+                                   onchange="atualizarPlanoFromBR(${index}, 'precoMensal', this.value)"
+                                   placeholder="0,00">
                         </div>
                         <div class="form-group">
                             <label>Preço Anual (R$)</label>
-                            <input type="number" step="0.01" value="${plano.precoAnual}" onchange="atualizarPlano(${index}, 'precoAnual', parseFloat(this.value))">
+                            <input type="text" value="${formatarMoedaBR(plano.precoAnual, false)}" 
+                                   onchange="atualizarPlanoFromBR(${index}, 'precoAnual', this.value)"
+                                   placeholder="0,00">
                         </div>
                         <div class="form-group">
                             <label>Economia Anual (%)</label>
@@ -2227,7 +2414,7 @@
                         </div>
                         <div class="form-group">
                             <label style="display: flex; align-items: center; gap: 10px;">
-                                <input type="checkbox" ${plano.destaque ? 'checked' : ''} onchange="atualizarPlano(${index}, 'destaque', this.checked)">
+                                <input type="checkbox" ${plano.destaque ? "checked" : ""} onchange="atualizarPlano(${index}, 'destaque', this.checked)">
                                 Plano em destaque
                             </label>
                         </div>
@@ -2240,17 +2427,17 @@
                 </div>
             `;
         });
-        
+
         container.innerHTML = html;
       }
 
       function renderizarFuncionalidadesGlobais(funcionalidades) {
-        const tbody = document.getElementById('funcionalidadesBody');
+        const tbody = document.getElementById("funcionalidadesBody");
         if (!tbody) return;
-        
-        let html = '';
+
+        let html = "";
         funcionalidades.forEach((func, index) => {
-            html += `
+          html += `
                 <tr>
                     <td>
                         <input type="text" value="${func}" style="width: 100%; padding: 8px;" 
@@ -2262,16 +2449,18 @@
                 </tr>
             `;
         });
-        
-        tbody.innerHTML = html || '<tr><td colspan="2" style="text-align: center;">Nenhuma funcionalidade</td></tr>';
+
+        tbody.innerHTML =
+          html ||
+          '<tr><td colspan="2" style="text-align: center;">Nenhuma funcionalidade</td></tr>';
       }
 
       function atualizarPreviewPlanos() {
         if (!clienteAtual || !clienteAtual.planosConfig) return;
-        
+
         const planosConfig = clienteAtual.planosConfig;
-        const preview = document.getElementById('previewPlanos');
-        
+        const preview = document.getElementById("previewPlanos");
+
         let html = `
             <div style="padding: 20px;">
                 <div style="text-align: center; margin-bottom: 30px;">
@@ -2293,65 +2482,86 @@
                         <thead>
                             <tr>
                                 <th style="text-align: left; padding: 15px; background: rgba(0,0,0,0.05);">Funcionalidades</th>
-                                ${(planosConfig.planos || []).map(p => `
+                                ${(planosConfig.planos || [])
+                                  .map(
+                                    (p) => `
                                     <th style="text-align: center; padding: 15px; background: ${p.cor}20; color: ${p.cor};">
                                         ${p.nome}
                                     </th>
-                                `).join('')}
+                                `,
+                                  )
+                                  .join("")}
                             </tr>
                         </thead>
                         <tbody>
-                            ${(planosConfig.funcionalidades || []).map(func => `
+                            ${(planosConfig.funcionalidades || [])
+                              .map(
+                                (func) => `
                                 <tr>
                                     <td style="padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.1);">${func}</td>
-                                    ${(planosConfig.planos || []).map(p => {
-                                        const valor = planosConfig.valoresFuncionalidades?.[func]?.[p.id] || '—';
+                                    ${(planosConfig.planos || [])
+                                      .map((p) => {
+                                        const valor =
+                                          planosConfig.valoresFuncionalidades?.[
+                                            func
+                                          ]?.[p.id] || "—";
                                         return `<td style="text-align: center; padding: 12px; border-bottom: 1px solid rgba(0,0,0,0.1);">${valor}</td>`;
-                                    }).join('')}
+                                      })
+                                      .join("")}
                                 </tr>
-                            `).join('')}
+                            `,
+                              )
+                              .join("")}
                             <tr style="background: rgba(0,0,0,0.05);">
                                 <td style="padding: 15px; font-weight: bold;">PREÇO MENSAL</td>
-                                ${(planosConfig.planos || []).map(p => `
+                                ${(planosConfig.planos || [])
+                                  .map(
+                                    (p) => `
                                     <td style="text-align: center; padding: 15px;">
-                                        <strong>R$ ${p.precoMensal.toFixed(2).replace('.', ',')}</strong>
+                                        <strong>${formatarMoedaBR(p.precoMensal)}</strong>
                                     </td>
-                                `).join('')}
+                                `,
+                                  )
+                                  .join("")}
                             </tr>
                             <tr style="background: rgba(0,0,0,0.02);">
                                 <td style="padding: 15px; font-weight: bold;">PREÇO ANUAL</td>
-                                ${(planosConfig.planos || []).map(p => `
+                                ${(planosConfig.planos || [])
+                                  .map(
+                                    (p) => `
                                     <td style="text-align: center; padding: 15px;">
-                                        <strong>R$ ${p.precoAnual.toFixed(2).replace('.', ',')}</strong>
+                                        <strong>${formatarMoedaBR(p.precoAnual)}</strong>
                                         <br><small style="color: #28a745;">Economize ${p.economiaAnual}%</small>
                                     </td>
-                                `).join('')}
+                                `,
+                                  )
+                                  .join("")}
                             </tr>
                         </tbody>
                     </table>
                 </div>
             </div>
         `;
-        
+
         preview.innerHTML = html;
       }
 
       function adicionarPlano() {
         if (!clienteAtual) return;
-        
+
         const planosConfig = clienteAtual.planosConfig || getPlanosPadrao();
         if (!planosConfig.planos) planosConfig.planos = [];
-        
+
         const novoPlano = {
-            id: `plano_${Date.now()}`,
-            nome: "🆕 NOVO PLANO",
-            cor: "#6c757d",
-            precoMensal: 0,
-            precoAnual: 0,
-            economiaAnual: 60,
-            destaque: false
+          id: `plano_${Date.now()}`,
+          nome: "🆕 NOVO PLANO",
+          cor: "#6c757d",
+          precoMensal: 0,
+          precoAnual: 0,
+          economiaAnual: 60,
+          destaque: false,
         };
-        
+
         planosConfig.planos.push(novoPlano);
         clienteAtual.planosConfig = planosConfig;
         alteracaoNaoSalva();
@@ -2365,8 +2575,16 @@
         atualizarPreviewPlanos();
       }
 
+      function atualizarPlanoFromBR(index, campo, valorStr) {
+        if (!clienteAtual || !clienteAtual.planosConfig) return;
+        const valorNumerico = parseMoedaBR(valorStr);
+        clienteAtual.planosConfig.planos[index][campo] = valorNumerico;
+        alteracaoNaoSalva();
+        atualizarPreviewPlanos();
+      }
+
       function removerPlano(index) {
-        if (!confirm('Remover este plano?')) return;
+        if (!confirm("Remover este plano?")) return;
         clienteAtual.planosConfig.planos.splice(index, 1);
         alteracaoNaoSalva();
         renderizarEditorPlanos();
@@ -2374,19 +2592,20 @@
 
       function adicionarFuncionalidadeGlobal() {
         if (!clienteAtual) return;
-        
+
         const planosConfig = clienteAtual.planosConfig || getPlanosPadrao();
         if (!planosConfig.funcionalidades) planosConfig.funcionalidades = [];
-        if (!planosConfig.valoresFuncionalidades) planosConfig.valoresFuncionalidades = {};
-        
+        if (!planosConfig.valoresFuncionalidades)
+          planosConfig.valoresFuncionalidades = {};
+
         const novaFunc = `Nova Funcionalidade ${planosConfig.funcionalidades.length + 1}`;
         planosConfig.funcionalidades.push(novaFunc);
         planosConfig.valoresFuncionalidades[novaFunc] = {};
-        
-        (planosConfig.planos || []).forEach(plano => {
-            planosConfig.valoresFuncionalidades[novaFunc][plano.id] = '—';
+
+        (planosConfig.planos || []).forEach((plano) => {
+          planosConfig.valoresFuncionalidades[novaFunc][plano.id] = "—";
         });
-        
+
         clienteAtual.planosConfig = planosConfig;
         alteracaoNaoSalva();
         renderizarEditorPlanos();
@@ -2394,43 +2613,46 @@
 
       function atualizarFuncionalidade(index, novoValor) {
         if (!clienteAtual || !clienteAtual.planosConfig) return;
-        
+
         const oldValue = clienteAtual.planosConfig.funcionalidades[index];
         clienteAtual.planosConfig.funcionalidades[index] = novoValor;
-        
+
         if (clienteAtual.planosConfig.valoresFuncionalidades[oldValue]) {
-            clienteAtual.planosConfig.valoresFuncionalidades[novoValor] = 
-                clienteAtual.planosConfig.valoresFuncionalidades[oldValue];
-            delete clienteAtual.planosConfig.valoresFuncionalidades[oldValue];
+          clienteAtual.planosConfig.valoresFuncionalidades[novoValor] =
+            clienteAtual.planosConfig.valoresFuncionalidades[oldValue];
+          delete clienteAtual.planosConfig.valoresFuncionalidades[oldValue];
         }
-        
+
         alteracaoNaoSalva();
         atualizarPreviewPlanos();
       }
 
       function removerFuncionalidade(index) {
-        if (!confirm('Remover esta funcionalidade?')) return;
-        
+        if (!confirm("Remover esta funcionalidade?")) return;
+
         const func = clienteAtual.planosConfig.funcionalidades[index];
         clienteAtual.planosConfig.funcionalidades.splice(index, 1);
         delete clienteAtual.planosConfig.valoresFuncionalidades[func];
-        
+
         alteracaoNaoSalva();
         renderizarEditorPlanos();
       }
 
       function editarFuncionalidadesPlano(planoIndex) {
         if (!clienteAtual || !clienteAtual.planosConfig) return;
-        
+
         const plano = clienteAtual.planosConfig.planos[planoIndex];
-        
+
         let html = `
             <h4 style="margin-bottom: 20px;">⚙️ Funcionalidades - ${plano.nome}</h4>
         `;
-        
-        (clienteAtual.planosConfig.funcionalidades || []).forEach(func => {
-            const valorAtual = clienteAtual.planosConfig.valoresFuncionalidades?.[func]?.[plano.id] || '—';
-            html += `
+
+        (clienteAtual.planosConfig.funcionalidades || []).forEach((func) => {
+          const valorAtual =
+            clienteAtual.planosConfig.valoresFuncionalidades?.[func]?.[
+              plano.id
+            ] || "—";
+          html += `
                 <div class="form-group">
                     <label>${func}</label>
                     <input type="text" value="${valorAtual}" 
@@ -2438,22 +2660,23 @@
                 </div>
             `;
         });
-        
-        document.getElementById('configAppBody').innerHTML = html;
-        document.getElementById('configAppTitulo').innerHTML = `⚙️ ${plano.nome}`;
-        document.getElementById('modalConfigApp').style.display = 'flex';
+
+        document.getElementById("configAppBody").innerHTML = html;
+        document.getElementById("configAppTitulo").innerHTML =
+          `⚙️ ${plano.nome}`;
+        document.getElementById("modalConfigApp").style.display = "flex";
       }
 
       function atualizarValorFuncionalidade(planoId, func, valor) {
         if (!clienteAtual || !clienteAtual.planosConfig) return;
-        
+
         if (!clienteAtual.planosConfig.valoresFuncionalidades) {
-            clienteAtual.planosConfig.valoresFuncionalidades = {};
+          clienteAtual.planosConfig.valoresFuncionalidades = {};
         }
         if (!clienteAtual.planosConfig.valoresFuncionalidades[func]) {
-            clienteAtual.planosConfig.valoresFuncionalidades[func] = {};
+          clienteAtual.planosConfig.valoresFuncionalidades[func] = {};
         }
-        
+
         clienteAtual.planosConfig.valoresFuncionalidades[func][planoId] = valor;
         alteracaoNaoSalva();
         atualizarPreviewPlanos();
@@ -2461,20 +2684,26 @@
 
       function construirPlanosConfig() {
         if (!clienteAtual || !clienteAtual.planosConfig) {
-            return getPlanosPadrao();
+          return getPlanosPadrao();
         }
-        
+
         return {
-            ativo: document.getElementById('planosAtivo')?.value === 'true',
-            titulo: document.getElementById('planosTitulo')?.value || '💰 PLANOS',
-            subtitulo: document.getElementById('planosSubtitulo')?.value || '',
-            cor: document.getElementById('planosCorPrincipal')?.value || '#4CAF50',
-            toggleMensal: document.getElementById('planosToggleMensal')?.value || '📅 Mensal',
-            toggleAnual: document.getElementById('planosToggleAnual')?.value || '📆 Anual',
-            economiaBadge: document.getElementById('planosEconomiaBadge')?.value || 'ECONOMIZE 60%',
-            planos: clienteAtual.planosConfig.planos || [],
-            funcionalidades: clienteAtual.planosConfig.funcionalidades || [],
-            valoresFuncionalidades: clienteAtual.planosConfig.valoresFuncionalidades || {}
+          ativo: document.getElementById("planosAtivo")?.value === "true",
+          titulo: document.getElementById("planosTitulo")?.value || "💰 PLANOS",
+          subtitulo: document.getElementById("planosSubtitulo")?.value || "",
+          cor:
+            document.getElementById("planosCorPrincipal")?.value || "#4CAF50",
+          toggleMensal:
+            document.getElementById("planosToggleMensal")?.value || "📅 Mensal",
+          toggleAnual:
+            document.getElementById("planosToggleAnual")?.value || "📆 Anual",
+          economiaBadge:
+            document.getElementById("planosEconomiaBadge")?.value ||
+            "ECONOMIZE 60%",
+          planos: clienteAtual.planosConfig.planos || [],
+          funcionalidades: clienteAtual.planosConfig.funcionalidades || [],
+          valoresFuncionalidades:
+            clienteAtual.planosConfig.valoresFuncionalidades || {},
         };
       }
 
@@ -2499,7 +2728,8 @@
           moeda: document.getElementById("moeda").value,
           formatoData: document.getElementById("formatoData").value,
           idioma: document.getElementById("idioma").value,
-          mensagemBoasVindas: document.getElementById("mensagemBoasVindas").value,
+          mensagemBoasVindas:
+            document.getElementById("mensagemBoasVindas").value,
           motivoBloqueio: document.getElementById("motivoBloqueio").value,
           funcDashboard: document.getElementById("funcDashboard").checked,
           funcLancamentos: document.getElementById("funcLancamentos").checked,
@@ -2512,57 +2742,79 @@
           permExcluirLanc: document.getElementById("permExcluirLanc").checked,
           permSelecaoMassa: document.getElementById("permSelecaoMassa").checked,
           permAutorizacao: document.getElementById("permAutorizacao").checked,
-          permEditarPrevisao: document.getElementById("permEditarPrevisao").checked,
-          permExcluirPrevisao: document.getElementById("permExcluirPrevisao").checked,
+          permEditarPrevisao:
+            document.getElementById("permEditarPrevisao").checked,
+          permExcluirPrevisao: document.getElementById("permExcluirPrevisao")
+            .checked,
           codigoHtml: document.getElementById("codigoHtml").value,
           codigoCss: document.getElementById("codigoCss").value,
           codigoJs: document.getElementById("codigoJs").value,
           logoBase64: logoTempBase64 || clienteAtual.logoBase64 || null,
           atualizadoEm: new Date().toISOString(),
-          planosConfig: construirPlanosConfig()
+          planosConfig: construirPlanosConfig(),
         };
 
         const config = {
           visual: {
-            corPrincipal: document.getElementById("corPrincipal")?.value || "#4CAF50",
+            corPrincipal:
+              document.getElementById("corPrincipal")?.value || "#4CAF50",
             modoEscuro: document.getElementById("modoEscuro")?.value || "auto",
             tema: document.getElementById("tema")?.value || "moderno",
           },
           conteudo: {
             nomeEmpresa: document.getElementById("nomeEmpresa")?.value || "",
-            termoColaborador: document.getElementById("termoColaborador")?.value || "Motorista",
+            termoColaborador:
+              document.getElementById("termoColaborador")?.value || "Motorista",
             termoAcao: document.getElementById("termoAcao")?.value || "Entrega",
-            termoCliente: document.getElementById("termoCliente")?.value || "Cliente",
+            termoCliente:
+              document.getElementById("termoCliente")?.value || "Cliente",
             moeda: document.getElementById("moeda")?.value || "BRL",
-            formatoData: document.getElementById("formatoData")?.value || "pt-BR",
+            formatoData:
+              document.getElementById("formatoData")?.value || "pt-BR",
             idioma: document.getElementById("idioma")?.value || "pt-BR",
-            mensagemBoasVindas: document.getElementById("mensagemBoasVindas")?.value || "",
-            motivoBloqueio: document.getElementById("motivoBloqueio")?.value || "",
+            mensagemBoasVindas:
+              document.getElementById("mensagemBoasVindas")?.value || "",
+            motivoBloqueio:
+              document.getElementById("motivoBloqueio")?.value || "",
           },
           funcoes: {
-            dashboard: document.getElementById("funcDashboard")?.checked ?? true,
-            lancamentos: document.getElementById("funcLancamentos")?.checked ?? true,
+            dashboard:
+              document.getElementById("funcDashboard")?.checked ?? true,
+            lancamentos:
+              document.getElementById("funcLancamentos")?.checked ?? true,
             contas: document.getElementById("funcContas")?.checked ?? true,
-            orcamento: document.getElementById("funcOrcamento")?.checked ?? true,
-            relatorios: document.getElementById("funcRelatorios")?.checked ?? true,
+            orcamento:
+              document.getElementById("funcOrcamento")?.checked ?? true,
+            relatorios:
+              document.getElementById("funcRelatorios")?.checked ?? true,
             planos: document.getElementById("funcPlanos")?.checked ?? false,
             importar: document.getElementById("funcImportar")?.checked ?? true,
-            permitirEditarLancamentos: document.getElementById("permEditarLanc")?.checked ?? true,
-            permitirExcluirLancamentos: document.getElementById("permExcluirLanc")?.checked ?? true,
-            permitirSelecaoMassa: document.getElementById("permSelecaoMassa")?.checked ?? true,
-            autorizacaoObrigatoria: document.getElementById("permAutorizacao")?.checked ?? false,
+            permitirEditarLancamentos:
+              document.getElementById("permEditarLanc")?.checked ?? true,
+            permitirExcluirLancamentos:
+              document.getElementById("permExcluirLanc")?.checked ?? true,
+            permitirSelecaoMassa:
+              document.getElementById("permSelecaoMassa")?.checked ?? true,
+            autorizacaoObrigatoria:
+              document.getElementById("permAutorizacao")?.checked ?? false,
           },
           codigo: {
             html: document.getElementById("codigoHtml")?.value || "",
             css: document.getElementById("codigoCss")?.value || "",
             js: document.getElementById("codigoJs")?.value || "",
           },
-          planosConfig: construirPlanosConfig()
+          planosConfig: construirPlanosConfig(),
         };
 
         try {
-          await db.collection("clientes").doc(clienteId).set(baseCliente, { merge: true });
-          await db.collection("configs").doc(clienteId).set(config, { merge: true });
+          await db
+            .collection("clientes")
+            .doc(clienteId)
+            .set(baseCliente, { merge: true });
+          await db
+            .collection("configs")
+            .doc(clienteId)
+            .set(config, { merge: true });
 
           alteracoesNaoSalvas = false;
           document.getElementById("btnSalvar").disabled = true;
@@ -2577,12 +2829,12 @@
       // FUNÇÕES AUXILIARES
       // ============================================
       function toggleApp(appId, ativar) {
-        alert(ativar ? '✅ App ativado' : '❌ App desativado');
+        alert(ativar ? "✅ App ativado" : "❌ App desativado");
         alteracaoNaoSalva();
       }
 
       function configurarApp(appId) {
-        alert('⚙️ Configurações do app');
+        alert("⚙️ Configurações do app");
       }
 
       function adicionarCategoria() {
@@ -2612,7 +2864,9 @@
       function exportarClienteJSON() {
         if (!clienteAtual) return;
         const dados = { cliente: clienteAtual, data: new Date().toISOString() };
-        const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
+        const blob = new Blob([JSON.stringify(dados, null, 2)], {
+          type: "application/json",
+        });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -2621,17 +2875,25 @@
         alert("📦 Backup exportado");
       }
 
-      function exportarClienteExcel() { alert("📊 Em breve!"); }
-      function exportarClientePDF() { alert("📑 Em breve!"); }
+      function exportarClienteExcel() {
+        alert("📊 Em breve!");
+      }
+      function exportarClientePDF() {
+        alert("📑 Em breve!");
+      }
 
       function importarDadosCliente() {
         if (!confirm("⚠️ Isso substituirá todos os dados? Continuar?")) return;
         alert("✅ Importado!");
       }
 
-      function criarBackup() { alert("💾 Backup criado!"); }
+      function criarBackup() {
+        alert("💾 Backup criado!");
+      }
 
-      function abrirSeletorLogo() { document.getElementById("logoInput").click(); }
+      function abrirSeletorLogo() {
+        document.getElementById("logoInput").click();
+      }
 
       function setLogoPreview(dataUrl) {
         const img = document.getElementById("logoPreview");
@@ -2646,18 +2908,20 @@
         }
       }
 
-      document.getElementById("logoInput").addEventListener("change", function (e) {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = function (e) {
-            logoTempBase64 = e.target.result;
-            setLogoPreview(logoTempBase64);
-            alteracaoNaoSalva();
-          };
-          reader.readAsDataURL(file);
-        }
-      });
+      document
+        .getElementById("logoInput")
+        .addEventListener("change", function (e) {
+          const file = e.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              logoTempBase64 = e.target.result;
+              setLogoPreview(logoTempBase64);
+              alteracaoNaoSalva();
+            };
+            reader.readAsDataURL(file);
+          }
+        });
 
       function removerLogoCliente() {
         if (!clienteAtual || !confirm("Remover logo?")) return;
@@ -2675,30 +2939,39 @@
         const token = gerarTokenConvite();
         const link = `${window.location.origin}/appfinanceiro.html?cliente=${clienteAtual.id}&convite=${token}`;
         document.getElementById("ultimoConviteLink").value = link;
-        try { await navigator.clipboard.writeText(link); } catch (e) {}
+        try {
+          await navigator.clipboard.writeText(link);
+        } catch (e) {}
         alert(`✅ Convite gerado!\n${link}`);
       }
 
       async function copiarUltimoConvite() {
         const link = document.getElementById("ultimoConviteLink").value;
         if (!link) return alert("Gere um convite primeiro");
-        try { await navigator.clipboard.writeText(link); alert("✅ Copiado!"); } 
-        catch (e) { alert("❌ Erro ao copiar"); }
+        try {
+          await navigator.clipboard.writeText(link);
+          alert("✅ Copiado!");
+        } catch (e) {
+          alert("❌ Erro ao copiar");
+        }
       }
 
       function entrarModoEdicao() {
         if (!clienteAtual) return alert("Selecione um cliente");
         document.getElementById("modalTitulo").textContent = "✏️ MODO EDIÇÃO";
-        document.getElementById("modalMsg").textContent = `Ativar modo edição para ${clienteAtual.nome}?`;
+        document.getElementById("modalMsg").textContent =
+          `Ativar modo edição para ${clienteAtual.nome}?`;
         document.getElementById("modalConfirm").style.display = "flex";
         acaoPendente = "editar";
       }
 
       async function bloquearCliente() {
         if (!clienteAtual) return;
-        const acao = clienteAtual.status === "ativo" ? "BLOQUEAR" : "DESBLOQUEAR";
+        const acao =
+          clienteAtual.status === "ativo" ? "BLOQUEAR" : "DESBLOQUEAR";
         document.getElementById("modalTitulo").textContent = `🔒 ${acao}`;
-        document.getElementById("modalMsg").textContent = `${acao} ${clienteAtual.nome}?`;
+        document.getElementById("modalMsg").textContent =
+          `${acao} ${clienteAtual.nome}?`;
         document.getElementById("modalConfirm").style.display = "flex";
         acaoPendente = "bloquear";
       }
@@ -2716,10 +2989,16 @@
             alert("❌ Erro: " + error.message);
           }
         } else if (acaoPendente === "bloquear") {
-          const novoStatus = clienteAtual.status === "ativo" ? "bloqueado" : "ativo";
+          const novoStatus =
+            clienteAtual.status === "ativo" ? "bloqueado" : "ativo";
           try {
-            await db.collection("clientes").doc(clienteAtual.id).update({ status: novoStatus });
-            alert(`✅ Cliente ${novoStatus === "ativo" ? "desbloqueado" : "bloqueado"}!`);
+            await db
+              .collection("clientes")
+              .doc(clienteAtual.id)
+              .update({ status: novoStatus });
+            alert(
+              `✅ Cliente ${novoStatus === "ativo" ? "desbloqueado" : "bloqueado"}!`,
+            );
           } catch (error) {
             alert("❌ Erro: " + error.message);
           }
@@ -2736,22 +3015,32 @@
       function copiarLinkClienteAtual() {
         if (!clienteAtual) return;
         const url = `${window.location.origin}/appfinanceiro.html?cliente=${clienteAtual.id}`;
-        try { navigator.clipboard.writeText(url); alert("✅ Link copiado!"); } 
-        catch (e) { prompt("Copie o link:", url); }
+        try {
+          navigator.clipboard.writeText(url);
+          alert("✅ Link copiado!");
+        } catch (e) {
+          prompt("Copie o link:", url);
+        }
       }
 
       async function deletarCliente(clienteId, event) {
         if (event) event.stopPropagation();
-        const cliente = clientes.find(c => c.id === clienteId);
+        const cliente = clientes.find((c) => c.id === clienteId);
         if (!cliente || !confirm(`⚠️ Excluir ${cliente.nome}?`)) return;
-        
+
         try {
           await db.collection("clientes").doc(clienteId).delete();
           alert("✅ Cliente excluído!");
           if (clienteAtual && clienteAtual.id === clienteId) {
             clienteAtual = null;
-            ["btnEditar","btnBloquear","btnSalvar","btnVisualizar","btnCopiarLink","btnExportar"]
-              .forEach(id => document.getElementById(id).disabled = true);
+            [
+              "btnEditar",
+              "btnBloquear",
+              "btnSalvar",
+              "btnVisualizar",
+              "btnCopiarLink",
+              "btnExportar",
+            ].forEach((id) => (document.getElementById(id).disabled = true));
           }
         } catch (error) {
           alert("❌ Erro ao deletar");
@@ -2786,7 +3075,7 @@
           funcRelatorios: true,
           funcPlanos: true,
           funcImportar: true,
-          planosConfig: getPlanosPadrao()
+          planosConfig: getPlanosPadrao(),
         };
 
         try {
@@ -2803,55 +3092,96 @@
       }
 
       function mudarAba(aba, btnEl) {
-        document.querySelectorAll(".tab-content").forEach(el => el.style.display = "none");
-        
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((el) => (el.style.display = "none"));
+
         const idMap = {
-          visual: "abaVisual", conteudo: "abaConteudo", funcoes: "abaFuncoes",
-          dados: "abaDados", apps: "abaApps", codigo: "abaCodigo",
-          planos: "abaPlanos", backup: "abaBackup"
+          visual: "abaVisual",
+          conteudo: "abaConteudo",
+          funcoes: "abaFuncoes",
+          dados: "abaDados",
+          apps: "abaApps",
+          codigo: "abaCodigo",
+          planos: "abaPlanos",
+          backup: "abaBackup",
         };
-        
+
         const abaElement = document.getElementById(idMap[aba]);
         if (abaElement) abaElement.style.display = "block";
-        
-        document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
         if (btnEl) btnEl.classList.add("active");
       }
 
       function aplicarPerfilUI() {
         const perfil = document.getElementById("perfilCliente").value;
         if (perfil === "pf") {
-          document.getElementById("termoColaborador").value = "Membro da família";
+          document.getElementById("termoColaborador").value =
+            "Membro da família";
           document.getElementById("termoAcao").value = "Tarefa";
         }
       }
 
-      function filtrarClientes() { atualizarListaClientes(); }
-
-      function mostrarAjuda() {
-        alert(`🚀 PODERES:\n\n💰 PLANOS - Editor completo\n• Adicione/remova planos\n• Edite preços e cores\n• Adicione funcionalidades\n• Preview em tempo real`);
+      function filtrarClientes() {
+        atualizarListaClientes();
       }
 
-      function diagnosticarConexao() { alert("🔍 Conectado!"); }
-      function mostrarPainelAdmin() { alert("⚡ Em desenvolvimento"); }
-      function fecharModal() { document.getElementById("modalConfirm").style.display = "none"; acaoPendente = null; }
-      function fecharModalConfig() { document.getElementById("modalConfigApp").style.display = "none"; }
-      function zerarIndicadoresClienteAtual() { alert("✅ Indicadores zerados!"); }
+      function mostrarAjuda() {
+        alert(
+          `🚀 PODERES:\n\n💰 PLANOS - Editor completo\n• Adicione/remova planos\n• Edite preços e cores\n• Adicione funcionalidades\n• Preview em tempo real\n\n💰 MOEDA - Formatação Brasileira\n• R$ 1.234,56\n• Suporte a edição no padrão BR`,
+        );
+      }
+
+      function diagnosticarConexao() {
+        alert("🔍 Conectado!");
+      }
+      function mostrarPainelAdmin() {
+        alert("⚡ Em desenvolvimento");
+      }
+      function fecharModal() {
+        document.getElementById("modalConfirm").style.display = "none";
+        acaoPendente = null;
+      }
+      function fecharModalConfig() {
+        document.getElementById("modalConfigApp").style.display = "none";
+      }
+      function zerarIndicadoresClienteAtual() {
+        alert("✅ Indicadores zerados!");
+      }
 
       // ============================================
       // INICIALIZAÇÃO
       // ============================================
       window.onload = function () {
         carregarClientes();
-        
-        document.getElementById("corPrincipal").addEventListener("input", function (e) {
-          document.getElementById("corHex").value = e.target.value;
-          atualizarPreview();
-        });
 
-        document.getElementById("corHex").addEventListener("input", function (e) {
-          document.getElementById("corPrincipal").value = e.target.value;
-          atualizarPreview();
+        document
+          .getElementById("corPrincipal")
+          .addEventListener("input", function (e) {
+            document.getElementById("corHex").value = e.target.value;
+            atualizarPreview();
+          });
+
+        document
+          .getElementById("corHex")
+          .addEventListener("input", function (e) {
+            document.getElementById("corPrincipal").value = e.target.value;
+            atualizarPreview();
+          });
+
+        // Adicionar máscara para campos de preço (opcional, mas útil)
+        document.querySelectorAll('input[placeholder="0,00"]').forEach(input => {
+          input.addEventListener('blur', function(e) {
+            if (this.value) {
+              const valor = parseMoedaBR(this.value);
+              if (!isNaN(valor)) {
+                this.value = formatarDecimalBR(valor);
+              }
+            }
+          });
         });
       };
     </script>
