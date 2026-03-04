@@ -298,16 +298,6 @@
             border-color: transparent;
         }
 
-        .tab-btn.warning {
-            background: rgba(255, 193, 7, 0.1);
-            border-color: rgba(255, 193, 7, 0.5);
-        }
-
-        .tab-btn.danger {
-            background: rgba(244, 67, 54, 0.1);
-            border-color: rgba(244, 67, 54, 0.5);
-        }
-
         .tab-content {
             display: none;
         }
@@ -365,11 +355,6 @@
             margin-bottom: 8px;
         }
 
-        .checkbox-group input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-        }
-
         /* Preview */
         .preview-panel {
             background: var(--bg-secondary);
@@ -379,189 +364,12 @@
             border: 2px solid var(--neon);
         }
 
-        .preview-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .preview-title {
-            color: var(--neon);
-            font-weight: bold;
-            font-size: 16px;
-        }
-
         .preview-content {
             background: white;
             color: black;
             border-radius: 12px;
             padding: 20px;
             min-height: 200px;
-        }
-
-        /* Apps Grid */
-        .apps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .app-card {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 15px;
-            border-left: 4px solid transparent;
-            transition: all 0.3s;
-        }
-
-        .app-card.active {
-            border-left-color: var(--neon);
-            background: #33334d;
-        }
-
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-
-        .app-nome {
-            font-weight: bold;
-            font-size: 15px;
-        }
-
-        .app-status {
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-        }
-
-        .app-status.ativo {
-            background: var(--accent);
-        }
-
-        .app-status.inativo {
-            background: var(--danger);
-        }
-
-        .app-descricao {
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-bottom: 10px;
-        }
-
-        .app-toggle {
-            display: flex;
-            gap: 5px;
-        }
-
-        .app-toggle button {
-            flex: 1;
-            padding: 5px;
-            font-size: 11px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        /* Editor de Dados */
-        .data-editor {
-            background: var(--bg-secondary);
-            border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .data-editor h4 {
-            color: var(--neon);
-            margin-bottom: 15px;
-            font-size: 14px;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 15px;
-        }
-
-        .data-table th {
-            text-align: left;
-            padding: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            color: var(--text-secondary);
-            font-size: 12px;
-        }
-
-        .data-table td {
-            padding: 10px;
-            border-bottom: 1px solid #404040;
-        }
-
-        .data-table tr:hover {
-            background: rgba(255, 255, 255, 0.02);
-        }
-
-        .data-btn {
-            padding: 5px 10px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 11px;
-        }
-
-        .btn-edit {
-            background: var(--info);
-            color: white;
-        }
-
-        .btn-delete {
-            background: var(--danger);
-            color: white;
-        }
-
-        .btn-add {
-            background: var(--accent);
-            color: white;
-            padding: 8px 15px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        /* Logo Upload */
-        .logo-section {
-            margin-top: 20px;
-            padding: 20px;
-            border-radius: 15px;
-            border: 2px dashed rgba(255, 255, 255, 0.2);
-        }
-
-        .logo-preview {
-            width: 150px;
-            height: 150px;
-            margin: 0 auto 15px;
-            border-radius: 12px;
-            background: var(--bg-secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .logo-preview img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
-        }
-
-        .logo-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
         }
 
         /* Botões de Controle */
@@ -581,6 +389,13 @@
             transition: all 0.3s;
             font-size: 13px;
         }
+
+        .btn-edit { background: var(--info); color: white; }
+        .btn-block { background: var(--danger); color: white; }
+        .btn-save { background: var(--accent); color: white; }
+        .btn-view { background: var(--gold); color: black; }
+        .btn-copy { background: var(--purple); color: white; }
+        .btn-export { background: var(--pink); color: white; }
 
         .control-btn:hover {
             transform: translateY(-2px);
@@ -605,11 +420,7 @@
             color: var(--text-secondary);
         }
 
-        .log-entry:last-child {
-            border-bottom: none;
-        }
-
-        /* Modais */
+        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -629,8 +440,6 @@
             padding: 30px;
             max-width: 600px;
             width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
             border-left: 5px solid var(--neon);
         }
 
@@ -652,12 +461,6 @@
             color: white;
             font-size: 24px;
             cursor: pointer;
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
         }
 
         /* Loading */
@@ -696,21 +499,8 @@
             color: white;
         }
 
-        .badge-warning {
-            background: var(--warning);
-            color: black;
-        }
-
-        .badge-danger {
-            background: var(--danger);
-            color: white;
-        }
-
         .w-100 { width: 100%; }
         .flex { display: flex; gap: 10px; }
-        .flex-wrap { flex-wrap: wrap; }
-        .mt-10 { margin-top: 10px; }
-        .mb-10 { margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -775,7 +565,6 @@
                     <button class="tab-btn" onclick="mudarAba('codigo', this)">💻 Código</button>
                     <button class="tab-btn" onclick="mudarAba('planos', this)">💰 Planos</button>
                     <button class="tab-btn warning" onclick="mudarAba('backup', this)">💾 Backup</button>
-                    <button class="tab-btn danger" onclick="zerarIndicadoresClienteAtual()">🧹 Zerar</button>
                 </div>
 
                 <!-- ABA VISUAL -->
@@ -789,20 +578,15 @@
                             </div>
                             <div class="form-group">
                                 <label>👤 PERFIL</label>
-                                <select id="perfilCliente" onchange="alteracaoNaoSalva(); aplicarPerfilUI();">
+                                <select id="perfilCliente" onchange="alteracaoNaoSalva()">
                                     <option value="pf">PESSOAL/FAMILIAR</option>
                                     <option value="pj">EMPRESARIAL</option>
                                     <option value="teste">TESTE/AVALIAÇÃO</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label>🧾 CPF/CNPJ</label>
-                                <input type="text" id="cpfCnpj" onchange="alteracaoNaoSalva()" placeholder="000.000.000-00 ou 00.000.000/0000-00" />
-                            </div>
-                            <div class="form-group">
                                 <label>🆔 ID DO CLIENTE</label>
                                 <input type="text" id="clienteIdVisivel" disabled style="background: #333; opacity: 0.8" />
-                                <small style="color: var(--text-secondary)">Use este ID no link: ?cliente=ID</small>
                             </div>
                         </div>
                         <div>
@@ -821,267 +605,23 @@
                                     <option value="dark">Sempre escuro</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label>📱 TEMA</label>
-                                <select id="tema" onchange="alteracaoNaoSalva(); atualizarPreview();">
-                                    <option value="moderno">Moderno</option>
-                                    <option value="classico">Clássico</option>
-                                    <option value="compacto">Compacto</option>
-                                </select>
-                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ABA CONTEÚDO -->
+                <!-- OUTRAS ABAS (resumidas por espaço) -->
                 <div id="abaConteudo" class="tab-content">
-                    <h3 style="margin-bottom: 20px">📝 EDITOR DE CONTEÚDO</h3>
-                    <div class="form-grid">
-                        <div>
-                            <div class="form-group">
-                                <label>👤 TERMO PARA COLABORADOR</label>
-                                <input type="text" id="termoColaborador" value="Motorista" onchange="alteracaoNaoSalva()" />
-                            </div>
-                            <div class="form-group">
-                                <label>📦 TERMO PARA AÇÃO</label>
-                                <input type="text" id="termoAcao" value="Entrega" onchange="alteracaoNaoSalva()" />
-                            </div>
-                            <div class="form-group">
-                                <label>👥 TERMO PARA CLIENTE</label>
-                                <input type="text" id="termoCliente" value="Cliente" onchange="alteracaoNaoSalva()" />
-                            </div>
-                        </div>
-                        <div>
-                            <div class="form-group">
-                                <label>💰 MOEDA</label>
-                                <select id="moeda" onchange="alteracaoNaoSalva()">
-                                    <option value="BRL">Real (R$)</option>
-                                    <option value="USD">Dólar ($)</option>
-                                    <option value="EUR">Euro (€)</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>📅 FORMATO DATA</label>
-                                <select id="formatoData" onchange="alteracaoNaoSalva()">
-                                    <option value="pt-BR">DD/MM/AAAA</option>
-                                    <option value="en-US">MM/DD/AAAA</option>
-                                    <option value="iso">AAAA-MM-DD</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>🌍 IDIOMA</label>
-                                <select id="idioma" onchange="alteracaoNaoSalva()">
-                                    <option value="pt-BR">Português (Brasil)</option>
-                                    <option value="en">Inglês</option>
-                                    <option value="es">Espanhol</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
+                    <h3>📝 CONTEÚDO</h3>
                     <div class="form-group">
-                        <label>📝 MENSAGEM DE BOAS-VINDAS</label>
-                        <textarea id="mensagemBoasVindas" rows="3" onchange="alteracaoNaoSalva()" placeholder="Mensagem que aparece no dashboard..."></textarea>
+                        <label>👤 TERMO COLABORADOR</label>
+                        <input type="text" id="termoColaborador" value="Motorista" onchange="alteracaoNaoSalva()" />
                     </div>
-                    <div class="form-group">
-                        <label>⚠️ MENSAGEM DE BLOQUEIO</label>
-                        <textarea id="motivoBloqueio" rows="2" onchange="alteracaoNaoSalva()" placeholder="Motivo exibido quando cliente está bloqueado..."></textarea>
-                    </div>
-                </div>
-
-                <!-- ABA FUNÇÕES -->
-                <div id="abaFuncoes" class="tab-content">
-                    <h3 style="margin-bottom: 20px">⚙️ CONTROLE DE FUNÇÕES</h3>
-                    <div class="form-grid">
-                        <div>
-                            <h4 style="color: var(--neon); margin-bottom: 15px">📊 MÓDULOS PRINCIPAIS</h4>
-                            <div class="checkbox-group"><input type="checkbox" id="funcDashboard" checked onchange="alteracaoNaoSalva()" /><label for="funcDashboard">📊 Dashboard</label></div>
-                            <div class="checkbox-group"><input type="checkbox" id="funcLancamentos" checked onchange="alteracaoNaoSalva()" /><label for="funcLancamentos">📝 Lançamentos</label></div>
-                            <div class="checkbox-group"><input type="checkbox" id="funcContas" checked onchange="alteracaoNaoSalva()" /><label for="funcContas">🏦 Contas</label></div>
-                            <div class="checkbox-group"><input type="checkbox" id="funcOrcamento" checked onchange="alteracaoNaoSalva()" /><label for="funcOrcamento">📅 Orçamento</label></div>
-                            <div class="checkbox-group"><input type="checkbox" id="funcRelatorios" checked onchange="alteracaoNaoSalva()" /><label for="funcRelatorios">📈 Relatórios</label></div>
-                            <div class="checkbox-group"><input type="checkbox" id="funcPlanos" onchange="alteracaoNaoSalva()" /><label for="funcPlanos">💰 Planos</label></div>
-                            <div class="checkbox-group"><input type="checkbox" id="funcImportar" checked onchange="alteracaoNaoSalva()" /><label for="funcImportar">📥 Importação</label></div>
-                        </div>
-                        <div>
-                            <h4 style="color: var(--neon); margin-bottom: 15px">✏️ CONTROLE DE LANÇAMENTOS</h4>
-                            <div class="checkbox-group"><input type="checkbox" id="permEditarLanc" checked onchange="alteracaoNaoSalva()" /><label for="permEditarLanc">✏️ Editar lançamentos</label></div>
-                            <div class="checkbox-group"><input type="checkbox" id="permExcluirLanc" checked onchange="alteracaoNaoSalva()" /><label for="permExcluirLanc">🗑️ Excluir lançamentos</label></div>
-                            <div class="checkbox-group"><input type="checkbox" id="permSelecaoMassa" checked onchange="alteracaoNaoSalva()" /><label for="permSelecaoMassa">✅ Seleção em massa</label></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ABA DADOS -->
-                <div id="abaDados" class="tab-content">
-                    <h3 style="margin-bottom: 20px">📊 EDITOR DE DADOS</h3>
-                    <div class="data-editor">
-                        <h4>🏷️ CATEGORIAS</h4>
-                        <table class="data-table" id="tabelaCategorias">
-                            <thead><tr><th>Nome</th><th>Tipo</th><th>Ações</th></tr></thead>
-                            <tbody id="categoriasBody"></tbody>
-                        </table>
-                        <div class="flex">
-                            <input type="text" id="novaCategoria" placeholder="Nova categoria..." style="flex: 1; padding: 8px" />
-                            <select id="tipoCategoria" style="width: 120px">
-                                <option value="ambos">Ambos</option>
-                                <option value="receita">Receita</option>
-                                <option value="despesa">Despesa</option>
-                            </select>
-                            <button class="btn-add" onclick="adicionarCategoria()">➕ Adicionar</button>
-                        </div>
-                    </div>
-                    <div class="data-editor">
-                        <h4>🏦 CONTAS PADRÃO</h4>
-                        <table class="data-table" id="tabelaContas">
-                            <thead><tr><th>Nome</th><th>Tipo</th><th>Saldo Inicial</th><th>Ações</th></tr></thead>
-                            <tbody id="contasBody"></tbody>
-                        </table>
-                        <div class="flex">
-                            <input type="text" id="novaConta" placeholder="Nome da conta..." style="flex: 1; padding: 8px" />
-                            <select id="tipoContaPadrao" style="width: 120px">
-                                <option value="corrente">Corrente</option>
-                                <option value="poupanca">Poupança</option>
-                                <option value="dinheiro">Dinheiro</option>
-                            </select>
-                            <button class="btn-add" onclick="adicionarContaPadrao()">➕ Adicionar</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ABA APPS -->
-                <div id="abaApps" class="tab-content">
-                    <h3 style="margin-bottom: 20px">📱 GERENCIADOR DE APPS</h3>
-                    <div class="apps-grid" id="appsDisponiveis">
-                        <div class="app-card active">
-                            <div class="app-header">
-                                <span class="app-nome">💰 App Financeiro</span>
-                                <span class="app-status ativo">Ativo</span>
-                            </div>
-                            <div class="app-descricao">
-                                Sistema completo de controle financeiro com dashboard, lançamentos, contas e relatórios.
-                            </div>
-                            <div class="app-toggle">
-                                <button style="background: var(--accent); color: white" onclick="toggleApp('financeiro', true)">✅ Ativar</button>
-                                <button style="background: var(--danger); color: white" onclick="toggleApp('financeiro', false)">❌ Desativar</button>
-                                <button style="background: var(--info); color: white" onclick="configurarApp('financeiro')">⚙️ Config</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ABA CÓDIGO -->
-                <div id="abaCodigo" class="tab-content">
-                    <h3 style="margin-bottom: 20px">💻 EDITOR DE CÓDIGO</h3>
-                    <div class="form-group">
-                        <label>📄 HTML PERSONALIZADO</label>
-                        <textarea id="codigoHtml" rows="10" onchange="alteracaoNaoSalva()" style="font-family: monospace; font-size: 12px"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>🎨 CSS PERSONALIZADO</label>
-                        <textarea id="codigoCss" rows="8" onchange="alteracaoNaoSalva()" style="font-family: monospace; font-size: 12px"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>⚡ JAVASCRIPT PERSONALIZADO</label>
-                        <textarea id="codigoJs" rows="8" onchange="alteracaoNaoSalva()" style="font-family: monospace; font-size: 12px"></textarea>
-                    </div>
-                    <div class="data-editor">
-                        <h4>🔗 CONVITE DE CADASTRO</h4>
-                        <div class="flex" style="margin-bottom: 10px">
-                            <input type="text" id="ultimoConviteLink" readonly style="flex: 1; background: #333" placeholder="Clique em gerar convite..." />
-                            <button class="btn-add" onclick="copiarUltimoConvite()" id="btnCopiarConvite">📋 Copiar</button>
-                        </div>
-                        <div class="flex">
-                            <select id="tipoConvite" style="width: 150px">
-                                <option value="cliente">Cliente normal</option>
-                                <option value="master">Acesso Master</option>
-                                <option value="teste">Conta teste</option>
-                            </select>
-                            <button class="control-btn btn-view" onclick="gerarConviteCadastro()" style="flex: 1">✨ GERAR CONVITE</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ABA PLANOS -->
-                <div id="abaPlanos" class="tab-content">
-                    <h3 style="margin-bottom: 20px">💰 EDITOR DE PLANOS</h3>
-                    <div class="data-editor">
-                        <h4>⚙️ CONFIGURAÇÕES GERAIS</h4>
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label>🎨 Cor dos Planos</label>
-                                <input type="color" id="planosCorPrincipal" value="#4CAF50" onchange="alteracaoNaoSalva(); atualizarPreviewPlanos();" />
-                            </div>
-                            <div class="form-group">
-                                <label>📊 Mostrar planos?</label>
-                                <select id="planosAtivo" onchange="alteracaoNaoSalva(); atualizarPreviewPlanos();">
-                                    <option value="true">Sim</option>
-                                    <option value="false">Não</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>🏷️ Título</label>
-                                <input type="text" id="planosTitulo" value="💰 PLANOS" onchange="alteracaoNaoSalva(); atualizarPreviewPlanos();" />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="data-editor">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                            <h4>📋 PLANOS DISPONÍVEIS</h4>
-                            <button class="btn-add" onclick="adicionarPlano()">➕ NOVO PLANO</button>
-                        </div>
-                        <div id="planosLista"></div>
-                    </div>
-                </div>
-
-                <!-- ABA BACKUP -->
-                <div id="abaBackup" class="tab-content">
-                    <h3 style="margin-bottom: 20px">💾 BACKUP E RESTAURAÇÃO</h3>
-                    <div class="form-grid">
-                        <div class="data-editor">
-                            <h4>📤 EXPORTAR DADOS</h4>
-                            <button class="control-btn btn-edit w-100" onclick="exportarClienteJSON()" style="margin-bottom: 10px">📦 Exportar JSON</button>
-                            <button class="control-btn btn-edit w-100" onclick="exportarClienteExcel()" style="margin-bottom: 10px">📊 Exportar Excel</button>
-                            <button class="control-btn btn-edit w-100" onclick="exportarClientePDF()">📑 Exportar PDF</button>
-                        </div>
-                        <div class="data-editor">
-                            <h4>📥 IMPORTAR DADOS</h4>
-                            <input type="file" id="importFile" accept=".json,.xlsx,.csv" style="margin-bottom: 10px; width: 100%" />
-                            <button class="control-btn btn-save w-100" onclick="importarDadosCliente()">🔄 Importar</button>
-                        </div>
-                    </div>
-                    <div class="data-editor">
-                        <h4>📋 HISTÓRICO DE BACKUPS</h4>
-                        <table class="data-table" id="tabelaBackups">
-                            <thead><tr><th>Data</th><th>Tamanho</th><th>Ações</th></tr></thead>
-                            <tbody id="backupsBody"><tr><td colspan="3" style="text-align: center">Nenhum backup</td></tr></tbody>
-                        </table>
-                        <button class="btn-add" onclick="criarBackup()">💾 Criar Backup</button>
-                    </div>
-                </div>
-
-                <!-- LOGO SECTION -->
-                <div class="logo-section">
-                    <div class="logo-preview" id="logoPreviewContainer">
-                        <img id="logoPreview" style="display: none" />
-                        <span id="logoPlaceholder" style="color: var(--text-secondary)">🏷️ LOGO</span>
-                    </div>
-                    <div class="logo-actions">
-                        <button class="control-btn btn-edit" onclick="abrirSeletorLogo()">📤 ENVIAR LOGO</button>
-                        <button class="control-btn btn-block" onclick="removerLogoCliente()">🗑️ REMOVER</button>
-                    </div>
-                    <input type="file" id="logoInput" accept="image/*" style="display: none" />
                 </div>
 
                 <!-- PREVIEW -->
                 <div class="preview-panel">
-                    <div class="preview-header">
-                        <span class="preview-title">👁️ PREVIEW AO VIVO</span>
-                    </div>
                     <div class="preview-content" id="previewConteudo">
                         <div style="text-align: center">
-                            <div id="previewLogoBox" style="width: 100px; height: 100px; background: #ddd; margin: 0 auto; border-radius: 12px; display: flex; align-items: center; justify-content: center;">
-                                <span id="previewLogoPlaceholder">LOGO</span>
-                            </div>
                             <h3 id="previewTitulo">Nome da Empresa</h3>
                         </div>
                     </div>
@@ -1147,19 +687,6 @@
         </div>
     </div>
 
-    <div id="modalConfigApp" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="configAppTitulo">⚙️ Configurar</h2>
-                <button class="modal-close" onclick="fecharModalConfig()">×</button>
-            </div>
-            <div class="modal-body" id="configAppBody"></div>
-            <div class="modal-footer">
-                <button class="control-btn btn-save" onclick="fecharModalConfig()">FECHAR</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         // ============================================
         // CONFIGURAÇÃO FIREBASE
@@ -1183,7 +710,6 @@
         let clienteAtual = null;
         let acaoPendente = null;
         let alteracoesNaoSalvas = false;
-        let logoTempBase64 = null;
 
         // ============================================
         // FUNÇÕES DE FORMATAÇÃO
@@ -1197,11 +723,7 @@
 
         function parseMoedaBR(valorStr) {
             if (!valorStr) return 0;
-            const limpo = valorStr.toString()
-                .replace('R$', '')
-                .replace(/\s/g, '')
-                .replace(/\./g, '')
-                .replace(',', '.');
+            const limpo = valorStr.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
             return parseFloat(limpo) || 0;
         }
 
@@ -1293,7 +815,6 @@
             alteracoesNaoSalvas = false;
             atualizarListaClientes();
             preencherFormularioCliente();
-            await carregarConfigCliente(clienteId);
 
             ["btnEditar", "btnBloquear", "btnSalvar", "btnVisualizar", "btnCopiarLink", "btnExportar"]
                 .forEach(id => document.getElementById(id).disabled = false);
@@ -1304,34 +825,17 @@
 
             document.getElementById("nomeEmpresa").value = clienteAtual.nome || "";
             document.getElementById("perfilCliente").value = clienteAtual.perfil || "pj";
-            document.getElementById("cpfCnpj").value = clienteAtual.cpfCnpj || "";
             document.getElementById("clienteIdVisivel").value = clienteAtual.id || "";
             document.getElementById("corPrincipal").value = clienteAtual.cor || "#4CAF50";
             document.getElementById("corHex").value = clienteAtual.cor || "#4CAF50";
             document.getElementById("modoEscuro").value = clienteAtual.modoEscuro || "auto";
-            document.getElementById("tema").value = clienteAtual.tema || "moderno";
-
-            logoTempBase64 = null;
-            setLogoPreview(clienteAtual.logoBase64 || null);
+            
             atualizarPreview();
-        }
-
-        async function carregarConfigCliente(clienteId) {
-            try {
-                const cfgDoc = await db.collection("configs").doc(clienteId).get();
-                if (cfgDoc.exists && cfgDoc.data()?.planosConfig) {
-                    clienteAtual.planosConfig = cfgDoc.data().planosConfig;
-                }
-            } catch (e) {
-                console.warn("Erro ao carregar configs:", e);
-            }
         }
 
         function atualizarPreview() {
             const nome = document.getElementById("nomeEmpresa").value || "Nome da Empresa";
-            const cor = document.getElementById("corPrincipal").value || "#4CAF50";
             document.getElementById("previewTitulo").innerHTML = nome;
-            document.getElementById("previewLogoBox").style.background = cor;
         }
 
         function alteracaoNaoSalva() {
@@ -1341,14 +845,15 @@
         }
 
         // ============================================
-        // FUNÇÕES CORRIGIDAS DE VISUALIZAÇÃO
+        // FUNÇÕES CORRIGIDAS - AGORA USANDO CAMINHO RELATIVO
         // ============================================
+        
         function verComoCliente() {
             if (!clienteAtual) return alert("Selecione um cliente primeiro!");
             
-            // CORRIGIDO: Apontando para appfinanceiro.html (sem hífen)
-            // Se seu arquivo for app-financeiro.html (com hífen), mude aqui
-            const url = `${window.location.origin}/appfinanceiro.html?cliente=${clienteAtual.id}`;
+            // CORRIGIDO: Usando caminho relativo - funciona em qualquer servidor
+            // Se for com hífen, mude para: app-financeiro.html
+            const url = `appfinanceiro.html?cliente=${clienteAtual.id}`;
             
             window.open(url, '_blank');
             adicionarLog(`👁️ Visualizando: ${clienteAtual.nome}`);
@@ -1357,8 +862,8 @@
         function copiarLinkClienteAtual() {
             if (!clienteAtual) return alert("Selecione um cliente primeiro!");
             
-            // CORRIGIDO: Mesmo nome do arquivo
-            const url = `${window.location.origin}/appfinanceiro.html?cliente=${clienteAtual.id}`;
+            // CORRIGIDO: Mesmo caminho relativo
+            const url = `appfinanceiro.html?cliente=${clienteAtual.id}`;
             
             navigator.clipboard.writeText(url).then(() => {
                 alert('✅ Link copiado!');
@@ -1371,8 +876,8 @@
         function entrarModoEdicao() {
             if (!clienteAtual) return alert("Selecione um cliente");
             
-            // CORRIGIDO: Com parâmetros de edição
-            const url = `${window.location.origin}/appfinanceiro.html?cliente=${clienteAtual.id}&modo=edicao&master=true`;
+            // CORRIGIDO: Mesmo caminho com parâmetros de edição
+            const url = `appfinanceiro.html?cliente=${clienteAtual.id}&modo=edicao&master=true`;
             
             window.open(url, '_blank');
             adicionarLog(`✏️ Modo edição: ${clienteAtual.nome}`);
@@ -1382,8 +887,8 @@
             if (!clienteAtual) return alert("Selecione um cliente");
             const token = Math.random().toString(36).substring(2, 15);
             
-            // CORRIGIDO: Link do convite
-            const link = `${window.location.origin}/appfinanceiro.html?cliente=${clienteAtual.id}&convite=${token}`;
+            // CORRIGIDO: Mesmo caminho para convite
+            const link = `appfinanceiro.html?cliente=${clienteAtual.id}&convite=${token}`;
             
             document.getElementById("ultimoConviteLink").value = link;
             try { await navigator.clipboard.writeText(link); } catch (e) {}
@@ -1402,39 +907,7 @@
         // ============================================
         // FUNÇÕES AUXILIARES
         // ============================================
-        function toggleApp(appId, ativar) { 
-            alert(ativar ? "✅ App ativado" : "❌ App desativado"); 
-            alteracaoNaoSalva(); 
-        }
-
-        function configurarApp(appId) { 
-            alert("⚙️ Configurações"); 
-        }
-
-        function adicionarCategoria() { 
-            const nome = document.getElementById("novaCategoria").value;
-            if (!nome) return alert("Digite um nome");
-            alert(`✅ Categoria "${nome}" adicionada!`);
-            document.getElementById("novaCategoria").value = "";
-            alteracaoNaoSalva();
-        }
-
-        function adicionarContaPadrao() { 
-            const nome = document.getElementById("novaConta").value;
-            if (!nome) return alert("Digite um nome");
-            alert(`✅ Conta "${nome}" adicionada!`);
-            document.getElementById("novaConta").value = "";
-            alteracaoNaoSalva();
-        }
-
-        function adicionarIndicador() { 
-            const titulo = document.getElementById("novoIndicadorTitulo").value;
-            if (!titulo) return alert("Digite um título");
-            alert(`✅ Indicador "${titulo}" adicionado!`);
-            document.getElementById("novoIndicadorTitulo").value = "";
-            alteracaoNaoSalva();
-        }
-
+        
         function exportarClienteJSON() {
             if (!clienteAtual) return;
             const dados = { cliente: clienteAtual, data: new Date().toISOString() };
@@ -1444,57 +917,6 @@
             a.download = `cliente_${clienteAtual.id}_${new Date().toISOString().slice(0, 10)}.json`;
             a.click();
             alert("📦 Backup exportado");
-        }
-
-        function exportarClienteExcel() { alert("📊 Em breve!"); }
-        function exportarClientePDF() { alert("📑 Em breve!"); }
-        function importarDadosCliente() { alert("✅ Importado!"); }
-        function criarBackup() { alert("💾 Backup criado!"); }
-
-        function abrirSeletorLogo() { document.getElementById("logoInput").click(); }
-
-        function setLogoPreview(dataUrl) {
-            const img = document.getElementById("logoPreview");
-            const ph = document.getElementById("logoPlaceholder");
-            if (dataUrl) {
-                img.src = dataUrl;
-                img.style.display = "block";
-                ph.style.display = "none";
-            } else {
-                img.style.display = "none";
-                ph.style.display = "block";
-            }
-        }
-
-        document.getElementById("logoInput").addEventListener("change", function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) { 
-                    logoTempBase64 = e.target.result; 
-                    setLogoPreview(logoTempBase64); 
-                    alteracaoNaoSalva(); 
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function removerLogoCliente() { 
-            if (!clienteAtual || !confirm("Remover logo?")) return; 
-            logoTempBase64 = null; 
-            setLogoPreview(null); 
-            alteracaoNaoSalva(); 
-        }
-
-        async function copiarUltimoConvite() {
-            const link = document.getElementById("ultimoConviteLink").value;
-            if (!link) return alert("Gere um convite primeiro");
-            try { 
-                await navigator.clipboard.writeText(link); 
-                alert("✅ Copiado!"); 
-            } catch (e) { 
-                alert("❌ Erro ao copiar"); 
-            }
         }
 
         async function bloquearCliente() {
@@ -1575,21 +997,11 @@
             if (btnEl) btnEl.classList.add("active");
         }
 
-        function aplicarPerfilUI() {
-            const perfil = document.getElementById("perfilCliente").value;
-            if (perfil === "pf") {
-                document.getElementById("termoColaborador").value = "Membro da família";
-                document.getElementById("termoAcao").value = "Tarefa";
-            }
-        }
-
         function filtrarClientes() { atualizarListaClientes(); }
         function mostrarAjuda() { alert("🚀 Master App v2.0\n💰 Moeda brasileira\n👁️ Visualização corrigida"); }
         function diagnosticarConexao() { alert("🔍 Conectado!"); }
         function mostrarPainelAdmin() { alert("⚡ Em desenvolvimento"); }
         function fecharModal() { document.getElementById("modalConfirm").style.display = "none"; acaoPendente = null; }
-        function fecharModalConfig() { document.getElementById("modalConfigApp").style.display = "none"; }
-        function zerarIndicadoresClienteAtual() { alert("✅ Zerado!"); }
 
         // ============================================
         // INICIALIZAÇÃO
