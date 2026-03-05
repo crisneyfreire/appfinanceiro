@@ -222,6 +222,11 @@
             color: white;
         }
 
+        .status-teste {
+            background: var(--warning);
+            color: white;
+        }
+
         .cliente-info {
             display: flex;
             gap: 10px;
@@ -504,6 +509,28 @@
             padding: 20px;
             margin-top: 20px;
         }
+
+        .success-message {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid var(--accent);
+            color: var(--accent);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .error-message {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -513,7 +540,7 @@
             <div>
                 <h1>👑 MASTER JEDI - CONTROLE TOTAL</h1>
                 <div style="display: flex; gap: 10px; margin-top: 5px">
-                    <span class="badge badge-success">v2.1 - CORRIGIDO</span>
+                    <span class="badge badge-success">v2.2 - CORRIGIDO</span>
                     <span class="badge" style="background: var(--neon); color: black">MODO SUPREMO</span>
                 </div>
             </div>
@@ -527,10 +554,13 @@
             </div>
         </div>
 
-        <!-- AVISO DE CONFIGURAÇÃO -->
+        <!-- MENSAGENS -->
         <div id="configWarning" class="warning-message" style="display: none;">
             ⚠️ Configure o nome do arquivo do app financeiro abaixo para que os links funcionem!
         </div>
+        
+        <div id="successMessage" class="success-message" style="display: none;"></div>
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
 
         <!-- GRID PRINCIPAL -->
         <div class="main-grid">
@@ -624,16 +654,40 @@
                         <label>👤 TERMO COLABORADOR</label>
                         <input type="text" id="termoColaborador" value="Motorista" onchange="alteracaoNaoSalva()" />
                     </div>
+                    <div class="form-group">
+                        <label>📧 EMAIL DE CONTATO</label>
+                        <input type="email" id="emailContato" onchange="alteracaoNaoSalva()" placeholder="contato@empresa.com" />
+                    </div>
+                    <div class="form-group">
+                        <label>📞 TELEFONE</label>
+                        <input type="text" id="telefoneContato" onchange="alteracaoNaoSalva()" placeholder="(00) 00000-0000" />
+                    </div>
                 </div>
 
                 <div id="abaFuncoes" class="tab-content">
                     <h3>⚙️ FUNÇÕES</h3>
-                    <p>Configurações das funções do sistema...</p>
+                    <div class="form-group">
+                        <label>🔑 PERMISSÕES ESPECIAIS</label>
+                        <select id="permissoesEspeciais" onchange="alteracaoNaoSalva()" multiple style="height: 100px">
+                            <option value="exportar">Exportar Dados</option>
+                            <option value="importar">Importar Dados</option>
+                            <option value="excluir">Excluir Lançamentos</option>
+                            <option value="editar">Editar Lançamentos Antigos</option>
+                            <option value="relatorios">Relatórios Avançados</option>
+                        </select>
+                        <small style="color: var(--text-secondary);">Segure Ctrl para selecionar múltiplas</small>
+                    </div>
+                    <div class="form-group">
+                        <label>⏰ LIMITE DE LANÇAMENTOS</label>
+                        <input type="number" id="limiteLancamentos" value="1000" onchange="alteracaoNaoSalva()" min="10" max="10000" />
+                    </div>
                 </div>
 
                 <div id="abaDados" class="tab-content">
-                    <h3>📊 DADOS</h3>
-                    <p>Visualização de dados do cliente...</p>
+                    <h3>📊 DADOS DO CLIENTE</h3>
+                    <div id="dadosClienteContainer">
+                        <div class="loading">Carregando dados...</div>
+                    </div>
                 </div>
 
                 <div id="abaApps" class="tab-content">
@@ -651,23 +705,55 @@
                         <div style="margin-top: 15px">
                             <button class="power-btn" onclick="testarLinkAppFinanceiro()">🔗 TESTAR LINK</button>
                             <button class="power-btn" onclick="buscarArquivosApp()">🔍 PROCURAR ARQUIVOS</button>
+                            <button class="power-btn" onclick="validarArquivoAppFinanceiro()">✅ VALIDAR ARQUIVO</button>
                         </div>
+                        <div id="appFinanceiroStatus" style="margin-top: 10px; font-size: 12px;"></div>
                     </div>
                 </div>
 
                 <div id="abaCodigo" class="tab-content">
-                    <h3>💻 CÓDIGO</h3>
-                    <p>Editor de código personalizado...</p>
+                    <h3>💻 CÓDIGO PERSONALIZADO</h3>
+                    <div class="form-group">
+                        <label>📜 CSS PERSONALIZADO</label>
+                        <textarea id="cssPersonalizado" rows="6" onchange="alteracaoNaoSalva()" placeholder="/* Adicione CSS personalizado aqui */"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>⚡ JAVASCRIPT PERSONALIZADO</label>
+                        <textarea id="jsPersonalizado" rows="6" onchange="alteracaoNaoSalva()" placeholder="// Adicione JavaScript personalizado aqui"></textarea>
+                    </div>
                 </div>
 
                 <div id="abaPlanos" class="tab-content">
-                    <h3>💰 PLANOS</h3>
-                    <p>Gerenciamento de planos e preços...</p>
+                    <h3>💰 PLANOS E PREÇOS</h3>
+                    <div class="form-group">
+                        <label>💳 PLANO ATUAL</label>
+                        <select id="planoAtual" onchange="alteracaoNaoSalva()">
+                            <option value="gratuito">Gratuito</option>
+                            <option value="basico">Básico</option>
+                            <option value="profissional">Profissional</option>
+                            <option value="empresarial">Empresarial</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>💰 VALOR MENSAL (R$)</label>
+                        <input type="text" id="valorPlano" value="0,00" onchange="alteracaoNaoSalva()" />
+                    </div>
+                    <div class="form-group">
+                        <label>📅 PRÓXIMO VENCIMENTO</label>
+                        <input type="date" id="proximoVencimento" onchange="alteracaoNaoSalva()" />
+                    </div>
                 </div>
 
                 <div id="abaBackup" class="tab-content">
-                    <h3>💾 BACKUP</h3>
-                    <p>Sistema de backup e restauração...</p>
+                    <h3>💾 BACKUP E RESTAURAÇÃO</h3>
+                    <div class="flex" style="flex-wrap: wrap; margin-bottom: 20px;">
+                        <button class="control-btn btn-save" onclick="exportarClienteCompleto()">📦 EXPORTAR BACKUP COMPLETO</button>
+                        <button class="control-btn btn-view" onclick="importarBackup()">📂 IMPORTAR BACKUP</button>
+                        <button class="control-btn btn-edit" onclick="restaurarVersaoAnterior()">🔄 RESTAURAR VERSÃO</button>
+                    </div>
+                    <div id="historicoBackups" style="max-height: 200px; overflow-y: auto; background: var(--bg-secondary); padding: 10px; border-radius: 8px;">
+                        <p style="color: var(--text-secondary); text-align: center;">Histórico de backups será exibido aqui</p>
+                    </div>
                 </div>
 
                 <!-- PREVIEW -->
@@ -675,6 +761,8 @@
                     <div class="preview-content" id="previewConteudo">
                         <div style="text-align: center">
                             <h3 id="previewTitulo">Nome da Empresa</h3>
+                            <p id="previewCor" style="margin-top: 10px; font-size: 12px;">Cor: #4CAF50</p>
+                            <p id="previewModo">Modo: Automático</p>
                         </div>
                     </div>
                 </div>
@@ -691,7 +779,7 @@
 
                 <!-- LOG PANEL -->
                 <div class="log-panel" id="logPanel">
-                    <div class="log-entry">🚀 Sistema pronto - Versão corrigida</div>
+                    <div class="log-entry">🚀 Sistema pronto - Versão 2.2 corrigida</div>
                 </div>
             </div>
         </div>
@@ -731,6 +819,14 @@
                         <option value="teste">Teste</option>
                     </select>
                 </div>
+                <div class="form-group">
+                    <label>Email:</label>
+                    <input type="email" id="novoClienteEmail" placeholder="email@exemplo.com" />
+                </div>
+                <div class="form-group">
+                    <label>Telefone:</label>
+                    <input type="text" id="novoClienteTelefone" placeholder="(00) 00000-0000" />
+                </div>
             </div>
             <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                 <button class="control-btn btn-save" onclick="criarClienteFirebase()">CRIAR</button>
@@ -751,6 +847,7 @@
                     <label>Link gerado:</label>
                     <input type="text" id="testeLinkUrl" readonly style="background: #333;" />
                 </div>
+                <div id="testeLinkStatus" style="margin-top: 10px; padding: 10px; border-radius: 5px; display: none;"></div>
             </div>
             <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                 <button class="control-btn btn-view" onclick="abrirLinkTeste()">ABRIR LINK</button>
@@ -760,9 +857,28 @@
         </div>
     </div>
 
+    <div id="modalDiagnostico" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>🔍 DIAGNÓSTICO DO SISTEMA</h2>
+                <button class="modal-close" onclick="fecharModalDiagnostico()">×</button>
+            </div>
+            <div class="modal-body" id="diagnosticoBody">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    Executando diagnóstico...
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="control-btn btn-save" onclick="executarDiagnosticoCompleto()">EXECUTAR</button>
+                <button class="control-btn btn-block" onclick="fecharModalDiagnostico()">FECHAR</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================================
-        // CONFIGURAÇÃO FIREBASE
+        // CONFIGURAÇÃO FIREBASE (CORRIGIDA)
         // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
@@ -773,8 +889,15 @@
             appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
         };
 
+        // Inicializar Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+        
+        // Configurar Firestore para usar timestamps
+        db.settings({
+            timestampsInSnapshots: true,
+            ignoreUndefinedProperties: true
+        });
 
         // ============================================
         // VARIÁVEIS GLOBAIS
@@ -783,50 +906,175 @@
         let clienteAtual = null;
         let acaoPendente = null;
         let alteracoesNaoSalvas = false;
+        let unsubscribeClientes = null;
 
-        // ============================================
-        // CONFIGURAÇÕES DO APP FINANCEIRO
-        // ============================================
+        // Configurações do app financeiro
         let appFinanceiroConfig = {
             nomeArquivo: 'appfinanceiro.html',
             caminho: ''
         };
 
-        // Carregar configurações salvas
+        // ============================================
+        // FUNÇÕES DE UTILITÁRIOS (CORRIGIDAS)
+        // ============================================
+        
+        function mostrarSucesso(mensagem) {
+            const el = document.getElementById('successMessage');
+            el.innerHTML = mensagem;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 3000);
+            adicionarLog(`✅ ${mensagem}`);
+        }
+
+        function mostrarErro(mensagem) {
+            const el = document.getElementById('errorMessage');
+            el.innerHTML = `❌ ${mensagem}`;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 5000);
+            adicionarLog(`❌ ${mensagem}`);
+        }
+
+        function adicionarLog(mensagem) {
+            const logPanel = document.getElementById("logPanel");
+            const entry = document.createElement("div");
+            entry.className = "log-entry";
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${mensagem}`;
+            logPanel.appendChild(entry);
+            if (logPanel.children.length > 10) logPanel.removeChild(logPanel.children[0]);
+        }
+
+        function formatarMoedaBR(valor, comSimbolo = true) {
+            if (valor === undefined || valor === null) return comSimbolo ? 'R$ 0,00' : '0,00';
+            const numero = typeof valor === 'string' ? parseFloat(valor.replace(/[^\d,.-]/g, '').replace(',', '.')) : valor;
+            if (isNaN(numero)) return comSimbolo ? 'R$ 0,00' : '0,00';
+            const valorFormatado = numero.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            return comSimbolo ? `R$ ${valorFormatado}` : valorFormatado;
+        }
+
+        function parseMoedaBR(valorStr) {
+            if (!valorStr) return 0;
+            const limpo = valorStr.toString()
+                .replace('R$', '')
+                .replace(/\s/g, '')
+                .replace(/\./g, '')
+                .replace(',', '.')
+                .trim();
+            const valor = parseFloat(limpo);
+            return isNaN(valor) ? 0 : valor;
+        }
+
+        // ============================================
+        // CONFIGURAÇÕES DO APP FINANCEIRO (CORRIGIDAS)
+        // ============================================
+        
         function carregarConfigAppFinanceiro() {
-            const saved = localStorage.getItem('appFinanceiroConfig');
-            if (saved) {
-                try {
+            try {
+                const saved = localStorage.getItem('appFinanceiroConfig');
+                if (saved) {
                     appFinanceiroConfig = JSON.parse(saved);
-                    document.getElementById('appFinanceiroNome').value = appFinanceiroConfig.nomeArquivo;
-                    document.getElementById('appFinanceiroCaminho').value = appFinanceiroConfig.caminho || '';
-                } catch (e) {}
+                } else {
+                    // Configuração padrão
+                    appFinanceiroConfig = {
+                        nomeArquivo: 'appfinanceiro.html',
+                        caminho: ''
+                    };
+                }
+                
+                document.getElementById('appFinanceiroNome').value = appFinanceiroConfig.nomeArquivo || 'appfinanceiro.html';
+                document.getElementById('appFinanceiroCaminho').value = appFinanceiroConfig.caminho || '';
+                
+                adicionarLog(`Configuração carregada: ${appFinanceiroConfig.nomeArquivo}`);
+            } catch (e) {
+                console.error('Erro ao carregar config:', e);
+                appFinanceiroConfig = {
+                    nomeArquivo: 'appfinanceiro.html',
+                    caminho: ''
+                };
             }
         }
 
         function salvarConfigAppFinanceiro() {
-            appFinanceiroConfig.nomeArquivo = document.getElementById('appFinanceiroNome').value || 'appfinanceiro.html';
-            appFinanceiroConfig.caminho = document.getElementById('appFinanceiroCaminho').value || '';
-            localStorage.setItem('appFinanceiroConfig', JSON.stringify(appFinanceiroConfig));
-            adicionarLog('✅ Configuração do app salva');
-            document.getElementById('configWarning').style.display = 'none';
+            try {
+                appFinanceiroConfig.nomeArquivo = document.getElementById('appFinanceiroNome').value || 'appfinanceiro.html';
+                appFinanceiroConfig.caminho = document.getElementById('appFinanceiroCaminho').value || '';
+                localStorage.setItem('appFinanceiroConfig', JSON.stringify(appFinanceiroConfig));
+                
+                mostrarSucesso('✅ Configuração do app salva com sucesso!');
+                document.getElementById('configWarning').style.display = 'none';
+                adicionarLog('Configuração do app salva');
+                
+                // Validar após salvar
+                setTimeout(validarArquivoAppFinanceiro, 500);
+            } catch (e) {
+                mostrarErro('Erro ao salvar configuração');
+            }
         }
 
         function mostrarConfigAppFinanceiro() {
             mudarAba('apps', document.querySelectorAll('.tab-btn')[4]);
         }
 
+        async function validarArquivoAppFinanceiro() {
+            const statusEl = document.getElementById('appFinanceiroStatus');
+            statusEl.innerHTML = '🔄 Validando...';
+            
+            try {
+                const config = appFinanceiroConfig;
+                const url = config.caminho + config.nomeArquivo;
+                
+                // Tentar fazer uma requisição HEAD para verificar se o arquivo existe
+                const response = await fetch(url, { method: 'HEAD', cache: 'no-cache' });
+                
+                if (response.ok) {
+                    statusEl.innerHTML = '✅ Arquivo encontrado!';
+                    statusEl.style.color = 'var(--accent)';
+                } else {
+                    statusEl.innerHTML = '⚠️ Arquivo não encontrado. Verifique o nome e caminho.';
+                    statusEl.style.color = 'var(--warning)';
+                    document.getElementById('configWarning').style.display = 'block';
+                }
+            } catch (error) {
+                statusEl.innerHTML = '❌ Erro ao acessar arquivo. Verifique o caminho.';
+                statusEl.style.color = 'var(--danger)';
+                document.getElementById('configWarning').style.display = 'block';
+            }
+        }
+
         function testarLinkAppFinanceiro() {
             if (!clienteAtual) {
-                alert('Selecione um cliente primeiro!');
+                mostrarErro('Selecione um cliente primeiro!');
                 return;
             }
 
             const config = appFinanceiroConfig;
-            let url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
+            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
             
-            document.getElementById('testeLinkMsg').innerHTML = `Testando link para: <strong>${clienteAtual.nome}</strong>`;
+            document.getElementById('testeLinkMsg').innerHTML = `Testando link para: <strong>${clienteAtual.nome || 'Cliente'}</strong>`;
             document.getElementById('testeLinkUrl').value = url;
+            
+            // Testar se o link é acessível
+            const statusEl = document.getElementById('testeLinkStatus');
+            statusEl.style.display = 'block';
+            statusEl.innerHTML = '🔄 Testando acesso...';
+            
+            fetch(url, { method: 'HEAD', cache: 'no-cache' })
+                .then(response => {
+                    if (response.ok) {
+                        statusEl.innerHTML = '✅ Link acessível!';
+                        statusEl.style.background = 'rgba(76, 175, 80, 0.2)';
+                        statusEl.style.color = 'var(--accent)';
+                    } else {
+                        statusEl.innerHTML = '⚠️ Arquivo não encontrado. Verifique o nome e caminho.';
+                        statusEl.style.background = 'rgba(255, 193, 7, 0.2)';
+                        statusEl.style.color = 'var(--warning)';
+                    }
+                })
+                .catch(() => {
+                    statusEl.innerHTML = '❌ Não foi possível acessar o arquivo. Verifique o caminho.';
+                    statusEl.style.background = 'rgba(244, 67, 54, 0.2)';
+                    statusEl.style.color = 'var(--danger)';
+                });
+            
             document.getElementById('modalTesteLink').style.display = 'flex';
         }
 
@@ -838,7 +1086,9 @@
         function copiarLinkTeste() {
             const url = document.getElementById('testeLinkUrl').value;
             navigator.clipboard.writeText(url).then(() => {
-                alert('✅ Link copiado!');
+                mostrarSucesso('✅ Link copiado!');
+            }).catch(() => {
+                prompt('Copie o link manualmente:', url);
             });
         }
 
@@ -847,58 +1097,64 @@
         }
 
         function buscarArquivosApp() {
-            // Simula busca por arquivos HTML na pasta atual
             const possiveisNomes = [
                 'appfinanceiro.html',
                 'app-financeiro.html',
                 'app_financeiro.html',
                 'financeiro.html',
                 'AppFinanceiro.html',
-                'App-Financeiro.html'
+                'App-Financeiro.html',
+                'App_Financeiro.html',
+                'app_financeiro.php',
+                'appfinanceiro.php'
             ];
             
-            let msg = 'Arquivos possíveis:\n';
+            let msg = 'Arquivos comuns que podem existir:\n\n';
             possiveisNomes.forEach(nome => {
-                msg += `- ${nome}\n`;
+                msg += `• ${nome}\n`;
             });
             
-            alert(msg + '\n\nVerifique qual destes arquivos existe na sua pasta e configure na aba Apps');
+            msg += '\nVerifique qual destes arquivos existe na sua pasta e configure na aba Apps';
+            
+            alert(msg);
             document.getElementById('configWarning').style.display = 'block';
         }
 
         // ============================================
-        // FUNÇÕES DE FORMATAÇÃO
+        // FUNÇÕES PRINCIPAIS DO FIREBASE (CORRIGIDAS)
         // ============================================
-        function formatarMoedaBR(valor, comSimbolo = true) {
-            if (valor === undefined || valor === null) return comSimbolo ? 'R$ 0,00' : '0,00';
-            const numero = typeof valor === 'string' ? parseFloat(valor) : valor;
-            const valorFormatado = numero.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            return comSimbolo ? `R$ ${valorFormatado}` : valorFormatado;
-        }
-
-        function parseMoedaBR(valorStr) {
-            if (!valorStr) return 0;
-            const limpo = valorStr.toString().replace('R$', '').replace(/\s/g, '').replace(/\./g, '').replace(',', '.');
-            return parseFloat(limpo) || 0;
-        }
-
-        // ============================================
-        // FUNÇÕES PRINCIPAIS
-        // ============================================
+        
         function carregarClientes() {
-            document.getElementById("firebaseStatus").innerHTML = "🔄 Carregando...";
+            document.getElementById("firebaseStatus").innerHTML = "🔄 Conectando...";
 
-            db.collection("clientes").onSnapshot((snapshot) => {
+            // Remover listener anterior se existir
+            if (unsubscribeClientes) {
+                unsubscribeClientes();
+            }
+
+            unsubscribeClientes = db.collection("clientes").onSnapshot((snapshot) => {
                 clientes = [];
                 let ativos = 0, bloqueados = 0, teste = 0;
 
                 snapshot.forEach((doc) => {
-                    const cliente = { id: doc.id, ...doc.data() };
+                    const cliente = { 
+                        id: doc.id, 
+                        ...doc.data(),
+                        // Garantir valores padrão
+                        status: doc.data().status || 'ativo',
+                        perfil: doc.data().perfil || 'pj',
+                        appsAtivos: doc.data().appsAtivos || 1,
+                        dataCriacao: doc.data().dataCriacao || new Date().toISOString()
+                    };
                     clientes.push(cliente);
+                    
                     if (cliente.status === "ativo") ativos++;
                     else if (cliente.status === "bloqueado") bloqueados++;
                     else if (cliente.perfil === "teste") teste++;
                 });
+
+                // Ordenar clientes por nome
+                clientes.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
 
                 document.getElementById("clientesCount").innerHTML = `📊 ${clientes.length} clientes`;
                 document.getElementById("ativosCount").innerHTML = `✅ Ativos: ${ativos}`;
@@ -909,16 +1165,35 @@
 
                 atualizarListaClientes();
 
+                // Se o cliente atual ainda existe, atualizar seus dados
                 if (clienteAtual) {
                     const atualizado = clientes.find(c => c.id === clienteAtual.id);
                     if (atualizado) {
                         clienteAtual = atualizado;
                         preencherFormularioCliente();
+                    } else {
+                        // Cliente atual foi removido
+                        clienteAtual = null;
+                        limparFormularioCliente();
                     }
                 }
+
+                adicionarLog(`${clientes.length} clientes carregados`);
+
             }, (error) => {
-                console.error("Erro:", error);
-                document.getElementById("firebaseStatus").innerHTML = "🔴 Erro";
+                console.error("Erro no Firestore:", error);
+                document.getElementById("firebaseStatus").innerHTML = "🔴 Erro de conexão";
+                
+                let mensagemErro = "Erro ao conectar ao Firebase: ";
+                if (error.message.includes('permission')) {
+                    mensagemErro += "Permissão negada. Verifique as regras do Firebase.";
+                } else if (error.message.includes('network')) {
+                    mensagemErro += "Problema de rede. Verifique sua conexão.";
+                } else {
+                    mensagemErro += error.message;
+                }
+                
+                mostrarErro(mensagemErro);
             });
         }
 
@@ -927,21 +1202,35 @@
             const filtro = document.getElementById("buscarCliente")?.value.toLowerCase() || "";
 
             if (clientes.length === 0) {
-                lista.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">📭 Nenhum cliente</div>';
+                lista.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">📭 Nenhum cliente cadastrado</div>';
                 return;
             }
 
             let html = "";
-            const clientesFiltrados = clientes.filter(c => c.nome?.toLowerCase().includes(filtro));
+            const clientesFiltrados = clientes.filter(c => 
+                c.nome?.toLowerCase().includes(filtro) || 
+                c.id?.toLowerCase().includes(filtro)
+            );
+
+            if (clientesFiltrados.length === 0) {
+                lista.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">🔍 Nenhum cliente encontrado</div>';
+                return;
+            }
 
             clientesFiltrados.forEach(c => {
                 const ativo = clienteAtual && clienteAtual.id === c.id;
-                const statusClass = c.status === "ativo" ? "status-ativo" : "status-bloqueado";
+                
+                let statusClass = "status-ativo";
+                if (c.status === "bloqueado") statusClass = "status-bloqueado";
+                else if (c.perfil === "teste") statusClass = "status-teste";
+                
+                const statusText = c.status === "bloqueado" ? "BLOQUEADO" : 
+                                  (c.perfil === "teste" ? "TESTE" : "ATIVO");
 
                 html += `<div class="cliente-item ${ativo ? "active" : ""}" onclick="selecionarCliente('${c.id}')">
                     <div class="cliente-header">
                         <span class="cliente-nome">${c.nome || "Sem nome"}</span>
-                        <span class="cliente-status ${statusClass}">${c.status || "ativo"}</span>
+                        <span class="cliente-status ${statusClass}">${statusText}</span>
                     </div>
                     <div class="cliente-info">
                         <span>📱 ${c.appsAtivos || 1} apps</span>
@@ -949,7 +1238,7 @@
                     </div>
                     <div class="cliente-actions">
                         <span class="action-icon" title="Editar" onclick="entrarModoEdicao(); event.stopPropagation()">✏️</span>
-                        <span class="action-icon" title="Bloquear" onclick="bloquearCliente(); event.stopPropagation()">🔒</span>
+                        <span class="action-icon" title="${c.status === 'bloqueado' ? 'Desbloquear' : 'Bloquear'}" onclick="bloquearCliente(); event.stopPropagation()">${c.status === 'bloqueado' ? '🔓' : '🔒'}</span>
                         <span class="action-icon" title="Visualizar" onclick="verComoCliente(); event.stopPropagation()">👁️</span>
                         <span class="action-icon" title="Copiar link" onclick="copiarLinkClienteAtual(); event.stopPropagation()">🔗</span>
                         <span class="action-icon danger" title="Excluir" onclick="deletarCliente('${c.id}', event)">🗑️</span>
@@ -957,22 +1246,54 @@
                 </div>`;
             });
 
-            lista.innerHTML = html || '<div style="padding: 20px; color: var(--text-secondary);">🔍 Nenhum cliente</div>';
+            lista.innerHTML = html;
+        }
+
+        function limparFormularioCliente() {
+            document.getElementById("nomeEmpresa").value = "";
+            document.getElementById("perfilCliente").value = "pj";
+            document.getElementById("clienteIdVisivel").value = "";
+            document.getElementById("corPrincipal").value = "#4CAF50";
+            document.getElementById("corHex").value = "#4CAF50";
+            document.getElementById("modoEscuro").value = "auto";
+            document.getElementById("termoColaborador").value = "Motorista";
+            document.getElementById("emailContato").value = "";
+            document.getElementById("telefoneContato").value = "";
+            
+            atualizarPreview();
+            
+            ["btnEditar", "btnBloquear", "btnSalvar", "btnVisualizar", "btnCopiarLink", "btnExportar"]
+                .forEach(id => document.getElementById(id).disabled = true);
         }
 
         async function selecionarCliente(clienteId) {
-            const cliente = clientes.find(c => c.id === clienteId);
-            if (!cliente) return;
+            if (alteracoesNaoSalvas) {
+                if (!confirm("⚠️ Há alterações não salvas! Deseja continuar mesmo assim?")) {
+                    return;
+                }
+                alteracoesNaoSalvas = false;
+                document.getElementById("btnSalvar").disabled = true;
+            }
 
-            if (alteracoesNaoSalvas && !confirm("⚠️ Há alterações não salvas! Continuar?")) return;
+            const cliente = clientes.find(c => c.id === clienteId);
+            if (!cliente) {
+                mostrarErro("Cliente não encontrado!");
+                return;
+            }
 
             clienteAtual = cliente;
-            alteracoesNaoSalvas = false;
             atualizarListaClientes();
             preencherFormularioCliente();
+            carregarDadosCliente(); // Carregar dados adicionais
 
+            // Habilitar botões
             ["btnEditar", "btnBloquear", "btnSalvar", "btnVisualizar", "btnCopiarLink", "btnExportar"]
                 .forEach(id => document.getElementById(id).disabled = false);
+
+            // Atualizar texto do botão bloquear
+            document.getElementById("btnBloquear").innerHTML = cliente.status === 'bloqueado' ? '🔓 DESBLOQUEAR' : '🔒 BLOQUEAR';
+
+            adicionarLog(`Cliente selecionado: ${cliente.nome || cliente.id}`);
         }
 
         function preencherFormularioCliente() {
@@ -984,13 +1305,75 @@
             document.getElementById("corPrincipal").value = clienteAtual.cor || "#4CAF50";
             document.getElementById("corHex").value = clienteAtual.cor || "#4CAF50";
             document.getElementById("modoEscuro").value = clienteAtual.modoEscuro || "auto";
+            document.getElementById("termoColaborador").value = clienteAtual.termoColaborador || "Motorista";
+            document.getElementById("emailContato").value = clienteAtual.email || "";
+            document.getElementById("telefoneContato").value = clienteAtual.telefone || "";
             
             atualizarPreview();
         }
 
+        async function carregarDadosCliente() {
+            if (!clienteAtual) return;
+            
+            const container = document.getElementById('dadosClienteContainer');
+            container.innerHTML = '<div class="loading">Carregando dados...</div>';
+            
+            try {
+                // Contar lançamentos deste cliente
+                const lancamentosSnapshot = await db.collection('lancamentos')
+                    .where('clienteId', '==', clienteAtual.id)
+                    .count()
+                    .get();
+                
+                const totalLancamentos = lancamentosSnapshot.data().count || 0;
+                
+                // Buscar últimos lançamentos
+                const ultimosSnapshot = await db.collection('lancamentos')
+                    .where('clienteId', '==', clienteAtual.id)
+                    .orderBy('data', 'desc')
+                    .limit(5)
+                    .get();
+                
+                let ultimosHtml = '';
+                ultimosSnapshot.forEach(doc => {
+                    const l = doc.data();
+                    ultimosHtml += `<div style="padding: 5px 0; border-bottom: 1px solid var(--border);">
+                        ${l.data || ''} - ${l.descricao || ''} - ${formatarMoedaBR(l.valor)}
+                    </div>`;
+                });
+                
+                container.innerHTML = `
+                    <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px;">
+                        <p><strong>📊 Total de lançamentos:</strong> ${totalLancamentos}</p>
+                        <p><strong>📅 Criado em:</strong> ${new Date(clienteAtual.dataCriacao || Date.now()).toLocaleDateString('pt-BR')}</p>
+                        <p><strong>🆔 ID:</strong> <small>${clienteAtual.id}</small></p>
+                        
+                        <h4 style="margin: 15px 0 10px;">📋 Últimos lançamentos:</h4>
+                        <div style="max-height: 150px; overflow-y: auto;">
+                            ${ultimosHtml || '<p style="color: var(--text-secondary);">Nenhum lançamento encontrado</p>'}
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados do cliente:', error);
+                container.innerHTML = '<p style="color: var(--danger);">Erro ao carregar dados</p>';
+            }
+        }
+
         function atualizarPreview() {
             const nome = document.getElementById("nomeEmpresa").value || "Nome da Empresa";
+            const cor = document.getElementById("corPrincipal").value || "#4CAF50";
+            const modo = document.getElementById("modoEscuro").value;
+            
             document.getElementById("previewTitulo").innerHTML = nome;
+            document.getElementById("previewTitulo").style.color = cor;
+            document.getElementById("previewCor").innerHTML = `Cor: ${cor}`;
+            
+            let modoTexto = "Automático";
+            if (modo === "light") modoTexto = "Sempre claro";
+            else if (modo === "dark") modoTexto = "Sempre escuro";
+            document.getElementById("previewModo").innerHTML = `Modo: ${modoTexto}`;
         }
 
         function alteracaoNaoSalva() {
@@ -1000,146 +1383,200 @@
         }
 
         // ============================================
-        // FUNÇÕES CORRIGIDAS - AGORA COM CONFIGURAÇÃO
+        // FUNÇÕES CORRIGIDAS - LINKS E AÇÕES
         // ============================================
         
         function verComoCliente() {
-            if (!clienteAtual) return alert("Selecione um cliente primeiro!");
+            if (!clienteAtual) {
+                mostrarErro("Selecione um cliente primeiro!");
+                return;
+            }
             
             const config = appFinanceiroConfig;
             const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
             
             window.open(url, '_blank');
-            adicionarLog(`👁️ Visualizando: ${clienteAtual.nome} (${url})`);
+            adicionarLog(`👁️ Visualizando: ${clienteAtual.nome || clienteAtual.id}`);
         }
 
         function copiarLinkClienteAtual() {
-            if (!clienteAtual) return alert("Selecione um cliente primeiro!");
+            if (!clienteAtual) {
+                mostrarErro("Selecione um cliente primeiro!");
+                return;
+            }
             
             const config = appFinanceiroConfig;
             const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
             
             navigator.clipboard.writeText(url).then(() => {
-                alert('✅ Link copiado!');
-                adicionarLog(`🔗 Link copiado: ${clienteAtual.nome}`);
+                mostrarSucesso('✅ Link copiado!');
+                adicionarLog(`🔗 Link copiado: ${clienteAtual.nome || clienteAtual.id}`);
             }).catch(() => {
-                prompt('Copie o link:', url);
+                prompt('Copie o link manualmente:', url);
             });
         }
 
         function entrarModoEdicao() {
-            if (!clienteAtual) return alert("Selecione um cliente");
+            if (!clienteAtual) {
+                mostrarErro("Selecione um cliente");
+                return;
+            }
             
             const config = appFinanceiroConfig;
             const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}&modo=edicao&master=true`;
             
             window.open(url, '_blank');
-            adicionarLog(`✏️ Modo edição: ${clienteAtual.nome}`);
+            adicionarLog(`✏️ Modo edição: ${clienteAtual.nome || clienteAtual.id}`);
         }
 
-        async function gerarConviteCadastro() {
-            if (!clienteAtual) return alert("Selecione um cliente");
-            const token = Math.random().toString(36).substring(2, 15);
-            
-            const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}&convite=${token}`;
-            
-            try { await navigator.clipboard.writeText(url); } catch (e) {}
-            alert(`✅ Convite gerado!`);
-            adicionarLog(`📧 Convite: ${clienteAtual.nome}`);
-        }
-
-        function adicionarLog(mensagem) {
-            const logPanel = document.getElementById("logPanel");
-            const entry = document.createElement("div");
-            entry.className = "log-entry";
-            entry.textContent = `[${new Date().toLocaleTimeString()}] ${mensagem}`;
-            logPanel.appendChild(entry);
-            if (logPanel.children.length > 5) logPanel.removeChild(logPanel.children[0]);
-        }
-
+        // ============================================
+        // FUNÇÕES DE CRUD (CORRIGIDAS)
+        // ============================================
+        
         async function salvarAlteracoes() {
             if (!clienteAtual) return;
             
+            // Validar campos obrigatórios
+            const nome = document.getElementById("nomeEmpresa").value;
+            if (!nome) {
+                mostrarErro("Nome da empresa é obrigatório!");
+                return;
+            }
+            
             const dadosAtualizados = {
-                nome: document.getElementById("nomeEmpresa").value,
+                nome: nome,
                 perfil: document.getElementById("perfilCliente").value,
                 cor: document.getElementById("corPrincipal").value,
-                modoEscuro: document.getElementById("modoEscuro").value
+                modoEscuro: document.getElementById("modoEscuro").value,
+                termoColaborador: document.getElementById("termoColaborador").value,
+                email: document.getElementById("emailContato").value,
+                telefone: document.getElementById("telefoneContato").value,
+                atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
             };
+
+            // Remover campos undefined
+            Object.keys(dadosAtualizados).forEach(key => {
+                if (dadosAtualizados[key] === undefined || dadosAtualizados[key] === null) {
+                    delete dadosAtualizados[key];
+                }
+            });
 
             try {
                 await db.collection("clientes").doc(clienteAtual.id).update(dadosAtualizados);
-                alert("✅ Alterações salvas!");
+                
+                mostrarSucesso("✅ Alterações salvas com sucesso!");
                 alteracoesNaoSalvas = false;
                 document.getElementById("btnSalvar").disabled = true;
                 adicionarLog(`💾 Dados salvos: ${clienteAtual.nome}`);
+                
             } catch (error) {
-                alert("❌ Erro ao salvar: " + error.message);
+                console.error("Erro ao salvar:", error);
+                
+                let mensagem = "Erro ao salvar: ";
+                if (error.message.includes('permission')) {
+                    mensagem += "Permissão negada. Verifique as regras do Firebase.";
+                } else {
+                    mensagem += error.message;
+                }
+                
+                mostrarErro(mensagem);
             }
-        }
-
-        // ============================================
-        // FUNÇÕES AUXILIARES
-        // ============================================
-        
-        function exportarClienteJSON() {
-            if (!clienteAtual) return;
-            const dados = { cliente: clienteAtual, data: new Date().toISOString() };
-            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = `cliente_${clienteAtual.id}_${new Date().toISOString().slice(0, 10)}.json`;
-            a.click();
-            alert("📦 Backup exportado");
         }
 
         async function bloquearCliente() {
             if (!clienteAtual) return;
-            document.getElementById("modalTitulo").textContent = "🔒 Bloquear";
-            document.getElementById("modalMsg").textContent = `Bloquear ${clienteAtual.nome}?`;
+            
+            const novoStatus = clienteAtual.status === "ativo" ? "bloqueado" : "ativo";
+            const acao = novoStatus === "bloqueado" ? "bloquear" : "desbloquear";
+            
+            document.getElementById("modalTitulo").textContent = acao === "bloquear" ? "🔒 Bloquear Cliente" : "🔓 Desbloquear Cliente";
+            document.getElementById("modalMsg").textContent = `Deseja ${acao} o cliente ${clienteAtual.nome || clienteAtual.id}?`;
             document.getElementById("modalConfirm").style.display = "flex";
-            acaoPendente = "bloquear";
+            
+            acaoPendente = async () => {
+                try {
+                    await db.collection("clientes").doc(clienteAtual.id).update({ 
+                        status: novoStatus,
+                        motivoBloqueio: novoStatus === "bloqueado" ? "Bloqueado pelo Master" : null,
+                        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    mostrarSucesso(`✅ Cliente ${novoStatus === "bloqueado" ? "bloqueado" : "desbloqueado"} com sucesso!`);
+                    adicionarLog(`🔒 Status alterado: ${clienteAtual.nome} -> ${novoStatus}`);
+                    
+                    // Atualizar texto do botão
+                    document.getElementById("btnBloquear").innerHTML = novoStatus === 'bloqueado' ? '🔓 DESBLOQUEAR' : '🔒 BLOQUEAR';
+                    
+                } catch (error) {
+                    console.error("Erro ao alterar status:", error);
+                    mostrarErro("Erro ao alterar status do cliente");
+                }
+                fecharModal();
+            };
         }
 
         async function confirmarAcao() {
-            if (acaoPendente === "bloquear") {
-                const novoStatus = clienteAtual.status === "ativo" ? "bloqueado" : "ativo";
-                try {
-                    await db.collection("clientes").doc(clienteAtual.id).update({ status: novoStatus });
-                    alert(`✅ Cliente ${novoStatus === "ativo" ? "desbloqueado" : "bloqueado"}!`);
-                    adicionarLog(`🔒 Status alterado: ${clienteAtual.nome} -> ${novoStatus}`);
-                } catch (error) { 
-                    alert("❌ Erro: " + error.message); 
-                }
+            if (acaoPendente) {
+                await acaoPendente();
+                acaoPendente = null;
             }
-            fecharModal();
         }
 
         async function deletarCliente(clienteId, event) {
             if (event) event.stopPropagation();
+            
             const cliente = clientes.find(c => c.id === clienteId);
-            if (!cliente || !confirm(`⚠️ Excluir ${cliente.nome}?`)) return;
+            if (!cliente) return;
+            
+            if (!confirm(`⚠️ ATENÇÃO!\n\nTem certeza que deseja EXCLUIR permanentemente o cliente "${cliente.nome || cliente.id}"?\n\nEsta ação não pode ser desfeita e todos os dados do cliente serão perdidos!`)) {
+                return;
+            }
+            
             try {
-                await db.collection("clientes").doc(clienteId).delete();
-                alert("✅ Cliente excluído!");
+                // Primeiro, excluir todos os lançamentos do cliente
+                const lancamentosSnapshot = await db.collection('lancamentos')
+                    .where('clienteId', '==', clienteId)
+                    .get();
+                
+                const batch = db.batch();
+                
+                lancamentosSnapshot.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                // Excluir o documento do cliente
+                batch.delete(db.collection("clientes").doc(clienteId));
+                
+                await batch.commit();
+                
+                mostrarSucesso("✅ Cliente e todos os seus dados foram excluídos!");
+                adicionarLog(`🗑️ Cliente excluído: ${cliente.nome || cliente.id}`);
+                
                 if (clienteAtual && clienteAtual.id === clienteId) {
                     clienteAtual = null;
-                    ["btnEditar","btnBloquear","btnSalvar","btnVisualizar","btnCopiarLink","btnExportar"]
-                        .forEach(id => document.getElementById(id).disabled = true);
+                    limparFormularioCliente();
                 }
-            } catch (error) { 
-                alert("❌ Erro ao deletar"); 
+                
+            } catch (error) {
+                console.error("Erro ao deletar cliente:", error);
+                mostrarErro("Erro ao excluir cliente: " + error.message);
             }
         }
 
         function criarCliente() { 
+            document.getElementById("novoClienteNome").value = "";
+            document.getElementById("novoClientePerfil").value = "pj";
+            document.getElementById("novoClienteEmail").value = "";
+            document.getElementById("novoClienteTelefone").value = "";
             document.getElementById("modalNovoCliente").style.display = "flex"; 
         }
 
         async function criarClienteFirebase() {
-            const nome = document.getElementById("novoClienteNome").value;
-            if (!nome) return alert("Digite o nome");
+            const nome = document.getElementById("novoClienteNome").value.trim();
+            if (!nome) {
+                mostrarErro("Digite o nome do cliente");
+                return;
+            }
 
             const novoCliente = {
                 nome: nome,
@@ -1148,15 +1585,21 @@
                 dataCriacao: new Date().toISOString(),
                 appsAtivos: 1,
                 cor: "#4CAF50",
-                modoEscuro: "auto"
+                modoEscuro: "auto",
+                termoColaborador: "Motorista",
+                email: document.getElementById("novoClienteEmail").value || "",
+                telefone: document.getElementById("novoClienteTelefone").value || "",
+                criadoEm: firebase.firestore.FieldValue.serverTimestamp()
             };
 
             try {
-                await db.collection("clientes").add(novoCliente);
-                alert(`✅ Cliente criado!`);
+                const docRef = await db.collection("clientes").add(novoCliente);
+                mostrarSucesso(`✅ Cliente "${nome}" criado com sucesso! ID: ${docRef.id}`);
+                adicionarLog(`➕ Novo cliente: ${nome}`);
                 fecharModalNovoCliente();
-            } catch (error) { 
-                alert("❌ Erro ao criar cliente"); 
+            } catch (error) {
+                console.error("Erro ao criar cliente:", error);
+                mostrarErro("Erro ao criar cliente: " + error.message);
             }
         }
 
@@ -1164,8 +1607,206 @@
             document.getElementById("modalNovoCliente").style.display = "none"; 
         }
 
+        // ============================================
+        // FUNÇÕES DE EXPORTAÇÃO E BACKUP
+        // ============================================
+        
+        function exportarClienteJSON() {
+            if (!clienteAtual) return;
+            
+            const dados = { 
+                cliente: clienteAtual, 
+                dataExportacao: new Date().toISOString(),
+                versao: "2.2"
+            };
+            
+            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = `cliente_${clienteAtual.nome || clienteAtual.id}_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            
+            mostrarSucesso("📦 Backup exportado com sucesso!");
+            adicionarLog(`📦 Backup exportado: ${clienteAtual.nome}`);
+        }
+
+        function exportarClienteCompleto() {
+            if (!clienteAtual) {
+                mostrarErro("Selecione um cliente primeiro!");
+                return;
+            }
+            
+            mostrarSucesso("Preparando backup completo...");
+            adicionarLog("Iniciando exportação completa...");
+            
+            // Esta função poderia ser expandida para exportar também os lançamentos
+            exportarClienteJSON();
+        }
+
+        function importarBackup() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    try {
+                        const dados = JSON.parse(e.target.result);
+                        
+                        if (!dados.cliente || !dados.cliente.id) {
+                            mostrarErro("Arquivo de backup inválido!");
+                            return;
+                        }
+                        
+                        if (confirm(`Deseja restaurar o backup do cliente "${dados.cliente.nome}"?\n\nIsso substituirá os dados atuais!`)) {
+                            await db.collection("clientes").doc(dados.cliente.id).set(dados.cliente);
+                            mostrarSucesso("✅ Backup restaurado com sucesso!");
+                            adicionarLog(`🔄 Backup restaurado: ${dados.cliente.nome}`);
+                        }
+                        
+                    } catch (error) {
+                        console.error("Erro ao importar backup:", error);
+                        mostrarErro("Erro ao importar backup: " + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            
+            input.click();
+        }
+
+        function restaurarVersaoAnterior() {
+            alert("Funcionalidade em desenvolvimento. Use Exportar/Importar backup por enquanto.");
+        }
+
+        // ============================================
+        // FUNÇÕES DE DIAGNÓSTICO (CORRIGIDAS)
+        // ============================================
+        
+        function diagnosticarConexao() {
+            document.getElementById('modalDiagnostico').style.display = 'flex';
+            executarDiagnosticoCompleto();
+        }
+
+        async function executarDiagnosticoCompleto() {
+            const body = document.getElementById('diagnosticoBody');
+            body.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Executando diagnóstico...</div>';
+            
+            try {
+                const resultados = [];
+                
+                // Teste 1: Firebase inicializado
+                resultados.push({
+                    teste: "Firebase inicializado",
+                    status: !!firebase.apps.length,
+                    mensagem: !!firebase.apps.length ? "✅ OK" : "❌ Falha"
+                });
+                
+                // Teste 2: Conexão com Firestore
+                try {
+                    const testRef = db.collection('_teste').doc('teste');
+                    await testRef.set({ timestamp: new Date().toISOString() });
+                    await testRef.delete();
+                    resultados.push({
+                        teste: "Conexão com Firestore",
+                        status: true,
+                        mensagem: "✅ OK"
+                    });
+                } catch (e) {
+                    resultados.push({
+                        teste: "Conexão com Firestore",
+                        status: false,
+                        mensagem: "❌ Falha: " + e.message
+                    });
+                }
+                
+                // Teste 3: Ler clientes
+                try {
+                    const snapshot = await db.collection('clientes').limit(1).get();
+                    resultados.push({
+                        teste: "Leitura de clientes",
+                        status: true,
+                        mensagem: `✅ OK (${snapshot.size} documentos lidos)`
+                    });
+                } catch (e) {
+                    resultados.push({
+                        teste: "Leitura de clientes",
+                        status: false,
+                        mensagem: "❌ Falha: " + e.message
+                    });
+                }
+                
+                // Teste 4: Configurações do app
+                resultados.push({
+                    teste: "Configuração do App Financeiro",
+                    status: !!(appFinanceiroConfig && appFinanceiroConfig.nomeArquivo),
+                    mensagem: appFinanceiroConfig?.nomeArquivo || "⚠️ Não configurado"
+                });
+                
+                // Teste 5: Cliente selecionado
+                resultados.push({
+                    teste: "Cliente selecionado",
+                    status: !!clienteAtual,
+                    mensagem: clienteAtual ? `✅ ${clienteAtual.nome || clienteAtual.id}` : "⚠️ Nenhum"
+                });
+                
+                // Montar HTML
+                let html = '<h3 style="margin-bottom: 15px;">📊 Resultados do Diagnóstico:</h3>';
+                html += '<table style="width: 100%; border-collapse: collapse;">';
+                
+                resultados.forEach(r => {
+                    html += `
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 0;">${r.teste}</td>
+                            <td style="padding: 10px 0; text-align: right;">
+                                <span style="color: ${r.status ? 'var(--accent)' : 'var(--danger)'};">${r.mensagem}</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</table>';
+                
+                // Sugestões
+                html += '<h4 style="margin: 20px 0 10px;">💡 Sugestões:</h4><ul style="color: var(--text-secondary);">';
+                
+                if (!resultados[1].status) {
+                    html += '<li>Verifique as regras de segurança do Firebase</li>';
+                    html += '<li>Certifique-se de que o Firestore está ativado</li>';
+                }
+                
+                if (!resultados[3].status) {
+                    html += '<li>Configure o nome do arquivo do App Financeiro na aba "Apps"</li>';
+                }
+                
+                if (resultados.length === 0) {
+                    html += '<li>Tudo parece OK!</li>';
+                }
+                
+                html += '</ul>';
+                
+                body.innerHTML = html;
+                
+            } catch (error) {
+                body.innerHTML = `<p style="color: var(--danger);">Erro durante diagnóstico: ${error.message}</p>`;
+            }
+        }
+
+        function fecharModalDiagnostico() {
+            document.getElementById('modalDiagnostico').style.display = 'none';
+        }
+
+        // ============================================
+        // FUNÇÕES AUXILIARES
+        // ============================================
+        
         function mudarAba(aba, btnEl) {
             document.querySelectorAll(".tab-content").forEach(el => el.style.display = "none");
+            
             const idMap = { 
                 visual: "abaVisual", 
                 conteudo: "abaConteudo", 
@@ -1176,22 +1817,27 @@
                 planos: "abaPlanos", 
                 backup: "abaBackup" 
             };
+            
             const abaElement = document.getElementById(idMap[aba]);
-            if (abaElement) abaElement.style.display = "block";
+            if (abaElement) {
+                abaElement.style.display = "block";
+                
+                // Se for a aba de dados, carregar dados do cliente
+                if (aba === 'dados' && clienteAtual) {
+                    carregarDadosCliente();
+                }
+            }
+            
             document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
             if (btnEl) btnEl.classList.add("active");
         }
 
-        function filtrarClientes() { atualizarListaClientes(); }
-        
-        function mostrarAjuda() { 
-            alert("🚀 MASTER APP v2.1 CORRIGIDO\n\n✅ Links corrigidos\n✅ Configuração do app financeiro\n✅ Teste de conexão\n✅ Backup funcional"); 
+        function filtrarClientes() { 
+            atualizarListaClientes(); 
         }
         
-        function diagnosticarConexao() { 
-            const status = document.getElementById("firebaseStatus").innerHTML;
-            const total = clientes.length;
-            alert(`🔍 DIAGNÓSTICO:\n\nFirebase: ${status}\nClientes carregados: ${total}\nApp Financeiro configurado: ${appFinanceiroConfig.nomeArquivo}\n\nSe os links não abrem, verifique se o arquivo "${appFinanceiroConfig.nomeArquivo}" existe na pasta correta.`); 
+        function mostrarAjuda() { 
+            alert(`🚀 MASTER APP v2.2 CORRIGIDO\n\n✅ Links corrigidos\n✅ Configuração do app financeiro\n✅ Validação de arquivos\n✅ Diagnóstico completo\n✅ Backup funcional\n✅ Sincronia com Firebase\n✅ Tratamento de erros\n\nCaso encontre algum problema, utilize o Diagnóstico para identificar a causa.`); 
         }
 
         function fecharModal() { 
@@ -1220,8 +1866,12 @@
             setTimeout(() => {
                 if (!localStorage.getItem('appFinanceiroConfig')) {
                     document.getElementById('configWarning').style.display = 'block';
+                } else {
+                    validarArquivoAppFinanceiro();
                 }
             }, 2000);
+            
+            adicionarLog("🚀 Sistema iniciado - v2.2 corrigido");
         };
     </script>
 </body>
