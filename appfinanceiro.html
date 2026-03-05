@@ -835,6 +835,43 @@
             border-bottom: 1px dashed var(--border);
         }
 
+        /* Mensagens de sucesso/erro */
+        .success-message {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        .error-message {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
+        .warning-message {
+            background: rgba(255, 152, 0, 0.2);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+            display: none;
+        }
+
         /* Utilitários */
         .text-success { color: var(--success); }
         .text-danger { color: var(--danger); }
@@ -864,6 +901,11 @@
 </head>
 <body>
     <div class="container">
+        <!-- MENSAGENS -->
+        <div id="successMessage" class="success-message"></div>
+        <div id="errorMessage" class="error-message"></div>
+        <div id="warningMessage" class="warning-message"></div>
+
         <!-- HEADER -->
         <div class="header">
             <div class="logo-area">
@@ -1317,6 +1359,21 @@
         </div>
     </div>
 
+    <!-- MODAL ÍNDICE -->
+    <div id="modalIndice" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📊 Criar Índice no Firebase</h2>
+                <button class="modal-close" onclick="fecharModalIndice()">&times;</button>
+            </div>
+            <div class="modal-body" id="indiceBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="abrirLinkIndice()">Abrir Link</button>
+                <button class="btn btn-outline" onclick="fecharModalIndice()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // ============================================
         // CONFIGURAÇÃO FIREBASE
@@ -1336,14 +1393,14 @@
         
         // Configurar Firestore para usar timestamps
         db.settings({
-            timestampsInSnapshots: true
+            timestampsInSnapshots: true,
+            ignoreUndefinedProperties: true
         });
 
         // ============================================
         // VARIÁVEIS GLOBAIS
         // ============================================
         let clienteId = null;
-        let clienteConfig = null;
         let clienteData = null;
         let lancamentos = [];
         let lancamentosFiltrados = [];
@@ -1355,10 +1412,41 @@
         let graficoFluxo = null;
         let graficoPizza = null;
         let debugAtivo = false;
+        let unsubscribeLancamentos = null;
+        let categoriasPadrao = [
+            'Alimentação', 'Transporte', 'Moradia', 'Saúde', 
+            'Educação', 'Lazer', 'Salário', 'Investimentos', 
+            'Vendas', 'Serviços', 'Impostos', 'Outros'
+        ];
 
         // ============================================
-        // FUNÇÕES DE LOG E DEBUG
+        // FUNÇÕES DE UTILITÁRIOS
         // ============================================
+        
+        function mostrarSucesso(mensagem) {
+            const el = document.getElementById('successMessage');
+            el.innerHTML = mensagem;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 3000);
+            adicionarDebug(`✅ ${mensagem}`, 'sucesso');
+        }
+
+        function mostrarErro(mensagem) {
+            const el = document.getElementById('errorMessage');
+            el.innerHTML = `❌ ${mensagem}`;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 5000);
+            adicionarDebug(`❌ ${mensagem}`, 'erro');
+        }
+
+        function mostrarAviso(mensagem) {
+            const el = document.getElementById('warningMessage');
+            el.innerHTML = `⚠️ ${mensagem}`;
+            el.style.display = 'block';
+            setTimeout(() => { el.style.display = 'none'; }, 4000);
+            adicionarDebug(`⚠️ ${mensagem}`, 'warning');
+        }
+
         function adicionarDebug(mensagem, tipo = 'info') {
             const debugContent = document.getElementById('debugContent');
             if (!debugContent) return;
@@ -1394,141 +1482,9 @@
             }
         }
 
-        function diagnosticarFirebase() {
-            adicionarDebug('Iniciando diagnóstico do Firebase...');
-            
-            const diagnostico = {
-                timestamp: new Date().toISOString(),
-                clienteId: clienteId,
-                firebaseInicializado: !!firebase.apps.length,
-                firestoreConectado: !!db,
-                totalLancamentos: lancamentos.length,
-                clienteConfig: clienteConfig ? 'Carregado' : 'Não carregado',
-                clienteData: clienteData ? 'Carregado' : 'Não carregado',
-                modoMaster: modoMaster,
-                modoEdicao: modoEdicao
-            };
-            
-            let html = `
-                <h3>📊 Status do Sistema</h3>
-                <table style="width: 100%; margin-top: 15px;">
-                    <tr><td><strong>Cliente ID:</strong></td><td>${clienteId || 'Não definido'}</td></tr>
-                    <tr><td><strong>Firebase:</strong></td><td>${diagnostico.firebaseInicializado ? '✅ OK' : '❌ Erro'}</td></tr>
-                    <tr><td><strong>Firestore:</strong></td><td>${diagnostico.firestoreConectado ? '✅ OK' : '❌ Erro'}</td></tr>
-                    <tr><td><strong>Total Lançamentos:</strong></td><td>${diagnostico.totalLancamentos}</td></tr>
-                    <tr><td><strong>Config Cliente:</strong></td><td>${diagnostico.clienteConfig}</td></tr>
-                    <tr><td><strong>Dados Cliente:</strong></td><td>${diagnostico.clienteData}</td></tr>
-                    <tr><td><strong>Modo Master:</strong></td><td>${diagnostico.modoMaster ? '✅' : '❌'}</td></tr>
-                </table>
-                
-                <h4 style="margin-top: 20px;">🔧 Testar Conexão</h4>
-                <button class="btn btn-primary w-100" onclick="testarConexaoFirebase()">Testar Conexão</button>
-                
-                <h4 style="margin-top: 20px;">🛠️ Ações Rápidas</h4>
-                <div class="flex" style="flex-wrap: wrap;">
-                    <button class="btn btn-sm btn-info" onclick="criarCollectionLancamentos()">Criar Collection</button>
-                    <button class="btn btn-sm btn-warning" onclick="verificarRegrasFirebase()">Verificar Regras</button>
-                    <button class="btn btn-sm btn-secondary" onclick="recarregarDados()">Recarregar Dados</button>
-                </div>
-            `;
-            
-            document.getElementById('diagnosticoBody').innerHTML = html;
-            document.getElementById('modalDiagnostico').style.display = 'flex';
-        }
-
-        async function testarConexaoFirebase() {
-            try {
-                adicionarDebug('Testando conexão com Firestore...');
-                
-                // Tentar escrever um documento de teste
-                const testRef = db.collection('_testes').doc('teste_conexao');
-                await testRef.set({
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                    clienteId: clienteId || 'teste'
-                });
-                
-                adicionarDebug('Conexão OK! Documento de teste criado', 'sucesso');
-                
-                // Tentar ler
-                const doc = await testRef.get();
-                if (doc.exists) {
-                    adicionarDebug('Leitura OK! Documento recuperado', 'sucesso');
-                }
-                
-                // Limpar teste
-                await testRef.delete();
-                
-                mostrarAlerta('✅ Conexão com Firebase OK!');
-                
-            } catch (error) {
-                adicionarDebug(`Erro na conexão: ${error.message}`, 'erro');
-                mostrarAlerta(`❌ Erro: ${error.message}`, 'error');
-            }
-        }
-
-        async function criarCollectionLancamentos() {
-            try {
-                adicionarDebug('Tentando criar collection lancamentos...');
-                
-                // Criar um documento dummy
-                await db.collection('lancamentos').add({
-                    clienteId: clienteId || 'teste',
-                    descricao: 'Documento de inicialização',
-                    valor: 0,
-                    data: new Date().toISOString().split('T')[0],
-                    tipo: 'entrada',
-                    criadoEm: firebase.firestore.FieldValue.serverTimestamp(),
-                    _inicializacao: true
-                });
-                
-                adicionarDebug('Collection criada com sucesso!', 'sucesso');
-                mostrarAlerta('✅ Collection lancamentos criada!');
-                
-                // Recarregar dados
-                carregarLancamentos();
-                
-            } catch (error) {
-                adicionarDebug(`Erro ao criar collection: ${error.message}`, 'erro');
-                mostrarAlerta(`❌ Erro: ${error.message}`, 'error');
-            }
-        }
-
-        function verificarRegrasFirebase() {
-            alert(`⚠️ Verifique as regras do Firebase no console:
-
-1. Acesse: https://console.firebase.google.com
-2. Selecione o projeto "painelmastercomplet"
-3. Vá em Firestore Database > Regras
-4. Adicione esta regra temporária para teste:
-
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if true;  // APENAS PARA TESTE!
-    }
-  }
-}
-
-⚠️ Depois dos testes, restrinja as regras!`);
-        }
-
-        function recarregarDados() {
-            adicionarDebug('Recarregando dados...');
-            carregarLancamentos();
-            carregarDadosCliente();
-        }
-
-        function fecharModalDiagnostico() {
-            document.getElementById('modalDiagnostico').style.display = 'none';
-        }
-
-        // ============================================
-        // FUNÇÕES DE FORMATAÇÃO
-        // ============================================
         function formatarMoedaBR(valor, comSimbolo = true) {
             if (valor === undefined || valor === null) return comSimbolo ? 'R$ 0,00' : '0,00';
-            const numero = typeof valor === 'string' ? parseFloat(valor) : valor;
+            const numero = typeof valor === 'string' ? parseFloat(valor.replace(/[^\d,.-]/g, '').replace(',', '.')) : valor;
             
             if (isNaN(numero)) return comSimbolo ? 'R$ 0,00' : '0,00';
             
@@ -1559,28 +1515,16 @@ service cloud.firestore {
         function formatarDataBR(data) {
             if (!data) return '-';
             try {
-                return new Date(data).toLocaleDateString('pt-BR');
+                return new Date(data + 'T12:00:00').toLocaleDateString('pt-BR');
             } catch (e) {
                 return '-';
             }
         }
 
-        function mostrarAlerta(mensagem, tipo = 'success') {
-            const alert = document.createElement('div');
-            alert.className = `alert ${tipo}`;
-            alert.innerHTML = mensagem;
-            document.body.appendChild(alert);
-            
-            setTimeout(() => {
-                alert.remove();
-            }, 3000);
-            
-            adicionarDebug(mensagem, tipo);
-        }
-
         // ============================================
-        // INICIALIZAÇÃO
+        // INICIALIZAÇÃO CORRIGIDA
         // ============================================
+        
         function getParametroUrl(nome) {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get(nome);
@@ -1598,8 +1542,8 @@ service cloud.firestore {
             adicionarDebug(`Modo Master: ${modoMaster ? 'Sim' : 'Não'}`);
             
             if (!clienteId) {
-                adicionarDebug('ERRO: Cliente não especificado!', 'erro');
                 mostrarErro('Cliente não especificado!');
+                document.getElementById('companyName').textContent = 'Erro: Cliente não especificado';
                 return;
             }
             
@@ -1609,10 +1553,17 @@ service cloud.firestore {
                 adicionarDebug('Painel Master ativado');
             }
             
+            // Carregar dados do cliente (agora da coleção clientes)
             await carregarDadosCliente();
-            carregarLancamentos();
-            aplicarTema();
+            
+            // Carregar categorias
             carregarCategorias();
+            
+            // Carregar lançamentos
+            carregarLancamentos();
+            
+            // Aplicar tema salvo
+            aplicarTema();
             
             // Ativar debug automaticamente se estiver em modo master
             if (modoMaster) {
@@ -1620,121 +1571,176 @@ service cloud.firestore {
             }
         };
 
-        function mostrarErro(mensagem) {
-            document.body.innerHTML = `
-                <div style="text-align: center; padding: 50px;">
-                    <h1>❌ Erro</h1>
-                    <p>${mensagem}</p>
-                    <button onclick="window.close()" class="btn btn-primary">Fechar</button>
-                </div>
-            `;
-        }
-
+        // ============================================
+        // CARREGAMENTO DE DADOS CORRIGIDO
+        // ============================================
+        
         async function carregarDadosCliente() {
             try {
-                adicionarDebug('Carregando dados do cliente...');
+                adicionarDebug('Carregando dados do cliente da coleção "clientes"...');
                 
-                // Buscar configurações do cliente
-                const configDoc = await db.collection('configs').doc(clienteId).get();
-                if (configDoc.exists) {
-                    clienteConfig = configDoc.data();
-                    adicionarDebug('Configurações carregadas');
-                    
-                    document.getElementById('companyName').textContent = 
-                        clienteConfig?.conteudo?.nomeEmpresa || 'App Financeiro';
-                    
-                    if (clienteConfig?.visual?.corPrincipal) {
-                        document.documentElement.style.setProperty('--primary', clienteConfig.visual.corPrincipal);
-                    }
-                    
-                    if (clienteConfig?.visual?.modoEscuro === 'dark') {
-                        document.documentElement.setAttribute('data-theme', 'dark');
-                    }
-                } else {
-                    adicionarDebug('Configurações não encontradas, usando padrão', 'warning');
-                }
-                
-                // Buscar dados do cliente
+                // Buscar dados do cliente na coleção CORRETA: "clientes"
                 const clienteDoc = await db.collection('clientes').doc(clienteId).get();
+                
                 if (clienteDoc.exists) {
                     clienteData = clienteDoc.data();
-                    adicionarDebug(`Cliente: ${clienteData.nome || 'Sem nome'}`);
+                    adicionarDebug(`Cliente encontrado: ${clienteData.nome || 'Sem nome'}`);
                     
-                    if (clienteData.status === 'bloqueado' && !modoMaster) {
-                        adicionarDebug('Cliente bloqueado!', 'warning');
-                        mostrarErro('Cliente Bloqueado!\n' + (clienteData.motivoBloqueio || 'Entre em contato com o administrador'));
-                        return;
+                    // Atualizar título
+                    document.getElementById('companyName').textContent = clienteData.nome || 'App Financeiro';
+                    
+                    // Aplicar configurações visuais
+                    if (clienteData.cor) {
+                        document.documentElement.style.setProperty('--primary', clienteData.cor);
                     }
+                    
+                    // Verificar status do cliente
+                    if (clienteData.status === 'bloqueado' && !modoMaster) {
+                        mostrarErro('Cliente Bloqueado!\n' + (clienteData.motivoBloqueio || 'Entre em contato com o administrador'));
+                        document.getElementById('companyName').textContent = '❌ CLIENTE BLOQUEADO';
+                        
+                        // Desabilitar ações
+                        document.querySelectorAll('button').forEach(btn => {
+                            if (!btn.classList.contains('btn-outline')) {
+                                btn.disabled = true;
+                            }
+                        });
+                    }
+                    
                 } else {
-                    adicionarDebug('Cliente não encontrado no Firestore', 'warning');
+                    adicionarDebug('Cliente não encontrado no Firestore. Criando automaticamente...', 'warning');
+                    
+                    // Criar cliente automaticamente se não existir
+                    const novoCliente = {
+                        nome: 'Novo Cliente',
+                        status: 'ativo',
+                        perfil: 'pj',
+                        dataCriacao: new Date().toISOString(),
+                        appsAtivos: 1,
+                        cor: '#4CAF50',
+                        modoEscuro: 'auto',
+                        termoColaborador: 'Motorista',
+                        criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    
+                    await db.collection('clientes').doc(clienteId).set(novoCliente);
+                    clienteData = novoCliente;
+                    document.getElementById('companyName').textContent = 'Novo Cliente';
+                    
+                    mostrarSucesso('Cliente criado automaticamente!');
                 }
                 
             } catch (error) {
                 adicionarDebug(`Erro ao carregar cliente: ${error.message}`, 'erro');
                 console.error('Erro ao carregar cliente:', error);
+                
+                if (error.message.includes('permission')) {
+                    mostrarErro('Erro de permissão! Verifique as regras do Firebase.');
+                } else {
+                    mostrarErro('Erro ao carregar dados do cliente');
+                }
             }
         }
 
         function carregarCategorias() {
-            const categorias = [
-                'Alimentação', 'Transporte', 'Moradia', 'Saúde', 
-                'Educação', 'Lazer', 'Salário', 'Investimentos', 
-                'Vendas', 'Serviços', 'Impostos', 'Outros'
-            ];
-            
             const selectCategoria = document.getElementById('lancamentoCategoria');
             const filtroCategoria = document.getElementById('filtroCategoria');
             
             if (selectCategoria) {
-                selectCategoria.innerHTML = categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+                selectCategoria.innerHTML = categoriasPadrao.map(c => `<option value="${c}">${c}</option>`).join('');
             }
             
             if (filtroCategoria) {
                 filtroCategoria.innerHTML = '<option value="todos">Todas</option>' + 
-                    categorias.map(c => `<option value="${c}">${c}</option>`).join('');
+                    categoriasPadrao.map(c => `<option value="${c}">${c}</option>`).join('');
             }
         }
 
         // ============================================
-        // CRUD DE LANÇAMENTOS
+        // CRUD DE LANÇAMENTOS CORRIGIDO
         // ============================================
+        
         function carregarLancamentos() {
             if (!clienteId) {
                 adicionarDebug('Não foi possível carregar lançamentos: clienteId não definido', 'erro');
                 return;
             }
             
-            adicionarDebug('Conectando ao Firestore...');
+            adicionarDebug('Conectando ao Firestore para carregar lançamentos...');
             
-            db.collection('lancamentos')
-                .where('clienteId', '==', clienteId)
-                .orderBy('data', 'desc')
-                .onSnapshot((snapshot) => {
-                    lancamentos = [];
-                    snapshot.forEach(doc => {
-                        lancamentos.push({
-                            id: doc.id,
-                            ...doc.data()
+            // Remover listener anterior se existir
+            if (unsubscribeLancamentos) {
+                unsubscribeLancamentos();
+            }
+
+            // Tentar carregar com índice composto
+            try {
+                unsubscribeLancamentos = db.collection('lancamentos')
+                    .where('clienteId', '==', clienteId)
+                    .orderBy('data', 'desc')
+                    .onSnapshot((snapshot) => {
+                        lancamentos = [];
+                        snapshot.forEach(doc => {
+                            lancamentos.push({
+                                id: doc.id,
+                                ...doc.data()
+                            });
                         });
+                        
+                        adicionarDebug(`${lancamentos.length} lançamentos carregados`, 'sucesso');
+                        
+                        aplicarFiltros();
+                        atualizarResumo();
+                        atualizarGraficos();
+                        
+                    }, (error) => {
+                        console.error('Erro ao carregar lançamentos:', error);
+                        adicionarDebug(`Erro: ${error.message}`, 'erro');
+                        
+                        // Se for erro de índice, tentar sem orderBy
+                        if (error.message.includes('index') || error.message.includes('requires an index')) {
+                            adicionarDebug('Tentando carregar sem orderBy...', 'warning');
+                            
+                            // Tentar sem orderBy
+                            unsubscribeLancamentos = db.collection('lancamentos')
+                                .where('clienteId', '==', clienteId)
+                                .onSnapshot((snapshot) => {
+                                    lancamentos = [];
+                                    snapshot.forEach(doc => {
+                                        lancamentos.push({
+                                            id: doc.id,
+                                            ...doc.data()
+                                        });
+                                    });
+                                    
+                                    // Ordenar manualmente
+                                    lancamentos.sort((a, b) => {
+                                        return (b.data || '').localeCompare(a.data || '');
+                                    });
+                                    
+                                    adicionarDebug(`${lancamentos.length} lançamentos carregados (ordenação manual)`, 'sucesso');
+                                    
+                                    aplicarFiltros();
+                                    atualizarResumo();
+                                    atualizarGraficos();
+                                    
+                                    // Mostrar aviso sobre índice
+                                    mostrarAviso('Para melhor performance, crie um índice composto (use Diagnóstico)');
+                                    
+                                }, (error2) => {
+                                    adicionarDebug(`Erro fatal: ${error2.message}`, 'erro');
+                                    mostrarErro('Erro ao carregar lançamentos. Verifique as permissões.');
+                                });
+                        } else if (error.message.includes('permission')) {
+                            mostrarErro('Erro de permissão! Verifique as regras do Firebase.');
+                        } else {
+                            mostrarErro('Erro ao carregar lançamentos');
+                        }
                     });
-                    
-                    adicionarDebug(`${lancamentos.length} lançamentos carregados`, 'sucesso');
-                    
-                    aplicarFiltros();
-                    atualizarResumo();
-                    atualizarGraficos();
-                    
-                }, (error) => {
-                    adicionarDebug(`Erro ao carregar lançamentos: ${error.message}`, 'erro');
-                    console.error('Erro ao carregar lançamentos:', error);
-                    
-                    // Sugerir solução
-                    if (error.message.includes('permission')) {
-                        mostrarAlerta('⚠️ Erro de permissão! Verifique as regras do Firebase', 'warning');
-                    } else if (error.message.includes('index')) {
-                        mostrarAlerta('⚠️ Erro de índice! Clique em diagnóstico para criar', 'warning');
-                    }
-                });
+            } catch (error) {
+                console.error('Erro ao configurar listener:', error);
+                mostrarErro('Erro ao conectar com Firebase');
+            }
         }
 
         function aplicarFiltros() {
@@ -1749,29 +1755,34 @@ service cloud.firestore {
             // Filtro por período
             if (periodo !== 'todos') {
                 const hoje = new Date();
-                const inicio = new Date();
+                hoje.setHours(0, 0, 0, 0);
+                
+                const inicio = new Date(hoje);
                 
                 switch(periodo) {
                     case 'hoje':
-                        inicio.setHours(0,0,0,0);
-                        filtrados = filtrados.filter(l => {
-                            const dataLanc = new Date(l.data + 'T12:00:00');
-                            return dataLanc >= inicio;
-                        });
+                        // Já está configurado para hoje
                         break;
                     case 'semana':
                         inicio.setDate(hoje.getDate() - 7);
-                        filtrados = filtrados.filter(l => new Date(l.data + 'T12:00:00') >= inicio);
                         break;
                     case 'mes':
                         inicio.setMonth(hoje.getMonth() - 1);
-                        filtrados = filtrados.filter(l => new Date(l.data + 'T12:00:00') >= inicio);
                         break;
                     case 'ano':
                         inicio.setFullYear(hoje.getFullYear() - 1);
-                        filtrados = filtrados.filter(l => new Date(l.data + 'T12:00:00') >= inicio);
                         break;
                 }
+                
+                filtrados = filtrados.filter(l => {
+                    if (!l.data) return false;
+                    try {
+                        const dataLanc = new Date(l.data + 'T12:00:00');
+                        return dataLanc >= inicio;
+                    } catch {
+                        return false;
+                    }
+                });
             }
             
             // Filtro por tipo
@@ -1797,9 +1808,9 @@ service cloud.firestore {
             filtrados.sort((a, b) => {
                 switch(ordenacao) {
                     case 'data_desc':
-                        return new Date(b.data + 'T12:00:00') - new Date(a.data + 'T12:00:00');
+                        return (b.data || '').localeCompare(a.data || '');
                     case 'data_asc':
-                        return new Date(a.data + 'T12:00:00') - new Date(b.data + 'T12:00:00');
+                        return (a.data || '').localeCompare(b.data || '');
                     case 'valor_desc':
                         return (b.valor || 0) - (a.valor || 0);
                     case 'valor_asc':
@@ -1866,7 +1877,7 @@ service cloud.firestore {
                         </td>
                         <td>${data}</td>
                         <td>${l.descricao || '-'}</td>
-                        <td><span class="badge badge-success">${l.categoria || 'Outros'}</span></td>
+                        <td><span class="badge badge-info">${l.categoria || 'Outros'}</span></td>
                         <td>${l.conta || '-'}</td>
                         <td>${l.tipo === 'entrada' ? '📥 Entrada' : '📤 Saída'}</td>
                         <td class="${valorClass}"><strong>${sinal} ${formatarMoedaBR(l.valor)}</strong></td>
@@ -1935,6 +1946,424 @@ service cloud.firestore {
         }
 
         // ============================================
+        // FUNÇÕES DE SELEÇÃO
+        // ============================================
+        
+        function toggleSelecionar(id) {
+            if (selecionados.has(id)) {
+                selecionados.delete(id);
+            } else {
+                selecionados.add(id);
+            }
+            atualizarSelecao();
+        }
+
+        function toggleSelecionarTodos() {
+            if (selecionados.size === lancamentosFiltrados.length) {
+                selecionados.clear();
+            } else {
+                lancamentosFiltrados.forEach(l => selecionados.add(l.id));
+            }
+            atualizarSelecao();
+        }
+
+        function atualizarSelecao() {
+            const selectAll = document.getElementById('selectAllCheckbox');
+            if (lancamentosFiltrados.length > 0) {
+                if (selecionados.size === lancamentosFiltrados.length) {
+                    selectAll.classList.add('checked');
+                } else {
+                    selectAll.classList.remove('checked');
+                }
+            }
+            
+            const selectionPanel = document.getElementById('selectionPanel');
+            if (selecionados.size > 0) {
+                selectionPanel.style.display = 'flex';
+                document.getElementById('selectedCount').textContent = selecionados.size;
+            } else {
+                selectionPanel.style.display = 'none';
+            }
+            
+            atualizarTabela();
+        }
+
+        function limparSelecao() {
+            selecionados.clear();
+            atualizarSelecao();
+        }
+
+        function editarSelecionados() {
+            if (selecionados.size === 0) return;
+            
+            if (selecionados.size === 1) {
+                const id = Array.from(selecionados)[0];
+                editarLancamento(id);
+            } else {
+                mostrarAviso('Selecione apenas um item para editar');
+            }
+        }
+
+        function excluirSelecionados() {
+            if (selecionados.size === 0) return;
+            
+            document.getElementById('confirmMessage').textContent = 
+                `Deseja realmente excluir ${selecionados.size} lançamento(s)?`;
+            
+            window.confirmarExclusaoCallback = async () => {
+                try {
+                    const batch = db.batch();
+                    for (const id of selecionados) {
+                        batch.delete(db.collection('lancamentos').doc(id));
+                    }
+                    await batch.commit();
+                    
+                    adicionarDebug(`${selecionados.size} itens excluídos`, 'sucesso');
+                    selecionados.clear();
+                    fecharModalConfirm();
+                    atualizarSelecao();
+                    mostrarSucesso(`${selecionados.size} itens excluídos!`);
+                    
+                } catch (error) {
+                    adicionarDebug(`Erro ao excluir: ${error.message}`, 'erro');
+                    mostrarErro('Erro ao excluir itens');
+                }
+            };
+            
+            document.getElementById('confirmActionBtn').onclick = window.confirmarExclusaoCallback;
+            document.getElementById('modalConfirm').style.display = 'flex';
+        }
+
+        // ============================================
+        // CRUD INDIVIDUAL
+        // ============================================
+        
+        function abrirModalNovoLancamento() {
+            document.getElementById('lancamentoId').value = '';
+            document.getElementById('lancamentoData').value = new Date().toISOString().split('T')[0];
+            document.getElementById('lancamentoDescricao').value = '';
+            document.getElementById('lancamentoCategoria').value = 'Outros';
+            document.getElementById('lancamentoConta').value = 'Carteira';
+            document.getElementById('lancamentoTipo').value = 'entrada';
+            document.getElementById('lancamentoValor').value = '';
+            document.getElementById('lancamentoObs').value = '';
+            
+            document.getElementById('modalLancamentoTitulo').textContent = 'Novo Lançamento';
+            document.getElementById('modalLancamento').style.display = 'flex';
+            
+            adicionarDebug('Abrindo modal de novo lançamento');
+        }
+
+        function editarLancamento(id) {
+            const lancamento = lancamentos.find(l => l.id === id);
+            if (!lancamento) return;
+            
+            document.getElementById('lancamentoId').value = lancamento.id;
+            document.getElementById('lancamentoData').value = lancamento.data || new Date().toISOString().split('T')[0];
+            document.getElementById('lancamentoDescricao').value = lancamento.descricao || '';
+            document.getElementById('lancamentoCategoria').value = lancamento.categoria || 'Outros';
+            document.getElementById('lancamentoConta').value = lancamento.conta || 'Carteira';
+            document.getElementById('lancamentoTipo').value = lancamento.tipo || 'entrada';
+            document.getElementById('lancamentoValor').value = lancamento.valor ? lancamento.valor.toFixed(2).replace('.', ',') : '';
+            document.getElementById('lancamentoObs').value = lancamento.obs || '';
+            
+            document.getElementById('modalLancamentoTitulo').textContent = 'Editar Lançamento';
+            document.getElementById('modalLancamento').style.display = 'flex';
+            
+            adicionarDebug(`Editando lançamento: ${lancamento.descricao}`);
+        }
+
+        function visualizarLancamento(id) {
+            const lancamento = lancamentos.find(l => l.id === id);
+            if (!lancamento) return;
+            
+            const data = lancamento.data ? formatarDataBR(lancamento.data) : '-';
+            const valor = formatarMoedaBR(lancamento.valor);
+            const tipo = lancamento.tipo === 'entrada' ? '📥 Entrada' : '📤 Saída';
+            const tipoClass = lancamento.tipo === 'entrada' ? 'text-success' : 'text-danger';
+            
+            const html = `
+                <div style="padding: 10px;">
+                    <h3 style="margin-bottom: 20px; color: var(--primary);">${lancamento.descricao || 'Sem descrição'}</h3>
+                    
+                    <table style="width: 100%;">
+                        <tr>
+                            <td style="padding: 10px 0;"><strong>📅 Data:</strong></td>
+                            <td>${data}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0;"><strong>🏷️ Categoria:</strong></td>
+                            <td><span class="badge badge-info">${lancamento.categoria || 'Outros'}</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0;"><strong>🏦 Conta:</strong></td>
+                            <td>${lancamento.conta || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0;"><strong>🔄 Tipo:</strong></td>
+                            <td class="${tipoClass}">${tipo}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px 0;"><strong>💰 Valor:</strong></td>
+                            <td class="${tipoClass}"><strong>${valor}</strong></td>
+                        </tr>
+                        ${lancamento.obs ? `
+                        <tr>
+                            <td style="padding: 10px 0;"><strong>📝 Observações:</strong></td>
+                            <td>${lancamento.obs}</td>
+                        </tr>
+                        ` : ''}
+                        <tr>
+                            <td style="padding: 10px 0;"><strong>🆔 ID:</strong></td>
+                            <td><small>${lancamento.id}</small></td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+            
+            document.getElementById('viewLancamentoBody').innerHTML = html;
+            document.getElementById('modalViewLancamento').style.display = 'flex';
+        }
+
+        async function salvarLancamento() {
+            const id = document.getElementById('lancamentoId').value;
+            const data = document.getElementById('lancamentoData').value;
+            const descricao = document.getElementById('lancamentoDescricao').value.trim();
+            const categoria = document.getElementById('lancamentoCategoria').value;
+            const conta = document.getElementById('lancamentoConta').value;
+            const tipo = document.getElementById('lancamentoTipo').value;
+            const valorStr = document.getElementById('lancamentoValor').value;
+            const obs = document.getElementById('lancamentoObs').value;
+            
+            if (!data || !descricao || !valorStr) {
+                mostrarAviso('Preencha todos os campos obrigatórios!');
+                return;
+            }
+            
+            const valor = parseMoedaBR(valorStr);
+            
+            if (valor <= 0) {
+                mostrarAviso('Valor deve ser maior que zero!');
+                return;
+            }
+            
+            const lancamento = {
+                clienteId,
+                data,
+                descricao,
+                categoria,
+                conta,
+                tipo,
+                valor,
+                obs,
+                atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            try {
+                adicionarDebug(`Salvando lançamento: ${descricao} - ${formatarMoedaBR(valor)}`);
+                
+                if (id) {
+                    await db.collection('lancamentos').doc(id).update(lancamento);
+                    adicionarDebug('Lançamento atualizado', 'sucesso');
+                    mostrarSucesso('✅ Lançamento atualizado!');
+                } else {
+                    lancamento.criadoEm = firebase.firestore.FieldValue.serverTimestamp();
+                    await db.collection('lancamentos').add(lancamento);
+                    adicionarDebug('Novo lançamento criado', 'sucesso');
+                    mostrarSucesso('✅ Lançamento criado!');
+                }
+                
+                fecharModalLancamento();
+                limparSelecao();
+                
+            } catch (error) {
+                adicionarDebug(`Erro ao salvar: ${error.message}`, 'erro');
+                console.error('Erro ao salvar:', error);
+                
+                if (error.message.includes('permission')) {
+                    mostrarErro('Erro de permissão! Verifique as regras do Firebase.');
+                } else {
+                    mostrarErro('Erro ao salvar lançamento!');
+                }
+            }
+        }
+
+        function confirmarExcluirLancamento(id) {
+            document.getElementById('confirmMessage').textContent = 'Deseja realmente excluir este lançamento?';
+            
+            window.confirmarExclusaoCallback = async () => {
+                try {
+                    await db.collection('lancamentos').doc(id).delete();
+                    adicionarDebug('Lançamento excluído', 'sucesso');
+                    fecharModalConfirm();
+                    mostrarSucesso('✅ Lançamento excluído!');
+                } catch (error) {
+                    adicionarDebug(`Erro ao excluir: ${error.message}`, 'erro');
+                    mostrarErro('❌ Erro ao excluir!');
+                }
+            };
+            
+            document.getElementById('confirmActionBtn').onclick = window.confirmarExclusaoCallback;
+            document.getElementById('modalConfirm').style.display = 'flex';
+        }
+
+        // ============================================
+        // GRÁFICOS
+        // ============================================
+        
+        function atualizarGraficos() {
+            atualizarGraficoFluxo();
+            atualizarGraficoPizza();
+        }
+
+        function atualizarGraficoFluxo() {
+            const ctx = document.getElementById('graficoFluxo').getContext('2d');
+            
+            const meses = {};
+            lancamentos.forEach(l => {
+                try {
+                    if (!l.data) return;
+                    const data = new Date(l.data + 'T12:00:00');
+                    const mesAno = `${data.getMonth()+1}/${data.getFullYear()}`;
+                    
+                    if (!meses[mesAno]) {
+                        meses[mesAno] = { entradas: 0, saidas: 0 };
+                    }
+                    
+                    if (l.tipo === 'entrada') {
+                        meses[mesAno].entradas += l.valor || 0;
+                    } else {
+                        meses[mesAno].saidas += l.valor || 0;
+                    }
+                } catch (e) {
+                    // Ignorar datas inválidas
+                }
+            });
+            
+            const labels = Object.keys(meses).sort((a, b) => {
+                const [mA, aA] = a.split('/');
+                const [mB, aB] = b.split('/');
+                return new Date(aA, mA-1) - new Date(aB, mB-1);
+            }).slice(-6);
+            
+            const entradasData = labels.map(m => meses[m].entradas);
+            const saidasData = labels.map(m => meses[m].saidas);
+            
+            if (graficoFluxo) {
+                graficoFluxo.destroy();
+            }
+            
+            graficoFluxo = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Entradas',
+                            data: entradasData,
+                            borderColor: '#4caf50',
+                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Saídas',
+                            data: saidasData,
+                            borderColor: '#f44336',
+                            backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value.toFixed(0);
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        function atualizarGraficoPizza() {
+            const ctx = document.getElementById('graficoPizza').getContext('2d');
+            
+            const categorias = {};
+            lancamentos.filter(l => l.tipo === 'saida').forEach(l => {
+                const cat = l.categoria || 'Outros';
+                if (!categorias[cat]) {
+                    categorias[cat] = 0;
+                }
+                categorias[cat] += l.valor || 0;
+            });
+            
+            const labels = Object.keys(categorias);
+            const dados = Object.values(categorias);
+            
+            if (graficoPizza) {
+                graficoPizza.destroy();
+            }
+            
+            if (labels.length === 0) {
+                return;
+            }
+            
+            graficoPizza = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dados,
+                        backgroundColor: [
+                            '#4caf50',
+                            '#2196f3',
+                            '#ff9800',
+                            '#f44336',
+                            '#9c27b0',
+                            '#00bcd4',
+                            '#e91e63',
+                            '#795548',
+                            '#607d8b'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${formatarMoedaBR(value)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ============================================
         // FUNÇÕES DE EXPORTAÇÃO/IMPORTAÇÃO/RELATÓRIOS
         // ============================================
         
@@ -1968,7 +2397,7 @@ service cloud.firestore {
                 
                 lancamentosFiltrados.slice(0, 50).forEach(l => {
                     tableRows.push([
-                        l.data ? new Date(l.data).toLocaleDateString('pt-BR') : '-',
+                        l.data ? new Date(l.data + 'T12:00:00').toLocaleDateString('pt-BR') : '-',
                         l.descricao || '-',
                         l.categoria || '-',
                         l.tipo === 'entrada' ? 'Entrada' : 'Saída',
@@ -1985,13 +2414,13 @@ service cloud.firestore {
                 });
                 
                 doc.save(`relatorio_${new Date().toISOString().slice(0,10)}.pdf`);
-                mostrarAlerta('✅ PDF exportado com sucesso!');
+                mostrarSucesso('✅ PDF exportado com sucesso!');
                 adicionarDebug('PDF exportado', 'sucesso');
                 
             } catch (error) {
                 adicionarDebug(`Erro ao exportar PDF: ${error.message}`, 'erro');
                 console.error('Erro ao exportar PDF:', error);
-                mostrarAlerta('❌ Erro ao exportar PDF', 'error');
+                mostrarErro('❌ Erro ao exportar PDF');
             }
         }
 
@@ -2000,7 +2429,7 @@ service cloud.firestore {
                 adicionarDebug('Exportando Excel...');
                 
                 const dados = lancamentosFiltrados.map(l => ({
-                    Data: l.data ? new Date(l.data).toLocaleDateString('pt-BR') : '-',
+                    Data: l.data ? new Date(l.data + 'T12:00:00').toLocaleDateString('pt-BR') : '-',
                     Descrição: l.descricao || '-',
                     Categoria: l.categoria || '-',
                     Conta: l.conta || '-',
@@ -2014,13 +2443,13 @@ service cloud.firestore {
                 XLSX.utils.book_append_sheet(wb, ws, 'Lançamentos');
                 XLSX.writeFile(wb, `lancamentos_${new Date().toISOString().slice(0,10)}.xlsx`);
                 
-                mostrarAlerta('✅ Excel exportado com sucesso!');
+                mostrarSucesso('✅ Excel exportado com sucesso!');
                 adicionarDebug('Excel exportado', 'sucesso');
                 
             } catch (error) {
                 adicionarDebug(`Erro ao exportar Excel: ${error.message}`, 'erro');
                 console.error('Erro ao exportar Excel:', error);
-                mostrarAlerta('❌ Erro ao exportar Excel', 'error');
+                mostrarErro('❌ Erro ao exportar Excel');
             }
         }
 
@@ -2048,13 +2477,13 @@ service cloud.firestore {
                 a.download = `lancamentos_${new Date().toISOString().slice(0,10)}.csv`;
                 a.click();
                 
-                mostrarAlerta('✅ CSV exportado com sucesso!');
+                mostrarSucesso('✅ CSV exportado com sucesso!');
                 adicionarDebug('CSV exportado', 'sucesso');
                 
             } catch (error) {
                 adicionarDebug(`Erro ao exportar CSV: ${error.message}`, 'erro');
                 console.error('Erro ao exportar CSV:', error);
-                mostrarAlerta('❌ Erro ao exportar CSV', 'error');
+                mostrarErro('❌ Erro ao exportar CSV');
             }
         }
 
@@ -2072,7 +2501,7 @@ service cloud.firestore {
             const substituir = document.getElementById('importSubstituir').checked;
             
             if (!file) {
-                mostrarAlerta('Selecione um arquivo!', 'warning');
+                mostrarAviso('Selecione um arquivo!');
                 return;
             }
             
@@ -2100,13 +2529,19 @@ service cloud.firestore {
                     
                     if (substituir) {
                         adicionarDebug('Substituindo dados existentes...');
+                        
                         // Apagar todos os lançamentos existentes
+                        const snapshot = await db.collection('lancamentos')
+                            .where('clienteId', '==', clienteId)
+                            .get();
+                        
                         const batch = db.batch();
-                        lancamentos.forEach(l => {
-                            batch.delete(db.collection('lancamentos').doc(l.id));
+                        snapshot.forEach(doc => {
+                            batch.delete(doc.ref);
                         });
                         await batch.commit();
-                        adicionarDebug(`${lancamentos.length} registros antigos removidos`);
+                        
+                        adicionarDebug(`${snapshot.size} registros antigos removidos`);
                     }
                     
                     // Importar novos dados
@@ -2144,13 +2579,13 @@ service cloud.firestore {
                     await batch.commit();
                     
                     adicionarDebug(`${importados} lançamentos importados com sucesso!`, 'sucesso');
-                    mostrarAlerta(`✅ ${importados} lançamentos importados com sucesso!`);
+                    mostrarSucesso(`✅ ${importados} lançamentos importados com sucesso!`);
                     fecharModalImport();
                     
                 } catch (error) {
                     adicionarDebug(`Erro ao importar: ${error.message}`, 'erro');
                     console.error('Erro ao importar:', error);
-                    mostrarAlerta('❌ Erro ao importar arquivo', 'error');
+                    mostrarErro('❌ Erro ao importar arquivo');
                 }
             };
             
@@ -2164,6 +2599,7 @@ service cloud.firestore {
             
             const lancamentosMes = lancamentos.filter(l => {
                 try {
+                    if (!l.data) return false;
                     const data = new Date(l.data + 'T12:00:00');
                     return data.getMonth() === mes && data.getFullYear() === ano;
                 } catch {
@@ -2228,6 +2664,7 @@ service cloud.firestore {
             
             const lancamentosAno = lancamentos.filter(l => {
                 try {
+                    if (!l.data) return false;
                     return new Date(l.data + 'T12:00:00').getFullYear() === ano;
                 } catch {
                     return false;
@@ -2254,6 +2691,7 @@ service cloud.firestore {
             for (let i = 0; i < 12; i++) {
                 const lancamentosMes = lancamentosAno.filter(l => {
                     try {
+                        if (!l.data) return false;
                         return new Date(l.data + 'T12:00:00').getMonth() === i;
                     } catch {
                         return false;
@@ -2399,7 +2837,6 @@ service cloud.firestore {
         function backupDados() {
             const dados = {
                 cliente: clienteData,
-                config: clienteConfig,
                 lancamentos: lancamentos,
                 dataBackup: new Date().toISOString()
             };
@@ -2411,7 +2848,7 @@ service cloud.firestore {
             a.download = `backup_${clienteId}_${new Date().toISOString().slice(0,10)}.json`;
             a.click();
             
-            mostrarAlerta('✅ Backup completo exportado!');
+            mostrarSucesso('✅ Backup completo exportado!');
             adicionarDebug('Backup exportado', 'sucesso');
         }
 
@@ -2425,19 +2862,23 @@ service cloud.firestore {
                 try {
                     adicionarDebug('Limpando todos os dados...', 'warning');
                     
+                    const snapshot = await db.collection('lancamentos')
+                        .where('clienteId', '==', clienteId)
+                        .get();
+                    
                     const batch = db.batch();
-                    lancamentos.forEach(l => {
-                        batch.delete(db.collection('lancamentos').doc(l.id));
+                    snapshot.forEach(doc => {
+                        batch.delete(doc.ref);
                     });
                     await batch.commit();
                     
-                    adicionarDebug(`${lancamentos.length} registros removidos`, 'sucesso');
-                    mostrarAlerta('✅ Todos os dados foram removidos!');
+                    adicionarDebug(`${snapshot.size} registros removidos`, 'sucesso');
+                    mostrarSucesso('✅ Todos os dados foram removidos!');
                     
                 } catch (error) {
                     adicionarDebug(`Erro ao limpar dados: ${error.message}`, 'erro');
                     console.error('Erro ao limpar dados:', error);
-                    mostrarAlerta('❌ Erro ao limpar dados', 'error');
+                    mostrarErro('❌ Erro ao limpar dados');
                 }
             }
         }
@@ -2451,411 +2892,158 @@ service cloud.firestore {
         }
 
         // ============================================
-        // GRÁFICOS
+        // FUNÇÕES DE DIAGNÓSTICO
         // ============================================
-        function atualizarGraficos() {
-            atualizarGraficoFluxo();
-            atualizarGraficoPizza();
+        
+        function diagnosticarFirebase() {
+            document.getElementById('modalDiagnostico').style.display = 'flex';
+            executarDiagnostico();
         }
 
-        function atualizarGraficoFluxo() {
-            const ctx = document.getElementById('graficoFluxo').getContext('2d');
-            
-            const meses = {};
-            lancamentos.forEach(l => {
-                try {
-                    const data = new Date(l.data + 'T12:00:00');
-                    const mesAno = `${data.getMonth()+1}/${data.getFullYear()}`;
-                    
-                    if (!meses[mesAno]) {
-                        meses[mesAno] = { entradas: 0, saidas: 0 };
-                    }
-                    
-                    if (l.tipo === 'entrada') {
-                        meses[mesAno].entradas += l.valor || 0;
-                    } else {
-                        meses[mesAno].saidas += l.valor || 0;
-                    }
-                } catch (e) {
-                    // Ignorar datas inválidas
-                }
-            });
-            
-            const labels = Object.keys(meses).sort((a, b) => {
-                const [mA, aA] = a.split('/');
-                const [mB, aB] = b.split('/');
-                return new Date(aA, mA-1) - new Date(aB, mB-1);
-            }).slice(-6);
-            
-            const entradasData = labels.map(m => meses[m].entradas);
-            const saidasData = labels.map(m => meses[m].saidas);
-            
-            if (graficoFluxo) {
-                graficoFluxo.destroy();
-            }
-            
-            graficoFluxo = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Entradas',
-                            data: entradasData,
-                            borderColor: '#4caf50',
-                            backgroundColor: 'rgba(76, 175, 80, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        },
-                        {
-                            label: 'Saídas',
-                            data: saidasData,
-                            borderColor: '#f44336',
-                            backgroundColor: 'rgba(244, 67, 54, 0.1)',
-                            tension: 0.4,
-                            fill: true
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return 'R$ ' + value.toFixed(0);
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function atualizarGraficoPizza() {
-            const ctx = document.getElementById('graficoPizza').getContext('2d');
-            
-            const categorias = {};
-            lancamentos.filter(l => l.tipo === 'saida').forEach(l => {
-                const cat = l.categoria || 'Outros';
-                if (!categorias[cat]) {
-                    categorias[cat] = 0;
-                }
-                categorias[cat] += l.valor || 0;
-            });
-            
-            const labels = Object.keys(categorias);
-            const dados = Object.values(categorias);
-            
-            if (graficoPizza) {
-                graficoPizza.destroy();
-            }
-            
-            if (labels.length === 0) {
-                return;
-            }
-            
-            graficoPizza = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: dados,
-                        backgroundColor: [
-                            '#4caf50',
-                            '#2196f3',
-                            '#ff9800',
-                            '#f44336',
-                            '#9c27b0',
-                            '#00bcd4',
-                            '#e91e63',
-                            '#795548',
-                            '#607d8b'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const label = context.label || '';
-                                    const value = context.raw || 0;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return `${label}: ${formatarMoedaBR(value)} (${percentage}%)`;
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        // ============================================
-        // FUNÇÕES DE SELEÇÃO
-        // ============================================
-        function toggleSelecionar(id) {
-            if (selecionados.has(id)) {
-                selecionados.delete(id);
-            } else {
-                selecionados.add(id);
-            }
-            atualizarSelecao();
-        }
-
-        function toggleSelecionarTodos() {
-            if (selecionados.size === lancamentosFiltrados.length) {
-                selecionados.clear();
-            } else {
-                lancamentosFiltrados.forEach(l => selecionados.add(l.id));
-            }
-            atualizarSelecao();
-        }
-
-        function atualizarSelecao() {
-            const selectAll = document.getElementById('selectAllCheckbox');
-            if (lancamentosFiltrados.length > 0) {
-                if (selecionados.size === lancamentosFiltrados.length) {
-                    selectAll.classList.add('checked');
-                } else {
-                    selectAll.classList.remove('checked');
-                }
-            }
-            
-            const selectionPanel = document.getElementById('selectionPanel');
-            if (selecionados.size > 0) {
-                selectionPanel.style.display = 'flex';
-                document.getElementById('selectedCount').textContent = selecionados.size;
-            } else {
-                selectionPanel.style.display = 'none';
-            }
-            
-            atualizarTabela();
-        }
-
-        function limparSelecao() {
-            selecionados.clear();
-            atualizarSelecao();
-        }
-
-        function editarSelecionados() {
-            if (selecionados.size === 0) return;
-            
-            if (selecionados.size === 1) {
-                const id = Array.from(selecionados)[0];
-                editarLancamento(id);
-            } else {
-                mostrarAlerta('Selecione apenas um item para editar', 'warning');
-            }
-        }
-
-        function excluirSelecionados() {
-            if (selecionados.size === 0) return;
-            
-            document.getElementById('confirmMessage').textContent = 
-                `Deseja realmente excluir ${selecionados.size} lançamento(s)?`;
-            
-            window.confirmarExclusaoCallback = async () => {
-                const batch = db.batch();
-                for (const id of selecionados) {
-                    batch.delete(db.collection('lancamentos').doc(id));
-                }
-                await batch.commit();
-                
-                adicionarDebug(`${selecionados.size} itens excluídos`, 'sucesso');
-                selecionados.clear();
-                fecharModalConfirm();
-                atualizarSelecao();
-                mostrarAlerta(`✅ ${selecionados.size} itens excluídos!`);
-            };
-            
-            document.getElementById('confirmActionBtn').onclick = window.confirmarExclusaoCallback;
-            document.getElementById('modalConfirm').style.display = 'flex';
-        }
-
-        // ============================================
-        // CRUD INDIVIDUAL
-        // ============================================
-        function abrirModalNovoLancamento() {
-            document.getElementById('lancamentoId').value = '';
-            document.getElementById('lancamentoData').value = new Date().toISOString().split('T')[0];
-            document.getElementById('lancamentoDescricao').value = '';
-            document.getElementById('lancamentoCategoria').value = 'Outros';
-            document.getElementById('lancamentoConta').value = 'Carteira';
-            document.getElementById('lancamentoTipo').value = 'entrada';
-            document.getElementById('lancamentoValor').value = '';
-            document.getElementById('lancamentoObs').value = '';
-            
-            document.getElementById('modalLancamentoTitulo').textContent = 'Novo Lançamento';
-            document.getElementById('modalLancamento').style.display = 'flex';
-            
-            adicionarDebug('Abrindo modal de novo lançamento');
-        }
-
-        function editarLancamento(id) {
-            const lancamento = lancamentos.find(l => l.id === id);
-            if (!lancamento) return;
-            
-            document.getElementById('lancamentoId').value = lancamento.id;
-            document.getElementById('lancamentoData').value = lancamento.data || new Date().toISOString().split('T')[0];
-            document.getElementById('lancamentoDescricao').value = lancamento.descricao || '';
-            document.getElementById('lancamentoCategoria').value = lancamento.categoria || 'Outros';
-            document.getElementById('lancamentoConta').value = lancamento.conta || 'Carteira';
-            document.getElementById('lancamentoTipo').value = lancamento.tipo || 'entrada';
-            document.getElementById('lancamentoValor').value = lancamento.valor ? lancamento.valor.toFixed(2).replace('.', ',') : '';
-            document.getElementById('lancamentoObs').value = lancamento.obs || '';
-            
-            document.getElementById('modalLancamentoTitulo').textContent = 'Editar Lançamento';
-            document.getElementById('modalLancamento').style.display = 'flex';
-            
-            adicionarDebug(`Editando lançamento: ${lancamento.descricao}`);
-        }
-
-        function visualizarLancamento(id) {
-            const lancamento = lancamentos.find(l => l.id === id);
-            if (!lancamento) return;
-            
-            const data = lancamento.data ? formatarDataBR(lancamento.data) : '-';
-            const valor = formatarMoedaBR(lancamento.valor);
-            const tipo = lancamento.tipo === 'entrada' ? '📥 Entrada' : '📤 Saída';
-            const tipoClass = lancamento.tipo === 'entrada' ? 'text-success' : 'text-danger';
-            
-            const html = `
-                <div style="padding: 10px;">
-                    <h3 style="margin-bottom: 20px; color: var(--primary);">${lancamento.descricao || 'Sem descrição'}</h3>
-                    
-                    <table style="width: 100%;">
-                        <tr>
-                            <td style="padding: 10px 0;"><strong>📅 Data:</strong></td>
-                            <td>${data}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px 0;"><strong>🏷️ Categoria:</strong></td>
-                            <td><span class="badge badge-success">${lancamento.categoria || 'Outros'}</span></td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px 0;"><strong>🏦 Conta:</strong></td>
-                            <td>${lancamento.conta || '-'}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px 0;"><strong>🔄 Tipo:</strong></td>
-                            <td class="${tipoClass}">${tipo}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 10px 0;"><strong>💰 Valor:</strong></td>
-                            <td class="${tipoClass}"><strong>${valor}</strong></td>
-                        </tr>
-                        ${lancamento.obs ? `
-                        <tr>
-                            <td style="padding: 10px 0;"><strong>📝 Observações:</strong></td>
-                            <td>${lancamento.obs}</td>
-                        </tr>
-                        ` : ''}
-                        <tr>
-                            <td style="padding: 10px 0;"><strong>🆔 ID:</strong></td>
-                            <td><small>${lancamento.id}</small></td>
-                        </tr>
-                    </table>
-                </div>
-            `;
-            
-            document.getElementById('viewLancamentoBody').innerHTML = html;
-            document.getElementById('modalViewLancamento').style.display = 'flex';
-        }
-
-        async function salvarLancamento() {
-            const id = document.getElementById('lancamentoId').value;
-            const data = document.getElementById('lancamentoData').value;
-            const descricao = document.getElementById('lancamentoDescricao').value;
-            const categoria = document.getElementById('lancamentoCategoria').value;
-            const conta = document.getElementById('lancamentoConta').value;
-            const tipo = document.getElementById('lancamentoTipo').value;
-            const valorStr = document.getElementById('lancamentoValor').value;
-            const obs = document.getElementById('lancamentoObs').value;
-            
-            if (!data || !descricao || !valorStr) {
-                mostrarAlerta('Preencha todos os campos obrigatórios!', 'warning');
-                return;
-            }
-            
-            const valor = parseMoedaBR(valorStr);
-            
-            if (valor <= 0) {
-                mostrarAlerta('Valor deve ser maior que zero!', 'warning');
-                return;
-            }
-            
-            const lancamento = {
-                clienteId,
-                data,
-                descricao,
-                categoria,
-                conta,
-                tipo,
-                valor,
-                obs,
-                atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
-            };
+        async function executarDiagnostico() {
+            const body = document.getElementById('diagnosticoBody');
+            body.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Executando diagnóstico...</div>';
             
             try {
-                adicionarDebug(`Salvando lançamento: ${descricao} - ${formatarMoedaBR(valor)}`);
+                const resultados = [];
                 
-                if (id) {
-                    await db.collection('lancamentos').doc(id).update(lancamento);
-                    adicionarDebug('Lançamento atualizado', 'sucesso');
-                    mostrarAlerta('✅ Lançamento atualizado!');
-                } else {
-                    lancamento.criadoEm = firebase.firestore.FieldValue.serverTimestamp();
-                    await db.collection('lancamentos').add(lancamento);
-                    adicionarDebug('Novo lançamento criado', 'sucesso');
-                    mostrarAlerta('✅ Lançamento criado!');
+                // Teste 1: Firebase inicializado
+                resultados.push({
+                    teste: "Firebase inicializado",
+                    status: !!firebase.apps.length,
+                    mensagem: !!firebase.apps.length ? "✅ OK" : "❌ Falha"
+                });
+                
+                // Teste 2: Conexão com Firestore
+                try {
+                    const testRef = db.collection('_teste').doc('teste_' + Date.now());
+                    await testRef.set({ timestamp: new Date().toISOString() });
+                    await testRef.delete();
+                    resultados.push({
+                        teste: "Conexão com Firestore",
+                        status: true,
+                        mensagem: "✅ OK"
+                    });
+                } catch (e) {
+                    resultados.push({
+                        teste: "Conexão com Firestore",
+                        status: false,
+                        mensagem: "❌ Falha: " + e.message
+                    });
                 }
                 
-                fecharModalLancamento();
-                limparSelecao();
+                // Teste 3: Ler cliente
+                try {
+                    const clienteDoc = await db.collection('clientes').doc(clienteId).get();
+                    resultados.push({
+                        teste: "Cliente encontrado",
+                        status: clienteDoc.exists,
+                        mensagem: clienteDoc.exists ? "✅ OK" : "⚠️ Não encontrado"
+                    });
+                } catch (e) {
+                    resultados.push({
+                        teste: "Cliente encontrado",
+                        status: false,
+                        mensagem: "❌ Erro: " + e.message
+                    });
+                }
+                
+                // Teste 4: Ler lançamentos
+                try {
+                    const snapshot = await db.collection('lancamentos')
+                        .where('clienteId', '==', clienteId)
+                        .limit(1)
+                        .get();
+                    
+                    resultados.push({
+                        teste: "Leitura de lançamentos",
+                        status: true,
+                        mensagem: `✅ OK (${snapshot.size} documentos)`
+                    });
+                } catch (e) {
+                    resultados.push({
+                        teste: "Leitura de lançamentos",
+                        status: false,
+                        mensagem: "❌ Falha: " + e.message
+                    });
+                    
+                    // Verificar se é erro de índice
+                    if (e.message.includes('index')) {
+                        const match = e.message.match(/https:\/\/console\.firebase\.google\.com[^\s]+/);
+                        if (match) {
+                            sessionStorage.setItem('indiceUrl', match[0]);
+                        }
+                    }
+                }
+                
+                // Montar HTML
+                let html = '<h3 style="margin-bottom: 15px;">📊 Resultados do Diagnóstico:</h3>';
+                html += '<table style="width: 100%; border-collapse: collapse;">';
+                
+                resultados.forEach(r => {
+                    html += `
+                        <tr style="border-bottom: 1px solid var(--border);">
+                            <td style="padding: 10px 0;">${r.teste}</td>
+                            <td style="padding: 10px 0; text-align: right;">
+                                <span style="color: ${r.status ? 'var(--success)' : 'var(--danger)'};">${r.mensagem}</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</table>';
+                
+                // Sugestões
+                html += '<h4 style="margin: 20px 0 10px;">💡 Sugestões:</h4><ul style="color: var(--text-secondary);">';
+                
+                if (!resultados[1].status) {
+                    html += '<li>Verifique as regras de segurança do Firebase</li>';
+                    html += '<li>Certifique-se de que o Firestore está ativado</li>';
+                }
+                
+                if (resultados[3] && !resultados[3].status) {
+                    const url = sessionStorage.getItem('indiceUrl');
+                    if (url) {
+                        html += `<li><a href="#" onclick="abrirLinkIndice(); return false;">Clique aqui para criar o índice necessário</a></li>`;
+                    } else {
+                        html += '<li>Pode ser necessário criar um índice composto</li>';
+                    }
+                }
+                
+                if (resultados.every(r => r.status)) {
+                    html += '<li>Tudo parece OK!</li>';
+                }
+                
+                html += '</ul>';
+                
+                body.innerHTML = html;
                 
             } catch (error) {
-                adicionarDebug(`Erro ao salvar: ${error.message}`, 'erro');
-                console.error('Erro ao salvar:', error);
-                mostrarAlerta('❌ Erro ao salvar lançamento!', 'error');
+                body.innerHTML = `<p style="color: var(--danger);">Erro durante diagnóstico: ${error.message}</p>`;
             }
         }
 
-        function confirmarExcluirLancamento(id) {
-            document.getElementById('confirmMessage').textContent = 'Deseja realmente excluir este lançamento?';
-            
-            window.confirmarExclusaoCallback = async () => {
-                try {
-                    await db.collection('lancamentos').doc(id).delete();
-                    adicionarDebug('Lançamento excluído', 'sucesso');
-                    fecharModalConfirm();
-                    mostrarAlerta('✅ Lançamento excluído!');
-                } catch (error) {
-                    adicionarDebug(`Erro ao excluir: ${error.message}`, 'erro');
-                    mostrarAlerta('❌ Erro ao excluir!', 'error');
-                }
-            };
-            
-            document.getElementById('confirmActionBtn').onclick = window.confirmarExclusaoCallback;
-            document.getElementById('modalConfirm').style.display = 'flex';
+        function abrirLinkIndice() {
+            const url = sessionStorage.getItem('indiceUrl');
+            if (url) {
+                window.open(url, '_blank');
+            } else {
+                mostrarAviso('Link do índice não disponível');
+            }
+        }
+
+        function fecharModalDiagnostico() {
+            document.getElementById('modalDiagnostico').style.display = 'none';
+        }
+
+        function fecharModalIndice() {
+            document.getElementById('modalIndice').style.display = 'none';
         }
 
         // ============================================
         // FUNÇÕES AUXILIARES
         // ============================================
+        
         function alternarTema() {
             const tema = document.documentElement.getAttribute('data-theme');
             if (tema === 'dark') {
@@ -2868,14 +3056,14 @@ service cloud.firestore {
         }
 
         function aplicarTema() {
-            if (clienteConfig?.visual?.modoEscuro === 'dark') {
+            if (clienteData?.modoEscuro === 'dark') {
                 document.documentElement.setAttribute('data-theme', 'dark');
             }
         }
 
         // Funções do Master
         function editarConfigCliente() {
-            window.open(`master_app.html?cliente=${clienteId}&modo=edicao`, '_blank');
+            window.open(`master_app.html?cliente=${clienteId}&modo=edicao&master=true`, '_blank');
         }
 
         async function bloquearCliente() {
@@ -2883,18 +3071,24 @@ service cloud.firestore {
                 try {
                     await db.collection('clientes').doc(clienteId).update({
                         status: 'bloqueado',
-                        motivoBloqueio: 'Bloqueado pelo Master'
+                        motivoBloqueio: 'Bloqueado pelo Master',
+                        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
                     });
-                    mostrarAlerta('Cliente bloqueado!');
+                    mostrarSucesso('Cliente bloqueado!');
                     adicionarDebug('Cliente bloqueado pelo master');
+                    
+                    // Recarregar dados do cliente
+                    await carregarDadosCliente();
+                    
                 } catch (error) {
                     adicionarDebug(`Erro ao bloquear: ${error.message}`, 'erro');
+                    mostrarErro('Erro ao bloquear cliente');
                 }
             }
         }
 
         function verComoMaster() {
-            window.location.href = `appfinanceiro.html?cliente=${clienteId}`;
+            window.location.href = `appfinanceiro.html?cliente=${clienteId}&master=true`;
         }
 
         function exportarDadosCliente() {
@@ -2923,6 +3117,7 @@ service cloud.firestore {
                 fecharModalImport();
                 fecharModalRelatorio();
                 fecharModalDiagnostico();
+                fecharModalIndice();
             }
         });
     </script>
