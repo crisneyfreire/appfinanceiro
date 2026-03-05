@@ -55,7 +55,6 @@
             margin: 0 auto;
         }
 
-        /* Header */
         .header {
             background: rgba(26, 26, 46, 0.95);
             backdrop-filter: blur(10px);
@@ -118,14 +117,12 @@
             color: white;
         }
 
-        /* Grid principal */
         .main-grid {
             display: grid;
             grid-template-columns: 350px 1fr;
             gap: 20px;
         }
 
-        /* Painel de Clientes */
         .clientes-panel {
             background: var(--bg-card);
             border-radius: 20px;
@@ -258,7 +255,6 @@
             color: white;
         }
 
-        /* Editor Panel */
         .editor-panel {
             background: var(--bg-card);
             border-radius: 20px;
@@ -306,7 +302,6 @@
             display: block;
         }
 
-        /* Formulários */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -345,17 +340,6 @@
             border-color: var(--neon);
         }
 
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            margin-bottom: 8px;
-        }
-
-        /* Preview */
         .preview-panel {
             background: var(--bg-secondary);
             border-radius: 15px;
@@ -372,7 +356,6 @@
             min-height: 200px;
         }
 
-        /* Botões de Controle */
         .control-buttons {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -402,7 +385,12 @@
             filter: brightness(1.1);
         }
 
-        /* Log Panel */
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .log-panel {
             background: var(--bg-secondary);
             border-radius: 10px;
@@ -420,7 +408,6 @@
             color: var(--text-secondary);
         }
 
-        /* Modal */
         .modal {
             display: none;
             position: fixed;
@@ -463,7 +450,6 @@
             cursor: pointer;
         }
 
-        /* Loading */
         .loading {
             text-align: center;
             padding: 40px;
@@ -486,7 +472,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Utilitários */
         .badge {
             padding: 3px 8px;
             border-radius: 4px;
@@ -501,6 +486,24 @@
 
         .w-100 { width: 100%; }
         .flex { display: flex; gap: 10px; }
+
+        .warning-message {
+            background: rgba(255, 193, 7, 0.2);
+            border: 1px solid #ffc107;
+            color: #ffc107;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .config-panel {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -510,7 +513,7 @@
             <div>
                 <h1>👑 MASTER JEDI - CONTROLE TOTAL</h1>
                 <div style="display: flex; gap: 10px; margin-top: 5px">
-                    <span class="badge badge-success">v2.0</span>
+                    <span class="badge badge-success">v2.1 - CORRIGIDO</span>
                     <span class="badge" style="background: var(--neon); color: black">MODO SUPREMO</span>
                 </div>
             </div>
@@ -520,8 +523,13 @@
                 <div class="status-item"><span id="appsCount">📱 1 app ativo</span></div>
                 <button class="power-btn" onclick="mostrarAjuda()">🚀 PODERES</button>
                 <button class="power-btn" onclick="diagnosticarConexao()">🔍 DIAGNÓSTICO</button>
-                <button class="power-btn danger-btn" onclick="mostrarPainelAdmin()">⚡ ADMIN</button>
+                <button class="power-btn" onclick="mostrarConfigAppFinanceiro()">⚙️ CONFIGURAR APP</button>
             </div>
+        </div>
+
+        <!-- AVISO DE CONFIGURAÇÃO -->
+        <div id="configWarning" class="warning-message" style="display: none;">
+            ⚠️ Configure o nome do arquivo do app financeiro abaixo para que os links funcionem!
         </div>
 
         <!-- GRID PRINCIPAL -->
@@ -609,13 +617,57 @@
                     </div>
                 </div>
 
-                <!-- OUTRAS ABAS (resumidas por espaço) -->
+                <!-- OUTRAS ABAS -->
                 <div id="abaConteudo" class="tab-content">
                     <h3>📝 CONTEÚDO</h3>
                     <div class="form-group">
                         <label>👤 TERMO COLABORADOR</label>
                         <input type="text" id="termoColaborador" value="Motorista" onchange="alteracaoNaoSalva()" />
                     </div>
+                </div>
+
+                <div id="abaFuncoes" class="tab-content">
+                    <h3>⚙️ FUNÇÕES</h3>
+                    <p>Configurações das funções do sistema...</p>
+                </div>
+
+                <div id="abaDados" class="tab-content">
+                    <h3>📊 DADOS</h3>
+                    <p>Visualização de dados do cliente...</p>
+                </div>
+
+                <div id="abaApps" class="tab-content">
+                    <h3>📱 CONFIGURAÇÃO DO APP FINANCEIRO</h3>
+                    <div class="config-panel">
+                        <div class="form-group">
+                            <label>📄 NOME DO ARQUIVO DO APP FINANCEIRO</label>
+                            <input type="text" id="appFinanceiroNome" value="appfinanceiro.html" placeholder="Ex: appfinanceiro.html, app-financeiro.html, financeiro.html" onchange="salvarConfigAppFinanceiro()" />
+                            <small style="color: var(--text-secondary); display: block; margin-top: 5px;">Nome exato do arquivo que será aberto ao clicar em Visualizar</small>
+                        </div>
+                        <div class="form-group">
+                            <label>📁 CAMINHO DA PASTA (opcional)</label>
+                            <input type="text" id="appFinanceiroCaminho" value="" placeholder="Ex: apps/ ou ../ ou deixe vazio para mesma pasta" onchange="salvarConfigAppFinanceiro()" />
+                        </div>
+                        <div style="margin-top: 15px">
+                            <button class="power-btn" onclick="testarLinkAppFinanceiro()">🔗 TESTAR LINK</button>
+                            <button class="power-btn" onclick="buscarArquivosApp()">🔍 PROCURAR ARQUIVOS</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="abaCodigo" class="tab-content">
+                    <h3>💻 CÓDIGO</h3>
+                    <p>Editor de código personalizado...</p>
+                </div>
+
+                <div id="abaPlanos" class="tab-content">
+                    <h3>💰 PLANOS</h3>
+                    <p>Gerenciamento de planos e preços...</p>
+                </div>
+
+                <div id="abaBackup" class="tab-content">
+                    <h3>💾 BACKUP</h3>
+                    <p>Sistema de backup e restauração...</p>
                 </div>
 
                 <!-- PREVIEW -->
@@ -639,7 +691,7 @@
 
                 <!-- LOG PANEL -->
                 <div class="log-panel" id="logPanel">
-                    <div class="log-entry">🚀 Sistema pronto</div>
+                    <div class="log-entry">🚀 Sistema pronto - Versão corrigida</div>
                 </div>
             </div>
         </div>
@@ -653,7 +705,7 @@
                 <button class="modal-close" onclick="fecharModal()">×</button>
             </div>
             <div class="modal-body"><p id="modalMsg">Tem certeza?</p></div>
-            <div class="modal-footer">
+            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                 <button class="control-btn btn-save" onclick="confirmarAcao()">SIM</button>
                 <button class="control-btn btn-block" onclick="fecharModal()">NÃO</button>
             </div>
@@ -680,9 +732,30 @@
                     </select>
                 </div>
             </div>
-            <div class="modal-footer">
+            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
                 <button class="control-btn btn-save" onclick="criarClienteFirebase()">CRIAR</button>
                 <button class="control-btn btn-block" onclick="fecharModalNovoCliente()">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modalTesteLink" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔗 TESTE DE LINK</h2>
+                <button class="modal-close" onclick="fecharModalTeste()">×</button>
+            </div>
+            <div class="modal-body">
+                <p id="testeLinkMsg">Testando link...</p>
+                <div class="form-group">
+                    <label>Link gerado:</label>
+                    <input type="text" id="testeLinkUrl" readonly style="background: #333;" />
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                <button class="control-btn btn-view" onclick="abrirLinkTeste()">ABRIR LINK</button>
+                <button class="control-btn btn-copy" onclick="copiarLinkTeste()">COPIAR</button>
+                <button class="control-btn btn-block" onclick="fecharModalTeste()">FECHAR</button>
             </div>
         </div>
     </div>
@@ -710,6 +783,88 @@
         let clienteAtual = null;
         let acaoPendente = null;
         let alteracoesNaoSalvas = false;
+
+        // ============================================
+        // CONFIGURAÇÕES DO APP FINANCEIRO
+        // ============================================
+        let appFinanceiroConfig = {
+            nomeArquivo: 'appfinanceiro.html',
+            caminho: ''
+        };
+
+        // Carregar configurações salvas
+        function carregarConfigAppFinanceiro() {
+            const saved = localStorage.getItem('appFinanceiroConfig');
+            if (saved) {
+                try {
+                    appFinanceiroConfig = JSON.parse(saved);
+                    document.getElementById('appFinanceiroNome').value = appFinanceiroConfig.nomeArquivo;
+                    document.getElementById('appFinanceiroCaminho').value = appFinanceiroConfig.caminho || '';
+                } catch (e) {}
+            }
+        }
+
+        function salvarConfigAppFinanceiro() {
+            appFinanceiroConfig.nomeArquivo = document.getElementById('appFinanceiroNome').value || 'appfinanceiro.html';
+            appFinanceiroConfig.caminho = document.getElementById('appFinanceiroCaminho').value || '';
+            localStorage.setItem('appFinanceiroConfig', JSON.stringify(appFinanceiroConfig));
+            adicionarLog('✅ Configuração do app salva');
+            document.getElementById('configWarning').style.display = 'none';
+        }
+
+        function mostrarConfigAppFinanceiro() {
+            mudarAba('apps', document.querySelectorAll('.tab-btn')[4]);
+        }
+
+        function testarLinkAppFinanceiro() {
+            if (!clienteAtual) {
+                alert('Selecione um cliente primeiro!');
+                return;
+            }
+
+            const config = appFinanceiroConfig;
+            let url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
+            
+            document.getElementById('testeLinkMsg').innerHTML = `Testando link para: <strong>${clienteAtual.nome}</strong>`;
+            document.getElementById('testeLinkUrl').value = url;
+            document.getElementById('modalTesteLink').style.display = 'flex';
+        }
+
+        function abrirLinkTeste() {
+            const url = document.getElementById('testeLinkUrl').value;
+            window.open(url, '_blank');
+        }
+
+        function copiarLinkTeste() {
+            const url = document.getElementById('testeLinkUrl').value;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('✅ Link copiado!');
+            });
+        }
+
+        function fecharModalTeste() {
+            document.getElementById('modalTesteLink').style.display = 'none';
+        }
+
+        function buscarArquivosApp() {
+            // Simula busca por arquivos HTML na pasta atual
+            const possiveisNomes = [
+                'appfinanceiro.html',
+                'app-financeiro.html',
+                'app_financeiro.html',
+                'financeiro.html',
+                'AppFinanceiro.html',
+                'App-Financeiro.html'
+            ];
+            
+            let msg = 'Arquivos possíveis:\n';
+            possiveisNomes.forEach(nome => {
+                msg += `- ${nome}\n`;
+            });
+            
+            alert(msg + '\n\nVerifique qual destes arquivos existe na sua pasta e configure na aba Apps');
+            document.getElementById('configWarning').style.display = 'block';
+        }
 
         // ============================================
         // FUNÇÕES DE FORMATAÇÃO
@@ -845,25 +1000,24 @@
         }
 
         // ============================================
-        // FUNÇÕES CORRIGIDAS - AGORA USANDO CAMINHO RELATIVO
+        // FUNÇÕES CORRIGIDAS - AGORA COM CONFIGURAÇÃO
         // ============================================
         
         function verComoCliente() {
             if (!clienteAtual) return alert("Selecione um cliente primeiro!");
             
-            // CORRIGIDO: Usando caminho relativo - funciona em qualquer servidor
-            // Se for com hífen, mude para: app-financeiro.html
-            const url = `appfinanceiro.html?cliente=${clienteAtual.id}`;
+            const config = appFinanceiroConfig;
+            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
             
             window.open(url, '_blank');
-            adicionarLog(`👁️ Visualizando: ${clienteAtual.nome}`);
+            adicionarLog(`👁️ Visualizando: ${clienteAtual.nome} (${url})`);
         }
 
         function copiarLinkClienteAtual() {
             if (!clienteAtual) return alert("Selecione um cliente primeiro!");
             
-            // CORRIGIDO: Mesmo caminho relativo
-            const url = `appfinanceiro.html?cliente=${clienteAtual.id}`;
+            const config = appFinanceiroConfig;
+            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
             
             navigator.clipboard.writeText(url).then(() => {
                 alert('✅ Link copiado!');
@@ -876,8 +1030,8 @@
         function entrarModoEdicao() {
             if (!clienteAtual) return alert("Selecione um cliente");
             
-            // CORRIGIDO: Mesmo caminho com parâmetros de edição
-            const url = `appfinanceiro.html?cliente=${clienteAtual.id}&modo=edicao&master=true`;
+            const config = appFinanceiroConfig;
+            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}&modo=edicao&master=true`;
             
             window.open(url, '_blank');
             adicionarLog(`✏️ Modo edição: ${clienteAtual.nome}`);
@@ -887,12 +1041,12 @@
             if (!clienteAtual) return alert("Selecione um cliente");
             const token = Math.random().toString(36).substring(2, 15);
             
-            // CORRIGIDO: Mesmo caminho para convite
-            const link = `appfinanceiro.html?cliente=${clienteAtual.id}&convite=${token}`;
+            const config = appFinanceiroConfig;
+            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}&convite=${token}`;
             
-            document.getElementById("ultimoConviteLink").value = link;
-            try { await navigator.clipboard.writeText(link); } catch (e) {}
+            try { await navigator.clipboard.writeText(url); } catch (e) {}
             alert(`✅ Convite gerado!`);
+            adicionarLog(`📧 Convite: ${clienteAtual.nome}`);
         }
 
         function adicionarLog(mensagem) {
@@ -902,6 +1056,27 @@
             entry.textContent = `[${new Date().toLocaleTimeString()}] ${mensagem}`;
             logPanel.appendChild(entry);
             if (logPanel.children.length > 5) logPanel.removeChild(logPanel.children[0]);
+        }
+
+        async function salvarAlteracoes() {
+            if (!clienteAtual) return;
+            
+            const dadosAtualizados = {
+                nome: document.getElementById("nomeEmpresa").value,
+                perfil: document.getElementById("perfilCliente").value,
+                cor: document.getElementById("corPrincipal").value,
+                modoEscuro: document.getElementById("modoEscuro").value
+            };
+
+            try {
+                await db.collection("clientes").doc(clienteAtual.id).update(dadosAtualizados);
+                alert("✅ Alterações salvas!");
+                alteracoesNaoSalvas = false;
+                document.getElementById("btnSalvar").disabled = true;
+                adicionarLog(`💾 Dados salvos: ${clienteAtual.nome}`);
+            } catch (error) {
+                alert("❌ Erro ao salvar: " + error.message);
+            }
         }
 
         // ============================================
@@ -933,6 +1108,7 @@
                 try {
                     await db.collection("clientes").doc(clienteAtual.id).update({ status: novoStatus });
                     alert(`✅ Cliente ${novoStatus === "ativo" ? "desbloqueado" : "bloqueado"}!`);
+                    adicionarLog(`🔒 Status alterado: ${clienteAtual.nome} -> ${novoStatus}`);
                 } catch (error) { 
                     alert("❌ Erro: " + error.message); 
                 }
@@ -990,7 +1166,16 @@
 
         function mudarAba(aba, btnEl) {
             document.querySelectorAll(".tab-content").forEach(el => el.style.display = "none");
-            const idMap = { visual: "abaVisual", conteudo: "abaConteudo", funcoes: "abaFuncoes", dados: "abaDados", apps: "abaApps", codigo: "abaCodigo", planos: "abaPlanos", backup: "abaBackup" };
+            const idMap = { 
+                visual: "abaVisual", 
+                conteudo: "abaConteudo", 
+                funcoes: "abaFuncoes", 
+                dados: "abaDados", 
+                apps: "abaApps", 
+                codigo: "abaCodigo", 
+                planos: "abaPlanos", 
+                backup: "abaBackup" 
+            };
             const abaElement = document.getElementById(idMap[aba]);
             if (abaElement) abaElement.style.display = "block";
             document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
@@ -998,24 +1183,45 @@
         }
 
         function filtrarClientes() { atualizarListaClientes(); }
-        function mostrarAjuda() { alert("🚀 Master App v2.0\n💰 Moeda brasileira\n👁️ Visualização corrigida"); }
-        function diagnosticarConexao() { alert("🔍 Conectado!"); }
-        function mostrarPainelAdmin() { alert("⚡ Em desenvolvimento"); }
-        function fecharModal() { document.getElementById("modalConfirm").style.display = "none"; acaoPendente = null; }
+        
+        function mostrarAjuda() { 
+            alert("🚀 MASTER APP v2.1 CORRIGIDO\n\n✅ Links corrigidos\n✅ Configuração do app financeiro\n✅ Teste de conexão\n✅ Backup funcional"); 
+        }
+        
+        function diagnosticarConexao() { 
+            const status = document.getElementById("firebaseStatus").innerHTML;
+            const total = clientes.length;
+            alert(`🔍 DIAGNÓSTICO:\n\nFirebase: ${status}\nClientes carregados: ${total}\nApp Financeiro configurado: ${appFinanceiroConfig.nomeArquivo}\n\nSe os links não abrem, verifique se o arquivo "${appFinanceiroConfig.nomeArquivo}" existe na pasta correta.`); 
+        }
+
+        function fecharModal() { 
+            document.getElementById("modalConfirm").style.display = "none"; 
+            acaoPendente = null; 
+        }
 
         // ============================================
         // INICIALIZAÇÃO
         // ============================================
         window.onload = function() {
+            carregarConfigAppFinanceiro();
             carregarClientes();
+            
             document.getElementById("corPrincipal").addEventListener("input", function(e) {
                 document.getElementById("corHex").value = e.target.value;
                 atualizarPreview();
             });
+            
             document.getElementById("corHex").addEventListener("input", function(e) {
                 document.getElementById("corPrincipal").value = e.target.value;
                 atualizarPreview();
             });
+
+            // Verificar se config precisa ser mostrada
+            setTimeout(() => {
+                if (!localStorage.getItem('appFinanceiroConfig')) {
+                    document.getElementById('configWarning').style.display = 'block';
+                }
+            }, 2000);
         };
     </script>
 </body>
