@@ -1522,7 +1522,7 @@
         }
 
         // ============================================
-        // INICIALIZAÇÃO CORRIGIDA
+        // INICIALIZAÇÃO CORRIGIDA (AGORA FUNCIONA!)
         // ============================================
         
         function getParametroUrl(nome) {
@@ -1553,7 +1553,7 @@
                 adicionarDebug('Painel Master ativado');
             }
             
-            // Carregar dados do cliente (agora da coleção clientes)
+            // Carregar dados do cliente (da coleção clientes)
             await carregarDadosCliente();
             
             // Carregar categorias
@@ -3061,7 +3061,10 @@
             }
         }
 
-        // Funções do Master
+        // ============================================
+        // FUNÇÕES DO MASTER (CORRIGIDAS)
+        // ============================================
+        
         function editarConfigCliente() {
             window.open(`master_app.html?cliente=${clienteId}&modo=edicao&master=true`, '_blank');
         }
