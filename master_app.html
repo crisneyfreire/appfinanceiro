@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
+        /* SEU CSS EXISTENTE - MANTIDO IGUAL */
         * {
             margin: 0;
             padding: 0;
@@ -540,7 +541,7 @@
             <div>
                 <h1>👑 MASTER JEDI - CONTROLE TOTAL</h1>
                 <div style="display: flex; gap: 10px; margin-top: 5px">
-                    <span class="badge badge-success">v2.2 - CORRIGIDO</span>
+                    <span class="badge badge-success">v2.3 - LINKS CORRIGIDOS</span>
                     <span class="badge" style="background: var(--neon); color: black">MODO SUPREMO</span>
                 </div>
             </div>
@@ -779,7 +780,7 @@
 
                 <!-- LOG PANEL -->
                 <div class="log-panel" id="logPanel">
-                    <div class="log-entry">🚀 Sistema pronto - Versão 2.2 corrigida</div>
+                    <div class="log-entry">🚀 Sistema pronto - Versão 2.3 links corrigidos</div>
                 </div>
             </div>
         </div>
@@ -1020,7 +1021,11 @@
             
             try {
                 const config = appFinanceiroConfig;
-                const url = config.caminho + config.nomeArquivo;
+                // IMPORTANTE: Adicionar ./ no início para evitar busca no Google
+                let url = config.caminho + config.nomeArquivo;
+                if (!url.startsWith('./') && !url.startsWith('/') && !url.startsWith('http')) {
+                    url = './' + url;
+                }
                 
                 // Tentar fazer uma requisição HEAD para verificar se o arquivo existe
                 const response = await fetch(url, { method: 'HEAD', cache: 'no-cache' });
@@ -1047,7 +1052,12 @@
             }
 
             const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
+            // IMPORTANTE: Adicionar ./ no início para evitar busca no Google
+            let baseUrl = config.caminho + config.nomeArquivo;
+            if (!baseUrl.startsWith('./') && !baseUrl.startsWith('/') && !baseUrl.startsWith('http')) {
+                baseUrl = './' + baseUrl;
+            }
+            const url = baseUrl + `?cliente=${clienteAtual.id}`;
             
             document.getElementById('testeLinkMsg').innerHTML = `Testando link para: <strong>${clienteAtual.nome || 'Cliente'}</strong>`;
             document.getElementById('testeLinkUrl').value = url;
@@ -1383,7 +1393,7 @@
         }
 
         // ============================================
-        // FUNÇÕES CORRIGIDAS - LINKS E AÇÕES
+        // FUNÇÕES CORRIGIDAS - LINKS E AÇÕES (AGORA FUNCIONAM!)
         // ============================================
         
         function verComoCliente() {
@@ -1393,7 +1403,12 @@
             }
             
             const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
+            // IMPORTANTE: Adicionar ./ no início para evitar busca no Google
+            let baseUrl = config.caminho + config.nomeArquivo;
+            if (!baseUrl.startsWith('./') && !baseUrl.startsWith('/') && !baseUrl.startsWith('http')) {
+                baseUrl = './' + baseUrl;
+            }
+            const url = baseUrl + `?cliente=${clienteAtual.id}`;
             
             window.open(url, '_blank');
             adicionarLog(`👁️ Visualizando: ${clienteAtual.nome || clienteAtual.id}`);
@@ -1406,7 +1421,12 @@
             }
             
             const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
+            // IMPORTANTE: Adicionar ./ no início para evitar busca no Google
+            let baseUrl = config.caminho + config.nomeArquivo;
+            if (!baseUrl.startsWith('./') && !baseUrl.startsWith('/') && !baseUrl.startsWith('http')) {
+                baseUrl = './' + baseUrl;
+            }
+            const url = baseUrl + `?cliente=${clienteAtual.id}`;
             
             navigator.clipboard.writeText(url).then(() => {
                 mostrarSucesso('✅ Link copiado!');
@@ -1423,7 +1443,12 @@
             }
             
             const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}&modo=edicao&master=true`;
+            // IMPORTANTE: Adicionar ./ no início para evitar busca no Google
+            let baseUrl = config.caminho + config.nomeArquivo;
+            if (!baseUrl.startsWith('./') && !baseUrl.startsWith('/') && !baseUrl.startsWith('http')) {
+                baseUrl = './' + baseUrl;
+            }
+            const url = baseUrl + `?cliente=${clienteAtual.id}&modo=edicao&master=true`;
             
             window.open(url, '_blank');
             adicionarLog(`✏️ Modo edição: ${clienteAtual.nome || clienteAtual.id}`);
@@ -1617,7 +1642,7 @@
             const dados = { 
                 cliente: clienteAtual, 
                 dataExportacao: new Date().toISOString(),
-                versao: "2.2"
+                versao: "2.3"
             };
             
             const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
@@ -1837,7 +1862,7 @@
         }
         
         function mostrarAjuda() { 
-            alert(`🚀 MASTER APP v2.2 CORRIGIDO\n\n✅ Links corrigidos\n✅ Configuração do app financeiro\n✅ Validação de arquivos\n✅ Diagnóstico completo\n✅ Backup funcional\n✅ Sincronia com Firebase\n✅ Tratamento de erros\n\nCaso encontre algum problema, utilize o Diagnóstico para identificar a causa.`); 
+            alert(`🚀 MASTER APP v2.3 - LINKS CORRIGIDOS\n\n✅ Links agora abrem corretamente (não vão mais para o Google)\n✅ Configuração do app financeiro\n✅ Validação de arquivos\n✅ Diagnóstico completo\n✅ Backup funcional\n\nCaso encontre algum problema, utilize o Diagnóstico para identificar a causa.`); 
         }
 
         function fecharModal() { 
@@ -1871,7 +1896,7 @@
                 }
             }, 2000);
             
-            adicionarLog("🚀 Sistema iniciado - v2.2 corrigido");
+            adicionarLog("🚀 Sistema iniciado - v2.3 links corrigidos");
         };
     </script>
 </body>
