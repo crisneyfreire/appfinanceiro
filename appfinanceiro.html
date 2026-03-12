@@ -1238,20 +1238,12 @@
                     
                     <div class="form-group">
                         <label>Conta</label>
-                        <select class="form-control" id="lancamentoConta">
-                            <option value="Carteira">Carteira</option>
-                            <option value="Conta Corrente">Conta Corrente</option>
-                            <option value="Poupança">Poupança</option>
-                            <option value="Cartão de Crédito">Cartão de Crédito</option>
-                        </select>
+                        <select class="form-control" id="lancamentoConta"></select>
                     </div>
                     
                     <div class="form-group">
                         <label>Tipo *</label>
-                        <select class="form-control" id="lancamentoTipo" required>
-                            <option value="entrada">Entrada (Receita)</option>
-                            <option value="saida">Saída (Despesa)</option>
-                        </select>
+                        <select class="form-control" id="lancamentoTipo" required></select>
                     </div>
                     
                     <div class="form-group">
@@ -1413,10 +1405,13 @@
         let graficoPizza = null;
         let debugAtivo = false;
         let unsubscribeLancamentos = null;
-        let categoriasPadrao = [
-            'Alimentação', 'Transporte', 'Moradia', 'Saúde', 
-            'Educação', 'Lazer', 'Salário', 'Investimentos', 
-            'Vendas', 'Serviços', 'Impostos', 'Outros'
+        
+        // Configurações do app (carregadas do Firestore)
+        let categorias = [];
+        let contas = [];
+        let tipos = [
+            { id: 'entrada', nome: 'Entrada (Receita)' },
+            { id: 'saida', nome: 'Saída (Despesa)' }
         ];
 
         // ============================================
@@ -1522,6 +1517,172 @@
         }
 
         // ============================================
+        // CARREGAR CONFIGURAÇÕES DO APP (CATEGORIAS, CONTAS, TIPOS)
+        // ============================================
+        
+        async function carregarConfiguracoesApp() {
+            if (!clienteId) return;
+            
+            try {
+                adicionarDebug('Carregando configurações do app...');
+                
+                // Carregar categorias
+                const categoriasSnapshot = await db.collection('configuracoes')
+                    .doc(clienteId)
+                    .collection('categorias')
+                    .orderBy('nome')
+                    .get();
+                
+                if (!categoriasSnapshot.empty) {
+                    categorias = [];
+                    categoriasSnapshot.forEach(doc => {
+                        categorias.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                } else {
+                    // Categorias padrão
+                    categorias = [
+                        { id: '1', nome: 'Alimentação' },
+                        { id: '2', nome: 'Transporte' },
+                        { id: '3', nome: 'Moradia' },
+                        { id: '4', nome: 'Saúde' },
+                        { id: '5', nome: 'Educação' },
+                        { id: '6', nome: 'Lazer' },
+                        { id: '7', nome: 'Salário' },
+                        { id: '8', nome: 'Investimentos' },
+                        { id: '9', nome: 'Vendas' },
+                        { id: '10', nome: 'Serviços' },
+                        { id: '11', nome: 'Impostos' },
+                        { id: '12', nome: 'Outros' }
+                    ];
+                }
+                
+                // Carregar contas
+                const contasSnapshot = await db.collection('configuracoes')
+                    .doc(clienteId)
+                    .collection('contas')
+                    .orderBy('nome')
+                    .get();
+                
+                if (!contasSnapshot.empty) {
+                    contas = [];
+                    contasSnapshot.forEach(doc => {
+                        contas.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                } else {
+                    // Contas padrão
+                    contas = [
+                        { id: '1', nome: 'Carteira' },
+                        { id: '2', nome: 'Conta Corrente' },
+                        { id: '3', nome: 'Poupança' },
+                        { id: '4', nome: 'Cartão de Crédito' }
+                    ];
+                }
+                
+                // Carregar tipos personalizados (opcional)
+                const tiposSnapshot = await db.collection('configuracoes')
+                    .doc(clienteId)
+                    .collection('tipos')
+                    .orderBy('nome')
+                    .get();
+                
+                if (!tiposSnapshot.empty) {
+                    tipos = [];
+                    tiposSnapshot.forEach(doc => {
+                        tipos.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
+                } else {
+                    // Tipos padrão
+                    tipos = [
+                        { id: 'entrada', nome: 'Entrada (Receita)' },
+                        { id: 'saida', nome: 'Saída (Despesa)' }
+                    ];
+                }
+                
+                adicionarDebug(`Configurações carregadas: ${categorias.length} categorias, ${contas.length} contas, ${tipos.length} tipos`, 'sucesso');
+                
+                // Atualizar selects
+                carregarCategorias();
+                carregarContas();
+                carregarTipos();
+                
+            } catch (error) {
+                adicionarDebug(`Erro ao carregar configurações: ${error.message}`, 'erro');
+                console.error('Erro ao carregar configurações:', error);
+                
+                // Fallback para valores padrão
+                categorias = [
+                    { id: '1', nome: 'Alimentação' },
+                    { id: '2', nome: 'Transporte' },
+                    { id: '3', nome: 'Moradia' },
+                    { id: '4', nome: 'Saúde' },
+                    { id: '5', nome: 'Educação' },
+                    { id: '6', nome: 'Lazer' },
+                    { id: '7', nome: 'Salário' },
+                    { id: '8', nome: 'Investimentos' },
+                    { id: '9', nome: 'Vendas' },
+                    { id: '10', nome: 'Serviços' },
+                    { id: '11', nome: 'Impostos' },
+                    { id: '12', nome: 'Outros' }
+                ];
+                
+                contas = [
+                    { id: '1', nome: 'Carteira' },
+                    { id: '2', nome: 'Conta Corrente' },
+                    { id: '3', nome: 'Poupança' },
+                    { id: '4', nome: 'Cartão de Crédito' }
+                ];
+                
+                tipos = [
+                    { id: 'entrada', nome: 'Entrada (Receita)' },
+                    { id: 'saida', nome: 'Saída (Despesa)' }
+                ];
+                
+                carregarCategorias();
+                carregarContas();
+                carregarTipos();
+            }
+        }
+
+        function carregarCategorias() {
+            const selectCategoria = document.getElementById('lancamentoCategoria');
+            const filtroCategoria = document.getElementById('filtroCategoria');
+            
+            if (selectCategoria) {
+                selectCategoria.innerHTML = categorias.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
+            }
+            
+            if (filtroCategoria) {
+                filtroCategoria.innerHTML = '<option value="todos">Todas</option>' + 
+                    categorias.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
+            }
+        }
+
+        function carregarContas() {
+            const selectConta = document.getElementById('lancamentoConta');
+            
+            if (selectConta) {
+                selectConta.innerHTML = contas.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
+            }
+        }
+
+        function carregarTipos() {
+            const selectTipo = document.getElementById('lancamentoTipo');
+            
+            if (selectTipo) {
+                selectTipo.innerHTML = tipos.map(t => `<option value="${t.id}">${t.nome}</option>`).join('');
+            }
+        }
+
+        // ============================================
         // INICIALIZAÇÃO CORRIGIDA
         // ============================================
         
@@ -1553,11 +1714,11 @@
                 adicionarDebug('Painel Master ativado');
             }
             
-            // Carregar dados do cliente (agora da coleção clientes)
+            // Carregar dados do cliente
             await carregarDadosCliente();
             
-            // Carregar categorias
-            carregarCategorias();
+            // Carregar configurações do app (categorias, contas, tipos)
+            await carregarConfiguracoesApp();
             
             // Carregar lançamentos
             carregarLancamentos();
@@ -1572,7 +1733,7 @@
         };
 
         // ============================================
-        // CARREGAMENTO DE DADOS CORRIGIDO
+        // CARREGAMENTO DE DADOS
         // ============================================
         
         async function carregarDadosCliente() {
@@ -1642,22 +1803,8 @@
             }
         }
 
-        function carregarCategorias() {
-            const selectCategoria = document.getElementById('lancamentoCategoria');
-            const filtroCategoria = document.getElementById('filtroCategoria');
-            
-            if (selectCategoria) {
-                selectCategoria.innerHTML = categoriasPadrao.map(c => `<option value="${c}">${c}</option>`).join('');
-            }
-            
-            if (filtroCategoria) {
-                filtroCategoria.innerHTML = '<option value="todos">Todas</option>' + 
-                    categoriasPadrao.map(c => `<option value="${c}">${c}</option>`).join('');
-            }
-        }
-
         // ============================================
-        // CRUD DE LANÇAMENTOS CORRIGIDO
+        // CRUD DE LANÇAMENTOS
         // ============================================
         
         function carregarLancamentos() {
@@ -2042,8 +2189,8 @@
             document.getElementById('lancamentoId').value = '';
             document.getElementById('lancamentoData').value = new Date().toISOString().split('T')[0];
             document.getElementById('lancamentoDescricao').value = '';
-            document.getElementById('lancamentoCategoria').value = 'Outros';
-            document.getElementById('lancamentoConta').value = 'Carteira';
+            document.getElementById('lancamentoCategoria').value = categorias.length > 0 ? categorias[0].nome : 'Outros';
+            document.getElementById('lancamentoConta').value = contas.length > 0 ? contas[0].nome : 'Carteira';
             document.getElementById('lancamentoTipo').value = 'entrada';
             document.getElementById('lancamentoValor').value = '';
             document.getElementById('lancamentoObs').value = '';
@@ -2948,7 +3095,23 @@
                     });
                 }
                 
-                // Teste 4: Ler lançamentos
+                // Teste 4: Ler configurações do app
+                try {
+                    const configDoc = await db.collection('configuracoes').doc(clienteId).get();
+                    resultados.push({
+                        teste: "Configurações do app",
+                        status: true,
+                        mensagem: configDoc.exists ? "✅ OK" : "⚠️ Usando padrão"
+                    });
+                } catch (e) {
+                    resultados.push({
+                        teste: "Configurações do app",
+                        status: false,
+                        mensagem: "⚠️ Erro: " + e.message
+                    });
+                }
+                
+                // Teste 5: Ler lançamentos
                 try {
                     const snapshot = await db.collection('lancamentos')
                         .where('clienteId', '==', clienteId)
@@ -3001,7 +3164,7 @@
                     html += '<li>Certifique-se de que o Firestore está ativado</li>';
                 }
                 
-                if (resultados[3] && !resultados[3].status) {
+                if (resultados[4] && !resultados[4].status) {
                     const url = sessionStorage.getItem('indiceUrl');
                     if (url) {
                         html += `<li><a href="#" onclick="abrirLinkIndice(); return false;">Clique aqui para criar o índice necessário</a></li>`;
