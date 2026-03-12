@@ -3,19 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👑 MASTER JEDI - CONTROLE TOTAL</title>
+    <title>💰 App Financeiro - Controle Financeiro</title>
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <!-- Bibliotecas -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- SheetJS (Excel) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
         * {
@@ -26,43 +31,55 @@
         }
 
         :root {
-            --bg-primary: #0a0a0f;
-            --bg-secondary: #1a1a2e;
-            --bg-card: #2a2a40;
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --primary-light: #C8E6C9;
+            --secondary: #2196F3;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --success: #4caf50;
+            --info: #00bcd4;
+            --dark: #1a1a2e;
+            --darker: #0a0a0f;
+            --light: #f5f5f5;
+            --gray: #9e9e9e;
+            --border: #e0e0e0;
+            
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #333333;
+            --text-secondary: #666666;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
             --text-primary: #ffffff;
             --text-secondary: #b0b0b0;
-            --accent: #4caf50;
-            --warning: #ff9800;
-            --danger: #f44336;
-            --info: #2196f3;
-            --gold: #ffd700;
-            --neon: #00ffaa;
-            --purple: #9c27b0;
-            --pink: #e91e63;
             --border: #404040;
+            --shadow: 0 2px 10px rgba(0,255,170,0.1);
         }
 
         body {
-            background: linear-gradient(135deg, var(--bg-primary), var(--bg-secondary));
-            min-height: 100vh;
-            padding: 20px;
+            background: var(--bg-secondary);
             color: var(--text-primary);
-            font-size: 14px;
+            min-height: 100vh;
+            transition: all 0.3s ease;
         }
 
         .container {
-            max-width: 1800px;
+            max-width: 1400px;
             margin: 0 auto;
+            padding: 20px;
         }
 
         .header {
-            background: rgba(26, 26, 46, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
+            background: var(--bg-primary);
+            border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
-            border: 1px solid rgba(0, 255, 170, 0.3);
-            box-shadow: 0 0 30px rgba(0, 255, 170, 0.2);
+            box-shadow: var(--shadow);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -70,248 +87,424 @@
             gap: 20px;
         }
 
-        .header h1 {
-            font-size: clamp(20px, 3vw, 28px);
+        .logo-area {
             display: flex;
             align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .company-info h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .company-info small {
+            color: var(--text-secondary);
+        }
+
+        .header-actions {
+            display: flex;
             gap: 10px;
-            text-shadow: 0 0 10px var(--neon);
+            flex-wrap: wrap;
+            align-items: center;
         }
 
-        .status-bar {
+        .badge-master {
+            background: linear-gradient(45deg, #ffd700, #ffaa00);
+            color: black;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 12px;
             display: flex;
             align-items: center;
-            gap: 20px;
-            flex-wrap: wrap;
+            gap: 5px;
         }
 
-        .status-item {
-            display: flex;
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 15px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 30px;
-            font-size: 13px;
-        }
-
-        .power-btn {
-            background: linear-gradient(45deg, var(--accent), var(--neon));
-            color: black;
-            font-weight: bold;
-            padding: 10px 20px;
-            border-radius: 30px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 13px;
-        }
-
-        .power-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 20px var(--neon);
-        }
-
-        .danger-btn {
-            background: linear-gradient(45deg, var(--danger), #ff6b6b);
-            color: white;
-        }
-
-        .main-grid {
-            display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 20px;
-        }
-
-        .clientes-panel {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 20px;
-            border-left: 4px solid var(--neon);
-            height: fit-content;
-        }
-
-        .panel-title {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            color: var(--neon);
-            font-size: 18px;
-            font-weight: bold;
-        }
-
-        .search-box {
-            width: 100%;
-            padding: 12px;
-            background: var(--bg-secondary);
-            border: 1px solid #404040;
-            border-radius: 10px;
-            color: white;
-            margin-bottom: 15px;
             font-size: 14px;
         }
 
-        .clientes-stats {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
-        }
-
-        .stat-tag {
-            background: rgba(0, 255, 170, 0.1);
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            border: 1px solid rgba(0, 255, 170, 0.3);
-        }
-
-        .clientes-lista {
-            max-height: 600px;
-            overflow-y: auto;
-        }
-
-        .cliente-item {
-            background: var(--bg-secondary);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 1px solid transparent;
-        }
-
-        .cliente-item:hover {
-            border-color: var(--neon);
-            transform: translateX(5px);
-            box-shadow: 0 0 15px rgba(0, 255, 170, 0.3);
-        }
-
-        .cliente-item.active {
-            border-color: var(--neon);
-            background: #33334d;
-        }
-
-        .cliente-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .cliente-nome {
-            font-weight: bold;
-            font-size: 15px;
-        }
-
-        .cliente-status {
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .status-ativo {
-            background: var(--accent);
+        .btn-primary {
+            background: var(--primary);
             color: white;
         }
 
-        .status-bloqueado {
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-danger {
             background: var(--danger);
             color: white;
         }
 
-        .status-teste {
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .btn-warning {
             background: var(--warning);
             color: white;
         }
 
-        .cliente-info {
-            display: flex;
-            gap: 10px;
-            font-size: 11px;
-            color: var(--text-secondary);
-            margin-bottom: 10px;
+        .btn-warning:hover {
+            background: #f57c00;
         }
 
-        .cliente-actions {
-            display: flex;
-            gap: 5px;
-            justify-content: flex-end;
+        .btn-info {
+            background: var(--info);
+            color: white;
         }
 
-        .action-icon {
+        .btn-info:hover {
+            background: #00a0b0;
+        }
+
+        .btn-sm {
             padding: 5px 10px;
-            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: 100%;
+            background: var(--bg-primary);
+            min-width: 250px;
+            box-shadow: var(--shadow);
+            border-radius: 10px;
+            z-index: 1000;
+            margin-top: 5px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             cursor: pointer;
             transition: all 0.2s;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            color: var(--primary);
+        }
+
+        .dropdown-item span {
+            flex: 1;
+        }
+
+        .dropdown-item small {
+            color: var(--text-secondary);
+            font-size: 11px;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 5px 0;
+        }
+
+        .dropdown-header {
+            padding: 8px 20px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: var(--bg-secondary);
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: var(--bg-primary);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .card-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .icon-entrada {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
+        }
+
+        .icon-saida {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
+        }
+
+        .icon-saldo {
+            background: rgba(33, 150, 243, 0.1);
+            color: #2196f3;
+        }
+
+        .table-container {
+            background: var(--bg-primary);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            overflow-x: auto;
+        }
+
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .table-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-title h3 {
+            font-size: 18px;
+        }
+
+        .selection-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            background: var(--bg-secondary);
+            padding: 8px 15px;
+            border-radius: 8px;
+        }
+
+        .selection-count {
+            background: var(--primary);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
             font-size: 12px;
-            background: rgba(255, 255, 255, 0.05);
+            font-weight: bold;
         }
 
-        .action-icon:hover {
-            background: var(--neon);
-            color: black;
+        table {
+            width: 100%;
+            border-collapse: collapse;
         }
 
-        .action-icon.danger:hover {
+        th {
+            text-align: left;
+            padding: 15px 10px;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .checkbox-custom {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary);
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            background: transparent;
+            transition: all 0.2s;
+        }
+
+        .checkbox-custom.checked {
+            background: var(--primary);
+        }
+
+        .checkbox-custom i {
+            font-size: 12px;
+            display: none;
+        }
+
+        .checkbox-custom.checked i {
+            display: block;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        tr:hover .row-actions {
+            opacity: 1;
+        }
+
+        .action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .action-btn.edit {
+            background: var(--info);
+            color: white;
+        }
+
+        .action-btn.edit:hover {
+            background: #00a0b0;
+            transform: scale(1.1);
+        }
+
+        .action-btn.delete {
             background: var(--danger);
             color: white;
         }
 
-        .editor-panel {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 20px;
-            border-top: 4px solid var(--neon);
+        .action-btn.delete:hover {
+            background: #d32f2f;
+            transform: scale(1.1);
         }
 
-        .editor-tabs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #404040;
+        .action-btn.view {
+            background: var(--success);
+            color: white;
         }
 
-        .tab-btn {
-            padding: 10px 18px;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(0, 255, 170, 0.25);
-            color: var(--text-primary);
-            cursor: pointer;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.2s;
-            font-size: 13px;
+        .action-btn.view:hover {
+            background: #388e3c;
+            transform: scale(1.1);
         }
 
-        .tab-btn:hover {
-            border-color: var(--neon);
-            box-shadow: 0 0 10px rgba(0, 255, 170, 0.25);
+        .badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
         }
 
-        .tab-btn.active {
-            background: linear-gradient(45deg, var(--neon), var(--accent));
-            color: #000;
-            border-color: transparent;
+        .badge-success {
+            background: rgba(76, 175, 80, 0.1);
+            color: #4caf50;
         }
 
-        .tab-content {
-            display: none;
+        .badge-danger {
+            background: rgba(244, 67, 54, 0.1);
+            color: #f44336;
         }
 
-        .tab-content.active {
-            display: block;
+        .badge-warning {
+            background: rgba(255, 152, 0, 0.1);
+            color: #ff9800;
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
+        .badge-info {
+            background: rgba(33, 150, 243, 0.1);
+            color: #2196f3;
         }
 
         .form-group {
@@ -326,91 +519,29 @@
             font-weight: 600;
         }
 
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
+        .form-control {
             width: 100%;
             padding: 12px;
-            background: var(--bg-secondary);
-            border: 1px solid #404040;
+            border: 1px solid var(--border);
             border-radius: 8px;
-            color: white;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             font-size: 14px;
         }
 
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
+        .form-control:focus {
             outline: none;
-            border-color: var(--neon);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.1);
         }
 
-        .preview-panel {
-            background: var(--bg-secondary);
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
-            border: 2px solid var(--neon);
-        }
-
-        .preview-content {
-            background: white;
-            color: black;
-            border-radius: 12px;
-            padding: 20px;
-            min-height: 200px;
-        }
-
-        .control-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .control-btn {
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
+        select.form-control {
             cursor: pointer;
-            transition: all 0.3s;
-            font-size: 13px;
         }
 
-        .btn-edit { background: var(--info); color: white; }
-        .btn-block { background: var(--danger); color: white; }
-        .btn-save { background: var(--accent); color: white; }
-        .btn-view { background: var(--gold); color: black; }
-        .btn-copy { background: var(--purple); color: white; }
-        .btn-export { background: var(--pink); color: white; }
-
-        .control-btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
-
-        .control-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .log-panel {
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            padding: 10px;
-            margin-top: 20px;
-            max-height: 100px;
-            overflow-y: auto;
-            font-size: 11px;
-            font-family: monospace;
-        }
-
-        .log-entry {
-            padding: 3px 0;
-            border-bottom: 1px solid #404040;
-            color: var(--text-secondary);
+        textarea.form-control {
+            resize: vertical;
+            min-height: 80px;
         }
 
         .modal {
@@ -420,21 +551,22 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0,0,0,0.5);
             z-index: 1000;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(5px);
         }
 
         .modal-content {
-            background: var(--bg-card);
-            border-radius: 20px;
+            background: var(--bg-primary);
+            border-radius: 15px;
             padding: 30px;
-            max-width: 800px;
+            max-width: 600px;
             width: 90%;
-            border-left: 5px solid var(--neon);
-            max-height: 90vh;
+            max-height: 85vh;
             overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
         }
 
         .modal-header {
@@ -442,31 +574,46 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
         }
 
         .modal-header h2 {
-            color: var(--neon);
-            font-size: 20px;
+            font-size: 22px;
+            color: var(--primary);
         }
 
         .modal-close {
             background: none;
             border: none;
-            color: white;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            color: var(--danger);
+            transform: scale(1.1);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
         }
 
         .loading {
             text-align: center;
             padding: 40px;
-            color: var(--neon);
-            font-size: 14px;
         }
 
         .loading-spinner {
-            border: 3px solid rgba(0, 255, 170, 0.1);
-            border-top: 3px solid var(--neon);
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--primary);
             border-radius: 50%;
             width: 40px;
             height: 40px;
@@ -479,48 +626,130 @@
             100% { transform: rotate(360deg); }
         }
 
-        .badge {
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .badge-success {
-            background: var(--accent);
-            color: white;
-        }
-
-        .w-100 { width: 100%; }
-        .flex { display: flex; gap: 10px; }
-
-        .warning-message {
-            background: rgba(255, 193, 7, 0.2);
-            border: 1px solid #ffc107;
-            color: #ffc107;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        .config-panel {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
+        .master-panel {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 170, 0, 0.1));
+            border: 2px solid #ffd700;
+            border-radius: 15px;
             padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .master-badge {
+            background: linear-gradient(45deg, #ffd700, #ffaa00);
+            color: black;
+            padding: 8px 20px;
+            border-radius: 30px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .chart-card {
+            background: var(--bg-primary);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .chart-card h3 {
+            margin-bottom: 15px;
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        .filters-bar {
+            background: var(--bg-primary);
+            border-radius: 15px;
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+
+        .filter-input {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 13px;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
             margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .page-item {
+            padding: 8px 14px;
+            border-radius: 6px;
+            background: var(--bg-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            border: 1px solid transparent;
+        }
+
+        .page-item:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .page-item.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
         .success-message {
             background: rgba(76, 175, 80, 0.2);
-            border: 1px solid var(--accent);
-            color: var(--accent);
+            border: 1px solid var(--success);
+            color: var(--success);
             padding: 15px;
             border-radius: 10px;
             margin-bottom: 20px;
             font-size: 14px;
             text-align: center;
+            display: none;
         }
 
         .error-message {
@@ -532,579 +761,382 @@
             margin-bottom: 20px;
             font-size: 14px;
             text-align: center;
+            display: none;
         }
-        
-        .config-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
+
+        .warning-message {
+            background: rgba(255, 152, 0, 0.2);
+            border: 1px solid var(--warning);
+            color: var(--warning);
+            padding: 15px;
+            border-radius: 10px;
             margin-bottom: 20px;
-        }
-
-        .config-card {
-            background: var(--bg-secondary);
-            padding: 20px;
-            border-radius: 15px;
-            border-left: 4px solid var(--neon);
-        }
-
-        .config-card h4 {
-            color: var(--neon);
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 16px;
-        }
-
-        .config-list {
-            max-height: 250px;
-            overflow-y: auto;
-            background: var(--bg-card);
-            padding: 10px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-        }
-
-        .config-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            background: var(--bg-secondary);
-            margin-bottom: 5px;
-            border-radius: 5px;
-            border: 1px solid rgba(0, 255, 170, 0.1);
-        }
-
-        .config-item:hover {
-            border-color: var(--neon);
-        }
-
-        .config-item-actions {
-            display: flex;
-            gap: 5px;
-        }
-
-        .config-item-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 3px 8px;
-            border-radius: 3px;
-            font-size: 12px;
-        }
-
-        .config-item-btn:hover {
-            background: var(--neon);
-            color: black;
-        }
-
-        .config-item-btn.danger:hover {
-            background: var(--danger);
-            color: white;
-        }
-
-        .add-config-form {
-            display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
-        }
-
-        .add-config-input {
-            flex: 1;
-            padding: 8px 12px;
-            background: var(--bg-card);
-            border: 1px solid #404040;
-            border-radius: 5px;
-            color: white;
-        }
-
-        .add-config-input:focus {
-            outline: none;
-            border-color: var(--neon);
-        }
-
-        .add-config-btn {
-            padding: 8px 15px;
-            background: linear-gradient(45deg, var(--accent), var(--neon));
-            color: black;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .add-config-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .bank-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 8px;
             font-size: 14px;
+            text-align: center;
+            display: none;
         }
+
+        .text-success { color: var(--success); }
+        .text-danger { color: var(--danger); }
+        .text-warning { color: var(--warning); }
+        .text-info { color: var(--info); }
+        .text-primary { color: var(--primary); }
+        
+        .mb-10 { margin-bottom: 10px; }
+        .mt-10 { margin-top: 10px; }
+        .ml-10 { margin-left: 10px; }
+        .mr-10 { margin-right: 10px; }
+        .p-10 { padding: 10px; }
+        
+        .flex { display: flex; gap: 10px; }
+        .flex-wrap { flex-wrap: wrap; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        
+        .w-100 { width: 100%; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        
+        .border-bottom { border-bottom: 1px solid var(--border); }
+        .border-top { border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- MENSAGENS -->
+        <div id="successMessage" class="success-message"></div>
+        <div id="errorMessage" class="error-message"></div>
+        <div id="warningMessage" class="warning-message"></div>
+
         <!-- HEADER -->
         <div class="header">
-            <div>
-                <h1>👑 MASTER JEDI - CONTROLE TOTAL</h1>
-                <div style="display: flex; gap: 10px; margin-top: 5px">
-                    <span class="badge badge-success">v6.0 - BANCOS INTEGRADOS</span>
-                    <span class="badge" style="background: var(--neon); color: black">MODO SUPREMO</span>
+            <div class="logo-area">
+                <div class="logo">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="company-info">
+                    <h1 id="companyName">Carregando...</h1>
+                    <small id="companyMeta">Controle Financeiro</small>
                 </div>
             </div>
-            <div class="status-bar">
-                <div class="status-item"><span id="firebaseStatus">🔄 Conectando...</span></div>
-                <div class="status-item"><span id="clientesCount">📊 0 clientes</span></div>
-                <div class="status-item"><span id="appsCount">📱 1 app ativo</span></div>
-                <button class="power-btn" onclick="mostrarAjuda()">🚀 PODERES</button>
-                <button class="power-btn" onclick="diagnosticarConexao()">🔍 DIAGNÓSTICO</button>
-                <button class="power-btn" onclick="mostrarConfigAppFinanceiro()">⚙️ CONFIGURAR APP</button>
-            </div>
-        </div>
-
-        <!-- MENSAGENS -->
-        <div id="configWarning" class="warning-message" style="display: none;">
-            ⚠️ Configure o nome do arquivo do app financeiro abaixo para que os links funcionem!
-        </div>
-        
-        <div id="successMessage" class="success-message" style="display: none;"></div>
-        <div id="errorMessage" class="error-message" style="display: none;"></div>
-
-        <!-- GRID PRINCIPAL -->
-        <div class="main-grid">
-            <!-- PAINEL DE CLIENTES -->
-            <div class="clientes-panel">
-                <div class="panel-title">
-                    <span>📋 CLIENTES</span>
-                    <span class="stat-tag" id="totalClientesTag">0</span>
+            <div class="header-actions">
+                <div id="masterBadge" style="display: none;">
+                    <span class="badge-master">
+                        <i class="fas fa-crown"></i> MODO MASTER ATIVO
+                    </span>
                 </div>
-
-                <input type="text" class="search-box" id="buscarCliente" placeholder="🔍 Buscar cliente..." onkeyup="filtrarClientes()" />
-
-                <div class="clientes-stats">
-                    <span class="stat-tag" id="ativosCount">✅ Ativos: 0</span>
-                    <span class="stat-tag" id="bloqueadosCount">🔒 Bloqueados: 0</span>
-                    <span class="stat-tag" id="testeCount">🧪 Teste: 0</span>
-                </div>
-
-                <div style="margin-bottom: 15px">
-                    <button class="power-btn w-100" onclick="criarCliente()" style="width: 100%">➕ NOVO CLIENTE</button>
-                </div>
-
-                <div class="clientes-lista" id="listaClientes">
-                    <div class="loading">
-                        <div class="loading-spinner"></div>
-                        Carregando clientes...
+                
+                <!-- MENU DROPDOWN DE AÇÕES -->
+                <div class="dropdown">
+                    <button class="btn btn-outline">
+                        <i class="fas fa-file-export"></i> Ações
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="dropdown-content">
+                        <div class="dropdown-header">📤 EXPORTAR</div>
+                        <div class="dropdown-item" onclick="exportarPDF()">
+                            <i class="fas fa-file-pdf"></i>
+                            <span>Exportar PDF</span>
+                        </div>
+                        <div class="dropdown-item" onclick="exportarExcel()">
+                            <i class="fas fa-file-excel"></i>
+                            <span>Exportar Excel</span>
+                        </div>
+                        <div class="dropdown-item" onclick="exportarCSV()">
+                            <i class="fas fa-file-csv"></i>
+                            <span>Exportar CSV</span>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <div class="dropdown-header">📥 IMPORTAR</div>
+                        <div class="dropdown-item" onclick="importarExtrato()">
+                            <i class="fas fa-upload"></i>
+                            <span>Importar Extrato</span>
+                            <small>OFX / CSV</small>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <div class="dropdown-header">📊 RELATÓRIOS</div>
+                        <div class="dropdown-item" onclick="gerarRelatorioMensal()">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Relatório Mensal</span>
+                        </div>
+                        <div class="dropdown-item" onclick="gerarRelatorioAnual()">
+                            <i class="fas fa-calendar"></i>
+                            <span>Relatório Anual</span>
+                        </div>
+                        <div class="dropdown-item" onclick="gerarRelatorioCategorias()">
+                            <i class="fas fa-chart-pie"></i>
+                            <span>Por Categoria</span>
+                        </div>
+                        <div class="dropdown-item" onclick="gerarRelatorioContas()">
+                            <i class="fas fa-wallet"></i>
+                            <span>Por Conta</span>
+                        </div>
+                        
+                        <div class="dropdown-divider"></div>
+                        
+                        <div class="dropdown-header">⚙️ FERRAMENTAS</div>
+                        <div class="dropdown-item" onclick="backupDados()">
+                            <i class="fas fa-database"></i>
+                            <span>Backup Completo</span>
+                        </div>
+                        <div class="dropdown-item" onclick="restaurarBackup()">
+                            <i class="fas fa-undo"></i>
+                            <span>Restaurar Backup</span>
+                        </div>
                     </div>
                 </div>
+                
+                <button class="btn btn-primary" onclick="abrirModalNovoLancamento()">
+                    <i class="fas fa-plus"></i> Novo Lançamento
+                </button>
+                
+                <button class="btn btn-outline" onclick="alternarTema()">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- MASTER PANEL -->
+        <div id="masterPanel" class="master-panel" style="display: none;">
+            <div class="master-badge">
+                <i class="fas fa-crown"></i> PAINEL DE CONTROLE MASTER
+            </div>
+            <div class="flex flex-wrap">
+                <button class="btn btn-warning" onclick="editarConfigCliente()">
+                    <i class="fas fa-edit"></i> Editar Configurações
+                </button>
+                <button class="btn btn-danger" onclick="bloquearCliente()">
+                    <i class="fas fa-lock"></i> Bloquear Cliente
+                </button>
+                <button class="btn btn-info" onclick="verComoMaster()">
+                    <i class="fas fa-eye"></i> Visualização Master
+                </button>
+            </div>
+        </div>
+
+        <!-- FILTROS -->
+        <div class="filters-bar">
+            <div class="filter-group">
+                <label>Período:</label>
+                <select class="filter-input" id="filtroPeriodo" onchange="aplicarFiltros()">
+                    <option value="todos">Todos</option>
+                    <option value="hoje">Hoje</option>
+                    <option value="semana">Esta semana</option>
+                    <option value="mes">Este mês</option>
+                    <option value="ano">Este ano</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Tipo:</label>
+                <select class="filter-input" id="filtroTipo" onchange="aplicarFiltros()">
+                    <option value="todos">Todos</option>
+                    <option value="entrada">Entradas</option>
+                    <option value="saida">Saídas</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>Categoria:</label>
+                <select class="filter-input" id="filtroCategoria" onchange="aplicarFiltros()">
+                    <option value="todos">Todas</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <input type="text" class="filter-input" placeholder="Buscar..." id="searchInput" onkeyup="aplicarFiltros()">
+            </div>
+            <div class="filter-group">
+                <button class="btn btn-sm btn-outline" onclick="limparFiltros()">
+                    <i class="fas fa-times"></i> Limpar
+                </button>
+            </div>
+        </div>
+
+        <!-- CARDS DE RESUMO -->
+        <div class="cards-grid">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Saldo Total</span>
+                    <span class="card-icon icon-saldo"><i class="fas fa-wallet"></i></span>
+                </div>
+                <div class="card-value" id="saldoTotal">R$ 0,00</div>
             </div>
 
-            <!-- EDITOR PANEL -->
-            <div class="editor-panel" id="editorPanel">
-                <!-- TABS -->
-                <div class="editor-tabs">
-                    <button class="tab-btn active" onclick="mudarAba('visual', this)">🎨 Visual</button>
-                    <button class="tab-btn" onclick="mudarAba('conteudo', this)">📝 Conteúdo</button>
-                    <button class="tab-btn" onclick="mudarAba('funcoes', this)">⚙️ Funções</button>
-                    <button class="tab-btn" onclick="mudarAba('dados', this)">📊 Dados</button>
-                    <button class="tab-btn" onclick="mudarAba('apps', this)">📱 Apps</button>
-                    <button class="tab-btn" onclick="mudarAba('bancos', this)">🏦 Bancos</button>
-                    <button class="tab-btn" onclick="mudarAba('config_app', this)">⚙️ Config. App</button>
-                    <button class="tab-btn" onclick="mudarAba('codigo', this)">💻 Código</button>
-                    <button class="tab-btn" onclick="mudarAba('planos', this)">💰 Planos</button>
-                    <button class="tab-btn warning" onclick="mudarAba('backup', this)">💾 Backup</button>
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Entradas</span>
+                    <span class="card-icon icon-entrada"><i class="fas fa-arrow-up"></i></span>
                 </div>
+                <div class="card-value text-success" id="totalEntradas">R$ 0,00</div>
+            </div>
 
-                <!-- ABA VISUAL -->
-                <div id="abaVisual" class="tab-content active">
-                    <h3 style="margin-bottom: 20px">🎨 EDITOR VISUAL</h3>
-                    <div class="form-grid">
-                        <div>
-                            <div class="form-group">
-                                <label>🏢 NOME DA EMPRESA</label>
-                                <input type="text" id="nomeEmpresa" onchange="alteracaoNaoSalva()" placeholder="Nome da empresa" />
-                            </div>
-                            <div class="form-group">
-                                <label>👤 PERFIL</label>
-                                <select id="perfilCliente" onchange="alteracaoNaoSalva()">
-                                    <option value="pf">PESSOAL/FAMILIAR</option>
-                                    <option value="pj">EMPRESARIAL</option>
-                                    <option value="teste">TESTE/AVALIAÇÃO</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>🆔 ID DO CLIENTE</label>
-                                <input type="text" id="clienteIdVisivel" disabled style="background: #333; opacity: 0.8" />
-                            </div>
-                        </div>
-                        <div>
-                            <div class="form-group">
-                                <label>🎨 COR PRINCIPAL</label>
-                                <div style="display: flex; gap: 10px">
-                                    <input type="color" id="corPrincipal" value="#4CAF50" onchange="alteracaoNaoSalva(); atualizarPreview();" style="width: 60px; height: 50px" />
-                                    <input type="text" id="corHex" value="#4CAF50" onchange="alteracaoNaoSalva(); atualizarPreview();" style="flex: 1" />
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Saídas</span>
+                    <span class="card-icon icon-saida"><i class="fas fa-arrow-down"></i></span>
+                </div>
+                <div class="card-value text-danger" id="totalSaidas">R$ 0,00</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">Lançamentos</span>
+                    <span class="card-icon" style="background: rgba(156, 39, 176, 0.1); color: #9c27b0;">
+                        <i class="fas fa-list"></i>
+                    </span>
+                </div>
+                <div class="card-value" id="totalLancamentos">0</div>
+            </div>
+        </div>
+
+        <!-- GRÁFICOS -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h3>📊 Fluxo Mensal</h3>
+                <div class="chart-container">
+                    <canvas id="graficoFluxo"></canvas>
+                </div>
+            </div>
+            <div class="chart-card">
+                <h3>🥧 Distribuição por Categoria</h3>
+                <div class="chart-container">
+                    <canvas id="graficoPizza"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABELA DE LANÇAMENTOS -->
+        <div class="table-container">
+            <div class="table-header">
+                <div class="table-title">
+                    <h3><i class="fas fa-list"></i> Últimos Lançamentos</h3>
+                    <div id="selectionPanel" class="selection-actions" style="display: none;">
+                        <span class="selection-count" id="selectedCount">0</span>
+                        <span>selecionados</span>
+                        <button class="btn btn-sm btn-warning" onclick="editarSelecionados()" title="Editar">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="excluirSelecionados()" title="Excluir">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="limparSelecao()" title="Limpar">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex">
+                    <select class="filter-input" id="ordenacao" onchange="aplicarFiltros()">
+                        <option value="data_desc">Mais recentes</option>
+                        <option value="data_asc">Mais antigos</option>
+                        <option value="valor_desc">Maior valor</option>
+                        <option value="valor_asc">Menor valor</option>
+                    </select>
+                </div>
+            </div>
+
+            <table id="tabelaLancamentos">
+                <thead>
+                    <tr>
+                        <th width="40">
+                            <div class="checkbox-wrapper">
+                                <div class="checkbox-custom" id="selectAllCheckbox" onclick="toggleSelecionarTodos()">
+                                    <i class="fas fa-check"></i>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label>🌙 MODO ESCURO</label>
-                                <select id="modoEscuro" onchange="alteracaoNaoSalva(); atualizarPreview();">
-                                    <option value="auto">Automático</option>
-                                    <option value="light">Sempre claro</option>
-                                    <option value="dark">Sempre escuro</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                        </th>
+                        <th>Data</th>
+                        <th>Descrição</th>
+                        <th>Categoria</th>
+                        <th>Conta</th>
+                        <th>Tipo</th>
+                        <th>Valor</th>
+                        <th width="120">Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="lancamentosBody">
+                    <tr>
+                        <td colspan="8" class="loading">
+                            <div class="loading-spinner"></div>
+                            Carregando lançamentos...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
 
-                <!-- ABA CONTEÚDO -->
-                <div id="abaConteudo" class="tab-content">
-                    <h3>📝 CONTEÚDO</h3>
-                    <div class="form-group">
-                        <label>👤 TERMO COLABORADOR</label>
-                        <input type="text" id="termoColaborador" value="Motorista" onchange="alteracaoNaoSalva()" />
-                    </div>
-                    <div class="form-group">
-                        <label>📧 EMAIL DE CONTATO</label>
-                        <input type="email" id="emailContato" onchange="alteracaoNaoSalva()" placeholder="contato@empresa.com" />
-                    </div>
-                    <div class="form-group">
-                        <label>📞 TELEFONE</label>
-                        <input type="text" id="telefoneContato" onchange="alteracaoNaoSalva()" placeholder="(00) 00000-0000" />
-                    </div>
-                </div>
+            <!-- Paginação -->
+            <div class="pagination" id="paginacao"></div>
+        </div>
+    </div>
 
-                <!-- ABA FUNÇÕES -->
-                <div id="abaFuncoes" class="tab-content">
-                    <h3>⚙️ FUNÇÕES</h3>
-                    <div class="form-group">
-                        <label>🔑 PERMISSÕES ESPECIAIS</label>
-                        <select id="permissoesEspeciais" onchange="alteracaoNaoSalva()" multiple style="height: 100px">
-                            <option value="exportar">Exportar Dados</option>
-                            <option value="importar">Importar Dados</option>
-                            <option value="excluir">Excluir Lançamentos</option>
-                            <option value="editar">Editar Lançamentos Antigos</option>
-                            <option value="relatorios">Relatórios Avançados</option>
-                        </select>
-                        <small style="color: var(--text-secondary);">Segure Ctrl para selecionar múltiplas</small>
-                    </div>
-                    <div class="form-group">
-                        <label>⏰ LIMITE DE LANÇAMENTOS</label>
-                        <input type="number" id="limiteLancamentos" value="1000" onchange="alteracaoNaoSalva()" min="10" max="10000" />
-                    </div>
-                </div>
-
-                <!-- ABA DADOS -->
-                <div id="abaDados" class="tab-content">
-                    <h3>📊 DADOS DO CLIENTE</h3>
-                    <div id="dadosClienteContainer">
-                        <div class="loading">Carregando dados...</div>
-                    </div>
-                </div>
-
-                <!-- ABA APPS -->
-                <div id="abaApps" class="tab-content">
-                    <h3>📱 CONFIGURAÇÃO DO APP FINANCEIRO</h3>
-                    <div class="config-panel">
-                        <div class="form-group">
-                            <label>📄 NOME DO ARQUIVO DO APP FINANCEIRO</label>
-                            <input type="text" id="appFinanceiroNome" value="appfinanceiro.html" placeholder="Ex: appfinanceiro.html" onchange="salvarConfigAppFinanceiro()" />
-                            <small style="color: var(--text-secondary);">Nome exato do arquivo que será aberto ao clicar em Visualizar</small>
-                        </div>
-                        <div class="form-group">
-                            <label>📁 CAMINHO DA PASTA (opcional)</label>
-                            <input type="text" id="appFinanceiroCaminho" value="" placeholder="Ex: apps/ ou ../" onchange="salvarConfigAppFinanceiro()" />
-                        </div>
-                        <div style="margin-top: 15px">
-                            <button class="power-btn" onclick="testarLinkAppFinanceiro()">🔗 TESTAR LINK</button>
-                            <button class="power-btn" onclick="validarArquivoAppFinanceiro()">✅ VALIDAR ARQUIVO</button>
-                        </div>
-                        <div id="appFinanceiroStatus" style="margin-top: 10px; font-size: 12px;"></div>
-                    </div>
-                </div>
-
-                <!-- ABA BANCOS -->
-                <div id="abaBancos" class="tab-content">
-                    <h3>🏦 BANCOS CADASTRADOS</h3>
+    <!-- MODAL NOVO/EDITAR LANÇAMENTO -->
+    <div id="modalLancamento" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalLancamentoTitulo">Novo Lançamento</h2>
+                <button class="modal-close" onclick="fecharModalLancamento()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="formLancamento" onsubmit="event.preventDefault(); salvarLancamento();">
+                    <input type="hidden" id="lancamentoId">
                     
-                    <div style="margin-bottom: 20px;">
-                        <button class="power-btn" onclick="mostrarModalBanco()" style="margin-right: 10px;">
-                            <i class="fas fa-plus"></i> NOVO BANCO
-                        </button>
-                        <button class="power-btn" onclick="salvarBancos()">
-                            <i class="fas fa-save"></i> SALVAR BANCOS
-                        </button>
-                        <button class="power-btn danger-btn" onclick="resetarBancosPadrao()" style="margin-left: 10px;">
-                            <i class="fas fa-undo"></i> PADRÃO
-                        </button>
+                    <div class="form-group">
+                        <label>Data *</label>
+                        <input type="date" class="form-control" id="lancamentoData" required>
                     </div>
                     
-                    <div class="config-grid">
-                        <div class="config-card" style="grid-column: span 3;">
-                            <h4><i class="fas fa-university"></i> LISTA DE BANCOS</h4>
-                            <div class="config-list" id="listaBancos" style="max-height: 400px;">
-                                <div class="loading">Carregando bancos...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ABA CONFIG APP -->
-                <div id="abaConfigApp" class="tab-content">
-                    <h3>⚙️ CONFIGURAÇÕES DO APP</h3>
-                    
-                    <div class="config-grid">
-                        
-                        <!-- CATEGORIAS -->
-                        <div class="config-card">
-                            <h4><i class="fas fa-tags"></i> CATEGORIAS</h4>
-                            
-                            <div class="config-list" id="listaCategorias">
-                                <div class="loading">Carregando categorias...</div>
-                            </div>
-                            
-                            <div class="add-config-form">
-                                <input type="text" id="novaCategoria" class="add-config-input" placeholder="Nova categoria...">
-                                <button class="add-config-btn" onclick="adicionarCategoria()">➕</button>
-                            </div>
-                        </div>
-                        
-                        <!-- CONTAS -->
-                        <div class="config-card">
-                            <h4><i class="fas fa-wallet"></i> CONTAS</h4>
-                            
-                            <div class="config-list" id="listaContas">
-                                <div class="loading">Carregando contas...</div>
-                            </div>
-                            
-                            <div class="add-config-form">
-                                <input type="text" id="novaConta" class="add-config-input" placeholder="Nova conta...">
-                                <button class="add-config-btn" onclick="adicionarConta()">➕</button>
-                            </div>
-                        </div>
-                        
-                        <!-- TIPOS -->
-                        <div class="config-card">
-                            <h4><i class="fas fa-exchange-alt"></i> TIPOS</h4>
-                            
-                            <div class="config-list" id="listaTipos">
-                                <div class="loading">Carregando tipos...</div>
-                            </div>
-                            
-                            <div class="add-config-form">
-                                <input type="text" id="novoTipo" class="add-config-input" placeholder="Novo tipo...">
-                                <select id="novoTipoNatureza" class="add-config-input" style="flex: 0.5;">
-                                    <option value="entrada">📥 Entrada</option>
-                                    <option value="saida">📤 Saída</option>
-                                </select>
-                                <button class="add-config-btn" onclick="adicionarTipo()">➕</button>
-                            </div>
-                        </div>
+                    <div class="form-group">
+                        <label>Descrição *</label>
+                        <input type="text" class="form-control" id="lancamentoDescricao" required placeholder="Ex: Salário, Conta de luz...">
                     </div>
                     
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button class="power-btn" onclick="salvarTudo()" style="flex: 1;">💾 SALVAR TUDO</button>
-                        <button class="power-btn danger-btn" onclick="resetarTudo()" style="flex: 1;">🔄 PADRÃO</button>
-                    </div>
-                </div>
-
-                <!-- ABA CÓDIGO -->
-                <div id="abaCodigo" class="tab-content">
-                    <h3>💻 CÓDIGO PERSONALIZADO</h3>
                     <div class="form-group">
-                        <label>📜 CSS PERSONALIZADO</label>
-                        <textarea id="cssPersonalizado" rows="6" onchange="alteracaoNaoSalva()" placeholder="/* Adicione CSS personalizado aqui */"></textarea>
+                        <label>Categoria</label>
+                        <select class="form-control" id="lancamentoCategoria"></select>
                     </div>
+                    
                     <div class="form-group">
-                        <label>⚡ JAVASCRIPT PERSONALIZADO</label>
-                        <textarea id="jsPersonalizado" rows="6" onchange="alteracaoNaoSalva()" placeholder="// Adicione JavaScript personalizado aqui"></textarea>
+                        <label>Conta</label>
+                        <select class="form-control" id="lancamentoConta"></select>
                     </div>
-                </div>
-
-                <!-- ABA PLANOS -->
-                <div id="abaPlanos" class="tab-content">
-                    <h3>💰 PLANOS E PREÇOS</h3>
+                    
                     <div class="form-group">
-                        <label>💳 PLANO ATUAL</label>
-                        <select id="planoAtual" onchange="alteracaoNaoSalva()">
-                            <option value="gratuito">Gratuito</option>
-                            <option value="basico">Básico</option>
-                            <option value="profissional">Profissional</option>
-                            <option value="empresarial">Empresarial</option>
-                        </select>
+                        <label>Tipo *</label>
+                        <select class="form-control" id="lancamentoTipo" required></select>
                     </div>
+                    
                     <div class="form-group">
-                        <label>💰 VALOR MENSAL (R$)</label>
-                        <input type="text" id="valorPlano" value="0,00" onchange="alteracaoNaoSalva()" />
+                        <label>Valor (R$) *</label>
+                        <input type="text" class="form-control" id="lancamentoValor" required placeholder="0,00" 
+                               onkeyup="this.value = this.value.replace(/[^0-9,]/g, '')"
+                               onblur="formatarCampoValor(this)">
                     </div>
+                    
                     <div class="form-group">
-                        <label>📅 PRÓXIMO VENCIMENTO</label>
-                        <input type="date" id="proximoVencimento" onchange="alteracaoNaoSalva()" />
+                        <label>Observações</label>
+                        <textarea class="form-control" id="lancamentoObs" rows="3"></textarea>
                     </div>
-                </div>
-
-                <!-- ABA BACKUP -->
-                <div id="abaBackup" class="tab-content">
-                    <h3>💾 BACKUP E RESTAURAÇÃO</h3>
-                    <div class="flex" style="flex-wrap: wrap; margin-bottom: 20px;">
-                        <button class="control-btn btn-save" onclick="exportarClienteCompleto()">📦 EXPORTAR BACKUP</button>
-                        <button class="control-btn btn-view" onclick="importarBackup()">📂 IMPORTAR BACKUP</button>
-                    </div>
-                    <div id="historicoBackups" style="max-height: 200px; overflow-y: auto; background: var(--bg-secondary); padding: 10px; border-radius: 8px;">
-                        <p style="color: var(--text-secondary); text-align: center;">Histórico de backups</p>
-                    </div>
-                </div>
-
-                <!-- PREVIEW -->
-                <div class="preview-panel">
-                    <div class="preview-content" id="previewConteudo">
-                        <div style="text-align: center">
-                            <h3 id="previewTitulo">Nome da Empresa</h3>
-                            <p id="previewCor" style="margin-top: 10px; font-size: 12px;">Cor: #4CAF50</p>
-                            <p id="previewModo">Modo: Automático</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- BOTÕES DE CONTROLE -->
-                <div class="control-buttons">
-                    <button class="control-btn btn-edit" onclick="entrarModoEdicao()" id="btnEditar" disabled>✏️ EDITAR</button>
-                    <button class="control-btn btn-block" onclick="bloquearCliente()" id="btnBloquear" disabled>🔒 BLOQUEAR</button>
-                    <button class="control-btn btn-save" onclick="salvarAlteracoes()" id="btnSalvar" disabled>💾 SALVAR</button>
-                    <button class="control-btn btn-view" onclick="verComoCliente()" id="btnVisualizar" disabled>👁️ VER COMO CLIENTE</button>
-                    <button class="control-btn btn-copy" onclick="copiarLinkClienteAtual()" id="btnCopiarLink" disabled>🔗 COPIAR LINK</button>
-                    <button class="control-btn btn-export" onclick="exportarClienteJSON()" id="btnExportar" disabled>📦 EXPORTAR</button>
-                </div>
-
-                <!-- LOG PANEL -->
-                <div class="log-panel" id="logPanel">
-                    <div class="log-entry">🚀 Sistema pronto - v6.0 Bancos Integrados</div>
-                </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="fecharModalLancamento()">Cancelar</button>
+                <button class="btn btn-primary" onclick="salvarLancamento()">Salvar</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL BANCO -->
-    <div id="modalBanco" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
+    <!-- MODAL VISUALIZAR LANÇAMENTO -->
+    <div id="modalViewLancamento" class="modal">
+        <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalBancoTitulo">🏦 NOVO BANCO</h2>
-                <button class="modal-close" onclick="fecharModalBanco()">×</button>
+                <h2>📋 Detalhes do Lançamento</h2>
+                <button class="modal-close" onclick="fecharModalView()">&times;</button>
             </div>
-            <div class="modal-body">
-                <input type="hidden" id="bancoIndex" value="-1">
-                
-                <div class="form-group">
-                    <label>🏦 NOME DO BANCO *</label>
-                    <input type="text" id="bancoNome" class="form-control" placeholder="Ex: Itaú, Bradesco, Nubank...">
-                </div>
-                
-                <div class="form-group">
-                    <label>🎨 COR DO BANCO</label>
-                    <div style="display: flex; gap: 10px;">
-                        <input type="color" id="bancoCor" value="#4CAF50" style="width: 60px; height: 40px;">
-                        <input type="text" id="bancoCorHex" value="#4CAF50" class="form-control" placeholder="#COR">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label>🔤 ÍCONE (Font Awesome)</label>
-                    <select id="bancoIcone" class="form-control">
-                        <option value="fa-university">🏛️ Padrão</option>
-                        <option value="fa-building">🏢 Edifício</option>
-                        <option value="fa-landmark">🏛️ Monumento</option>
-                        <option value="fa-piggy-bank">🐷 Porquinho</option>
-                        <option value="fa-credit-card">💳 Cartão</option>
-                        <option value="fa-money-bill">💰 Dinheiro</option>
-                        <option value="fa-coins">🪙 Moedas</option>
-                        <option value="fa-sack-dollar">💰 Saco de Dinheiro</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>📄 FORMATO DO EXTRATO</label>
-                    <select id="bancoFormato" class="form-control">
-                        <option value="ofx">OFX</option>
-                        <option value="csv_ofx">CSV estilo OFX</option>
-                        <option value="csv_itau">CSV Itaú</option>
-                        <option value="csv_bradesco">CSV Bradesco</option>
-                        <option value="csv_santander">CSV Santander</option>
-                        <option value="csv_bb">CSV Banco do Brasil</option>
-                        <option value="csv_caixa">CSV Caixa</option>
-                        <option value="csv_nubank">CSV Nubank</option>
-                        <option value="csv_inter">CSV Inter</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>🔢 POSIÇÃO DA DATA</label>
-                    <input type="text" id="bancoPosData" class="form-control" placeholder="Ex: 0, 1, A, B..." value="0">
-                    <small>Número da coluna (0 = primeira)</small>
-                </div>
-                
-                <div class="form-group">
-                    <label>🔢 POSIÇÃO DA DESCRIÇÃO</label>
-                    <input type="text" id="bancoPosDesc" class="form-control" placeholder="Ex: 1, 2, B, C..." value="1">
-                </div>
-                
-                <div class="form-group">
-                    <label>🔢 POSIÇÃO DO VALOR</label>
-                    <input type="text" id="bancoPosValor" class="form-control" placeholder="Ex: 2, 3, C, D..." value="2">
-                </div>
-                
-                <div class="form-group">
-                    <label>🔢 POSIÇÃO DO TIPO (D/C)</label>
-                    <input type="text" id="bancoPosTipo" class="form-control" placeholder="Ex: 3, 4, D, E... (opcional)">
-                </div>
-                
-                <div class="form-group">
-                    <label>📅 FORMATO DA DATA</label>
-                    <select id="bancoFormatoData" class="form-control">
-                        <option value="dd/mm/yyyy">DD/MM/AAAA</option>
-                        <option value="mm/dd/yyyy">MM/DD/AAAA</option>
-                        <option value="yyyy-mm-dd">AAAA-MM-DD</option>
-                        <option value="dd-mm-yyyy">DD-MM-AAAA</option>
-                        <option value="dd/mm/yy">DD/MM/AA</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>💰 SEPARADOR DE VALOR</label>
-                    <select id="bancoSeparador" class="form-control">
-                        <option value=".">Ponto (.)</option>
-                        <option value=",">Vírgula (,)</option>
-                        <option value="auto">Automático</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>📊 DELIMITADOR CSV</label>
-                    <select id="bancoDelimitador" class="form-control">
-                        <option value=",">Vírgula (,)</option>
-                        <option value=";">Ponto e vírgula (;)</option>
-                        <option value="\t">Tabulação</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>📝 OBSERVAÇÕES</label>
-                    <textarea id="bancoObs" class="form-control" rows="2" placeholder="Observações..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                <button class="control-btn btn-save" onclick="salvarBanco()">💾 SALVAR</button>
-                <button class="control-btn btn-block" onclick="fecharModalBanco()">CANCELAR</button>
+            <div class="modal-body" id="viewLancamentoBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="fecharModalView()">Fechar</button>
             </div>
         </div>
     </div>
@@ -1113,92 +1145,67 @@
     <div id="modalConfirm" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalTitulo">⚡ Confirmação</h2>
-                <button class="modal-close" onclick="fecharModal()">×</button>
+                <h2>Confirmar Ação</h2>
+                <button class="modal-close" onclick="fecharModalConfirm()">&times;</button>
             </div>
-            <div class="modal-body"><p id="modalMsg">Tem certeza?</p></div>
-            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                <button class="control-btn btn-save" onclick="confirmarAcao()">SIM</button>
-                <button class="control-btn btn-block" onclick="fecharModal()">NÃO</button>
+            <div class="modal-body">
+                <p id="confirmMessage">Tem certeza?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="fecharModalConfirm()">Cancelar</button>
+                <button class="btn btn-danger" id="confirmActionBtn">Confirmar</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL NOVO CLIENTE -->
-    <div id="modalNovoCliente" class="modal">
+    <!-- MODAL IMPORTAÇÃO DE EXTRATO -->
+    <div id="modalImport" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>➕ NOVO CLIENTE</h2>
-                <button class="modal-close" onclick="fecharModalNovoCliente()">×</button>
+                <h2>📥 Importar Extrato Bancário</h2>
+                <button class="modal-close" onclick="fecharModalImport()">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Nome:</label>
-                    <input type="text" id="novoClienteNome" placeholder="Nome da empresa" />
-                </div>
-                <div class="form-group">
-                    <label>Perfil:</label>
-                    <select id="novoClientePerfil">
-                        <option value="pj">Empresarial</option>
-                        <option value="pf">Pessoal</option>
-                        <option value="teste">Teste</option>
+                    <label>🏦 Selecione o Banco</label>
+                    <select class="form-control" id="importBanco" required>
+                        <option value="">Carregando bancos...</option>
                     </select>
                 </div>
+                
                 <div class="form-group">
-                    <label>Email:</label>
-                    <input type="email" id="novoClienteEmail" placeholder="email@exemplo.com" />
+                    <label>📄 Arquivo do Extrato</label>
+                    <input type="file" id="importFile" accept=".ofx,.csv,.txt" class="form-control">
+                    <small style="color: var(--text-secondary);">Formatos: OFX ou CSV</small>
                 </div>
-                <div class="form-group">
-                    <label>Telefone:</label>
-                    <input type="text" id="novoClienteTelefone" placeholder="(00) 00000-0000" />
-                </div>
-            </div>
-            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                <button class="control-btn btn-save" onclick="criarClienteFirebase()">CRIAR</button>
-                <button class="control-btn btn-block" onclick="fecharModalNovoCliente()">CANCELAR</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL TESTE LINK -->
-    <div id="modalTesteLink" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>🔗 TESTE DE LINK</h2>
-                <button class="modal-close" onclick="fecharModalTeste()">×</button>
-            </div>
-            <div class="modal-body">
-                <p id="testeLinkMsg">Testando link...</p>
-                <div class="form-group">
-                    <label>Link gerado:</label>
-                    <input type="text" id="testeLinkUrl" readonly style="background: #333;" />
-                </div>
-                <div id="testeLinkStatus" style="margin-top: 10px; padding: 10px; border-radius: 5px; display: none;"></div>
-            </div>
-            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                <button class="control-btn btn-view" onclick="abrirLinkTeste()">ABRIR LINK</button>
-                <button class="control-btn btn-copy" onclick="copiarLinkTeste()">COPIAR</button>
-                <button class="control-btn btn-block" onclick="fecharModalTeste()">FECHAR</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL DIAGNÓSTICO -->
-    <div id="modalDiagnostico" class="modal">
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h2>🔍 DIAGNÓSTICO DO SISTEMA</h2>
-                <button class="modal-close" onclick="fecharModalDiagnostico()">×</button>
-            </div>
-            <div class="modal-body" id="diagnosticoBody">
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    Executando diagnóstico...
+                
+                <div class="flex items-center" style="margin-top: 15px;">
+                    <input type="checkbox" id="importSubstituir" style="margin-right: 8px;">
+                    <label for="importSubstituir">Substituir lançamentos existentes</label>
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="control-btn btn-save" onclick="executarDiagnosticoCompleto()">EXECUTAR</button>
-                <button class="control-btn btn-block" onclick="fecharModalDiagnostico()">FECHAR</button>
+                <button class="btn btn-outline" onclick="fecharModalImport()">Cancelar</button>
+                <button class="btn btn-primary" onclick="processarImportacaoExtrato()">
+                    <i class="fas fa-upload"></i> Importar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL RELATÓRIO -->
+    <div id="modalRelatorio" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2 id="modalRelatorioTitulo">📊 Relatório</h2>
+                <button class="modal-close" onclick="fecharModalRelatorio()">&times;</button>
+            </div>
+            <div class="modal-body" id="relatorioBody" style="max-height: 500px; overflow-y: auto;"></div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="fecharModalRelatorio()">Fechar</button>
+                <button class="btn btn-primary" onclick="exportarRelatorioPDF()">
+                    <i class="fas fa-file-pdf"></i> Exportar PDF
+                </button>
             </div>
         </div>
     </div>
@@ -1227,20 +1234,21 @@
         // ============================================
         // VARIÁVEIS GLOBAIS
         // ============================================
-        let clientes = [];
-        let clienteAtual = null;
-        let acaoPendente = null;
-        let alteracoesNaoSalvas = false;
-        let unsubscribeClientes = null;
-
-        let appFinanceiroConfig = {
-            nomeArquivo: 'appfinanceiro.html',
-            caminho: ''
-        };
+        let clienteId = null;
+        let clienteData = null;
+        let lancamentos = [];
+        let lancamentosFiltrados = [];
+        let selecionados = new Set();
+        let modoMaster = false;
+        let paginaAtual = 1;
+        let itensPorPagina = 10;
+        let graficoFluxo = null;
+        let graficoPizza = null;
+        let unsubscribeLancamentos = null;
         
-        let categoriasCliente = [];
-        let contasCliente = [];
-        let tiposCliente = [];
+        let categorias = [];
+        let contas = [];
+        let tipos = [];
         let bancosCliente = [];
 
         // ============================================
@@ -1251,1368 +1259,1130 @@
             const el = document.getElementById('successMessage');
             el.innerHTML = mensagem;
             el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 3000);
-            adicionarLog(`✅ ${mensagem}`);
+            setTimeout(() => el.style.display = 'none', 3000);
         }
 
         function mostrarErro(mensagem) {
             const el = document.getElementById('errorMessage');
-            el.innerHTML = `❌ ${mensagem}`;
+            el.innerHTML = '❌ ' + mensagem;
             el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 5000);
-            adicionarLog(`❌ ${mensagem}`);
+            setTimeout(() => el.style.display = 'none', 5000);
         }
 
-        function adicionarLog(mensagem) {
-            const logPanel = document.getElementById("logPanel");
-            const entry = document.createElement("div");
-            entry.className = "log-entry";
-            entry.textContent = `[${new Date().toLocaleTimeString()}] ${mensagem}`;
-            logPanel.appendChild(entry);
-            if (logPanel.children.length > 10) logPanel.removeChild(logPanel.children[0]);
+        function mostrarAviso(mensagem) {
+            const el = document.getElementById('warningMessage');
+            el.innerHTML = '⚠️ ' + mensagem;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 4000);
+        }
+
+        function formatarMoedaBR(valor, comSimbolo = true) {
+            if (valor === undefined || valor === null) return comSimbolo ? 'R$ 0,00' : '0,00';
+            const numero = typeof valor === 'string' ? parseFloat(valor.replace(/[^\d,.-]/g, '').replace(',', '.')) : valor;
+            if (isNaN(numero)) return comSimbolo ? 'R$ 0,00' : '0,00';
+            const valorFormatado = numero.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            return comSimbolo ? `R$ ${valorFormatado}` : valorFormatado;
+        }
+
+        function parseMoedaBR(valorStr) {
+            if (!valorStr) return 0;
+            const limpo = valorStr.toString()
+                .replace('R$', '')
+                .replace(/\s/g, '')
+                .replace(/\./g, '')
+                .replace(',', '.')
+                .trim();
+            return parseFloat(limpo) || 0;
+        }
+
+        function formatarCampoValor(input) {
+            if (input.value) {
+                const valor = parseMoedaBR(input.value);
+                input.value = formatarMoedaBR(valor, false);
+            }
+        }
+
+        function formatarDataBR(data) {
+            if (!data) return '-';
+            try {
+                return new Date(data + 'T12:00:00').toLocaleDateString('pt-BR');
+            } catch (e) {
+                return '-';
+            }
         }
 
         // ============================================
-        // CONFIGURAÇÕES DO APP FINANCEIRO
+        // CARREGAR CONFIGURAÇÕES DO FIREBASE
         // ============================================
         
-        function carregarConfigAppFinanceiro() {
-            try {
-                const saved = localStorage.getItem('appFinanceiroConfig');
-                if (saved) {
-                    appFinanceiroConfig = JSON.parse(saved);
-                }
-                
-                document.getElementById('appFinanceiroNome').value = appFinanceiroConfig.nomeArquivo || 'appfinanceiro.html';
-                document.getElementById('appFinanceiroCaminho').value = appFinanceiroConfig.caminho || '';
-                
-                adicionarLog(`Configuração carregada: ${appFinanceiroConfig.nomeArquivo}`);
-            } catch (e) {
-                console.error('Erro ao carregar config:', e);
-            }
-        }
-
-        function salvarConfigAppFinanceiro() {
-            try {
-                appFinanceiroConfig.nomeArquivo = document.getElementById('appFinanceiroNome').value || 'appfinanceiro.html';
-                appFinanceiroConfig.caminho = document.getElementById('appFinanceiroCaminho').value || '';
-                localStorage.setItem('appFinanceiroConfig', JSON.stringify(appFinanceiroConfig));
-                
-                mostrarSucesso('✅ Configuração do app salva!');
-                document.getElementById('configWarning').style.display = 'none';
-                adicionarLog('Configuração do app salva');
-            } catch (e) {
-                mostrarErro('Erro ao salvar configuração');
-            }
-        }
-
-        function mostrarConfigAppFinanceiro() {
-            mudarAba('apps', document.querySelectorAll('.tab-btn')[4]);
-        }
-
-        // ============================================
-        // FUNÇÕES DE BANCOS
-        // ============================================
-        
-        function carregarBancosCliente() {
-            if (!clienteAtual) return;
-            
-            try {
-                const saved = localStorage.getItem(`bancos_${clienteAtual.id}`);
-                if (saved) {
-                    bancosCliente = JSON.parse(saved);
-                } else {
-                    bancosCliente = [
-                        {
-                            nome: 'Itaú',
-                            cor: '#EC7000',
-                            icone: 'fa-university',
-                            formato: 'csv_itau',
-                            posData: 0,
-                            posDesc: 1,
-                            posValor: 2,
-                            posTipo: 3,
-                            formatoData: 'dd/mm/yyyy',
-                            separador: ',',
-                            delimitador: ';',
-                            obs: 'Extrato do Itaú'
-                        },
-                        {
-                            nome: 'Bradesco',
-                            cor: '#CC092F',
-                            icone: 'fa-building',
-                            formato: 'csv_bradesco',
-                            posData: 0,
-                            posDesc: 1,
-                            posValor: 3,
-                            posTipo: 4,
-                            formatoData: 'dd/mm/yyyy',
-                            separador: ',',
-                            delimitador: ';',
-                            obs: 'Extrato do Bradesco'
-                        },
-                        {
-                            nome: 'Nubank',
-                            cor: '#820AD1',
-                            icone: 'fa-credit-card',
-                            formato: 'csv_nubank',
-                            posData: 0,
-                            posDesc: 1,
-                            posValor: 2,
-                            posTipo: '',
-                            formatoData: 'dd/mm/yyyy',
-                            separador: ',',
-                            delimitador: ',',
-                            obs: 'Extrato do Nubank'
-                        }
-                    ];
-                }
-                
-                atualizarListaBancos();
-                adicionarLog(`${bancosCliente.length} bancos carregados`);
-                
-            } catch (e) {
-                console.error('Erro ao carregar bancos:', e);
-            }
-        }
-
-        function atualizarListaBancos() {
-            const lista = document.getElementById('listaBancos');
-            
-            if (!bancosCliente || bancosCliente.length === 0) {
-                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">Nenhum banco cadastrado</div>';
-                return;
-            }
-            
-            let html = '';
-            bancosCliente.forEach((banco, index) => {
-                const cor = banco.cor || '#4CAF50';
-                const icone = banco.icone || 'fa-university';
-                
-                html += `
-                    <div class="config-item" style="border-left: 4px solid ${cor};">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span class="bank-icon" style="background: ${cor}; color: white;">
-                                <i class="fas ${icone}"></i>
-                            </span>
-                            <div>
-                                <strong>${banco.nome}</strong><br>
-                                <small style="color: var(--text-secondary);">${banco.formato} | ${banco.obs || ''}</small>
-                            </div>
-                        </div>
-                        <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarBanco(${index})" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerBanco(${index})" title="Remover">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            lista.innerHTML = html;
-        }
-
-        function mostrarModalBanco() {
-            document.getElementById('bancoIndex').value = '-1';
-            document.getElementById('modalBancoTitulo').textContent = '🏦 NOVO BANCO';
-            
-            document.getElementById('bancoNome').value = '';
-            document.getElementById('bancoCor').value = '#4CAF50';
-            document.getElementById('bancoCorHex').value = '#4CAF50';
-            document.getElementById('bancoIcone').value = 'fa-university';
-            document.getElementById('bancoFormato').value = 'ofx';
-            document.getElementById('bancoPosData').value = '0';
-            document.getElementById('bancoPosDesc').value = '1';
-            document.getElementById('bancoPosValor').value = '2';
-            document.getElementById('bancoPosTipo').value = '';
-            document.getElementById('bancoFormatoData').value = 'dd/mm/yyyy';
-            document.getElementById('bancoSeparador').value = '.';
-            document.getElementById('bancoDelimitador').value = ',';
-            document.getElementById('bancoObs').value = '';
-            
-            document.getElementById('modalBanco').style.display = 'flex';
-        }
-
-        function editarBanco(index) {
-            const banco = bancosCliente[index];
-            if (!banco) return;
-            
-            document.getElementById('bancoIndex').value = index;
-            document.getElementById('modalBancoTitulo').textContent = `✏️ EDITAR BANCO: ${banco.nome}`;
-            
-            document.getElementById('bancoNome').value = banco.nome || '';
-            document.getElementById('bancoCor').value = banco.cor || '#4CAF50';
-            document.getElementById('bancoCorHex').value = banco.cor || '#4CAF50';
-            document.getElementById('bancoIcone').value = banco.icone || 'fa-university';
-            document.getElementById('bancoFormato').value = banco.formato || 'ofx';
-            document.getElementById('bancoPosData').value = banco.posData || '0';
-            document.getElementById('bancoPosDesc').value = banco.posDesc || '1';
-            document.getElementById('bancoPosValor').value = banco.posValor || '2';
-            document.getElementById('bancoPosTipo').value = banco.posTipo || '';
-            document.getElementById('bancoFormatoData').value = banco.formatoData || 'dd/mm/yyyy';
-            document.getElementById('bancoSeparador').value = banco.separador || '.';
-            document.getElementById('bancoDelimitador').value = banco.delimitador || ',';
-            document.getElementById('bancoObs').value = banco.obs || '';
-            
-            document.getElementById('modalBanco').style.display = 'flex';
-        }
-
-        function salvarBanco() {
-            const index = parseInt(document.getElementById('bancoIndex').value);
-            const nome = document.getElementById('bancoNome').value.trim();
-            
-            if (!nome) {
-                mostrarErro('Nome do banco é obrigatório!');
-                return;
-            }
-            
-            const banco = {
-                nome: nome,
-                cor: document.getElementById('bancoCor').value,
-                icone: document.getElementById('bancoIcone').value,
-                formato: document.getElementById('bancoFormato').value,
-                posData: document.getElementById('bancoPosData').value,
-                posDesc: document.getElementById('bancoPosDesc').value,
-                posValor: document.getElementById('bancoPosValor').value,
-                posTipo: document.getElementById('bancoPosTipo').value,
-                formatoData: document.getElementById('bancoFormatoData').value,
-                separador: document.getElementById('bancoSeparador').value,
-                delimitador: document.getElementById('bancoDelimitador').value,
-                obs: document.getElementById('bancoObs').value
-            };
-            
-            if (index === -1) {
-                bancosCliente.push(banco);
-                mostrarSucesso(`Banco "${nome}" adicionado!`);
-            } else {
-                bancosCliente[index] = banco;
-                mostrarSucesso(`Banco "${nome}" atualizado!`);
-            }
-            
-            atualizarListaBancos();
-            fecharModalBanco();
-        }
-
-        function removerBanco(index) {
-            if (!confirm('Remover este banco?')) return;
-            
-            const removido = bancosCliente.splice(index, 1)[0];
-            atualizarListaBancos();
-            mostrarSucesso(`Banco "${removido.nome}" removido!`);
-        }
-
-        function salvarBancos() {
-            if (!clienteAtual) {
-                mostrarErro('Selecione um cliente primeiro!');
-                return;
-            }
-            
-            try {
-                localStorage.setItem(`bancos_${clienteAtual.id}`, JSON.stringify(bancosCliente));
-                mostrarSucesso('✅ Bancos salvos com sucesso!');
-            } catch (e) {
-                mostrarErro('Erro ao salvar bancos: ' + e.message);
-            }
-        }
-
-        function resetarBancosPadrao() {
-            if (!confirm('Resetar bancos para o padrão?')) return;
-            
-            bancosCliente = [
-                {
-                    nome: 'Itaú',
-                    cor: '#EC7000',
-                    icone: 'fa-university',
-                    formato: 'csv_itau',
-                    posData: 0,
-                    posDesc: 1,
-                    posValor: 2,
-                    posTipo: 3,
-                    formatoData: 'dd/mm/yyyy',
-                    separador: ',',
-                    delimitador: ';',
-                    obs: 'Extrato do Itaú'
-                },
-                {
-                    nome: 'Bradesco',
-                    cor: '#CC092F',
-                    icone: 'fa-building',
-                    formato: 'csv_bradesco',
-                    posData: 0,
-                    posDesc: 1,
-                    posValor: 3,
-                    posTipo: 4,
-                    formatoData: 'dd/mm/yyyy',
-                    separador: ',',
-                    delimitador: ';',
-                    obs: 'Extrato do Bradesco'
-                },
-                {
-                    nome: 'Nubank',
-                    cor: '#820AD1',
-                    icone: 'fa-credit-card',
-                    formato: 'csv_nubank',
-                    posData: 0,
-                    posDesc: 1,
-                    posValor: 2,
-                    posTipo: '',
-                    formatoData: 'dd/mm/yyyy',
-                    separador: ',',
-                    delimitador: ',',
-                    obs: 'Extrato do Nubank'
-                }
-            ];
-            
-            atualizarListaBancos();
-            mostrarSucesso('Bancos resetados para o padrão!');
-        }
-
-        // ============================================
-        // FUNÇÕES DE CONFIGURAÇÕES
-        // ============================================
-        
-        function carregarConfiguracoesCliente() {
-            if (!clienteAtual) return;
+        async function carregarConfiguracoes() {
+            if (!clienteId) return;
             
             try {
                 // Categorias
-                const savedCategorias = localStorage.getItem(`categorias_${clienteAtual.id}`);
-                if (savedCategorias) {
-                    categoriasCliente = JSON.parse(savedCategorias);
+                const catSnapshot = await db.collection('configuracoes').doc(clienteId).collection('categorias').get();
+                if (!catSnapshot.empty) {
+                    categorias = [];
+                    catSnapshot.forEach(doc => categorias.push({ id: doc.id, nome: doc.data().nome }));
                 } else {
-                    categoriasCliente = [
-                        'Alimentação', 'Transporte', 'Moradia', 'Saúde', 
-                        'Educação', 'Lazer', 'Salário', 'Investimentos', 
-                        'Vendas', 'Serviços', 'Impostos', 'Outros'
+                    categorias = [
+                        { id: 1, nome: 'Alimentação' }, { id: 2, nome: 'Transporte' },
+                        { id: 3, nome: 'Moradia' }, { id: 4, nome: 'Saúde' },
+                        { id: 5, nome: 'Educação' }, { id: 6, nome: 'Lazer' },
+                        { id: 7, nome: 'Salário' }, { id: 8, nome: 'Investimentos' },
+                        { id: 9, nome: 'Vendas' }, { id: 10, nome: 'Serviços' },
+                        { id: 11, nome: 'Impostos' }, { id: 12, nome: 'Outros' }
                     ];
                 }
                 
                 // Contas
-                const savedContas = localStorage.getItem(`contas_${clienteAtual.id}`);
-                if (savedContas) {
-                    contasCliente = JSON.parse(savedContas);
+                const contasSnapshot = await db.collection('configuracoes').doc(clienteId).collection('contas').get();
+                if (!contasSnapshot.empty) {
+                    contas = [];
+                    contasSnapshot.forEach(doc => contas.push({ id: doc.id, nome: doc.data().nome }));
                 } else {
-                    contasCliente = [
-                        'Carteira', 'Conta Corrente', 'Poupança', 'Cartão de Crédito'
+                    contas = [
+                        { id: 1, nome: 'Carteira' }, { id: 2, nome: 'Conta Corrente' },
+                        { id: 3, nome: 'Poupança' }, { id: 4, nome: 'Cartão de Crédito' }
                     ];
                 }
                 
                 // Tipos
-                const savedTipos = localStorage.getItem(`tipos_${clienteAtual.id}`);
-                if (savedTipos) {
-                    tiposCliente = JSON.parse(savedTipos);
+                const tiposSnapshot = await db.collection('configuracoes').doc(clienteId).collection('tipos').get();
+                if (!tiposSnapshot.empty) {
+                    tipos = [];
+                    tiposSnapshot.forEach(doc => tipos.push(doc.data()));
                 } else {
-                    tiposCliente = [
-                        { nome: 'Entrada (Receita)', natureza: 'entrada' },
-                        { nome: 'Saída (Despesa)', natureza: 'saida' }
+                    tipos = [
+                        { id: 'entrada', nome: 'Entrada', natureza: 'entrada' },
+                        { id: 'saida', nome: 'Saída', natureza: 'saida' }
                     ];
                 }
                 
-                carregarBancosCliente();
-                
-                atualizarListaCategorias();
-                atualizarListaContas();
-                atualizarListaTipos();
-                
-            } catch (e) {
-                console.error('Erro ao carregar configurações:', e);
-            }
-        }
-
-        function atualizarListaCategorias() {
-            const lista = document.getElementById('listaCategorias');
-            
-            if (!categoriasCliente || categoriasCliente.length === 0) {
-                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhuma categoria</div>';
-                return;
-            }
-            
-            let html = '';
-            categoriasCliente.forEach((cat, index) => {
-                html += `
-                    <div class="config-item">
-                        <span>${cat}</span>
-                        <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarCategoria(${index})" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerCategoria(${index})" title="Remover">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            lista.innerHTML = html;
-        }
-
-        function atualizarListaContas() {
-            const lista = document.getElementById('listaContas');
-            
-            if (!contasCliente || contasCliente.length === 0) {
-                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhuma conta</div>';
-                return;
-            }
-            
-            let html = '';
-            contasCliente.forEach((conta, index) => {
-                html += `
-                    <div class="config-item">
-                        <span>${conta}</span>
-                        <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarConta(${index})" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerConta(${index})" title="Remover">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            lista.innerHTML = html;
-        }
-
-        function atualizarListaTipos() {
-            const lista = document.getElementById('listaTipos');
-            
-            if (!tiposCliente || tiposCliente.length === 0) {
-                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhum tipo</div>';
-                return;
-            }
-            
-            let html = '';
-            tiposCliente.forEach((tipo, index) => {
-                const naturezaIcon = tipo.natureza === 'entrada' ? '📥' : '📤';
-                html += `
-                    <div class="config-item">
-                        <span>${naturezaIcon} ${tipo.nome} <span style="color: ${tipo.natureza === 'entrada' ? '#4caf50' : '#f44336'}; font-size: 10px;">(${tipo.natureza})</span></span>
-                        <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarTipo(${index})" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerTipo(${index})" title="Remover">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            lista.innerHTML = html;
-        }
-
-        function adicionarCategoria() {
-            const nome = document.getElementById('novaCategoria').value.trim();
-            if (!nome) {
-                mostrarErro('Digite um nome para a categoria');
-                return;
-            }
-            
-            categoriasCliente.push(nome);
-            document.getElementById('novaCategoria').value = '';
-            atualizarListaCategorias();
-            mostrarSucesso(`Categoria "${nome}" adicionada!`);
-        }
-
-        function adicionarConta() {
-            const nome = document.getElementById('novaConta').value.trim();
-            if (!nome) {
-                mostrarErro('Digite um nome para a conta');
-                return;
-            }
-            
-            contasCliente.push(nome);
-            document.getElementById('novaConta').value = '';
-            atualizarListaContas();
-            mostrarSucesso(`Conta "${nome}" adicionada!`);
-        }
-
-        function adicionarTipo() {
-            const nome = document.getElementById('novoTipo').value.trim();
-            const natureza = document.getElementById('novoTipoNatureza').value;
-            
-            if (!nome) {
-                mostrarErro('Digite um nome para o tipo');
-                return;
-            }
-            
-            tiposCliente.push({ nome: nome, natureza: natureza });
-            document.getElementById('novoTipo').value = '';
-            atualizarListaTipos();
-            mostrarSucesso(`Tipo "${nome}" adicionado!`);
-        }
-
-        function removerCategoria(index) {
-            if (!confirm('Remover esta categoria?')) return;
-            const removido = categoriasCliente.splice(index, 1)[0];
-            atualizarListaCategorias();
-            mostrarSucesso(`Categoria "${removido}" removida!`);
-        }
-
-        function removerConta(index) {
-            if (!confirm('Remover esta conta?')) return;
-            const removido = contasCliente.splice(index, 1)[0];
-            atualizarListaContas();
-            mostrarSucesso(`Conta "${removido}" removida!`);
-        }
-
-        function removerTipo(index) {
-            if (!confirm('Remover este tipo?')) return;
-            const removido = tiposCliente.splice(index, 1)[0];
-            atualizarListaTipos();
-            mostrarSucesso(`Tipo "${removido.nome}" removido!`);
-        }
-
-        function editarCategoria(index) {
-            const novoNome = prompt('Editar categoria:', categoriasCliente[index]);
-            if (novoNome && novoNome !== categoriasCliente[index]) {
-                categoriasCliente[index] = novoNome;
-                atualizarListaCategorias();
-                mostrarSucesso('Categoria atualizada!');
-            }
-        }
-
-        function editarConta(index) {
-            const novoNome = prompt('Editar conta:', contasCliente[index]);
-            if (novoNome && novoNome !== contasCliente[index]) {
-                contasCliente[index] = novoNome;
-                atualizarListaContas();
-                mostrarSucesso('Conta atualizada!');
-            }
-        }
-
-        function editarTipo(index) {
-            const tipo = tiposCliente[index];
-            const novoNome = prompt('Editar tipo:', tipo.nome);
-            if (novoNome && novoNome !== tipo.nome) {
-                tipo.nome = novoNome;
-                atualizarListaTipos();
-                mostrarSucesso('Tipo atualizado!');
-            }
-        }
-
-        function salvarTudo() {
-            if (!clienteAtual) {
-                mostrarErro('Selecione um cliente primeiro!');
-                return;
-            }
-            
-            try {
-                localStorage.setItem(`categorias_${clienteAtual.id}`, JSON.stringify(categoriasCliente));
-                localStorage.setItem(`contas_${clienteAtual.id}`, JSON.stringify(contasCliente));
-                localStorage.setItem(`tipos_${clienteAtual.id}`, JSON.stringify(tiposCliente));
-                localStorage.setItem(`bancos_${clienteAtual.id}`, JSON.stringify(bancosCliente));
-                
-                mostrarSucesso('✅ Todas as configurações salvas!');
-            } catch (e) {
-                mostrarErro('Erro ao salvar: ' + e.message);
-            }
-        }
-
-        function resetarTudo() {
-            if (!confirm('Resetar todas as configurações para o padrão?')) return;
-            
-            categoriasCliente = [
-                'Alimentação', 'Transporte', 'Moradia', 'Saúde', 
-                'Educação', 'Lazer', 'Salário', 'Investimentos', 
-                'Vendas', 'Serviços', 'Impostos', 'Outros'
-            ];
-            
-            contasCliente = [
-                'Carteira', 'Conta Corrente', 'Poupança', 'Cartão de Crédito'
-            ];
-            
-            tiposCliente = [
-                { nome: 'Entrada (Receita)', natureza: 'entrada' },
-                { nome: 'Saída (Despesa)', natureza: 'saida' }
-            ];
-            
-            bancosCliente = [];
-            
-            atualizarListaCategorias();
-            atualizarListaContas();
-            atualizarListaTipos();
-            atualizarListaBancos();
-            
-            mostrarSucesso('Configurações resetadas!');
-        }
-
-        // ============================================
-        // FUNÇÕES PRINCIPAIS DO FIREBASE
-        // ============================================
-        
-        function carregarClientes() {
-            document.getElementById("firebaseStatus").innerHTML = "🔄 Conectando...";
-
-            if (unsubscribeClientes) {
-                unsubscribeClientes();
-            }
-
-            unsubscribeClientes = db.collection("clientes").onSnapshot((snapshot) => {
-                clientes = [];
-                let ativos = 0, bloqueados = 0, teste = 0;
-
-                snapshot.forEach((doc) => {
-                    const cliente = { 
-                        id: doc.id, 
-                        ...doc.data(),
-                        status: doc.data().status || 'ativo',
-                        perfil: doc.data().perfil || 'pj',
-                        appsAtivos: doc.data().appsAtivos || 1,
-                        dataCriacao: doc.data().dataCriacao || new Date().toISOString()
-                    };
-                    clientes.push(cliente);
-                    
-                    if (cliente.status === "ativo") ativos++;
-                    else if (cliente.status === "bloqueado") bloqueados++;
-                    else if (cliente.perfil === "teste") teste++;
-                });
-
-                clientes.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
-
-                document.getElementById("clientesCount").innerHTML = `📊 ${clientes.length} clientes`;
-                document.getElementById("ativosCount").innerHTML = `✅ Ativos: ${ativos}`;
-                document.getElementById("bloqueadosCount").innerHTML = `🔒 Bloqueados: ${bloqueados}`;
-                document.getElementById("testeCount").innerHTML = `🧪 Teste: ${teste}`;
-                document.getElementById("totalClientesTag").innerHTML = clientes.length;
-                document.getElementById("firebaseStatus").innerHTML = "🟢 Conectado";
-
-                atualizarListaClientes();
-
-                if (clienteAtual) {
-                    const atualizado = clientes.find(c => c.id === clienteAtual.id);
-                    if (atualizado) {
-                        clienteAtual = atualizado;
-                        preencherFormularioCliente();
-                    } else {
-                        clienteAtual = null;
-                        limparFormularioCliente();
-                    }
+                // Bancos
+                const bancosSnapshot = await db.collection('configuracoes').doc(clienteId).collection('bancos').get();
+                if (!bancosSnapshot.empty) {
+                    bancosCliente = [];
+                    bancosSnapshot.forEach(doc => bancosCliente.push(doc.data()));
+                } else {
+                    bancosCliente = [];
                 }
-
-                adicionarLog(`${clientes.length} clientes carregados`);
-
-            }, (error) => {
-                console.error("Erro no Firestore:", error);
-                document.getElementById("firebaseStatus").innerHTML = "🔴 Erro de conexão";
-                mostrarErro("Erro ao conectar ao Firebase: " + error.message);
-            });
-        }
-
-        function atualizarListaClientes() {
-            const lista = document.getElementById("listaClientes");
-            const filtro = document.getElementById("buscarCliente")?.value.toLowerCase() || "";
-
-            if (clientes.length === 0) {
-                lista.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">📭 Nenhum cliente cadastrado</div>';
-                return;
-            }
-
-            let html = "";
-            const clientesFiltrados = clientes.filter(c => 
-                c.nome?.toLowerCase().includes(filtro) || 
-                c.id?.toLowerCase().includes(filtro)
-            );
-
-            clientesFiltrados.forEach(c => {
-                const ativo = clienteAtual && clienteAtual.id === c.id;
                 
-                let statusClass = "status-ativo";
-                if (c.status === "bloqueado") statusClass = "status-bloqueado";
-                else if (c.perfil === "teste") statusClass = "status-teste";
-                
-                const statusText = c.status === "bloqueado" ? "BLOQUEADO" : 
-                                  (c.perfil === "teste" ? "TESTE" : "ATIVO");
-
-                html += `<div class="cliente-item ${ativo ? "active" : ""}" onclick="selecionarCliente('${c.id}')">
-                    <div class="cliente-header">
-                        <span class="cliente-nome">${c.nome || "Sem nome"}</span>
-                        <span class="cliente-status ${statusClass}">${statusText}</span>
-                    </div>
-                    <div class="cliente-info">
-                        <span>📱 ${c.appsAtivos || 1} apps</span>
-                        <span>📅 ${new Date(c.dataCriacao || Date.now()).toLocaleDateString('pt-BR')}</span>
-                    </div>
-                    <div class="cliente-actions">
-                        <span class="action-icon" title="Editar" onclick="entrarModoEdicao(); event.stopPropagation()">✏️</span>
-                        <span class="action-icon" title="${c.status === 'bloqueado' ? 'Desbloquear' : 'Bloquear'}" onclick="bloquearCliente(); event.stopPropagation()">${c.status === 'bloqueado' ? '🔓' : '🔒'}</span>
-                        <span class="action-icon" title="Visualizar" onclick="verComoCliente(); event.stopPropagation()">👁️</span>
-                        <span class="action-icon" title="Copiar link" onclick="copiarLinkClienteAtual(); event.stopPropagation()">🔗</span>
-                        <span class="action-icon danger" title="Excluir" onclick="deletarCliente('${c.id}', event)">🗑️</span>
-                    </div>
-                </div>`;
-            });
-
-            lista.innerHTML = html;
-        }
-
-        function limparFormularioCliente() {
-            document.getElementById("nomeEmpresa").value = "";
-            document.getElementById("perfilCliente").value = "pj";
-            document.getElementById("clienteIdVisivel").value = "";
-            document.getElementById("corPrincipal").value = "#4CAF50";
-            document.getElementById("corHex").value = "#4CAF50";
-            document.getElementById("modoEscuro").value = "auto";
-            document.getElementById("termoColaborador").value = "Motorista";
-            document.getElementById("emailContato").value = "";
-            document.getElementById("telefoneContato").value = "";
-            
-            atualizarPreview();
-            
-            ["btnEditar", "btnBloquear", "btnSalvar", "btnVisualizar", "btnCopiarLink", "btnExportar"]
-                .forEach(id => document.getElementById(id).disabled = true);
-        }
-
-        async function selecionarCliente(clienteId) {
-            if (alteracoesNaoSalvas) {
-                if (!confirm("⚠️ Há alterações não salvas! Deseja continuar?")) {
-                    return;
-                }
-                alteracoesNaoSalvas = false;
-                document.getElementById("btnSalvar").disabled = true;
-            }
-
-            const cliente = clientes.find(c => c.id === clienteId);
-            if (!cliente) {
-                mostrarErro("Cliente não encontrado!");
-                return;
-            }
-
-            clienteAtual = cliente;
-            atualizarListaClientes();
-            preencherFormularioCliente();
-            
-            carregarConfiguracoesCliente();
-
-            ["btnEditar", "btnBloquear", "btnSalvar", "btnVisualizar", "btnCopiarLink", "btnExportar"]
-                .forEach(id => document.getElementById(id).disabled = false);
-
-            document.getElementById("btnBloquear").innerHTML = cliente.status === 'bloqueado' ? '🔓 DESBLOQUEAR' : '🔒 BLOQUEAR';
-
-            adicionarLog(`Cliente selecionado: ${cliente.nome || cliente.id}`);
-        }
-
-        function preencherFormularioCliente() {
-            if (!clienteAtual) return;
-
-            document.getElementById("nomeEmpresa").value = clienteAtual.nome || "";
-            document.getElementById("perfilCliente").value = clienteAtual.perfil || "pj";
-            document.getElementById("clienteIdVisivel").value = clienteAtual.id || "";
-            document.getElementById("corPrincipal").value = clienteAtual.cor || "#4CAF50";
-            document.getElementById("corHex").value = clienteAtual.cor || "#4CAF50";
-            document.getElementById("modoEscuro").value = clienteAtual.modoEscuro || "auto";
-            document.getElementById("termoColaborador").value = clienteAtual.termoColaborador || "Motorista";
-            document.getElementById("emailContato").value = clienteAtual.email || "";
-            document.getElementById("telefoneContato").value = clienteAtual.telefone || "";
-            
-            atualizarPreview();
-        }
-
-        function atualizarPreview() {
-            const nome = document.getElementById("nomeEmpresa").value || "Nome da Empresa";
-            const cor = document.getElementById("corPrincipal").value || "#4CAF50";
-            const modo = document.getElementById("modoEscuro").value;
-            
-            document.getElementById("previewTitulo").innerHTML = nome;
-            document.getElementById("previewTitulo").style.color = cor;
-            document.getElementById("previewCor").innerHTML = `Cor: ${cor}`;
-            
-            let modoTexto = "Automático";
-            if (modo === "light") modoTexto = "Sempre claro";
-            else if (modo === "dark") modoTexto = "Sempre escuro";
-            document.getElementById("previewModo").innerHTML = `Modo: ${modoTexto}`;
-        }
-
-        function alteracaoNaoSalva() {
-            alteracoesNaoSalvas = true;
-            document.getElementById("btnSalvar").disabled = false;
-            atualizarPreview();
-        }
-
-        function verComoCliente() {
-            if (!clienteAtual) {
-                mostrarErro("Selecione um cliente primeiro!");
-                return;
-            }
-            
-            const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
-            
-            window.open(url, '_blank');
-            adicionarLog(`👁️ Visualizando: ${clienteAtual.nome || clienteAtual.id}`);
-        }
-
-        function copiarLinkClienteAtual() {
-            if (!clienteAtual) {
-                mostrarErro("Selecione um cliente primeiro!");
-                return;
-            }
-            
-            const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
-            
-            navigator.clipboard.writeText(url).then(() => {
-                mostrarSucesso('✅ Link copiado!');
-            }).catch(() => {
-                prompt('Copie o link manualmente:', url);
-            });
-        }
-
-        function entrarModoEdicao() {
-            if (!clienteAtual) {
-                mostrarErro("Selecione um cliente");
-                return;
-            }
-            
-            const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}&modo=edicao&master=true`;
-            
-            window.open(url, '_blank');
-            adicionarLog(`✏️ Modo edição: ${clienteAtual.nome || clienteAtual.id}`);
-        }
-
-        async function salvarAlteracoes() {
-            if (!clienteAtual) return;
-            
-            const nome = document.getElementById("nomeEmpresa").value;
-            if (!nome) {
-                mostrarErro("Nome da empresa é obrigatório!");
-                return;
-            }
-            
-            const dadosAtualizados = {
-                nome: nome,
-                perfil: document.getElementById("perfilCliente").value,
-                cor: document.getElementById("corPrincipal").value,
-                modoEscuro: document.getElementById("modoEscuro").value,
-                termoColaborador: document.getElementById("termoColaborador").value,
-                email: document.getElementById("emailContato").value,
-                telefone: document.getElementById("telefoneContato").value,
-                atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            try {
-                await db.collection("clientes").doc(clienteAtual.id).update(dadosAtualizados);
-                
-                mostrarSucesso("✅ Alterações salvas com sucesso!");
-                alteracoesNaoSalvas = false;
-                document.getElementById("btnSalvar").disabled = true;
-                adicionarLog(`💾 Dados salvos: ${clienteAtual.nome}`);
+                carregarCategorias();
+                carregarContas();
+                carregarTipos();
+                atualizarSelectBancos();
                 
             } catch (error) {
-                console.error("Erro ao salvar:", error);
-                mostrarErro("Erro ao salvar: " + error.message);
+                console.error('Erro ao carregar configurações:', error);
+                
+                // Fallback
+                categorias = [
+                    { id: 1, nome: 'Alimentação' }, { id: 2, nome: 'Transporte' },
+                    { id: 3, nome: 'Moradia' }, { id: 4, nome: 'Saúde' },
+                    { id: 5, nome: 'Educação' }, { id: 6, nome: 'Lazer' },
+                    { id: 7, nome: 'Salário' }, { id: 8, nome: 'Investimentos' },
+                    { id: 9, nome: 'Vendas' }, { id: 10, nome: 'Serviços' },
+                    { id: 11, nome: 'Impostos' }, { id: 12, nome: 'Outros' }
+                ];
+                contas = [
+                    { id: 1, nome: 'Carteira' }, { id: 2, nome: 'Conta Corrente' },
+                    { id: 3, nome: 'Poupança' }, { id: 4, nome: 'Cartão de Crédito' }
+                ];
+                tipos = [
+                    { id: 'entrada', nome: 'Entrada', natureza: 'entrada' },
+                    { id: 'saida', nome: 'Saída', natureza: 'saida' }
+                ];
+                bancosCliente = [];
+                
+                carregarCategorias();
+                carregarContas();
+                carregarTipos();
+                atualizarSelectBancos();
             }
         }
 
-        async function bloquearCliente() {
-            if (!clienteAtual) return;
+        function carregarCategorias() {
+            const selectCategoria = document.getElementById('lancamentoCategoria');
+            const filtroCategoria = document.getElementById('filtroCategoria');
             
-            const novoStatus = clienteAtual.status === "ativo" ? "bloqueado" : "ativo";
-            const acao = novoStatus === "bloqueado" ? "bloquear" : "desbloquear";
+            if (selectCategoria) {
+                selectCategoria.innerHTML = categorias.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
+            }
             
-            document.getElementById("modalTitulo").textContent = acao === "bloquear" ? "🔒 Bloquear Cliente" : "🔓 Desbloquear Cliente";
-            document.getElementById("modalMsg").textContent = `Deseja ${acao} o cliente ${clienteAtual.nome || clienteAtual.id}?`;
-            document.getElementById("modalConfirm").style.display = "flex";
+            if (filtroCategoria) {
+                filtroCategoria.innerHTML = '<option value="todos">Todas</option>' + 
+                    categorias.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
+            }
+        }
+
+        function carregarContas() {
+            const selectConta = document.getElementById('lancamentoConta');
+            if (selectConta) {
+                selectConta.innerHTML = contas.map(c => `<option value="${c.nome}">${c.nome}</option>`).join('');
+            }
+        }
+
+        function carregarTipos() {
+            const selectTipo = document.getElementById('lancamentoTipo');
+            if (selectTipo) {
+                selectTipo.innerHTML = tipos.map(t => `<option value="${t.natureza}">${t.nome}</option>`).join('');
+            }
+        }
+
+        function atualizarSelectBancos() {
+            const select = document.getElementById('importBanco');
+            if (!select) return;
             
-            acaoPendente = async () => {
+            let html = '<option value="">Selecione o banco...</option>';
+            bancosCliente.forEach((banco, index) => {
+                html += `<option value="${index}">${banco.nome}</option>`;
+            });
+            select.innerHTML = html;
+        }
+
+        // ============================================
+        // FUNÇÕES DE IMPORTAÇÃO DE EXTRATO
+        // ============================================
+        
+        function importarExtrato() {
+            document.getElementById('modalImport').style.display = 'flex';
+            atualizarSelectBancos();
+        }
+
+        function processarImportacaoExtrato() {
+            const file = document.getElementById('importFile').files[0];
+            const bancoIndex = document.getElementById('importBanco').value;
+            const substituir = document.getElementById('importSubstituir').checked;
+            
+            if (!file) {
+                mostrarAviso('Selecione um arquivo!');
+                return;
+            }
+            
+            if (bancoIndex === '') {
+                mostrarAviso('Selecione o banco!');
+                return;
+            }
+            
+            const banco = bancosCliente[bancoIndex];
+            
+            const reader = new FileReader();
+            
+            reader.onload = async function(e) {
                 try {
-                    await db.collection("clientes").doc(clienteAtual.id).update({ 
-                        status: novoStatus,
-                        motivoBloqueio: novoStatus === "bloqueado" ? "Bloqueado pelo Master" : null,
-                        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                    const extensao = file.name.split('.').pop().toLowerCase();
+                    let lancamentosImport = [];
+                    
+                    if (extensao === 'ofx') {
+                        lancamentosImport = parseOFX(e.target.result);
+                    } else {
+                        lancamentosImport = parseCSV(e.target.result, banco);
+                    }
+                    
+                    if (substituir) {
+                        const snapshot = await db.collection('lancamentos')
+                            .where('clienteId', '==', clienteId)
+                            .get();
+                        
+                        const batch = db.batch();
+                        snapshot.forEach(doc => batch.delete(doc.ref));
+                        await batch.commit();
+                    }
+                    
+                    const batch = db.batch();
+                    let importados = 0;
+                    
+                    lancamentosImport.forEach(l => {
+                        const ref = db.collection('lancamentos').doc();
+                        batch.set(ref, {
+                            clienteId,
+                            ...l,
+                            criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        importados++;
                     });
                     
-                    mostrarSucesso(`✅ Cliente ${novoStatus === "bloqueado" ? "bloqueado" : "desbloqueado"}!`);
-                    document.getElementById("btnBloquear").innerHTML = novoStatus === 'bloqueado' ? '🔓 DESBLOQUEAR' : '🔒 BLOQUEAR';
+                    await batch.commit();
+                    
+                    mostrarSucesso(`✅ ${importados} lançamentos importados!`);
+                    fecharModalImport();
                     
                 } catch (error) {
-                    mostrarErro("Erro ao alterar status: " + error.message);
+                    mostrarErro('Erro ao importar: ' + error.message);
                 }
-                fecharModal();
             };
-        }
-
-        async function confirmarAcao() {
-            if (acaoPendente) {
-                await acaoPendente();
-                acaoPendente = null;
+            
+            if (file.name.toLowerCase().endsWith('.ofx')) {
+                reader.readAsText(file);
+            } else {
+                reader.readAsBinaryString(file);
             }
         }
 
-        async function deletarCliente(clienteId, event) {
-            if (event) event.stopPropagation();
+        function parseOFX(ofxContent) {
+            const lancamentos = [];
+            const transactionRegex = /<STMTTRN>([\s\S]*?)<\/STMTTRN>/g;
+            const typeRegex = /<TRNTYPE>(.*?)<\/TRNTYPE>/;
+            const dateRegex = /<DTPOSTED>(.*?)<\/DTPOSTED>/;
+            const amountRegex = /<TRNAMT>(.*?)<\/TRNAMT>/;
+            const memoRegex = /<MEMO>(.*?)<\/MEMO>/;
             
-            const cliente = clientes.find(c => c.id === clienteId);
-            if (!cliente) return;
-            
-            if (!confirm(`⚠️ ATENÇÃO!\n\nExcluir cliente "${cliente.nome || cliente.id}"?\n\nEsta ação NÃO pode ser desfeita!`)) {
-                return;
-            }
-            
-            try {
-                const lancamentosSnapshot = await db.collection('lancamentos')
-                    .where('clienteId', '==', clienteId)
-                    .get();
+            let match;
+            while ((match = transactionRegex.exec(ofxContent)) !== null) {
+                const transaction = match[1];
                 
-                const batch = db.batch();
-                lancamentosSnapshot.forEach(doc => batch.delete(doc.ref));
-                batch.delete(db.collection("clientes").doc(clienteId));
+                const tipo = (transaction.match(typeRegex) || [,''])[1];
+                const dataStr = (transaction.match(dateRegex) || [,''])[1];
+                const valor = parseFloat((transaction.match(amountRegex) || [,'0'])[1]);
+                const descricao = (transaction.match(memoRegex) || [,'Extrato'])[1];
                 
-                await batch.commit();
-                
-                localStorage.removeItem(`categorias_${clienteId}`);
-                localStorage.removeItem(`contas_${clienteId}`);
-                localStorage.removeItem(`tipos_${clienteId}`);
-                localStorage.removeItem(`bancos_${clienteId}`);
-                
-                mostrarSucesso("✅ Cliente excluído!");
-                
-                if (clienteAtual && clienteAtual.id === clienteId) {
-                    clienteAtual = null;
-                    limparFormularioCliente();
+                let data = new Date().toISOString().split('T')[0];
+                if (dataStr && dataStr.length >= 8) {
+                    data = `${dataStr.substring(0,4)}-${dataStr.substring(4,6)}-${dataStr.substring(6,8)}`;
                 }
                 
-            } catch (error) {
-                mostrarErro("Erro ao excluir: " + error.message);
+                lancamentos.push({
+                    data: data,
+                    descricao: descricao,
+                    categoria: 'Outros',
+                    conta: 'Banco',
+                    tipo: valor < 0 ? 'saida' : 'entrada',
+                    valor: Math.abs(valor),
+                    obs: 'Importado de OFX'
+                });
             }
+            return lancamentos;
         }
 
-        function criarCliente() { 
-            document.getElementById("novoClienteNome").value = "";
-            document.getElementById("novoClientePerfil").value = "pj";
-            document.getElementById("novoClienteEmail").value = "";
-            document.getElementById("novoClienteTelefone").value = "";
-            document.getElementById("modalNovoCliente").style.display = "flex"; 
+        function parseCSV(csvContent, banco) {
+            const linhas = csvContent.split('\n');
+            const lancamentos = [];
+            
+            for (let i = 0; i < linhas.length; i++) {
+                const linha = linhas[i].trim();
+                if (!linha) continue;
+                
+                const delimitador = banco.delimitador === '\\t' ? '\t' : (banco.delimitador || ',');
+                const colunas = linha.split(delimitador);
+                
+                const posData = isNaN(banco.posData) ? banco.posData.charCodeAt(0) - 65 : parseInt(banco.posData);
+                const posDesc = isNaN(banco.posDesc) ? banco.posDesc.charCodeAt(0) - 65 : parseInt(banco.posDesc);
+                const posValor = isNaN(banco.posValor) ? banco.posValor.charCodeAt(0) - 65 : parseInt(banco.posValor);
+                
+                const dataStr = colunas[posData]?.replace(/['"]/g, '').trim();
+                const descricao = colunas[posDesc]?.replace(/['"]/g, '').trim();
+                let valorStr = colunas[posValor]?.replace(/['"]/g, '').trim();
+                
+                if (!dataStr || !descricao || !valorStr) continue;
+                
+                let data = converterData(dataStr, banco.formatoData || 'dd/mm/yyyy');
+                if (!data) continue;
+                
+                valorStr = valorStr.replace(/\./g, '').replace(',', '.');
+                let valor = parseFloat(valorStr);
+                if (isNaN(valor)) continue;
+                
+                lancamentos.push({
+                    data: data,
+                    descricao: descricao,
+                    categoria: 'Outros',
+                    conta: banco.nome,
+                    tipo: valor < 0 ? 'saida' : 'entrada',
+                    valor: Math.abs(valor),
+                    obs: `Importado de ${banco.nome}`
+                });
+            }
+            return lancamentos;
         }
 
-        async function criarClienteFirebase() {
-            const nome = document.getElementById("novoClienteNome").value.trim();
-            if (!nome) {
-                mostrarErro("Digite o nome do cliente");
-                return;
+        function converterData(dataStr, formato) {
+            dataStr = dataStr.trim();
+            switch(formato) {
+                case 'dd/mm/yyyy':
+                    const partes = dataStr.split('/');
+                    if (partes.length === 3) return `${partes[2]}-${partes[1]}-${partes[0]}`;
+                    break;
+                case 'yyyy-mm-dd':
+                    return dataStr;
+                case 'dd-mm-yyyy':
+                    const partesDM = dataStr.split('-');
+                    if (partesDM.length === 3) return `${partesDM[2]}-${partesDM[1]}-${partesDM[0]}`;
+                    break;
             }
-
-            const novoCliente = {
-                nome: nome,
-                perfil: document.getElementById("novoClientePerfil").value,
-                status: "ativo",
-                dataCriacao: new Date().toISOString(),
-                appsAtivos: 1,
-                cor: "#4CAF50",
-                modoEscuro: "auto",
-                termoColaborador: "Motorista",
-                email: document.getElementById("novoClienteEmail").value || "",
-                telefone: document.getElementById("novoClienteTelefone").value || "",
-                criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            try {
-                await db.collection("clientes").add(novoCliente);
-                mostrarSucesso(`✅ Cliente "${nome}" criado!`);
-                fecharModalNovoCliente();
-            } catch (error) {
-                mostrarErro("Erro ao criar cliente: " + error.message);
-            }
-        }
-
-        function fecharModalNovoCliente() { 
-            document.getElementById("modalNovoCliente").style.display = "none"; 
+            return new Date().toISOString().split('T')[0];
         }
 
         // ============================================
-        // FUNÇÕES DE DIAGNÓSTICO CORRIGIDAS
+        // INICIALIZAÇÃO
         // ============================================
         
-        function diagnosticarConexao() {
-            document.getElementById('modalDiagnostico').style.display = 'flex';
-            executarDiagnosticoCompleto();
+        function getParametroUrl(nome) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(nome);
         }
 
-        async function executarDiagnosticoCompleto() {
-            const body = document.getElementById('diagnosticoBody');
-            body.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Executando diagnóstico...</div>';
+        window.onload = async function() {
+            clienteId = getParametroUrl('cliente');
+            const master = getParametroUrl('master');
             
+            modoMaster = master === 'true';
+            
+            if (!clienteId) {
+                mostrarErro('Cliente não especificado!');
+                document.getElementById('companyName').textContent = 'Erro: Cliente não especificado';
+                return;
+            }
+            
+            if (modoMaster) {
+                document.getElementById('masterBadge').style.display = 'block';
+                document.getElementById('masterPanel').style.display = 'block';
+            }
+            
+            await carregarDadosCliente();
+            await carregarConfiguracoes();
+            carregarLancamentos();
+            aplicarTema();
+        };
+
+        async function carregarDadosCliente() {
             try {
-                const resultados = [];
+                const clienteDoc = await db.collection('clientes').doc(clienteId).get();
                 
-                // Teste 1: Firebase inicializado
-                resultados.push({
-                    teste: "Firebase inicializado",
-                    status: !!firebase.apps.length,
-                    mensagem: !!firebase.apps.length ? "✅ OK" : "❌ Falha"
-                });
-                
-                // Teste 2: Conexão com Firestore
-                try {
-                    const testRef = db.collection('_teste').doc('teste');
-                    await testRef.set({ timestamp: new Date().toISOString() });
-                    await testRef.delete();
-                    resultados.push({
-                        teste: "Conexão com Firestore",
-                        status: true,
-                        mensagem: "✅ OK"
-                    });
-                } catch (e) {
-                    resultados.push({
-                        teste: "Conexão com Firestore",
-                        status: false,
-                        mensagem: "❌ Falha: " + e.message
-                    });
-                }
-                
-                // Teste 3: Leitura de clientes
-                try {
-                    const snapshot = await db.collection('clientes').limit(1).get();
-                    resultados.push({
-                        teste: "Leitura de clientes",
-                        status: true,
-                        mensagem: `✅ OK (${snapshot.size} documentos lidos)`
-                    });
-                } catch (e) {
-                    resultados.push({
-                        teste: "Leitura de clientes",
-                        status: false,
-                        mensagem: "❌ Falha: " + e.message
-                    });
-                }
-                
-                // Teste 4: Configuração do App Financeiro
-                resultados.push({
-                    teste: "Configuração do App Financeiro",
-                    status: !!(appFinanceiroConfig && appFinanceiroConfig.nomeArquivo),
-                    mensagem: appFinanceiroConfig?.nomeArquivo || "⚠️ Não configurado"
-                });
-                
-                // Teste 5: Cliente selecionado
-                resultados.push({
-                    teste: "Cliente selecionado",
-                    status: !!clienteAtual,
-                    mensagem: clienteAtual ? `✅ ${clienteAtual.nome || clienteAtual.id}` : "⚠️ Nenhum"
-                });
-                
-                // Teste 6: Configurações do cliente (LOCALSTORAGE)
-                if (clienteAtual) {
-                    try {
-                        const categorias = localStorage.getItem(`categorias_${clienteAtual.id}`);
-                        const contas = localStorage.getItem(`contas_${clienteAtual.id}`);
-                        const tipos = localStorage.getItem(`tipos_${clienteAtual.id}`);
-                        const bancos = localStorage.getItem(`bancos_${clienteAtual.id}`);
-                        
-                        const temConfig = !!(categorias || contas || tipos || bancos);
-                        
-                        if (temConfig) {
-                            let totalItens = 0;
-                            if (categorias) totalItens += JSON.parse(categorias).length;
-                            if (contas) totalItens += JSON.parse(contas).length;
-                            if (tipos) totalItens += JSON.parse(tipos).length;
-                            if (bancos) totalItens += JSON.parse(bancos).length;
-                            
-                            resultados.push({
-                                teste: "Configurações do cliente",
-                                status: true,
-                                mensagem: `✅ ${totalItens} itens configurados`
-                            });
-                        } else {
-                            resultados.push({
-                                teste: "Configurações do cliente",
-                                status: true,
-                                mensagem: "⚠️ Usando valores padrão (nada salvo ainda)"
-                            });
-                        }
-                    } catch (e) {
-                        resultados.push({
-                            teste: "Configurações do cliente",
-                            status: true,
-                            mensagem: "⚠️ Usando valores padrão"
-                        });
+                if (clienteDoc.exists) {
+                    clienteData = clienteDoc.data();
+                    document.getElementById('companyName').textContent = clienteData.nome || 'App Financeiro';
+                    
+                    if (clienteData.cor) {
+                        document.documentElement.style.setProperty('--primary', clienteData.cor);
+                    }
+                    
+                    if (clienteData.status === 'bloqueado' && !modoMaster) {
+                        mostrarErro('Cliente Bloqueado!');
+                        document.getElementById('companyName').textContent = '❌ CLIENTE BLOQUEADO';
+                        document.querySelectorAll('button').forEach(btn => btn.disabled = true);
                     }
                 } else {
-                    resultados.push({
-                        teste: "Configurações do cliente",
-                        status: false,
-                        mensagem: "⚠️ Selecione um cliente primeiro"
-                    });
+                    document.getElementById('companyName').textContent = 'Cliente não encontrado';
                 }
-                
-                // Montar HTML do resultado
-                let html = '<h3 style="margin-bottom: 15px;">📊 Resultados do Diagnóstico:</h3>';
-                html += '<table style="width: 100%; border-collapse: collapse;">';
-                
-                resultados.forEach(r => {
-                    let cor = 'var(--accent)';
-                    if (!r.status) cor = 'var(--danger)';
-                    else if (r.mensagem.includes('⚠️')) cor = 'var(--warning)';
-                    
-                    html += `
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 10px 0;">${r.teste}</td>
-                            <td style="padding: 10px 0; text-align: right;">
-                                <span style="color: ${cor};">${r.mensagem}</span>
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                html += '</table>';
-                
-                // Sugestões
-                html += '<h4 style="margin: 20px 0 10px;">💡 Sugestões:</h4><ul style="color: var(--text-secondary);">';
-                
-                if (!resultados[1].status) {
-                    html += '<li>Verifique as regras de segurança do Firebase</li>';
-                    html += '<li>Certifique-se de que o Firestore está ativado</li>';
-                }
-                
-                if (!resultados[3].status) {
-                    html += '<li>Configure o nome do arquivo do App Financeiro na aba "Apps"</li>';
-                }
-                
-                if (!resultados[4].status) {
-                    html += '<li>Selecione um cliente para ver suas configurações</li>';
-                }
-                
-                if (resultados[5] && resultados[5].mensagem.includes('valores padrão')) {
-                    html += '<li>As configurações usarão os valores padrão até você salvar algo</li>';
-                    html += '<li>Acesse a aba "⚙️ Config. App" para personalizar categorias, contas e tipos</li>';
-                    html += '<li>Acesse a aba "🏦 Bancos" para personalizar os bancos</li>';
-                }
-                
-                if (resultados.every(r => r.status || r.mensagem.includes('padrão'))) {
-                    html += '<li>Tudo funcionando corretamente! ✅</li>';
-                }
-                
-                html += '</ul>';
-                
-                body.innerHTML = html;
-                
             } catch (error) {
-                body.innerHTML = `<p style="color: var(--danger);">Erro durante diagnóstico: ${error.message}</p>`;
+                mostrarErro('Erro ao carregar dados');
             }
         }
 
-        function fecharModalDiagnostico() {
-            document.getElementById('modalDiagnostico').style.display = 'none';
+        function carregarLancamentos() {
+            if (!clienteId) return;
+
+            if (unsubscribeLancamentos) {
+                unsubscribeLancamentos();
+            }
+
+            unsubscribeLancamentos = db.collection('lancamentos')
+                .where('clienteId', '==', clienteId)
+                .orderBy('data', 'desc')
+                .onSnapshot((snapshot) => {
+                    lancamentos = [];
+                    snapshot.forEach(doc => {
+                        lancamentos.push({ id: doc.id, ...doc.data() });
+                    });
+                    aplicarFiltros();
+                    atualizarResumo();
+                    atualizarGraficos();
+                }, (error) => {
+                    mostrarErro('Erro ao carregar lançamentos');
+                });
         }
 
-        function fecharModalBanco() {
-            document.getElementById('modalBanco').style.display = 'none';
-        }
-
-        function mudarAba(aba, btnEl) {
-            document.querySelectorAll(".tab-content").forEach(el => el.style.display = "none");
+        function aplicarFiltros() {
+            const periodo = document.getElementById('filtroPeriodo')?.value || 'todos';
+            const tipo = document.getElementById('filtroTipo')?.value || 'todos';
+            const categoria = document.getElementById('filtroCategoria')?.value || 'todos';
+            const busca = document.getElementById('searchInput')?.value.toLowerCase() || '';
+            const ordenacao = document.getElementById('ordenacao')?.value || 'data_desc';
             
-            const idMap = { 
-                visual: "abaVisual", 
-                conteudo: "abaConteudo", 
-                funcoes: "abaFuncoes", 
-                dados: "abaDados", 
-                apps: "abaApps",
-                bancos: "abaBancos",
-                config_app: "abaConfigApp",
-                codigo: "abaCodigo", 
-                planos: "abaPlanos", 
-                backup: "abaBackup" 
-            };
+            let filtrados = [...lancamentos];
             
-            const abaElement = document.getElementById(idMap[aba]);
-            if (abaElement) {
-                abaElement.style.display = "block";
+            if (periodo !== 'todos') {
+                const hoje = new Date();
+                hoje.setHours(0, 0, 0, 0);
+                const inicio = new Date(hoje);
                 
-                if (aba === 'config_app' && clienteAtual) {
-                    carregarConfiguracoesCliente();
+                switch(periodo) {
+                    case 'hoje': break;
+                    case 'semana': inicio.setDate(hoje.getDate() - 7); break;
+                    case 'mes': inicio.setMonth(hoje.getMonth() - 1); break;
+                    case 'ano': inicio.setFullYear(hoje.getFullYear() - 1); break;
                 }
                 
-                if (aba === 'bancos' && clienteAtual) {
-                    carregarBancosCliente();
-                }
+                filtrados = filtrados.filter(l => {
+                    if (!l.data) return false;
+                    try {
+                        return new Date(l.data + 'T12:00:00') >= inicio;
+                    } catch { return false; }
+                });
             }
             
-            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-            if (btnEl) btnEl.classList.add("active");
+            if (tipo !== 'todos') filtrados = filtrados.filter(l => l.tipo === tipo);
+            if (categoria !== 'todos') filtrados = filtrados.filter(l => l.categoria === categoria);
+            
+            if (busca) {
+                filtrados = filtrados.filter(l => 
+                    (l.descricao?.toLowerCase() || '').includes(busca) ||
+                    (l.categoria?.toLowerCase() || '').includes(busca) ||
+                    (l.conta?.toLowerCase() || '').includes(busca)
+                );
+            }
+            
+            filtrados.sort((a, b) => {
+                switch(ordenacao) {
+                    case 'data_desc': return (b.data || '').localeCompare(a.data || '');
+                    case 'data_asc': return (a.data || '').localeCompare(b.data || '');
+                    case 'valor_desc': return (b.valor || 0) - (a.valor || 0);
+                    case 'valor_asc': return (a.valor || 0) - (b.valor || 0);
+                    default: return 0;
+                }
+            });
+            
+            lancamentosFiltrados = filtrados;
+            paginaAtual = 1;
+            atualizarTabela();
+            atualizarPaginacao();
         }
 
-        function filtrarClientes() { 
-            atualizarListaClientes(); 
-        }
-        
-        function mostrarAjuda() { 
-            alert(`🚀 MASTER APP v6.0\n\n✅ Firebase conectado\n✅ Clientes gerenciados\n✅ Bancos configuráveis\n✅ Categorias, Contas e Tipos\n✅ Diagnóstico corrigido\n✅ Salvamento local\n\nAcesse as abas para configurar:` +
-                `\n\n🏦 Bancos - Cadastre os bancos do cliente` +
-                `\n⚙️ Config. App - Categorias, contas e tipos` +
-                `\n📱 Apps - Configure o link do app financeiro`); 
+        function limparFiltros() {
+            document.getElementById('filtroPeriodo').value = 'todos';
+            document.getElementById('filtroTipo').value = 'todos';
+            document.getElementById('filtroCategoria').value = 'todos';
+            document.getElementById('searchInput').value = '';
+            document.getElementById('ordenacao').value = 'data_desc';
+            aplicarFiltros();
         }
 
-        function fecharModal() { 
-            document.getElementById("modalConfirm").style.display = "none"; 
-            acaoPendente = null; 
-        }
-
-        function testarLinkAppFinanceiro() {
-            if (!clienteAtual) {
-                mostrarErro('Selecione um cliente primeiro!');
+        function atualizarTabela() {
+            const tbody = document.getElementById('lancamentosBody');
+            
+            if (lancamentosFiltrados.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" style="text-align: center; padding: 40px;">
+                            <i class="fas fa-inbox fa-3x" style="opacity: 0.3; margin-bottom: 10px;"></i>
+                            <p>Nenhum lançamento</p>
+                            <button class="btn btn-primary btn-sm" onclick="abrirModalNovoLancamento()">
+                                <i class="fas fa-plus"></i> Novo Lançamento
+                            </button>
+                        </td>
+                    </tr>
+                `;
                 return;
             }
-
-            const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
             
-            document.getElementById('testeLinkMsg').innerHTML = `Testando link para: <strong>${clienteAtual.nome || 'Cliente'}</strong>`;
-            document.getElementById('testeLinkUrl').value = url;
+            const inicio = (paginaAtual - 1) * itensPorPagina;
+            const fim = inicio + itensPorPagina;
+            const lancamentosPagina = lancamentosFiltrados.slice(inicio, fim);
             
-            const statusEl = document.getElementById('testeLinkStatus');
-            statusEl.style.display = 'block';
-            statusEl.innerHTML = '🔄 Testando acesso...';
+            let html = '';
+            lancamentosPagina.forEach(l => {
+                const selecionado = selecionados.has(l.id);
+                const data = l.data ? formatarDataBR(l.data) : '-';
+                const valorClass = l.tipo === 'entrada' ? 'text-success' : 'text-danger';
+                const sinal = l.tipo === 'entrada' ? '' : '-';
+                
+                html += `
+                    <tr>
+                        <td>
+                            <div class="checkbox-wrapper">
+                                <div class="checkbox-custom ${selecionado ? 'checked' : ''}" 
+                                     onclick="toggleSelecionar('${l.id}')">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                            </div>
+                        </td>
+                        <td>${data}</td>
+                        <td>${l.descricao || '-'}</td>
+                        <td><span class="badge badge-info">${l.categoria || 'Outros'}</span></td>
+                        <td>${l.conta || '-'}</td>
+                        <td>${l.tipo === 'entrada' ? '📥 Entrada' : '📤 Saída'}</td>
+                        <td class="${valorClass}"><strong>${sinal} ${formatarMoedaBR(l.valor)}</strong></td>
+                        <td>
+                            <div class="row-actions">
+                                <button class="action-btn view" onclick="visualizarLancamento('${l.id}')">👁️</button>
+                                <button class="action-btn edit" onclick="editarLancamento('${l.id}')">✏️</button>
+                                <button class="action-btn delete" onclick="confirmarExcluirLancamento('${l.id}')">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
             
-            fetch(url, { method: 'HEAD', cache: 'no-cache' })
-                .then(response => {
-                    if (response.ok) {
-                        statusEl.innerHTML = '✅ Link acessível!';
-                        statusEl.style.background = 'rgba(76, 175, 80, 0.2)';
-                        statusEl.style.color = 'var(--accent)';
-                    } else {
-                        statusEl.innerHTML = '⚠️ Arquivo não encontrado. Verifique o nome e caminho.';
-                        statusEl.style.background = 'rgba(255, 193, 7, 0.2)';
-                        statusEl.style.color = 'var(--warning)';
-                    }
-                })
-                .catch(() => {
-                    statusEl.innerHTML = '❌ Não foi possível acessar o arquivo. Verifique o caminho.';
-                    statusEl.style.background = 'rgba(244, 67, 54, 0.2)';
-                    statusEl.style.color = 'var(--danger)';
-                });
-            
-            document.getElementById('modalTesteLink').style.display = 'flex';
+            tbody.innerHTML = html;
         }
 
-        function abrirLinkTeste() {
-            const url = document.getElementById('testeLinkUrl').value;
-            window.open(url, '_blank');
+        function atualizarPaginacao() {
+            const totalPaginas = Math.ceil(lancamentosFiltrados.length / itensPorPagina);
+            const paginacao = document.getElementById('paginacao');
+            
+            if (totalPaginas <= 1) {
+                paginacao.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            for (let i = 1; i <= totalPaginas; i++) {
+                html += `<span class="page-item ${i === paginaAtual ? 'active' : ''}" onclick="irParaPagina(${i})">${i}</span>`;
+            }
+            paginacao.innerHTML = html;
         }
 
-        function copiarLinkTeste() {
-            const url = document.getElementById('testeLinkUrl').value;
-            navigator.clipboard.writeText(url).then(() => {
-                mostrarSucesso('✅ Link copiado!');
-            }).catch(() => {
-                prompt('Copie o link manualmente:', url);
+        function irParaPagina(pagina) {
+            paginaAtual = pagina;
+            atualizarTabela();
+        }
+
+        function atualizarResumo() {
+            let saldo = 0, entradas = 0, saidas = 0;
+            
+            lancamentosFiltrados.forEach(l => {
+                const valor = l.valor || 0;
+                if (l.tipo === 'entrada') {
+                    saldo += valor;
+                    entradas += valor;
+                } else {
+                    saldo -= valor;
+                    saidas += valor;
+                }
+            });
+            
+            document.getElementById('saldoTotal').textContent = formatarMoedaBR(saldo);
+            document.getElementById('totalEntradas').textContent = formatarMoedaBR(entradas);
+            document.getElementById('totalSaidas').textContent = formatarMoedaBR(saidas);
+            document.getElementById('totalLancamentos').textContent = lancamentosFiltrados.length;
+        }
+
+        function atualizarGraficos() {
+            atualizarGraficoFluxo();
+            atualizarGraficoPizza();
+        }
+
+        function atualizarGraficoFluxo() {
+            const ctx = document.getElementById('graficoFluxo').getContext('2d');
+            
+            const meses = {};
+            lancamentos.forEach(l => {
+                try {
+                    if (!l.data) return;
+                    const data = new Date(l.data + 'T12:00:00');
+                    const mesAno = `${data.getMonth()+1}/${data.getFullYear()}`;
+                    if (!meses[mesAno]) meses[mesAno] = { entradas: 0, saidas: 0 };
+                    if (l.tipo === 'entrada') meses[mesAno].entradas += l.valor || 0;
+                    else meses[mesAno].saidas += l.valor || 0;
+                } catch (e) {}
+            });
+            
+            const labels = Object.keys(meses).sort((a, b) => {
+                const [mA, aA] = a.split('/');
+                const [mB, aB] = b.split('/');
+                return new Date(aA, mA-1) - new Date(aB, mB-1);
+            }).slice(-6);
+            
+            const entradasData = labels.map(m => meses[m].entradas);
+            const saidasData = labels.map(m => meses[m].saidas);
+            
+            if (graficoFluxo) graficoFluxo.destroy();
+            
+            graficoFluxo = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Entradas', data: entradasData, borderColor: '#4caf50', backgroundColor: 'rgba(76, 175, 80, 0.1)', tension: 0.4, fill: true },
+                        { label: 'Saídas', data: saidasData, borderColor: '#f44336', backgroundColor: 'rgba(244, 67, 54, 0.1)', tension: 0.4, fill: true }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { y: { beginAtZero: true, ticks: { callback: v => 'R$ ' + v } } }
+                }
             });
         }
 
-        function fecharModalTeste() {
-            document.getElementById('modalTesteLink').style.display = 'none';
+        function atualizarGraficoPizza() {
+            const ctx = document.getElementById('graficoPizza').getContext('2d');
+            
+            const categorias = {};
+            lancamentos.filter(l => l.tipo === 'saida').forEach(l => {
+                const cat = l.categoria || 'Outros';
+                if (!categorias[cat]) categorias[cat] = 0;
+                categorias[cat] += l.valor || 0;
+            });
+            
+            const labels = Object.keys(categorias);
+            const dados = Object.values(categorias);
+            
+            if (graficoPizza) graficoPizza.destroy();
+            if (labels.length === 0) return;
+            
+            graficoPizza = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: dados,
+                        backgroundColor: ['#4caf50','#2196f3','#ff9800','#f44336','#9c27b0','#00bcd4','#e91e63','#795548','#607d8b']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const label = context.label || '';
+                                    const value = context.raw || 0;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${label}: ${formatarMoedaBR(value)} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
-        function validarArquivoAppFinanceiro() {
-            const statusEl = document.getElementById('appFinanceiroStatus');
-            statusEl.innerHTML = '🔄 Validando...';
+        function toggleSelecionar(id) {
+            if (selecionados.has(id)) selecionados.delete(id);
+            else selecionados.add(id);
+            atualizarSelecao();
+        }
+
+        function toggleSelecionarTodos() {
+            if (selecionados.size === lancamentosFiltrados.length) selecionados.clear();
+            else lancamentosFiltrados.forEach(l => selecionados.add(l.id));
+            atualizarSelecao();
+        }
+
+        function atualizarSelecao() {
+            const selectAll = document.getElementById('selectAllCheckbox');
+            if (lancamentosFiltrados.length > 0) {
+                if (selecionados.size === lancamentosFiltrados.length) selectAll.classList.add('checked');
+                else selectAll.classList.remove('checked');
+            }
             
-            try {
-                const config = appFinanceiroConfig;
-                const url = config.caminho + config.nomeArquivo;
-                
-                fetch(url, { method: 'HEAD', cache: 'no-cache' })
-                    .then(response => {
-                        if (response.ok) {
-                            statusEl.innerHTML = '✅ Arquivo encontrado!';
-                            statusEl.style.color = 'var(--accent)';
-                        } else {
-                            statusEl.innerHTML = '⚠️ Arquivo não encontrado';
-                            statusEl.style.color = 'var(--warning)';
-                            document.getElementById('configWarning').style.display = 'block';
-                        }
-                    })
-                    .catch(() => {
-                        statusEl.innerHTML = '❌ Erro ao acessar arquivo';
-                        statusEl.style.color = 'var(--danger)';
-                        document.getElementById('configWarning').style.display = 'block';
-                    });
-            } catch (error) {
-                statusEl.innerHTML = '❌ Erro na validação';
-                statusEl.style.color = 'var(--danger)';
+            const selectionPanel = document.getElementById('selectionPanel');
+            if (selecionados.size > 0) {
+                selectionPanel.style.display = 'flex';
+                document.getElementById('selectedCount').textContent = selecionados.size;
+            } else {
+                selectionPanel.style.display = 'none';
+            }
+            atualizarTabela();
+        }
+
+        function limparSelecao() {
+            selecionados.clear();
+            atualizarSelecao();
+        }
+
+        function editarSelecionados() {
+            if (selecionados.size === 0) return;
+            if (selecionados.size === 1) {
+                const id = Array.from(selecionados)[0];
+                editarLancamento(id);
+            } else {
+                mostrarAviso('Selecione apenas um item');
             }
         }
 
-        function exportarClienteJSON() {
-            if (!clienteAtual) return;
+        function excluirSelecionados() {
+            if (selecionados.size === 0) return;
             
-            const dados = { 
-                cliente: clienteAtual, 
-                dataExportacao: new Date().toISOString(),
-                versao: "6.0"
+            document.getElementById('confirmMessage').textContent = `Excluir ${selecionados.size} lançamento(s)?`;
+            
+            window.confirmarExclusaoCallback = async () => {
+                try {
+                    const batch = db.batch();
+                    for (const id of selecionados) {
+                        batch.delete(db.collection('lancamentos').doc(id));
+                    }
+                    await batch.commit();
+                    
+                    selecionados.clear();
+                    fecharModalConfirm();
+                    mostrarSucesso('✅ Itens excluídos!');
+                } catch (error) {
+                    mostrarErro('Erro ao excluir');
+                }
             };
             
-            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = `cliente_${clienteAtual.nome || clienteAtual.id}_${new Date().toISOString().slice(0, 10)}.json`;
-            a.click();
+            document.getElementById('confirmActionBtn').onclick = window.confirmarExclusaoCallback;
+            document.getElementById('modalConfirm').style.display = 'flex';
+        }
+
+        function abrirModalNovoLancamento() {
+            document.getElementById('lancamentoId').value = '';
+            document.getElementById('lancamentoData').value = new Date().toISOString().split('T')[0];
+            document.getElementById('lancamentoDescricao').value = '';
+            document.getElementById('lancamentoCategoria').value = categorias[0]?.nome || 'Outros';
+            document.getElementById('lancamentoConta').value = contas[0]?.nome || 'Carteira';
+            document.getElementById('lancamentoTipo').value = 'entrada';
+            document.getElementById('lancamentoValor').value = '';
+            document.getElementById('lancamentoObs').value = '';
             
-            mostrarSucesso("📦 Backup exportado!");
+            document.getElementById('modalLancamentoTitulo').textContent = 'Novo Lançamento';
+            document.getElementById('modalLancamento').style.display = 'flex';
         }
 
-        function exportarClienteCompleto() {
-            exportarClienteJSON();
+        function editarLancamento(id) {
+            const lancamento = lancamentos.find(l => l.id === id);
+            if (!lancamento) return;
+            
+            document.getElementById('lancamentoId').value = lancamento.id;
+            document.getElementById('lancamentoData').value = lancamento.data || new Date().toISOString().split('T')[0];
+            document.getElementById('lancamentoDescricao').value = lancamento.descricao || '';
+            document.getElementById('lancamentoCategoria').value = lancamento.categoria || 'Outros';
+            document.getElementById('lancamentoConta').value = lancamento.conta || 'Carteira';
+            document.getElementById('lancamentoTipo').value = lancamento.tipo || 'entrada';
+            document.getElementById('lancamentoValor').value = lancamento.valor ? lancamento.valor.toFixed(2).replace('.', ',') : '';
+            document.getElementById('lancamentoObs').value = lancamento.obs || '';
+            
+            document.getElementById('modalLancamentoTitulo').textContent = 'Editar Lançamento';
+            document.getElementById('modalLancamento').style.display = 'flex';
         }
 
-        function importarBackup() {
+        function visualizarLancamento(id) {
+            const lancamento = lancamentos.find(l => l.id === id);
+            if (!lancamento) return;
+            
+            const data = lancamento.data ? formatarDataBR(lancamento.data) : '-';
+            const valor = formatarMoedaBR(lancamento.valor);
+            const tipo = lancamento.tipo === 'entrada' ? '📥 Entrada' : '📤 Saída';
+            const tipoClass = lancamento.tipo === 'entrada' ? 'text-success' : 'text-danger';
+            
+            const html = `
+                <div>
+                    <h3>${lancamento.descricao || 'Sem descrição'}</h3>
+                    <p><strong>Data:</strong> ${data}</p>
+                    <p><strong>Categoria:</strong> ${lancamento.categoria || 'Outros'}</p>
+                    <p><strong>Conta:</strong> ${lancamento.conta || '-'}</p>
+                    <p><strong>Tipo:</strong> <span class="${tipoClass}">${tipo}</span></p>
+                    <p><strong>Valor:</strong> <span class="${tipoClass}">${valor}</span></p>
+                    ${lancamento.obs ? `<p><strong>Obs:</strong> ${lancamento.obs}</p>` : ''}
+                </div>
+            `;
+            
+            document.getElementById('viewLancamentoBody').innerHTML = html;
+            document.getElementById('modalViewLancamento').style.display = 'flex';
+        }
+
+        async function salvarLancamento() {
+            const id = document.getElementById('lancamentoId').value;
+            const data = document.getElementById('lancamentoData').value;
+            const descricao = document.getElementById('lancamentoDescricao').value.trim();
+            const categoria = document.getElementById('lancamentoCategoria').value;
+            const conta = document.getElementById('lancamentoConta').value;
+            const tipo = document.getElementById('lancamentoTipo').value;
+            const valorStr = document.getElementById('lancamentoValor').value;
+            const obs = document.getElementById('lancamentoObs').value;
+            
+            if (!data || !descricao || !valorStr) {
+                mostrarAviso('Preencha todos os campos!');
+                return;
+            }
+            
+            const valor = parseMoedaBR(valorStr);
+            if (valor <= 0) {
+                mostrarAviso('Valor deve ser maior que zero!');
+                return;
+            }
+            
+            const lancamento = {
+                clienteId, data, descricao, categoria, conta, tipo, valor, obs,
+                atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            try {
+                if (id) {
+                    await db.collection('lancamentos').doc(id).update(lancamento);
+                    mostrarSucesso('✅ Lançamento atualizado!');
+                } else {
+                    lancamento.criadoEm = firebase.firestore.FieldValue.serverTimestamp();
+                    await db.collection('lancamentos').add(lancamento);
+                    mostrarSucesso('✅ Lançamento criado!');
+                }
+                fecharModalLancamento();
+                limparSelecao();
+            } catch (error) {
+                mostrarErro('Erro ao salvar');
+            }
+        }
+
+        function confirmarExcluirLancamento(id) {
+            document.getElementById('confirmMessage').textContent = 'Excluir este lançamento?';
+            window.confirmarExclusaoCallback = async () => {
+                try {
+                    await db.collection('lancamentos').doc(id).delete();
+                    fecharModalConfirm();
+                    mostrarSucesso('✅ Lançamento excluído!');
+                } catch (error) {
+                    mostrarErro('Erro ao excluir');
+                }
+            };
+            document.getElementById('confirmActionBtn').onclick = window.confirmarExclusaoCallback;
+            document.getElementById('modalConfirm').style.display = 'flex';
+        }
+
+        function exportarPDF() {
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFontSize(18);
+                doc.text('Relatório Financeiro', 14, 22);
+                doc.setFontSize(11);
+                doc.text(`Cliente: ${document.getElementById('companyName').textContent}`, 14, 32);
+                doc.text(`Data: ${new Date().toLocaleDateString('pt-BR')}`, 14, 38);
+                
+                doc.setFontSize(12);
+                doc.text('Resumo', 14, 48);
+                doc.setFontSize(10);
+                doc.text(`Saldo: ${document.getElementById('saldoTotal').textContent}`, 14, 56);
+                doc.text(`Entradas: ${document.getElementById('totalEntradas').textContent}`, 14, 62);
+                doc.text(`Saídas: ${document.getElementById('totalSaidas').textContent}`, 14, 68);
+                
+                const tableColumn = ['Data', 'Descrição', 'Categoria', 'Tipo', 'Valor'];
+                const tableRows = [];
+                
+                lancamentosFiltrados.slice(0, 50).forEach(l => {
+                    tableRows.push([
+                        l.data ? new Date(l.data + 'T12:00:00').toLocaleDateString('pt-BR') : '-',
+                        l.descricao || '-',
+                        l.categoria || '-',
+                        l.tipo === 'entrada' ? 'Entrada' : 'Saída',
+                        formatarMoedaBR(l.valor)
+                    ]);
+                });
+                
+                doc.autoTable({ head: [tableColumn], body: tableRows, startY: 80 });
+                doc.save(`relatorio_${new Date().toISOString().slice(0,10)}.pdf`);
+                mostrarSucesso('✅ PDF exportado!');
+            } catch (error) {
+                mostrarErro('Erro ao exportar PDF');
+            }
+        }
+
+        function exportarExcel() {
+            try {
+                const dados = lancamentosFiltrados.map(l => ({
+                    Data: l.data ? new Date(l.data + 'T12:00:00').toLocaleDateString('pt-BR') : '-',
+                    Descrição: l.descricao || '-',
+                    Categoria: l.categoria || '-',
+                    Conta: l.conta || '-',
+                    Tipo: l.tipo === 'entrada' ? 'Entrada' : 'Saída',
+                    Valor: l.valor || 0
+                }));
+                
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(dados);
+                XLSX.utils.book_append_sheet(wb, ws, 'Lançamentos');
+                XLSX.writeFile(wb, `lancamentos_${new Date().toISOString().slice(0,10)}.xlsx`);
+                mostrarSucesso('✅ Excel exportado!');
+            } catch (error) {
+                mostrarErro('Erro ao exportar Excel');
+            }
+        }
+
+        function exportarCSV() {
+            try {
+                const dados = lancamentosFiltrados.map(l => ({
+                    Data: l.data || '-',
+                    Descrição: l.descricao || '-',
+                    Categoria: l.categoria || '-',
+                    Conta: l.conta || '-',
+                    Tipo: l.tipo || '-',
+                    Valor: l.valor || 0
+                }));
+                
+                const ws = XLSX.utils.json_to_sheet(dados);
+                const csv = XLSX.utils.sheet_to_csv(ws);
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `lancamentos_${new Date().toISOString().slice(0,10)}.csv`;
+                a.click();
+                mostrarSucesso('✅ CSV exportado!');
+            } catch (error) {
+                mostrarErro('Erro ao exportar CSV');
+            }
+        }
+
+        function gerarRelatorioMensal() {
+            const hoje = new Date();
+            const mes = hoje.getMonth();
+            const ano = hoje.getFullYear();
+            
+            const lancamentosMes = lancamentos.filter(l => {
+                try {
+                    if (!l.data) return false;
+                    const data = new Date(l.data + 'T12:00:00');
+                    return data.getMonth() === mes && data.getFullYear() === ano;
+                } catch { return false; }
+            });
+            
+            let entradas = 0, saidas = 0;
+            lancamentosMes.forEach(l => {
+                if (l.tipo === 'entrada') entradas += l.valor;
+                else saidas += l.valor;
+            });
+            
+            let html = `
+                <h3>Relatório Mensal</h3>
+                <p>Total: ${lancamentosMes.length}</p>
+                <p>Entradas: R$ ${entradas.toFixed(2)}</p>
+                <p>Saídas: R$ ${saidas.toFixed(2)}</p>
+                <p>Saldo: R$ ${(entradas - saidas).toFixed(2)}</p>
+            `;
+            
+            document.getElementById('relatorioBody').innerHTML = html;
+            document.getElementById('modalRelatorioTitulo').textContent = '📅 Relatório Mensal';
+            document.getElementById('modalRelatorio').style.display = 'flex';
+        }
+
+        function gerarRelatorioAnual() {
+            const hoje = new Date();
+            const ano = hoje.getFullYear();
+            
+            const lancamentosAno = lancamentos.filter(l => {
+                try {
+                    if (!l.data) return false;
+                    return new Date(l.data + 'T12:00:00').getFullYear() === ano;
+                } catch { return false; }
+            });
+            
+            let html = `<h3>Relatório Anual ${ano}</h3>`;
+            html += `<p>Total de lançamentos: ${lancamentosAno.length}</p>`;
+            
+            document.getElementById('relatorioBody').innerHTML = html;
+            document.getElementById('modalRelatorioTitulo').textContent = '📆 Relatório Anual';
+            document.getElementById('modalRelatorio').style.display = 'flex';
+        }
+
+        function gerarRelatorioCategorias() {
+            const cats = {};
+            lancamentos.forEach(l => {
+                const cat = l.categoria || 'Outros';
+                if (!cats[cat]) cats[cat] = { entradas:0, saidas:0 };
+                if (l.tipo === 'entrada') cats[cat].entradas += l.valor;
+                else cats[cat].saidas += l.valor;
+            });
+            
+            let html = '<h3>Por Categoria</h3>';
+            Object.entries(cats).forEach(([cat, v]) => {
+                html += `<p><b>${cat}:</b> R$ ${(v.entradas - v.saidas).toFixed(2)}</p>`;
+            });
+            
+            document.getElementById('relatorioBody').innerHTML = html;
+            document.getElementById('modalRelatorioTitulo').textContent = '📊 Por Categoria';
+            document.getElementById('modalRelatorio').style.display = 'flex';
+        }
+
+        function gerarRelatorioContas() {
+            const contas = {};
+            lancamentos.forEach(l => {
+                const conta = l.conta || 'Carteira';
+                if (!contas[conta]) contas[conta] = 0;
+                if (l.tipo === 'entrada') contas[conta] += l.valor;
+                else contas[conta] -= l.valor;
+            });
+            
+            let html = '<h3>Por Conta</h3>';
+            Object.entries(contas).forEach(([conta, saldo]) => {
+                html += `<p><b>${conta}:</b> R$ ${saldo.toFixed(2)}</p>`;
+            });
+            
+            document.getElementById('relatorioBody').innerHTML = html;
+            document.getElementById('modalRelatorioTitulo').textContent = '🏦 Por Conta';
+            document.getElementById('modalRelatorio').style.display = 'flex';
+        }
+
+        function backupDados() {
+            const dados = { cliente: clienteData, lancamentos, dataBackup: new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = `backup_${clienteId}_${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            mostrarSucesso('✅ Backup exportado!');
+        }
+
+        function restaurarBackup() {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = '.json';
             
             input.onchange = async (e) => {
                 const file = e.target.files[0];
-                if (!file) return;
-                
                 const reader = new FileReader();
+                
                 reader.onload = async (e) => {
                     try {
                         const dados = JSON.parse(e.target.result);
-                        
-                        if (!dados.cliente || !dados.cliente.id) {
-                            mostrarErro("Arquivo de backup inválido!");
-                            return;
-                        }
-                        
-                        if (confirm(`Deseja restaurar o backup do cliente "${dados.cliente.nome}"?\n\nIsso substituirá os dados atuais!`)) {
-                            await db.collection("clientes").doc(dados.cliente.id).set(dados.cliente);
-                            mostrarSucesso("✅ Backup restaurado!");
-                        }
-                        
+                        mostrarSucesso('Backup restaurado (simulação)');
                     } catch (error) {
-                        mostrarErro("Erro ao importar backup: " + error.message);
+                        mostrarErro('Arquivo inválido');
                     }
                 };
                 reader.readAsText(file);
             };
-            
             input.click();
         }
 
-        function restaurarVersaoAnterior() {
-            alert("Use Exportar/Importar backup");
+        function exportarRelatorioPDF() { exportarPDF(); }
+        function fecharModalRelatorio() { document.getElementById('modalRelatorio').style.display = 'none'; }
+
+        function alternarTema() {
+            const tema = document.documentElement.getAttribute('data-theme');
+            if (tema === 'dark') document.documentElement.removeAttribute('data-theme');
+            else document.documentElement.setAttribute('data-theme', 'dark');
         }
 
-        window.onload = function() {
-            carregarConfigAppFinanceiro();
-            carregarClientes();
-            
-            document.getElementById("corPrincipal").addEventListener("input", function(e) {
-                document.getElementById("corHex").value = e.target.value;
-                atualizarPreview();
-            });
-            
-            document.getElementById("corHex").addEventListener("input", function(e) {
-                document.getElementById("corPrincipal").value = e.target.value;
-                atualizarPreview();
-            });
+        function aplicarTema() {
+            if (clienteData?.modoEscuro === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        }
 
-            document.getElementById("bancoCor").addEventListener("input", function(e) {
-                document.getElementById("bancoCorHex").value = e.target.value;
-            });
-            
-            document.getElementById("bancoCorHex").addEventListener("input", function(e) {
-                document.getElementById("bancoCor").value = e.target.value;
-            });
+        function editarConfigCliente() { window.open(`master_app.html?cliente=${clienteId}&modo=edicao&master=true`, '_blank'); }
+        
+        async function bloquearCliente() {
+            if (confirm('Bloquear este cliente?')) {
+                try {
+                    await db.collection('clientes').doc(clienteId).update({ status: 'bloqueado' });
+                    mostrarSucesso('Cliente bloqueado!');
+                } catch (error) { mostrarErro('Erro ao bloquear'); }
+            }
+        }
+        
+        function verComoMaster() { window.location.href = `appfinanceiro.html?cliente=${clienteId}&master=true`; }
 
-            setTimeout(() => {
-                if (!localStorage.getItem('appFinanceiroConfig')) {
-                    document.getElementById('configWarning').style.display = 'block';
-                }
-            }, 2000);
-            
-            adicionarLog("🚀 Sistema iniciado - v6.0 com Bancos");
-        };
+        function fecharModalLancamento() { document.getElementById('modalLancamento').style.display = 'none'; }
+        function fecharModalView() { document.getElementById('modalViewLancamento').style.display = 'none'; }
+        function fecharModalConfirm() { document.getElementById('modalConfirm').style.display = 'none'; }
+        function fecharModalImport() { document.getElementById('modalImport').style.display = 'none'; }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                fecharModalLancamento();
+                fecharModalView();
+                fecharModalConfirm();
+                fecharModalImport();
+                fecharModalRelatorio();
+            }
+        });
     </script>
 </body>
 </html>
