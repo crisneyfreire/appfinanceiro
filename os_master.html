@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👑 MASTER OS - Controle de Serviços</title>
+    
+    <link rel="manifest" href="manifest_os_master.json">
+    <meta name="theme-color" content="#4CAF50">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #45a049;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --info: #2196F3;
+            --nova: #2196F3;
+            --aceita: #FF9800;
+            --execucao: #4CAF50;
+            --concluida: #9C27B0;
+            --cancelada: #f44336;
+            --bg: #1a1a2e;
+            --card: #2a2a40;
+            --text: #ffffff;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .status-bar {
+            display: flex;
+            gap: 15px;
+        }
+
+        .status-item {
+            background: rgba(255,255,255,0.1);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        .notification-area {
+            background: var(--danger);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .filtros {
+            background: var(--card);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .filtro-btn {
+            padding: 8px 15px;
+            border: 1px solid #404040;
+            border-radius: 20px;
+            background: transparent;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filtro-btn:hover {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .filtro-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .clientes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .cliente-card {
+            background: var(--card);
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .cliente-nome {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+        .cliente-contato {
+            font-size: 12px;
+            color: #b0b0b0;
+            margin-bottom: 10px;
+        }
+
+        .cliente-stats {
+            display: flex;
+            gap: 10px;
+            font-size: 11px;
+        }
+
+        .os-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .os-card {
+            background: var(--card);
+            border-radius: 15px;
+            padding: 20px;
+            border-left: 4px solid;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .os-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .os-card.nova { border-left-color: var(--nova); }
+        .os-card.aceita { border-left-color: var(--aceita); }
+        .os-card.em_execucao { border-left-color: var(--execucao); }
+        .os-card.concluida { border-left-color: var(--concluida); }
+        .os-card.cancelada { border-left-color: var(--cancelada); opacity: 0.6; }
+
+        .os-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .os-cliente {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .os-status {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .os-prioridade {
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-left: 5px;
+        }
+
+        .os-prioridade.urgente {
+            background: var(--danger);
+            color: white;
+        }
+
+        .os-prioridade.normal {
+            background: var(--info);
+            color: white;
+        }
+
+        .os-titulo {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .os-descricao {
+            color: #b0b0b0;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .os-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            color: #888;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .status-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        .status-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 100px;
+        }
+
+        .btn-nova { background: var(--nova); color: white; }
+        .btn-aceita { background: var(--aceita); color: white; }
+        .btn-execucao { background: var(--execucao); color: white; }
+        .btn-concluida { background: var(--concluida); color: white; }
+        .btn-cancelada { background: var(--cancelada); color: white; }
+
+        .fotos-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .foto-item {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .foto-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .timeline {
+            margin: 20px 0;
+            padding-left: 20px;
+            border-left: 2px solid #404040;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 15px;
+            padding-left: 20px;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -26px;
+            top: 0;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary);
+        }
+
+        .timeline-date {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .arquivo-upload {
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed var(--primary);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--primary);
+        }
+
+        .loading-spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        #notificacaoSom {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <audio id="notificacaoSom" preload="auto">
+        <source src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4LjI5LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAADIABvb3RzHR4AAAAAAAAAAAAAAAAAAAAAAQADe3t7AAAAAEpSQ09ERQAAAEEAAAMgMDVhY2U4ZDU4MDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMAAA//sQZAAP8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//sQZAAP8AAAGkAAAAIAAANIAAAASAAAAaQAAAAgAAA0gAAABFXhpZmVNyysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrKysrK//sQZAAP8AAAGkAAAAIAAANIAAAASAAAAaQAAAAgAAA0gAAABVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV" type="audio/mp3">
+    </audio>
+
+    <div class="container">
+        <div class="header">
+            <h1>
+                <span>👑 MASTER OS</span>
+                <span style="font-size: 14px; background: var(--primary); padding: 3px 10px; border-radius: 20px;">Controle de Serviços</span>
+            </h1>
+            <div class="status-bar">
+                <span class="status-item" id="totalClientes">👥 Clientes: 0</span>
+                <span class="status-item" id="totalOS">📋 Total: 0</span>
+                <span class="status-item" id="novasOS">🆕 Novas: 0</span>
+                <span class="status-item" id="execucaoOS">⚙️ Execução: 0</span>
+            </div>
+        </div>
+
+        <div class="notification-area" id="notificationArea">
+            <span id="notificationMsg">🔔 Nova ordem de serviço!</span>
+            <button style="background: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;" onclick="esconderNotificacao()">OK</button>
+        </div>
+
+        <div class="filtros">
+            <button class="filtro-btn active" onclick="filtrarOS('todas')">📋 Todas</button>
+            <button class="filtro-btn" onclick="filtrarOS('nova')">🆕 Novas</button>
+            <button class="filtro-btn" onclick="filtrarOS('aceita')">✅ Aceitas</button>
+            <button class="filtro-btn" onclick="filtrarOS('em_execucao')">⚙️ Em Execução</button>
+            <button class="filtro-btn" onclick="filtrarOS('concluida')">🎉 Concluídas</button>
+            <button class="filtro-btn" onclick="filtrarOS('urgente')">⚡ Urgentes</button>
+        </div>
+
+        <h3>👥 Meus Clientes</h3>
+        <div class="clientes-grid" id="clientesGrid"></div>
+
+        <h3>📋 Ordens de Serviço</h3>
+        <div class="os-grid" id="osGrid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                Carregando ordens...
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="modalOS">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitulo">Detalhes da OS</h2>
+                <button class="modal-close" onclick="fecharModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="modalFoto" onclick="this.style.display='none'">
+        <img id="fotoAmpliada" style="max-width: 90%; max-height: 90%; border-radius: 10px;">
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
+            authDomain: "painelmastercomplet.firebaseapp.com",
+            projectId: "painelmastercomplet",
+            storageBucket: "painelmastercomplet.firebasestorage.app",
+            messagingSenderId: "87580974705",
+            appId: "1:87580974705:web:bd17f8609687f25ee4c5d0"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        const MEU_ID = 'prestador_principal';
+        let ordens = [];
+        let filtroAtual = 'todas';
+        let notificacaoVisivel = false;
+
+        window.onload = function() {
+            carregarClientes();
+            carregarOrdens();
+        };
+
+        function carregarClientes() {
+            db.collection('clientes_os')
+                .where('prestadorId', '==', MEU_ID)
+                .onSnapshot(snapshot => {
+                    const clientes = [];
+                    snapshot.forEach(doc => {
+                        clientes.push({ id: doc.id, ...doc.data() });
+                    });
+                    
+                    renderizarClientes(clientes);
+                    document.getElementById('totalClientes').innerHTML = `👥 Clientes: ${clientes.length}`;
+                });
+        }
+
+        function renderizarClientes(clientes) {
+            const grid = document.getElementById('clientesGrid');
+            
+            if (clientes.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #888;">Nenhum cliente cadastrado</div>';
+                return;
+            }
+
+            let html = '';
+            clientes.forEach(c => {
+                html += `
+                    <div class="cliente-card">
+                        <div class="cliente-nome">${c.nome}</div>
+                        <div class="cliente-contato">${c.email} | ${c.telefone || 'Sem telefone'}</div>
+                        <div class="cliente-stats">
+                            <span>📅 ${new Date(c.dataCadastro).toLocaleDateString()}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            grid.innerHTML = html;
+        }
+
+        function carregarOrdens() {
+            db.collection('ordens_servico')
+                .where('prestadorId', '==', MEU_ID)
+                .orderBy('criadoEm', 'desc')
+                .onSnapshot(snapshot => {
+                    const novasOrdens = [];
+                    snapshot.docChanges().forEach(change => {
+                        if (change.type === 'added') {
+                            const os = { id: change.doc.id, ...change.doc.data() };
+                            novasOrdens.push(os);
+                            
+                            if (os.status === 'nova' && !notificacaoVisivel) {
+                                notificarNovaOS(os);
+                            }
+                        }
+                    });
+
+                    ordens = [];
+                    snapshot.forEach(doc => {
+                        ordens.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    atualizarEstatisticas();
+                    renderizarOrdens();
+                });
+        }
+
+        function notificarNovaOS(os) {
+            notificacaoVisivel = true;
+            document.getElementById('notificationMsg').innerHTML = `🔔 Nova OS: ${os.titulo}`;
+            document.getElementById('notificationArea').style.display = 'flex';
+            document.getElementById('notificacaoSom').play().catch(() => {});
+        }
+
+        function esconderNotificacao() {
+            document.getElementById('notificationArea').style.display = 'none';
+            notificacaoVisivel = false;
+        }
+
+        function renderizarOrdens() {
+            const grid = document.getElementById('osGrid');
+            
+            let ordensFiltradas = ordens;
+            if (filtroAtual !== 'todas') {
+                if (filtroAtual === 'urgente') {
+                    ordensFiltradas = ordens.filter(o => o.prioridade === 'urgente');
+                } else {
+                    ordensFiltradas = ordens.filter(o => o.status === filtroAtual);
+                }
+            }
+
+            if (ordensFiltradas.length === 0) {
+                grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #888;">📭 Nenhuma ordem encontrada</div>';
+                return;
+            }
+
+            let html = '';
+            ordensFiltradas.forEach(os => {
+                const data = new Date(os.criadoEm).toLocaleString('pt-BR');
+                
+                html += `
+                    <div class="os-card ${os.status}" onclick="abrirOS('${os.id}')">
+                        <div class="os-header">
+                            <span class="os-cliente">👤 ${os.clienteId?.substring(0, 8)}</span>
+                            <span>
+                                <span class="os-status" style="background: ${getStatusColor(os.status)}">${getStatusTexto(os.status)}</span>
+                                <span class="os-prioridade ${os.prioridade}">${os.prioridade === 'urgente' ? '⚡' : '📋'}</span>
+                            </span>
+                        </div>
+                        <div class="os-titulo">${os.titulo}</div>
+                        <div class="os-descricao">${os.descricao?.substring(0, 100)}${os.descricao?.length > 100 ? '...' : ''}</div>
+                        <div class="os-footer">
+                            <span>📅 ${data}</span>
+                            <span>${os.anexos?.length || 0} 📷</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            grid.innerHTML = html;
+        }
+
+        function getStatusColor(status) {
+            const map = {
+                'nova': '#2196F3',
+                'aceita': '#FF9800',
+                'em_execucao': '#4CAF50',
+                'concluida': '#9C27B0',
+                'cancelada': '#f44336'
+            };
+            return map[status] || '#888';
+        }
+
+        function getStatusTexto(status) {
+            const map = {
+                'nova': 'Nova',
+                'aceita': 'Aceita',
+                'em_execucao': 'Execução',
+                'concluida': 'Concluída',
+                'cancelada': 'Cancelada'
+            };
+            return map[status] || status;
+        }
+
+        function atualizarEstatisticas() {
+            const total = ordens.length;
+            const novas = ordens.filter(o => o.status === 'nova').length;
+            const execucao = ordens.filter(o => o.status === 'em_execucao').length;
+
+            document.getElementById('totalOS').innerHTML = `📋 Total: ${total}`;
+            document.getElementById('novasOS').innerHTML = `🆕 Novas: ${novas}`;
+            document.getElementById('execucaoOS').innerHTML = `⚙️ Execução: ${execucao}`;
+        }
+
+        function filtrarOS(filtro) {
+            filtroAtual = filtro;
+            document.querySelectorAll('.filtro-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderizarOrdens();
+        }
+
+        async function abrirOS(osId) {
+            const os = ordens.find(o => o.id === osId);
+            if (!os) return;
+
+            let clienteNome = 'Cliente';
+            try {
+                const clienteDoc = await db.collection('clientes_os').doc(os.clienteId).get();
+                if (clienteDoc.exists) {
+                    clienteNome = clienteDoc.data().nome;
+                }
+            } catch (e) {}
+
+            const eventosSnapshot = await db.collection('ordens_servico').doc(osId)
+                .collection('eventos')
+                .orderBy('quando', 'desc')
+                .get();
+
+            const eventos = [];
+            eventosSnapshot.forEach(doc => eventos.push(doc.data()));
+
+            const dataCriacao = new Date(os.criadoEm).toLocaleString('pt-BR');
+            
+            let fotosHtml = '';
+            if (os.anexos && os.anexos.length > 0) {
+                fotosHtml = '<div style="margin: 20px 0;"><h4>📷 Fotos</h4><div class="fotos-grid">';
+                os.anexos.forEach(url => {
+                    fotosHtml += `
+                        <div class="foto-item" onclick="abrirFoto('${url}'); event.stopPropagation()">
+                            <img src="${url}">
+                        </div>
+                    `;
+                });
+                fotosHtml += '</div></div>';
+            }
+
+            let eventosHtml = '<div style="margin: 20px 0;"><h4>📋 Histórico</h4><div class="timeline">';
+            eventos.forEach(ev => {
+                const data = new Date(ev.quando).toLocaleString('pt-BR');
+                eventosHtml += `
+                    <div class="timeline-item">
+                        <div class="timeline-date">${data}</div>
+                        <div class="timeline-text">${ev.texto}</div>
+                    </div>
+                `;
+            });
+            eventosHtml += '</div></div>';
+
+            let arquivoUploadHtml = '';
+            if (os.status === 'em_execucao') {
+                arquivoUploadHtml = `
+                    <div class="arquivo-upload" onclick="document.getElementById('arquivoEntrega').click()">
+                        <span style="font-size: 40px;">📎</span>
+                        <p>Clique para fazer upload do arquivo final</p>
+                    </div>
+                    <input type="file" id="arquivoEntrega" style="display: none;" onchange="entregarArquivo('${os.id}', this)">
+                `;
+            }
+
+            let arquivoFinalHtml = '';
+            if (os.arquivoEntrega) {
+                arquivoFinalHtml = `
+                    <div style="margin: 15px 0; padding: 15px; background: #1a472a; border-radius: 8px;">
+                        <strong>✅ Arquivo entregue:</strong>
+                        <a href="${os.arquivoEntrega}" target="_blank" style="display: block; margin-top: 10px; color: var(--primary);">📎 Baixar arquivo</a>
+                    </div>
+                `;
+            }
+
+            document.getElementById('modalBody').innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h3>${os.titulo}</h3>
+                    <p><strong>Cliente:</strong> ${clienteNome}</p>
+                    <p><strong>Prioridade:</strong> ${os.prioridade === 'urgente' ? '⚡ Urgente' : '📋 Normal'}</p>
+                    <p><strong>Criado em:</strong> ${dataCriacao}</p>
+                </div>
+
+                <div style="background: #1a1a2e; padding: 15px; border-radius: 10px; margin-bottom: 20px;">
+                    <h4>📝 Descrição</h4>
+                    <p>${os.descricao}</p>
+                </div>
+
+                <div style="margin: 20px 0;">
+                    <h4>📌 Alterar Status</h4>
+                    <div class="status-actions">
+                        <button class="status-btn btn-nova" onclick="alterarStatus('${os.id}', 'nova')" ${os.status === 'nova' ? 'disabled' : ''}>🆕 Nova</button>
+                        <button class="status-btn btn-aceita" onclick="alterarStatus('${os.id}', 'aceita')" ${os.status === 'aceita' ? 'disabled' : ''}>✅ Aceitar</button>
+                        <button class="status-btn btn-execucao" onclick="alterarStatus('${os.id}', 'em_execucao')" ${os.status === 'em_execucao' ? 'disabled' : ''}>⚙️ Executar</button>
+                        <button class="status-btn btn-concluida" onclick="alterarStatus('${os.id}', 'concluida')" ${os.status === 'concluida' ? 'disabled' : ''}>🎉 Concluir</button>
+                        <button class="status-btn btn-cancelada" onclick="alterarStatus('${os.id}', 'cancelada')" ${os.status === 'cancelada' ? 'disabled' : ''}>❌ Cancelar</button>
+                    </div>
+                </div>
+
+                ${arquivoFinalHtml}
+                ${arquivoUploadHtml}
+                ${fotosHtml}
+                ${eventosHtml}
+            `;
+
+            document.getElementById('modalOS').style.display = 'flex';
+        }
+
+        async function alterarStatus(osId, novoStatus) {
+            try {
+                await db.collection('ordens_servico').doc(osId).update({
+                    status: novoStatus,
+                    atualizadoEm: new Date().toISOString()
+                });
+
+                await db.collection('ordens_servico').doc(osId)
+                    .collection('eventos').add({
+                        tipo: 'status',
+                        texto: `Status alterado para: ${getStatusTexto(novoStatus)}`,
+                        quando: new Date().toISOString(),
+                        autor: 'master'
+                    });
+
+                if (novoStatus === 'concluida') {
+                    // Notificar cliente
+                    const os = await db.collection('ordens_servico').doc(osId).get();
+                    await db.collection('notificacoes').add({
+                        clienteId: os.data().clienteId,
+                        mensagem: '✅ Seu serviço foi concluído!',
+                        osId: osId,
+                        lida: false,
+                        criadoEm: new Date().toISOString()
+                    });
+                }
+
+                alert('✅ Status atualizado!');
+                fecharModal();
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('❌ Erro ao alterar status');
+            }
+        }
+
+        async function entregarArquivo(osId, input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            try {
+                const path = `entregas/${osId}_${Date.now()}_${file.name}`;
+                const ref = storage.ref().child(path);
+                await ref.put(file);
+                const url = await ref.getDownloadURL();
+
+                await db.collection('ordens_servico').doc(osId).update({
+                    arquivoEntrega: url,
+                    status: 'concluida',
+                    concluidoEm: new Date().toISOString()
+                });
+
+                await db.collection('ordens_servico').doc(osId)
+                    .collection('eventos').add({
+                        tipo: 'entrega',
+                        texto: 'Arquivo final entregue',
+                        quando: new Date().toISOString(),
+                        autor: 'master'
+                    });
+
+                const os = await db.collection('ordens_servico').doc(osId).get();
+                await db.collection('notificacoes').add({
+                    clienteId: os.data().clienteId,
+                    mensagem: '✅ Serviço concluído! Arquivo disponível.',
+                    osId: osId,
+                    lida: false,
+                    criadoEm: new Date().toISOString()
+                });
+
+                alert('✅ Arquivo entregue e OS concluída!');
+                fecharModal();
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('❌ Erro ao enviar arquivo');
+            }
+        }
+
+        function abrirFoto(url) {
+            document.getElementById('fotoAmpliada').src = url;
+            document.getElementById('modalFoto').style.display = 'flex';
+        }
+
+        function fecharModal() {
+            document.getElementById('modalOS').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
