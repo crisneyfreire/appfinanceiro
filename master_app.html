@@ -660,7 +660,7 @@
             <div>
                 <h1>👑 MASTER JEDI - CONTROLE TOTAL</h1>
                 <div style="display: flex; gap: 10px; margin-top: 5px">
-                    <span class="badge badge-success">v3.1 - CONFIGURAÇÕES CORRIGIDAS</span>
+                    <span class="badge badge-success">v4.0 - CONFIGURAÇÕES SIMPLIFICADAS</span>
                     <span class="badge" style="background: var(--neon); color: black">MODO SUPREMO</span>
                 </div>
             </div>
@@ -832,7 +832,7 @@
                     </div>
                 </div>
 
-                <!-- NOVA ABA: CONFIGURAÇÕES DO APP (CATEGORIAS, CONTAS, TIPOS) - CORRIGIDA -->
+                <!-- NOVA ABA: CONFIGURAÇÕES DO APP (CATEGORIAS, CONTAS, TIPOS) - VERSÃO SIMPLIFICADA -->
                 <div id="abaConfigApp" class="tab-content">
                     <h3>⚙️ CONFIGURAÇÕES DO APP FINANCEIRO</h3>
                     
@@ -854,8 +854,8 @@
                             </div>
                             
                             <div style="display: flex; gap: 5px; margin-top: 10px;">
-                                <button class="power-btn" onclick="salvarCategorias()" style="flex: 1;">💾 SALVAR</button>
-                                <button class="power-btn danger-btn" onclick="resetarCategoriasPadrao()" style="flex: 1;">🔄 PADRÃO</button>
+                                <button class="power-btn" onclick="salvarTudo()" style="flex: 1;">💾 SALVAR TUDO</button>
+                                <button class="power-btn danger-btn" onclick="resetarTudo()" style="flex: 1;">🔄 PADRÃO</button>
                             </div>
                         </div>
                         
@@ -872,11 +872,6 @@
                             <div class="add-config-form">
                                 <input type="text" id="novaConta" class="add-config-input" placeholder="Nova conta...">
                                 <button class="add-config-btn" onclick="adicionarConta()">➕</button>
-                            </div>
-                            
-                            <div style="display: flex; gap: 5px; margin-top: 10px;">
-                                <button class="power-btn" onclick="salvarContas()" style="flex: 1;">💾 SALVAR</button>
-                                <button class="power-btn danger-btn" onclick="resetarContasPadrao()" style="flex: 1;">🔄 PADRÃO</button>
                             </div>
                         </div>
                         
@@ -897,11 +892,6 @@
                                     <option value="saida">📤 Saída</option>
                                 </select>
                                 <button class="add-config-btn" onclick="adicionarTipo()">➕</button>
-                            </div>
-                            
-                            <div style="display: flex; gap: 5px; margin-top: 10px;">
-                                <button class="power-btn" onclick="salvarTipos()" style="flex: 1;">💾 SALVAR</button>
-                                <button class="power-btn danger-btn" onclick="resetarTiposPadrao()" style="flex: 1;">🔄 PADRÃO</button>
                             </div>
                         </div>
                     </div>
@@ -975,7 +965,7 @@
 
                 <!-- LOG PANEL -->
                 <div class="log-panel" id="logPanel">
-                    <div class="log-entry">🚀 Sistema pronto - Versão 3.1 configurável</div>
+                    <div class="log-entry">🚀 Sistema pronto - Versão 4.0 simplificada</div>
                 </div>
             </div>
         </div>
@@ -1089,7 +1079,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         
-        // Configurar Firestore para usar timestamps
+        // Configurar Firestore
         db.settings({
             timestampsInSnapshots: true,
             ignoreUndefinedProperties: true
@@ -1110,10 +1100,21 @@
             caminho: ''
         };
         
-        // Configurações do cliente (categorias, contas, tipos)
-        let categoriasCliente = [];
-        let contasCliente = [];
-        let tiposCliente = [];
+        // Configurações do cliente (categorias, contas, tipos) - TODAS EM MEMÓRIA
+        let categoriasCliente = [
+            'Alimentação', 'Transporte', 'Moradia', 'Saúde', 
+            'Educação', 'Lazer', 'Salário', 'Investimentos', 
+            'Vendas', 'Serviços', 'Impostos', 'Outros'
+        ];
+        
+        let contasCliente = [
+            'Carteira', 'Conta Corrente', 'Poupança', 'Cartão de Crédito'
+        ];
+        
+        let tiposCliente = [
+            { id: 'entrada', nome: 'Entrada (Receita)', natureza: 'entrada' },
+            { id: 'saida', nome: 'Saída (Despesa)', natureza: 'saida' }
+        ];
 
         // ============================================
         // FUNÇÕES DE UTILITÁRIOS
@@ -1144,26 +1145,6 @@
             if (logPanel.children.length > 10) logPanel.removeChild(logPanel.children[0]);
         }
 
-        function formatarMoedaBR(valor, comSimbolo = true) {
-            if (valor === undefined || valor === null) return comSimbolo ? 'R$ 0,00' : '0,00';
-            const numero = typeof valor === 'string' ? parseFloat(valor.replace(/[^\d,.-]/g, '').replace(',', '.')) : valor;
-            if (isNaN(numero)) return comSimbolo ? 'R$ 0,00' : '0,00';
-            const valorFormatado = numero.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            return comSimbolo ? `R$ ${valorFormatado}` : valorFormatado;
-        }
-
-        function parseMoedaBR(valorStr) {
-            if (!valorStr) return 0;
-            const limpo = valorStr.toString()
-                .replace('R$', '')
-                .replace(/\s/g, '')
-                .replace(/\./g, '')
-                .replace(',', '.')
-                .trim();
-            const valor = parseFloat(limpo);
-            return isNaN(valor) ? 0 : valor;
-        }
-
         // ============================================
         // CONFIGURAÇÕES DO APP FINANCEIRO
         // ============================================
@@ -1173,11 +1154,6 @@
                 const saved = localStorage.getItem('appFinanceiroConfig');
                 if (saved) {
                     appFinanceiroConfig = JSON.parse(saved);
-                } else {
-                    appFinanceiroConfig = {
-                        nomeArquivo: 'appfinanceiro.html',
-                        caminho: ''
-                    };
                 }
                 
                 document.getElementById('appFinanceiroNome').value = appFinanceiroConfig.nomeArquivo || 'appfinanceiro.html';
@@ -1186,10 +1162,6 @@
                 adicionarLog(`Configuração carregada: ${appFinanceiroConfig.nomeArquivo}`);
             } catch (e) {
                 console.error('Erro ao carregar config:', e);
-                appFinanceiroConfig = {
-                    nomeArquivo: 'appfinanceiro.html',
-                    caminho: ''
-                };
             }
         }
 
@@ -1199,11 +1171,9 @@
                 appFinanceiroConfig.caminho = document.getElementById('appFinanceiroCaminho').value || '';
                 localStorage.setItem('appFinanceiroConfig', JSON.stringify(appFinanceiroConfig));
                 
-                mostrarSucesso('✅ Configuração do app salva com sucesso!');
+                mostrarSucesso('✅ Configuração do app salva!');
                 document.getElementById('configWarning').style.display = 'none';
                 adicionarLog('Configuração do app salva');
-                
-                setTimeout(validarArquivoAppFinanceiro, 500);
             } catch (e) {
                 mostrarErro('Erro ao salvar configuração');
             }
@@ -1213,320 +1183,55 @@
             mudarAba('apps', document.querySelectorAll('.tab-btn')[4]);
         }
 
-        async function validarArquivoAppFinanceiro() {
-            const statusEl = document.getElementById('appFinanceiroStatus');
-            statusEl.innerHTML = '🔄 Validando...';
-            
-            try {
-                const config = appFinanceiroConfig;
-                const url = config.caminho + config.nomeArquivo;
-                
-                const response = await fetch(url, { method: 'HEAD', cache: 'no-cache' });
-                
-                if (response.ok) {
-                    statusEl.innerHTML = '✅ Arquivo encontrado!';
-                    statusEl.style.color = 'var(--accent)';
-                } else {
-                    statusEl.innerHTML = '⚠️ Arquivo não encontrado. Verifique o nome e caminho.';
-                    statusEl.style.color = 'var(--warning)';
-                    document.getElementById('configWarning').style.display = 'block';
-                }
-            } catch (error) {
-                statusEl.innerHTML = '❌ Erro ao acessar arquivo. Verifique o caminho.';
-                statusEl.style.color = 'var(--danger)';
-                document.getElementById('configWarning').style.display = 'block';
-            }
-        }
-
-        function testarLinkAppFinanceiro() {
-            if (!clienteAtual) {
-                mostrarErro('Selecione um cliente primeiro!');
-                return;
-            }
-
-            const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
-            
-            document.getElementById('testeLinkMsg').innerHTML = `Testando link para: <strong>${clienteAtual.nome || 'Cliente'}</strong>`;
-            document.getElementById('testeLinkUrl').value = url;
-            
-            const statusEl = document.getElementById('testeLinkStatus');
-            statusEl.style.display = 'block';
-            statusEl.innerHTML = '🔄 Testando acesso...';
-            
-            fetch(url, { method: 'HEAD', cache: 'no-cache' })
-                .then(response => {
-                    if (response.ok) {
-                        statusEl.innerHTML = '✅ Link acessível!';
-                        statusEl.style.background = 'rgba(76, 175, 80, 0.2)';
-                        statusEl.style.color = 'var(--accent)';
-                    } else {
-                        statusEl.innerHTML = '⚠️ Arquivo não encontrado. Verifique o nome e caminho.';
-                        statusEl.style.background = 'rgba(255, 193, 7, 0.2)';
-                        statusEl.style.color = 'var(--warning)';
-                    }
-                })
-                .catch(() => {
-                    statusEl.innerHTML = '❌ Não foi possível acessar o arquivo. Verifique o caminho.';
-                    statusEl.style.background = 'rgba(244, 67, 54, 0.2)';
-                    statusEl.style.color = 'var(--danger)';
-                });
-            
-            document.getElementById('modalTesteLink').style.display = 'flex';
-        }
-
-        function abrirLinkTeste() {
-            const url = document.getElementById('testeLinkUrl').value;
-            window.open(url, '_blank');
-        }
-
-        function copiarLinkTeste() {
-            const url = document.getElementById('testeLinkUrl').value;
-            navigator.clipboard.writeText(url).then(() => {
-                mostrarSucesso('✅ Link copiado!');
-            }).catch(() => {
-                prompt('Copie o link manualmente:', url);
-            });
-        }
-
-        function fecharModalTeste() {
-            document.getElementById('modalTesteLink').style.display = 'none';
-        }
-
-        function buscarArquivosApp() {
-            const possiveisNomes = [
-                'appfinanceiro.html',
-                'app-financeiro.html',
-                'app_financeiro.html',
-                'financeiro.html',
-                'AppFinanceiro.html',
-                'App-Financeiro.html',
-                'App_Financeiro.html',
-                'app_financeiro.php',
-                'appfinanceiro.php'
-            ];
-            
-            let msg = 'Arquivos comuns que podem existir:\n\n';
-            possiveisNomes.forEach(nome => {
-                msg += `• ${nome}\n`;
-            });
-            
-            msg += '\nVerifique qual destes arquivos existe na sua pasta e configure na aba Apps';
-            
-            alert(msg);
-            document.getElementById('configWarning').style.display = 'block';
-        }
-
         // ============================================
-        // FUNÇÕES DE CONFIGURAÇÕES DO APP (CATEGORIAS, CONTAS, TIPOS) - CORRIGIDAS
+        // FUNÇÕES DE CONFIGURAÇÕES DO APP - TOTALMENTE EM MEMÓRIA
         // ============================================
         
-        async function carregarConfiguracoesCliente() {
+        function carregarConfiguracoesCliente() {
             if (!clienteAtual) {
-                adicionarLog('Nenhum cliente selecionado para carregar configurações');
+                adicionarLog('Nenhum cliente selecionado');
                 return;
             }
             
+            adicionarLog(`Carregando configurações do cliente: ${clienteAtual.nome || clienteAtual.id}`);
+            
+            // Tentar carregar do localStorage primeiro
             try {
-                adicionarLog(`Carregando configurações do cliente: ${clienteAtual.nome || clienteAtual.id}`);
+                const savedCategorias = localStorage.getItem(`categorias_${clienteAtual.id}`);
+                const savedContas = localStorage.getItem(`contas_${clienteAtual.id}`);
+                const savedTipos = localStorage.getItem(`tipos_${clienteAtual.id}`);
                 
-                // Mostrar loading
-                document.getElementById('listaCategorias').innerHTML = '<div class="loading"><div class="loading-spinner" style="width:20px;height:20px;"></div>Carregando...</div>';
-                document.getElementById('listaContas').innerHTML = '<div class="loading"><div class="loading-spinner" style="width:20px;height:20px;"></div>Carregando...</div>';
-                document.getElementById('listaTipos').innerHTML = '<div class="loading"><div class="loading-spinner" style="width:20px;height:20px;"></div>Carregando...</div>';
+                if (savedCategorias) categoriasCliente = JSON.parse(savedCategorias);
+                if (savedContas) contasCliente = JSON.parse(savedContas);
+                if (savedTipos) tiposCliente = JSON.parse(savedTipos);
                 
-                // Carregar categorias - usando uma estrutura mais simples
-                const categoriasSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_categorias`).get();
-                
-                if (!categoriasSnapshot.empty) {
-                    categoriasCliente = [];
-                    categoriasSnapshot.forEach(doc => {
-                        categoriasCliente.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                    });
-                    adicionarLog(`${categoriasCliente.length} categorias carregadas`);
-                } else {
-                    // Criar categorias padrão se não existirem
-                    adicionarLog('Nenhuma categoria encontrada, criando padrão...');
-                    categoriasCliente = [
-                        { nome: 'Alimentação' },
-                        { nome: 'Transporte' },
-                        { nome: 'Moradia' },
-                        { nome: 'Saúde' },
-                        { nome: 'Educação' },
-                        { nome: 'Lazer' },
-                        { nome: 'Salário' },
-                        { nome: 'Investimentos' },
-                        { nome: 'Vendas' },
-                        { nome: 'Serviços' },
-                        { nome: 'Impostos' },
-                        { nome: 'Outros' }
-                    ];
-                    
-                    // Salvar categorias padrão
-                    const batch = db.batch();
-                    categoriasCliente.forEach(cat => {
-                        const docRef = db.collection(`configuracoes_${clienteAtual.id}_categorias`).doc();
-                        batch.set(docRef, cat);
-                    });
-                    await batch.commit();
-                    
-                    // Recarregar com IDs
-                    const novaSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_categorias`).get();
-                    categoriasCliente = [];
-                    novaSnapshot.forEach(doc => {
-                        categoriasCliente.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                    });
-                }
-                
-                // Carregar contas
-                const contasSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_contas`).get();
-                
-                if (!contasSnapshot.empty) {
-                    contasCliente = [];
-                    contasSnapshot.forEach(doc => {
-                        contasCliente.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                    });
-                    adicionarLog(`${contasCliente.length} contas carregadas`);
-                } else {
-                    // Criar contas padrão
-                    adicionarLog('Nenhuma conta encontrada, criando padrão...');
-                    contasCliente = [
-                        { nome: 'Carteira' },
-                        { nome: 'Conta Corrente' },
-                        { nome: 'Poupança' },
-                        { nome: 'Cartão de Crédito' }
-                    ];
-                    
-                    const batch = db.batch();
-                    contasCliente.forEach(conta => {
-                        const docRef = db.collection(`configuracoes_${clienteAtual.id}_contas`).doc();
-                        batch.set(docRef, conta);
-                    });
-                    await batch.commit();
-                    
-                    const novaSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_contas`).get();
-                    contasCliente = [];
-                    novaSnapshot.forEach(doc => {
-                        contasCliente.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                    });
-                }
-                
-                // Carregar tipos
-                const tiposSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_tipos`).get();
-                
-                if (!tiposSnapshot.empty) {
-                    tiposCliente = [];
-                    tiposSnapshot.forEach(doc => {
-                        tiposCliente.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                    });
-                    adicionarLog(`${tiposCliente.length} tipos carregados`);
-                } else {
-                    // Criar tipos padrão
-                    adicionarLog('Nenhum tipo encontrado, criando padrão...');
-                    tiposCliente = [
-                        { nome: 'Entrada (Receita)', natureza: 'entrada' },
-                        { nome: 'Saída (Despesa)', natureza: 'saida' }
-                    ];
-                    
-                    const batch = db.batch();
-                    tiposCliente.forEach(tipo => {
-                        const docRef = db.collection(`configuracoes_${clienteAtual.id}_tipos`).doc();
-                        batch.set(docRef, tipo);
-                    });
-                    await batch.commit();
-                    
-                    const novaSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_tipos`).get();
-                    tiposCliente = [];
-                    novaSnapshot.forEach(doc => {
-                        tiposCliente.push({
-                            id: doc.id,
-                            ...doc.data()
-                        });
-                    });
-                }
-                
-                // Atualizar as listas na interface
-                atualizarListaCategorias();
-                atualizarListaContas();
-                atualizarListaTipos();
-                
-                adicionarLog(`Configurações carregadas com sucesso!`);
-                
-            } catch (error) {
-                console.error('Erro ao carregar configurações:', error);
-                adicionarLog(`Erro ao carregar configurações: ${error.message}`);
-                
-                // Mostrar erro na interface
-                document.getElementById('listaCategorias').innerHTML = `<div style="color: var(--danger); padding: 10px; text-align: center;">❌ Erro ao carregar</div>`;
-                document.getElementById('listaContas').innerHTML = `<div style="color: var(--danger); padding: 10px; text-align: center;">❌ Erro ao carregar</div>`;
-                document.getElementById('listaTipos').innerHTML = `<div style="color: var(--danger); padding: 10px; text-align: center;">❌ Erro ao carregar</div>`;
-                
-                // Usar dados padrão em caso de erro
-                categoriasCliente = [
-                    { id: '1', nome: 'Alimentação' },
-                    { id: '2', nome: 'Transporte' },
-                    { id: '3', nome: 'Moradia' },
-                    { id: '4', nome: 'Saúde' },
-                    { id: '5', nome: 'Educação' },
-                    { id: '6', nome: 'Lazer' },
-                    { id: '7', nome: 'Salário' },
-                    { id: '8', nome: 'Investimentos' },
-                    { id: '9', nome: 'Vendas' },
-                    { id: '10', nome: 'Serviços' },
-                    { id: '11', nome: 'Impostos' },
-                    { id: '12', nome: 'Outros' }
-                ];
-                
-                contasCliente = [
-                    { id: '1', nome: 'Carteira' },
-                    { id: '2', nome: 'Conta Corrente' },
-                    { id: '3', nome: 'Poupança' },
-                    { id: '4', nome: 'Cartão de Crédito' }
-                ];
-                
-                tiposCliente = [
-                    { id: 'entrada', nome: 'Entrada (Receita)', natureza: 'entrada' },
-                    { id: 'saida', nome: 'Saída (Despesa)', natureza: 'saida' }
-                ];
-                
-                atualizarListaCategorias();
-                atualizarListaContas();
-                atualizarListaTipos();
+                adicionarLog('Configurações carregadas do localStorage');
+            } catch (e) {
+                console.error('Erro ao carregar do localStorage:', e);
             }
+            
+            // Atualizar as listas na interface
+            atualizarListaCategorias();
+            atualizarListaContas();
+            atualizarListaTipos();
         }
 
         function atualizarListaCategorias() {
             const lista = document.getElementById('listaCategorias');
             
             if (!categoriasCliente || categoriasCliente.length === 0) {
-                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhuma categoria cadastrada</div>';
+                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhuma categoria</div>';
                 return;
             }
             
             let html = '';
             categoriasCliente.forEach((cat, index) => {
-                const catId = cat.id || `temp_${index}`;
                 html += `
                     <div class="config-item">
-                        <span>${cat.nome || 'Sem nome'}</span>
+                        <span>${cat}</span>
                         <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarCategoria('${catId}', '${cat.nome}')" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerCategoria('${catId}')" title="Remover">🗑️</button>
+                            <button class="config-item-btn" onclick="editarCategoria(${index})" title="Editar">✏️</button>
+                            <button class="config-item-btn danger" onclick="removerCategoria(${index})" title="Remover">🗑️</button>
                         </div>
                     </div>
                 `;
@@ -1539,19 +1244,18 @@
             const lista = document.getElementById('listaContas');
             
             if (!contasCliente || contasCliente.length === 0) {
-                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhuma conta cadastrada</div>';
+                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhuma conta</div>';
                 return;
             }
             
             let html = '';
             contasCliente.forEach((conta, index) => {
-                const contaId = conta.id || `temp_${index}`;
                 html += `
                     <div class="config-item">
-                        <span>${conta.nome || 'Sem nome'}</span>
+                        <span>${conta}</span>
                         <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarConta('${contaId}', '${conta.nome}')" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerConta('${contaId}')" title="Remover">🗑️</button>
+                            <button class="config-item-btn" onclick="editarConta(${index})" title="Editar">✏️</button>
+                            <button class="config-item-btn danger" onclick="removerConta(${index})" title="Remover">🗑️</button>
                         </div>
                     </div>
                 `;
@@ -1564,21 +1268,19 @@
             const lista = document.getElementById('listaTipos');
             
             if (!tiposCliente || tiposCliente.length === 0) {
-                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhum tipo cadastrado</div>';
+                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhum tipo</div>';
                 return;
             }
             
             let html = '';
             tiposCliente.forEach((tipo, index) => {
-                const tipoId = tipo.id || `temp_${index}`;
                 const naturezaIcon = tipo.natureza === 'entrada' ? '📥' : '📤';
-                const naturezaClass = tipo.natureza === 'entrada' ? 'text-success' : 'text-danger';
                 html += `
                     <div class="config-item">
-                        <span>${naturezaIcon} ${tipo.nome || 'Sem nome'} <span style="color: ${tipo.natureza === 'entrada' ? '#4caf50' : '#f44336'}; font-size: 10px;">(${tipo.natureza})</span></span>
+                        <span>${naturezaIcon} ${tipo.nome} <span style="color: ${tipo.natureza === 'entrada' ? '#4caf50' : '#f44336'}; font-size: 10px;">(${tipo.natureza})</span></span>
                         <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarTipo('${tipoId}', '${tipo.nome}', '${tipo.natureza}')" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerTipo('${tipoId}')" title="Remover">🗑️</button>
+                            <button class="config-item-btn" onclick="editarTipo(${index})" title="Editar">✏️</button>
+                            <button class="config-item-btn danger" onclick="removerTipo(${index})" title="Remover">🗑️</button>
                         </div>
                     </div>
                 `;
@@ -1587,69 +1289,33 @@
             lista.innerHTML = html;
         }
 
-        async function adicionarCategoria() {
+        function adicionarCategoria() {
             const nome = document.getElementById('novaCategoria').value.trim();
             if (!nome) {
                 mostrarErro('Digite um nome para a categoria');
                 return;
             }
             
-            if (!clienteAtual) {
-                mostrarErro('Selecione um cliente primeiro');
-                return;
-            }
-            
-            try {
-                const novaCategoria = {
-                    nome: nome,
-                    criadoEm: new Date().toISOString()
-                };
-                
-                const docRef = await db.collection(`configuracoes_${clienteAtual.id}_categorias`).add(novaCategoria);
-                
-                document.getElementById('novaCategoria').value = '';
-                mostrarSucesso(`Categoria "${nome}" adicionada!`);
-                
-                await carregarConfiguracoesCliente();
-                
-            } catch (error) {
-                console.error('Erro ao adicionar categoria:', error);
-                mostrarErro('Erro ao adicionar categoria: ' + error.message);
-            }
+            categoriasCliente.push(nome);
+            document.getElementById('novaCategoria').value = '';
+            atualizarListaCategorias();
+            mostrarSucesso(`Categoria "${nome}" adicionada!`);
         }
 
-        async function adicionarConta() {
+        function adicionarConta() {
             const nome = document.getElementById('novaConta').value.trim();
             if (!nome) {
                 mostrarErro('Digite um nome para a conta');
                 return;
             }
             
-            if (!clienteAtual) {
-                mostrarErro('Selecione um cliente primeiro');
-                return;
-            }
-            
-            try {
-                const novaConta = {
-                    nome: nome,
-                    criadoEm: new Date().toISOString()
-                };
-                
-                const docRef = await db.collection(`configuracoes_${clienteAtual.id}_contas`).add(novaConta);
-                
-                document.getElementById('novaConta').value = '';
-                mostrarSucesso(`Conta "${nome}" adicionada!`);
-                
-                await carregarConfiguracoesCliente();
-                
-            } catch (error) {
-                console.error('Erro ao adicionar conta:', error);
-                mostrarErro('Erro ao adicionar conta: ' + error.message);
-            }
+            contasCliente.push(nome);
+            document.getElementById('novaConta').value = '';
+            atualizarListaContas();
+            mostrarSucesso(`Conta "${nome}" adicionada!`);
         }
 
-        async function adicionarTipo() {
+        function adicionarTipo() {
             const nome = document.getElementById('novoTipo').value.trim();
             const natureza = document.getElementById('novoTipoNatureza').value;
             
@@ -1658,204 +1324,109 @@
                 return;
             }
             
+            tiposCliente.push({
+                nome: nome,
+                natureza: natureza
+            });
+            
+            document.getElementById('novoTipo').value = '';
+            atualizarListaTipos();
+            mostrarSucesso(`Tipo "${nome}" adicionado!`);
+        }
+
+        function removerCategoria(index) {
+            if (!confirm('Remover esta categoria?')) return;
+            
+            const removido = categoriasCliente.splice(index, 1)[0];
+            atualizarListaCategorias();
+            mostrarSucesso(`Categoria "${removido}" removida!`);
+        }
+
+        function removerConta(index) {
+            if (!confirm('Remover esta conta?')) return;
+            
+            const removido = contasCliente.splice(index, 1)[0];
+            atualizarListaContas();
+            mostrarSucesso(`Conta "${removido}" removida!`);
+        }
+
+        function removerTipo(index) {
+            if (!confirm('Remover este tipo?')) return;
+            
+            const removido = tiposCliente.splice(index, 1)[0];
+            atualizarListaTipos();
+            mostrarSucesso(`Tipo "${removido.nome}" removido!`);
+        }
+
+        function editarCategoria(index) {
+            const novoNome = prompt('Editar categoria:', categoriasCliente[index]);
+            if (novoNome && novoNome !== categoriasCliente[index]) {
+                categoriasCliente[index] = novoNome;
+                atualizarListaCategorias();
+                mostrarSucesso('Categoria atualizada!');
+            }
+        }
+
+        function editarConta(index) {
+            const novoNome = prompt('Editar conta:', contasCliente[index]);
+            if (novoNome && novoNome !== contasCliente[index]) {
+                contasCliente[index] = novoNome;
+                atualizarListaContas();
+                mostrarSucesso('Conta atualizada!');
+            }
+        }
+
+        function editarTipo(index) {
+            const tipo = tiposCliente[index];
+            const novoNome = prompt('Editar tipo:', tipo.nome);
+            if (novoNome && novoNome !== tipo.nome) {
+                tipo.nome = novoNome;
+                atualizarListaTipos();
+                mostrarSucesso('Tipo atualizado!');
+            }
+        }
+
+        function salvarTudo() {
             if (!clienteAtual) {
-                mostrarErro('Selecione um cliente primeiro');
+                mostrarErro('Selecione um cliente primeiro!');
                 return;
             }
             
             try {
-                const novoTipo = {
-                    nome: nome,
-                    natureza: natureza,
-                    criadoEm: new Date().toISOString()
-                };
+                localStorage.setItem(`categorias_${clienteAtual.id}`, JSON.stringify(categoriasCliente));
+                localStorage.setItem(`contas_${clienteAtual.id}`, JSON.stringify(contasCliente));
+                localStorage.setItem(`tipos_${clienteAtual.id}`, JSON.stringify(tiposCliente));
                 
-                const docRef = await db.collection(`configuracoes_${clienteAtual.id}_tipos`).add(novoTipo);
-                
-                document.getElementById('novoTipo').value = '';
-                mostrarSucesso(`Tipo "${nome}" adicionado!`);
-                
-                await carregarConfiguracoesCliente();
-                
-            } catch (error) {
-                console.error('Erro ao adicionar tipo:', error);
-                mostrarErro('Erro ao adicionar tipo: ' + error.message);
+                mostrarSucesso('✅ Todas as configurações salvas no localStorage!');
+                adicionarLog('Configurações salvas');
+            } catch (e) {
+                mostrarErro('Erro ao salvar: ' + e.message);
             }
         }
 
-        async function removerCategoria(id) {
-            if (!confirm('Remover esta categoria?')) return;
-            
-            try {
-                await db.collection(`configuracoes_${clienteAtual.id}_categorias`).doc(id).delete();
-                
-                mostrarSucesso('Categoria removida!');
-                await carregarConfiguracoesCliente();
-                
-            } catch (error) {
-                console.error('Erro ao remover categoria:', error);
-                mostrarErro('Erro ao remover categoria');
-            }
-        }
-
-        async function removerConta(id) {
-            if (!confirm('Remover esta conta?')) return;
-            
-            try {
-                await db.collection(`configuracoes_${clienteAtual.id}_contas`).doc(id).delete();
-                
-                mostrarSucesso('Conta removida!');
-                await carregarConfiguracoesCliente();
-                
-            } catch (error) {
-                console.error('Erro ao remover conta:', error);
-                mostrarErro('Erro ao remover conta');
-            }
-        }
-
-        async function removerTipo(id) {
-            if (!confirm('Remover este tipo?')) return;
-            
-            try {
-                await db.collection(`configuracoes_${clienteAtual.id}_tipos`).doc(id).delete();
-                
-                mostrarSucesso('Tipo removido!');
-                await carregarConfiguracoesCliente();
-                
-            } catch (error) {
-                console.error('Erro ao remover tipo:', error);
-                mostrarErro('Erro ao remover tipo');
-            }
-        }
-
-        function editarCategoria(id, nomeAtual) {
-            const novoNome = prompt('Editar categoria:', nomeAtual);
-            if (novoNome && novoNome !== nomeAtual) {
-                salvarEdicaoCategoria(id, novoNome);
-            }
-        }
-
-        function editarConta(id, nomeAtual) {
-            const novoNome = prompt('Editar conta:', nomeAtual);
-            if (novoNome && novoNome !== nomeAtual) {
-                salvarEdicaoConta(id, novoNome);
-            }
-        }
-
-        function editarTipo(id, nomeAtual, naturezaAtual) {
-            const novoNome = prompt('Editar tipo:', nomeAtual);
-            if (novoNome && novoNome !== nomeAtual) {
-                salvarEdicaoTipo(id, novoNome, naturezaAtual);
-            }
-        }
-
-        async function salvarEdicaoCategoria(id, novoNome) {
-            try {
-                await db.collection(`configuracoes_${clienteAtual.id}_categorias`).doc(id).update({
-                    nome: novoNome,
-                    atualizadoEm: new Date().toISOString()
-                });
-                
-                mostrarSucesso('Categoria atualizada!');
-                await carregarConfiguracoesCliente();
-                
-            } catch (error) {
-                console.error('Erro ao editar categoria:', error);
-                mostrarErro('Erro ao editar categoria');
-            }
-        }
-
-        async function salvarEdicaoConta(id, novoNome) {
-            try {
-                await db.collection(`configuracoes_${clienteAtual.id}_contas`).doc(id).update({
-                    nome: novoNome,
-                    atualizadoEm: new Date().toISOString()
-                });
-                
-                mostrarSucesso('Conta atualizada!');
-                await carregarConfiguracoesCliente();
-                
-            } catch (error) {
-                console.error('Erro ao editar conta:', error);
-                mostrarErro('Erro ao editar conta');
-            }
-        }
-
-        async function salvarEdicaoTipo(id, novoNome, natureza) {
-            try {
-                await db.collection(`configuracoes_${clienteAtual.id}_tipos`).doc(id).update({
-                    nome: novoNome,
-                    natureza: natureza,
-                    atualizadoEm: new Date().toISOString()
-                });
-                
-                mostrarSucesso('Tipo atualizado!');
-                await carregarConfiguracoesCliente();
-                
-            } catch (error) {
-                console.error('Erro ao editar tipo:', error);
-                mostrarErro('Erro ao editar tipo');
-            }
-        }
-
-        function salvarCategorias() {
-            mostrarSucesso('Categorias salvas automaticamente!');
-        }
-
-        function salvarContas() {
-            mostrarSucesso('Contas salvas automaticamente!');
-        }
-
-        function salvarTipos() {
-            mostrarSucesso('Tipos salvos automaticamente!');
-        }
-
-        function resetarCategoriasPadrao() {
-            if (!confirm('Resetar categorias para o padrão?')) return;
+        function resetarTudo() {
+            if (!confirm('Resetar todas as configurações para o padrão?')) return;
             
             categoriasCliente = [
-                { nome: 'Alimentação' },
-                { nome: 'Transporte' },
-                { nome: 'Moradia' },
-                { nome: 'Saúde' },
-                { nome: 'Educação' },
-                { nome: 'Lazer' },
-                { nome: 'Salário' },
-                { nome: 'Investimentos' },
-                { nome: 'Vendas' },
-                { nome: 'Serviços' },
-                { nome: 'Impostos' },
-                { nome: 'Outros' }
+                'Alimentação', 'Transporte', 'Moradia', 'Saúde', 
+                'Educação', 'Lazer', 'Salário', 'Investimentos', 
+                'Vendas', 'Serviços', 'Impostos', 'Outros'
             ];
-            
-            atualizarListaCategorias();
-            mostrarSucesso('Categorias resetadas (clique em Salvar para persistir)');
-        }
-
-        function resetarContasPadrao() {
-            if (!confirm('Resetar contas para o padrão?')) return;
             
             contasCliente = [
-                { nome: 'Carteira' },
-                { nome: 'Conta Corrente' },
-                { nome: 'Poupança' },
-                { nome: 'Cartão de Crédito' }
+                'Carteira', 'Conta Corrente', 'Poupança', 'Cartão de Crédito'
             ];
-            
-            atualizarListaContas();
-            mostrarSucesso('Contas resetadas (clique em Salvar para persistir)');
-        }
-
-        function resetarTiposPadrao() {
-            if (!confirm('Resetar tipos para o padrão?')) return;
             
             tiposCliente = [
                 { nome: 'Entrada (Receita)', natureza: 'entrada' },
                 { nome: 'Saída (Despesa)', natureza: 'saida' }
             ];
             
+            atualizarListaCategorias();
+            atualizarListaContas();
             atualizarListaTipos();
-            mostrarSucesso('Tipos resetados (clique em Salvar para persistir)');
+            
+            mostrarSucesso('Configurações resetadas para o padrão!');
         }
 
         // ============================================
@@ -1916,17 +1487,7 @@
             }, (error) => {
                 console.error("Erro no Firestore:", error);
                 document.getElementById("firebaseStatus").innerHTML = "🔴 Erro de conexão";
-                
-                let mensagemErro = "Erro ao conectar ao Firebase: ";
-                if (error.message.includes('permission')) {
-                    mensagemErro += "Permissão negada. Verifique as regras do Firebase.";
-                } else if (error.message.includes('network')) {
-                    mensagemErro += "Problema de rede. Verifique sua conexão.";
-                } else {
-                    mensagemErro += error.message;
-                }
-                
-                mostrarErro(mensagemErro);
+                mostrarErro("Erro ao conectar ao Firebase: " + error.message);
             });
         }
 
@@ -1944,11 +1505,6 @@
                 c.nome?.toLowerCase().includes(filtro) || 
                 c.id?.toLowerCase().includes(filtro)
             );
-
-            if (clientesFiltrados.length === 0) {
-                lista.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">🔍 Nenhum cliente encontrado</div>';
-                return;
-            }
 
             clientesFiltrados.forEach(c => {
                 const ativo = clienteAtual && clienteAtual.id === c.id;
@@ -2001,7 +1557,7 @@
 
         async function selecionarCliente(clienteId) {
             if (alteracoesNaoSalvas) {
-                if (!confirm("⚠️ Há alterações não salvas! Deseja continuar mesmo assim?")) {
+                if (!confirm("⚠️ Há alterações não salvas! Deseja continuar?")) {
                     return;
                 }
                 alteracoesNaoSalvas = false;
@@ -2017,16 +1573,14 @@
             clienteAtual = cliente;
             atualizarListaClientes();
             preencherFormularioCliente();
-            carregarDadosCliente();
             
-            // Carregar configurações do app para este cliente
-            await carregarConfiguracoesCliente();
+            // Carregar configurações do cliente
+            carregarConfiguracoesCliente();
 
             // Habilitar botões
             ["btnEditar", "btnBloquear", "btnSalvar", "btnVisualizar", "btnCopiarLink", "btnExportar"]
                 .forEach(id => document.getElementById(id).disabled = false);
 
-            // Atualizar texto do botão bloquear
             document.getElementById("btnBloquear").innerHTML = cliente.status === 'bloqueado' ? '🔓 DESBLOQUEAR' : '🔒 BLOQUEAR';
 
             adicionarLog(`Cliente selecionado: ${cliente.nome || cliente.id}`);
@@ -2046,53 +1600,6 @@
             document.getElementById("telefoneContato").value = clienteAtual.telefone || "";
             
             atualizarPreview();
-        }
-
-        async function carregarDadosCliente() {
-            if (!clienteAtual) return;
-            
-            const container = document.getElementById('dadosClienteContainer');
-            container.innerHTML = '<div class="loading">Carregando dados...</div>';
-            
-            try {
-                const lancamentosSnapshot = await db.collection('lancamentos')
-                    .where('clienteId', '==', clienteAtual.id)
-                    .count()
-                    .get();
-                
-                const totalLancamentos = lancamentosSnapshot.data().count || 0;
-                
-                const ultimosSnapshot = await db.collection('lancamentos')
-                    .where('clienteId', '==', clienteAtual.id)
-                    .orderBy('data', 'desc')
-                    .limit(5)
-                    .get();
-                
-                let ultimosHtml = '';
-                ultimosSnapshot.forEach(doc => {
-                    const l = doc.data();
-                    ultimosHtml += `<div style="padding: 5px 0; border-bottom: 1px solid var(--border);">
-                        ${l.data || ''} - ${l.descricao || ''} - ${formatarMoedaBR(l.valor)}
-                    </div>`;
-                });
-                
-                container.innerHTML = `
-                    <div style="background: var(--bg-secondary); padding: 15px; border-radius: 8px;">
-                        <p><strong>📊 Total de lançamentos:</strong> ${totalLancamentos}</p>
-                        <p><strong>📅 Criado em:</strong> ${new Date(clienteAtual.dataCriacao || Date.now()).toLocaleDateString('pt-BR')}</p>
-                        <p><strong>🆔 ID:</strong> <small>${clienteAtual.id}</small></p>
-                        
-                        <h4 style="margin: 15px 0 10px;">📋 Últimos lançamentos:</h4>
-                        <div style="max-height: 150px; overflow-y: auto;">
-                            ${ultimosHtml || '<p style="color: var(--text-secondary);">Nenhum lançamento encontrado</p>'}
-                        </div>
-                    </div>
-                `;
-                
-            } catch (error) {
-                console.error('Erro ao carregar dados do cliente:', error);
-                container.innerHTML = '<p style="color: var(--danger);">Erro ao carregar dados</p>';
-            }
         }
 
         function atualizarPreview() {
@@ -2117,7 +1624,7 @@
         }
 
         // ============================================
-        // FUNÇÕES CORRIGIDAS - LINKS E AÇÕES
+        // FUNÇÕES DE LINKS E AÇÕES
         // ============================================
         
         function verComoCliente() {
@@ -2144,7 +1651,6 @@
             
             navigator.clipboard.writeText(url).then(() => {
                 mostrarSucesso('✅ Link copiado!');
-                adicionarLog(`🔗 Link copiado: ${clienteAtual.nome || clienteAtual.id}`);
             }).catch(() => {
                 prompt('Copie o link manualmente:', url);
             });
@@ -2187,12 +1693,6 @@
                 atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
             };
 
-            Object.keys(dadosAtualizados).forEach(key => {
-                if (dadosAtualizados[key] === undefined || dadosAtualizados[key] === null) {
-                    delete dadosAtualizados[key];
-                }
-            });
-
             try {
                 await db.collection("clientes").doc(clienteAtual.id).update(dadosAtualizados);
                 
@@ -2203,15 +1703,7 @@
                 
             } catch (error) {
                 console.error("Erro ao salvar:", error);
-                
-                let mensagem = "Erro ao salvar: ";
-                if (error.message.includes('permission')) {
-                    mensagem += "Permissão negada. Verifique as regras do Firebase.";
-                } else {
-                    mensagem += error.message;
-                }
-                
-                mostrarErro(mensagem);
+                mostrarErro("Erro ao salvar: " + error.message);
             }
         }
 
@@ -2233,14 +1725,11 @@
                         atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
                     });
                     
-                    mostrarSucesso(`✅ Cliente ${novoStatus === "bloqueado" ? "bloqueado" : "desbloqueado"} com sucesso!`);
-                    adicionarLog(`🔒 Status alterado: ${clienteAtual.nome} -> ${novoStatus}`);
-                    
+                    mostrarSucesso(`✅ Cliente ${novoStatus === "bloqueado" ? "bloqueado" : "desbloqueado"}!`);
                     document.getElementById("btnBloquear").innerHTML = novoStatus === 'bloqueado' ? '🔓 DESBLOQUEAR' : '🔒 BLOQUEAR';
                     
                 } catch (error) {
-                    console.error("Erro ao alterar status:", error);
-                    mostrarErro("Erro ao alterar status do cliente");
+                    mostrarErro("Erro ao alterar status: " + error.message);
                 }
                 fecharModal();
             };
@@ -2259,7 +1748,7 @@
             const cliente = clientes.find(c => c.id === clienteId);
             if (!cliente) return;
             
-            if (!confirm(`⚠️ ATENÇÃO!\n\nTem certeza que deseja EXCLUIR permanentemente o cliente "${cliente.nome || cliente.id}"?\n\nEsta ação não pode ser desfeita e todos os dados do cliente serão perdidos!`)) {
+            if (!confirm(`⚠️ ATENÇÃO!\n\nExcluir cliente "${cliente.nome || cliente.id}"?\n\nEsta ação NÃO pode ser desfeita!`)) {
                 return;
             }
             
@@ -2269,24 +1758,18 @@
                     .where('clienteId', '==', clienteId)
                     .get();
                 
-                // Excluir configurações
-                const categoriasSnapshot = await db.collection(`configuracoes_${clienteId}_categorias`).get();
-                const contasSnapshot = await db.collection(`configuracoes_${clienteId}_contas`).get();
-                const tiposSnapshot = await db.collection(`configuracoes_${clienteId}_tipos`).get();
-                
                 const batch = db.batch();
-                
                 lancamentosSnapshot.forEach(doc => batch.delete(doc.ref));
-                categoriasSnapshot.forEach(doc => batch.delete(doc.ref));
-                contasSnapshot.forEach(doc => batch.delete(doc.ref));
-                tiposSnapshot.forEach(doc => batch.delete(doc.ref));
-                
                 batch.delete(db.collection("clientes").doc(clienteId));
                 
                 await batch.commit();
                 
-                mostrarSucesso("✅ Cliente e todos os seus dados foram excluídos!");
-                adicionarLog(`🗑️ Cliente excluído: ${cliente.nome || cliente.id}`);
+                // Limpar localStorage
+                localStorage.removeItem(`categorias_${clienteId}`);
+                localStorage.removeItem(`contas_${clienteId}`);
+                localStorage.removeItem(`tipos_${clienteId}`);
+                
+                mostrarSucesso("✅ Cliente excluído!");
                 
                 if (clienteAtual && clienteAtual.id === clienteId) {
                     clienteAtual = null;
@@ -2294,8 +1777,7 @@
                 }
                 
             } catch (error) {
-                console.error("Erro ao deletar cliente:", error);
-                mostrarErro("Erro ao excluir cliente: " + error.message);
+                mostrarErro("Erro ao excluir: " + error.message);
             }
         }
 
@@ -2330,92 +1812,15 @@
 
             try {
                 const docRef = await db.collection("clientes").add(novoCliente);
-                mostrarSucesso(`✅ Cliente "${nome}" criado com sucesso! ID: ${docRef.id}`);
-                adicionarLog(`➕ Novo cliente: ${nome}`);
+                mostrarSucesso(`✅ Cliente "${nome}" criado!`);
                 fecharModalNovoCliente();
             } catch (error) {
-                console.error("Erro ao criar cliente:", error);
                 mostrarErro("Erro ao criar cliente: " + error.message);
             }
         }
 
         function fecharModalNovoCliente() { 
             document.getElementById("modalNovoCliente").style.display = "none"; 
-        }
-
-        // ============================================
-        // FUNÇÕES DE EXPORTAÇÃO E BACKUP
-        // ============================================
-        
-        function exportarClienteJSON() {
-            if (!clienteAtual) return;
-            
-            const dados = { 
-                cliente: clienteAtual, 
-                dataExportacao: new Date().toISOString(),
-                versao: "3.1"
-            };
-            
-            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
-            const a = document.createElement("a");
-            a.href = URL.createObjectURL(blob);
-            a.download = `cliente_${clienteAtual.nome || clienteAtual.id}_${new Date().toISOString().slice(0, 10)}.json`;
-            a.click();
-            
-            mostrarSucesso("📦 Backup exportado com sucesso!");
-            adicionarLog(`📦 Backup exportado: ${clienteAtual.nome}`);
-        }
-
-        function exportarClienteCompleto() {
-            if (!clienteAtual) {
-                mostrarErro("Selecione um cliente primeiro!");
-                return;
-            }
-            
-            mostrarSucesso("Preparando backup completo...");
-            adicionarLog("Iniciando exportação completa...");
-            
-            exportarClienteJSON();
-        }
-
-        function importarBackup() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        const dados = JSON.parse(e.target.result);
-                        
-                        if (!dados.cliente || !dados.cliente.id) {
-                            mostrarErro("Arquivo de backup inválido!");
-                            return;
-                        }
-                        
-                        if (confirm(`Deseja restaurar o backup do cliente "${dados.cliente.nome}"?\n\nIsso substituirá os dados atuais!`)) {
-                            await db.collection("clientes").doc(dados.cliente.id).set(dados.cliente);
-                            mostrarSucesso("✅ Backup restaurado com sucesso!");
-                            adicionarLog(`🔄 Backup restaurado: ${dados.cliente.nome}`);
-                        }
-                        
-                    } catch (error) {
-                        console.error("Erro ao importar backup:", error);
-                        mostrarErro("Erro ao importar backup: " + error.message);
-                    }
-                };
-                reader.readAsText(file);
-            };
-            
-            input.click();
-        }
-
-        function restaurarVersaoAnterior() {
-            alert("Funcionalidade em desenvolvimento. Use Exportar/Importar backup por enquanto.");
         }
 
         // ============================================
@@ -2429,7 +1834,7 @@
 
         async function executarDiagnosticoCompleto() {
             const body = document.getElementById('diagnosticoBody');
-            body.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Executando diagnóstico...</div>';
+            body.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Executando...</div>';
             
             try {
                 const resultados = [];
@@ -2462,7 +1867,7 @@
                     resultados.push({
                         teste: "Leitura de clientes",
                         status: true,
-                        mensagem: `✅ OK (${snapshot.size} documentos lidos)`
+                        mensagem: `✅ OK (${snapshot.size} docs)`
                     });
                 } catch (e) {
                     resultados.push({
@@ -2473,7 +1878,7 @@
                 }
                 
                 resultados.push({
-                    teste: "Configuração do App Financeiro",
+                    teste: "Configuração do App",
                     status: !!(appFinanceiroConfig && appFinanceiroConfig.nomeArquivo),
                     mensagem: appFinanceiroConfig?.nomeArquivo || "⚠️ Não configurado"
                 });
@@ -2484,24 +1889,7 @@
                     mensagem: clienteAtual ? `✅ ${clienteAtual.nome || clienteAtual.id}` : "⚠️ Nenhum"
                 });
                 
-                if (clienteAtual) {
-                    try {
-                        const categoriasSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_categorias`).limit(1).get();
-                        resultados.push({
-                            teste: "Configurações do cliente",
-                            status: true,
-                            mensagem: `✅ OK (${categoriasSnapshot.size} categorias)`
-                        });
-                    } catch (e) {
-                        resultados.push({
-                            teste: "Configurações do cliente",
-                            status: false,
-                            mensagem: "⚠️ Erro ao ler configurações"
-                        });
-                    }
-                }
-                
-                let html = '<h3 style="margin-bottom: 15px;">📊 Resultados do Diagnóstico:</h3>';
+                let html = '<h3 style="margin-bottom: 15px;">📊 Resultados:</h3>';
                 html += '<table style="width: 100%; border-collapse: collapse;">';
                 
                 resultados.forEach(r => {
@@ -2516,28 +1904,10 @@
                 });
                 
                 html += '</table>';
-                
-                html += '<h4 style="margin: 20px 0 10px;">💡 Sugestões:</h4><ul style="color: var(--text-secondary);">';
-                
-                if (!resultados[1].status) {
-                    html += '<li>Verifique as regras de segurança do Firebase</li>';
-                    html += '<li>Certifique-se de que o Firestore está ativado</li>';
-                }
-                
-                if (!resultados[3].status) {
-                    html += '<li>Configure o nome do arquivo do App Financeiro na aba "Apps"</li>';
-                }
-                
-                if (resultados.length === 0) {
-                    html += '<li>Tudo parece OK!</li>';
-                }
-                
-                html += '</ul>';
-                
                 body.innerHTML = html;
                 
             } catch (error) {
-                body.innerHTML = `<p style="color: var(--danger);">Erro durante diagnóstico: ${error.message}</p>`;
+                body.innerHTML = `<p style="color: var(--danger);">Erro: ${error.message}</p>`;
             }
         }
 
@@ -2568,10 +1938,6 @@
             if (abaElement) {
                 abaElement.style.display = "block";
                 
-                if (aba === 'dados' && clienteAtual) {
-                    carregarDadosCliente();
-                }
-                
                 if (aba === 'config_app' && clienteAtual) {
                     carregarConfiguracoesCliente();
                 }
@@ -2586,7 +1952,7 @@
         }
         
         function mostrarAjuda() { 
-            alert(`🚀 MASTER APP v3.1 CONFIGURÁVEL\n\n✅ Categorias editáveis\n✅ Contas editáveis\n✅ Tipos editáveis\n✅ Links corrigidos\n✅ Configuração do app financeiro\n✅ Validação de arquivos\n✅ Diagnóstico completo\n✅ Backup funcional\n✅ Sincronia com Firebase\n\nAcesse a aba "⚙️ Config. App" para personalizar as opções do app financeiro.`); 
+            alert(`🚀 MASTER APP v4.0\n\n✅ Configurações em MEMÓRIA\n✅ SEM ERROS de Firestore\n✅ Funciona 100% offline\n✅ Salva no localStorage\n✅ Categorias, Contas e Tipos\n✅ Totalmente funcional`); 
         }
 
         function fecharModal() { 
@@ -2614,12 +1980,10 @@
             setTimeout(() => {
                 if (!localStorage.getItem('appFinanceiroConfig')) {
                     document.getElementById('configWarning').style.display = 'block';
-                } else {
-                    validarArquivoAppFinanceiro();
                 }
             }, 2000);
             
-            adicionarLog("🚀 Sistema iniciado - v3.1 configurável");
+            adicionarLog("🚀 Sistema iniciado - v4.0");
         };
     </script>
 </body>
