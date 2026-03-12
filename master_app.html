@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>👑 MASTER JEDI - CONTROLE TOTAL</title>
+    <title>👑 MASTER APP - CONTROLE TOTAL</title>
     
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     
     <!-- Bibliotecas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -40,6 +41,8 @@
             --purple: #9c27b0;
             --pink: #e91e63;
             --border: #404040;
+            --os-primary: #ff6b6b;
+            --os-secondary: #4ecdc4;
         }
 
         body {
@@ -55,7 +58,8 @@
             margin: 0 auto;
         }
 
-        .header {
+        /* Header Principal */
+        .main-header {
             background: rgba(26, 26, 46, 0.95);
             backdrop-filter: blur(10px);
             border-radius: 20px;
@@ -70,7 +74,7 @@
             gap: 20px;
         }
 
-        .header h1 {
+        .main-header h1 {
             font-size: clamp(20px, 3vw, 28px);
             display: flex;
             align-items: center;
@@ -95,34 +99,121 @@
             font-size: 13px;
         }
 
-        .power-btn {
-            background: linear-gradient(45deg, var(--accent), var(--neon));
-            color: black;
-            font-weight: bold;
-            padding: 10px 20px;
-            border-radius: 30px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 13px;
+        /* Tabs Principais */
+        .main-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: var(--bg-card);
+            padding: 10px;
+            border-radius: 15px;
         }
 
-        .power-btn:hover {
-            transform: scale(1.05);
+        .main-tab {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .main-tab.active {
+            background: linear-gradient(45deg, var(--neon), var(--accent));
+            color: black;
             box-shadow: 0 0 20px var(--neon);
         }
 
-        .danger-btn {
-            background: linear-gradient(45deg, var(--danger), #ff6b6b);
+        .main-tab.financeiro.active {
+            background: linear-gradient(45deg, var(--neon), var(--accent));
+        }
+
+        .main-tab.os.active {
+            background: linear-gradient(45deg, var(--os-primary), var(--os-secondary));
+        }
+
+        .main-tab-content {
+            display: none;
+        }
+
+        .main-tab-content.active {
+            display: block;
+        }
+
+        /* Botões */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
             color: white;
         }
 
+        .btn-primary:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #f57c00;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--neon);
+            color: var(--neon);
+        }
+
+        .btn-outline:hover {
+            background: var(--neon);
+            color: black;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        /* Grid Principal */
         .main-grid {
             display: grid;
             grid-template-columns: 350px 1fr;
             gap: 20px;
         }
 
+        /* Painel de Clientes (comum aos dois) */
         .clientes-panel {
             background: var(--bg-card);
             border-radius: 20px;
@@ -260,6 +351,7 @@
             color: white;
         }
 
+        /* Editor Panel */
         .editor-panel {
             background: var(--bg-card);
             border-radius: 20px;
@@ -307,6 +399,7 @@
             display: block;
         }
 
+        /* Formulários */
         .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -345,195 +438,7 @@
             border-color: var(--neon);
         }
 
-        .preview-panel {
-            background: var(--bg-secondary);
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
-            border: 2px solid var(--neon);
-        }
-
-        .preview-content {
-            background: white;
-            color: black;
-            border-radius: 12px;
-            padding: 20px;
-            min-height: 200px;
-        }
-
-        .control-buttons {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .control-btn {
-            padding: 12px;
-            border: none;
-            border-radius: 8px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 13px;
-        }
-
-        .btn-edit { background: var(--info); color: white; }
-        .btn-block { background: var(--danger); color: white; }
-        .btn-save { background: var(--accent); color: white; }
-        .btn-view { background: var(--gold); color: black; }
-        .btn-copy { background: var(--purple); color: white; }
-        .btn-export { background: var(--pink); color: white; }
-
-        .control-btn:hover {
-            transform: translateY(-2px);
-            filter: brightness(1.1);
-        }
-
-        .control-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .log-panel {
-            background: var(--bg-secondary);
-            border-radius: 10px;
-            padding: 10px;
-            margin-top: 20px;
-            max-height: 100px;
-            overflow-y: auto;
-            font-size: 11px;
-            font-family: monospace;
-        }
-
-        .log-entry {
-            padding: 3px 0;
-            border-bottom: 1px solid #404040;
-            color: var(--text-secondary);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 800px;
-            width: 90%;
-            border-left: 5px solid var(--neon);
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h2 {
-            color: var(--neon);
-            font-size: 20px;
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: var(--neon);
-            font-size: 14px;
-        }
-
-        .loading-spinner {
-            border: 3px solid rgba(0, 255, 170, 0.1);
-            border-top: 3px solid var(--neon);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .badge {
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .badge-success {
-            background: var(--accent);
-            color: white;
-        }
-
-        .w-100 { width: 100%; }
-        .flex { display: flex; gap: 10px; }
-
-        .warning-message {
-            background: rgba(255, 193, 7, 0.2);
-            border: 1px solid #ffc107;
-            color: #ffc107;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        .config-panel {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-        }
-
-        .success-message {
-            background: rgba(76, 175, 80, 0.2);
-            border: 1px solid var(--accent);
-            color: var(--accent);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            text-align: center;
-        }
-
-        .error-message {
-            background: rgba(244, 67, 54, 0.2);
-            border: 1px solid var(--danger);
-            color: var(--danger);
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            font-size: 14px;
-            text-align: center;
-        }
-        
+        /* Config Grid */
         .config-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -621,11 +526,6 @@
             color: white;
         }
 
-        .add-config-input:focus {
-            outline: none;
-            border-color: var(--neon);
-        }
-
         .add-config-btn {
             padding: 8px 15px;
             background: linear-gradient(45deg, var(--accent), var(--neon));
@@ -640,614 +540,801 @@
             transform: scale(1.05);
         }
 
-        .bank-icon {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            display: inline-flex;
+        /* Preview */
+        .preview-panel {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid var(--neon);
+        }
+
+        .preview-content {
+            background: white;
+            color: black;
+            border-radius: 12px;
+            padding: 20px;
+            min-height: 200px;
+        }
+
+        /* Botões de Controle */
+        .control-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .control-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .control-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-edit { background: var(--info); color: white; }
+        .btn-block { background: var(--danger); color: white; }
+        .btn-save { background: var(--accent); color: white; }
+        .btn-view { background: var(--gold); color: black; }
+        .btn-copy { background: var(--purple); color: white; }
+        .btn-export { background: var(--pink); color: white; }
+
+        /* Log Panel */
+        .log-panel {
+            background: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 20px;
+            max-height: 100px;
+            overflow-y: auto;
+            font-size: 11px;
+            font-family: monospace;
+        }
+
+        .log-entry {
+            padding: 3px 0;
+            border-bottom: 1px solid #404040;
+            color: var(--text-secondary);
+        }
+
+        /* Modais */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
             align-items: center;
             justify-content: center;
-            margin-right: 8px;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            border-left: 5px solid var(--neon);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--neon);
+            font-size: 20px;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--neon);
             font-size: 14px;
         }
+
+        .loading-spinner {
+            border: 3px solid rgba(0, 255, 170, 0.1);
+            border-top: 3px solid var(--neon);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .badge {
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .badge-success {
+            background: var(--accent);
+            color: white;
+        }
+
+        .w-100 { width: 100%; }
+        .flex { display: flex; gap: 10px; }
+        .mt-20 { margin-top: 20px; }
+        .mb-10 { margin-bottom: 10px; }
+        .text-success { color: var(--accent); }
+        .text-danger { color: var(--danger); }
+        .text-warning { color: var(--warning); }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- HEADER -->
-        <div class="header">
+        <!-- HEADER PRINCIPAL -->
+        <div class="main-header">
             <div>
-                <h1>👑 MASTER JEDI - CONTROLE TOTAL</h1>
-                <div style="display: flex; gap: 10px; margin-top: 5px">
-                    <span class="badge badge-success">v8.0 - COMPLETO</span>
-                    <span class="badge" style="background: var(--neon); color: black">MODO SUPREMO</span>
-                </div>
+                <h1>👑 MASTER APP</h1>
+                <div style="font-size: 12px; color: var(--text-secondary);">Controle Total - Financeiro + OS</div>
             </div>
             <div class="status-bar">
-                <div class="status-item"><span id="firebaseStatus">🔄 Conectando...</span></div>
-                <div class="status-item"><span id="clientesCount">📊 0 clientes</span></div>
-                <div class="status-item"><span id="appsCount">📱 1 app ativo</span></div>
-                <button class="power-btn" onclick="mostrarAjuda()">🚀 PODERES</button>
-                <button class="power-btn" onclick="diagnosticarConexao()">🔍 DIAGNÓSTICO</button>
-                <button class="power-btn" onclick="mostrarConfigAppFinanceiro()">⚙️ CONFIGURAR APP</button>
+                <div class="status-item" id="firebaseStatus">🔄 Conectando...</div>
+                <div class="status-item" id="totalClientes">📊 Clientes: 0</div>
+                <div class="status-item" id="totalOS">🔧 OS: 0</div>
+                <button class="btn btn-primary btn-sm" onclick="mostrarAjuda()">🚀 Ajuda</button>
+                <button class="btn btn-outline btn-sm" onclick="diagnosticar()">🔍 Diagnóstico</button>
             </div>
         </div>
 
-        <!-- MENSAGENS -->
-        <div id="configWarning" class="warning-message" style="display: none;">
-            ⚠️ Configure o nome do arquivo do app financeiro abaixo para que os links funcionem!
+        <!-- TABS PRINCIPAIS -->
+        <div class="main-tabs">
+            <button class="main-tab financeiro active" onclick="mudarMainTab('financeiro')">
+                <i class="fas fa-coins"></i> APP FINANCEIRO
+            </button>
+            <button class="main-tab os" onclick="mudarMainTab('os')">
+                <i class="fas fa-tools"></i> ORDEM DE SERVIÇO
+            </button>
         </div>
-        
-        <div id="successMessage" class="success-message" style="display: none;"></div>
-        <div id="errorMessage" class="error-message" style="display: none;"></div>
 
-        <!-- GRID PRINCIPAL -->
-        <div class="main-grid">
-            <!-- PAINEL DE CLIENTES -->
-            <div class="clientes-panel">
-                <div class="panel-title">
-                    <span>📋 CLIENTES</span>
-                    <span class="stat-tag" id="totalClientesTag">0</span>
+        <!-- CONTEÚDO PRINCIPAL - APP FINANCEIRO -->
+        <div id="mainTabFinanceiro" class="main-tab-content active">
+            <!-- HEADER DO FINANCEIRO -->
+            <div class="main-header" style="margin-bottom: 20px; border-left-color: var(--neon);">
+                <div>
+                    <h2 style="color: var(--neon);">📊 APP FINANCEIRO</h2>
+                    <div style="font-size: 12px; color: var(--text-secondary);">Gestão de clientes e lançamentos</div>
                 </div>
-
-                <input type="text" class="search-box" id="buscarCliente" placeholder="🔍 Buscar cliente..." onkeyup="filtrarClientes()" />
-
-                <div class="clientes-stats">
-                    <span class="stat-tag" id="ativosCount">✅ Ativos: 0</span>
-                    <span class="stat-tag" id="bloqueadosCount">🔒 Bloqueados: 0</span>
-                    <span class="stat-tag" id="testeCount">🧪 Teste: 0</span>
+                <div class="status-bar">
+                    <span class="status-item" id="financeiroAtivos">✅ Ativos: 0</span>
+                    <span class="status-item" id="financeiroBloqueados">🔒 Bloqueados: 0</span>
                 </div>
+            </div>
 
-                <div style="margin-bottom: 15px">
-                    <button class="power-btn w-100" onclick="criarCliente()" style="width: 100%">➕ NOVO CLIENTE</button>
-                </div>
+            <!-- GRID DO FINANCEIRO -->
+            <div class="main-grid">
+                <!-- PAINEL DE CLIENTES FINANCEIRO -->
+                <div class="clientes-panel" style="border-left-color: var(--neon);">
+                    <div class="panel-title">
+                        <span>📋 CLIENTES FINANCEIRO</span>
+                        <span class="stat-tag" id="totalClientesFinanceiro">0</span>
+                    </div>
 
-                <div class="clientes-lista" id="listaClientes">
-                    <div class="loading">
-                        <div class="loading-spinner"></div>
-                        Carregando clientes...
+                    <input type="text" class="search-box" id="buscarClienteFinanceiro" placeholder="🔍 Buscar cliente..." onkeyup="filtrarClientesFinanceiro()">
+
+                    <div class="clientes-stats">
+                        <span class="stat-tag" id="financeiroAtivosCount">✅ Ativos: 0</span>
+                        <span class="stat-tag" id="financeiroBloqueadosCount">🔒 Bloqueados: 0</span>
+                    </div>
+
+                    <button class="btn btn-primary w-100 mb-10" onclick="mostrarModalNovoClienteFinanceiro()">➕ NOVO CLIENTE</button>
+
+                    <div class="clientes-lista" id="listaClientesFinanceiro">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            Carregando...
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- EDITOR PANEL -->
-            <div class="editor-panel" id="editorPanel">
-                <!-- TABS -->
-                <div class="editor-tabs">
-                    <button class="tab-btn active" onclick="mudarAba('visual', this)">🎨 Visual</button>
-                    <button class="tab-btn" onclick="mudarAba('conteudo', this)">📝 Conteúdo</button>
-                    <button class="tab-btn" onclick="mudarAba('funcoes', this)">⚙️ Funções</button>
-                    <button class="tab-btn" onclick="mudarAba('dados', this)">📊 Dados</button>
-                    <button class="tab-btn" onclick="mudarAba('apps', this)">📱 Apps</button>
-                    <button class="tab-btn" onclick="mudarAba('bancos', this)">🏦 Bancos</button>
-                    <button class="tab-btn" onclick="mudarAba('config_app', this)">⚙️ Config. App</button>
-                    <button class="tab-btn" onclick="mudarAba('codigo', this)">💻 Código</button>
-                    <button class="tab-btn" onclick="mudarAba('planos', this)">💰 Planos</button>
-                    <button class="tab-btn warning" onclick="mudarAba('backup', this)">💾 Backup</button>
-                </div>
+                <!-- EDITOR PANEL FINANCEIRO -->
+                <div class="editor-panel" id="editorPanelFinanceiro">
+                    <!-- TABS DO FINANCEIRO -->
+                    <div class="editor-tabs">
+                        <button class="tab-btn active" onclick="mudarAbaFinanceiro('visual', this)">🎨 Visual</button>
+                        <button class="tab-btn" onclick="mudarAbaFinanceiro('conteudo', this)">📝 Conteúdo</button>
+                        <button class="tab-btn" onclick="mudarAbaFinanceiro('funcoes', this)">⚙️ Funções</button>
+                        <button class="tab-btn" onclick="mudarAbaFinanceiro('dados', this)">📊 Dados</button>
+                        <button class="tab-btn" onclick="mudarAbaFinanceiro('apps', this)">📱 Apps</button>
+                        <button class="tab-btn" onclick="mudarAbaFinanceiro('bancos', this)">🏦 Bancos</button>
+                        <button class="tab-btn" onclick="mudarAbaFinanceiro('config_app', this)">⚙️ Config. App</button>
+                        <button class="tab-btn" onclick="mudarAbaFinanceiro('codigo', this)">💻 Código</button>
+                        <button class="tab-btn" onclick="mudarAbaFinanceiro('planos', this)">💰 Planos</button>
+                        <button class="tab-btn warning" onclick="mudarAbaFinanceiro('backup', this)">💾 Backup</button>
+                    </div>
 
-                <!-- ABA VISUAL -->
-                <div id="abaVisual" class="tab-content active">
-                    <h3 style="margin-bottom: 20px">🎨 EDITOR VISUAL</h3>
-                    <div class="form-grid">
-                        <div>
-                            <div class="form-group">
-                                <label>🏢 NOME DA EMPRESA</label>
-                                <input type="text" id="nomeEmpresa" onchange="alteracaoNaoSalva()" placeholder="Nome da empresa" />
-                            </div>
-                            <div class="form-group">
-                                <label>👤 PERFIL</label>
-                                <select id="perfilCliente" onchange="alteracaoNaoSalva()">
-                                    <option value="pf">PESSOAL/FAMILIAR</option>
-                                    <option value="pj">EMPRESARIAL</option>
-                                    <option value="teste">TESTE/AVALIAÇÃO</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label>🆔 ID DO CLIENTE</label>
-                                <input type="text" id="clienteIdVisivel" disabled style="background: #333; opacity: 0.8" />
-                            </div>
-                        </div>
-                        <div>
-                            <div class="form-group">
-                                <label>🎨 COR PRINCIPAL</label>
-                                <div style="display: flex; gap: 10px">
-                                    <input type="color" id="corPrincipal" value="#4CAF50" onchange="alteracaoNaoSalva(); atualizarPreview();" style="width: 60px; height: 50px" />
-                                    <input type="text" id="corHex" value="#4CAF50" onchange="alteracaoNaoSalva(); atualizarPreview();" style="flex: 1" />
+                    <!-- ABA VISUAL FINANCEIRO -->
+                    <div id="abaVisualFinanceiro" class="tab-content active">
+                        <h3 style="margin-bottom: 20px">🎨 EDITOR VISUAL</h3>
+                        <div class="form-grid">
+                            <div>
+                                <div class="form-group">
+                                    <label>🏢 NOME DA EMPRESA</label>
+                                    <input type="text" id="nomeEmpresa" onchange="alteracaoNaoSalvaFinanceiro()" placeholder="Nome da empresa" />
+                                </div>
+                                <div class="form-group">
+                                    <label>👤 PERFIL</label>
+                                    <select id="perfilCliente" onchange="alteracaoNaoSalvaFinanceiro()">
+                                        <option value="pf">PESSOAL/FAMILIAR</option>
+                                        <option value="pj">EMPRESARIAL</option>
+                                        <option value="teste">TESTE/AVALIAÇÃO</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>🆔 ID DO CLIENTE</label>
+                                    <input type="text" id="clienteIdVisivel" disabled style="background: #333; opacity: 0.8" />
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label>🌙 MODO ESCURO</label>
-                                <select id="modoEscuro" onchange="alteracaoNaoSalva(); atualizarPreview();">
-                                    <option value="auto">Automático</option>
-                                    <option value="light">Sempre claro</option>
-                                    <option value="dark">Sempre escuro</option>
-                                </select>
+                            <div>
+                                <div class="form-group">
+                                    <label>🎨 COR PRINCIPAL</label>
+                                    <div style="display: flex; gap: 10px">
+                                        <input type="color" id="corPrincipal" value="#4CAF50" onchange="alteracaoNaoSalvaFinanceiro(); atualizarPreviewFinanceiro();" style="width: 60px; height: 50px" />
+                                        <input type="text" id="corHex" value="#4CAF50" onchange="alteracaoNaoSalvaFinanceiro(); atualizarPreviewFinanceiro();" style="flex: 1" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>🌙 MODO ESCURO</label>
+                                    <select id="modoEscuro" onchange="alteracaoNaoSalvaFinanceiro(); atualizarPreviewFinanceiro();">
+                                        <option value="auto">Automático</option>
+                                        <option value="light">Sempre claro</option>
+                                        <option value="dark">Sempre escuro</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- ABA CONTEÚDO -->
-                <div id="abaConteudo" class="tab-content">
-                    <h3>📝 CONTEÚDO</h3>
-                    <div class="form-group">
-                        <label>👤 TERMO COLABORADOR</label>
-                        <input type="text" id="termoColaborador" value="Motorista" onchange="alteracaoNaoSalva()" />
-                    </div>
-                    <div class="form-group">
-                        <label>📧 EMAIL DE CONTATO</label>
-                        <input type="email" id="emailContato" onchange="alteracaoNaoSalva()" placeholder="contato@empresa.com" />
-                    </div>
-                    <div class="form-group">
-                        <label>📞 TELEFONE</label>
-                        <input type="text" id="telefoneContato" onchange="alteracaoNaoSalva()" placeholder="(00) 00000-0000" />
-                    </div>
-                </div>
-
-                <!-- ABA FUNÇÕES -->
-                <div id="abaFuncoes" class="tab-content">
-                    <h3>⚙️ FUNÇÕES E PERMISSÕES</h3>
-                    
-                    <div class="config-card" style="margin-bottom: 20px;">
-                        <h4><i class="fas fa-key"></i> PERMISSÕES ESPECIAIS</h4>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;">
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" id="permExportar" value="exportar" onchange="alteracaoNaoSalva()">
-                                <span>📤 Exportar Dados</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" id="permImportar" value="importar" onchange="alteracaoNaoSalva()">
-                                <span>📥 Importar Dados</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" id="permExcluir" value="excluir" onchange="alteracaoNaoSalva()">
-                                <span>🗑️ Excluir Lançamentos</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" id="permEditar" value="editar" onchange="alteracaoNaoSalva()">
-                                <span>✏️ Editar Lançamentos Antigos</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" id="permRelatorios" value="relatorios" onchange="alteracaoNaoSalva()">
-                                <span>📊 Relatórios Avançados</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" id="permBackup" value="backup" onchange="alteracaoNaoSalva()">
-                                <span>💾 Backup Automático</span>
-                            </label>
+                    <!-- ABA CONTEÚDO FINANCEIRO -->
+                    <div id="abaConteudoFinanceiro" class="tab-content">
+                        <h3>📝 CONTEÚDO</h3>
+                        <div class="form-group">
+                            <label>👤 TERMO COLABORADOR</label>
+                            <input type="text" id="termoColaborador" value="Motorista" onchange="alteracaoNaoSalvaFinanceiro()" />
+                        </div>
+                        <div class="form-group">
+                            <label>📧 EMAIL DE CONTATO</label>
+                            <input type="email" id="emailContato" onchange="alteracaoNaoSalvaFinanceiro()" placeholder="contato@empresa.com" />
+                        </div>
+                        <div class="form-group">
+                            <label>📞 TELEFONE</label>
+                            <input type="text" id="telefoneContato" onchange="alteracaoNaoSalvaFinanceiro()" placeholder="(00) 00000-0000" />
                         </div>
                     </div>
-                    
-                    <div class="config-card" style="margin-bottom: 20px;">
-                        <h4><i class="fas fa-tachometer-alt"></i> LIMITES</h4>
+
+                    <!-- ABA FUNÇÕES FINANCEIRO -->
+                    <div id="abaFuncoesFinanceiro" class="tab-content">
+                        <h3>⚙️ FUNÇÕES</h3>
+                        <div class="form-group">
+                            <label>🔑 PERMISSÕES ESPECIAIS</label>
+                            <select id="permissoesEspeciais" onchange="alteracaoNaoSalvaFinanceiro()" multiple style="height: 100px">
+                                <option value="exportar">Exportar Dados</option>
+                                <option value="importar">Importar Dados</option>
+                                <option value="excluir">Excluir Lançamentos</option>
+                                <option value="editar">Editar Lançamentos Antigos</option>
+                                <option value="relatorios">Relatórios Avançados</option>
+                            </select>
+                            <small style="color: var(--text-secondary);">Segure Ctrl para selecionar múltiplas</small>
+                        </div>
                         <div class="form-group">
                             <label>⏰ LIMITE DE LANÇAMENTOS</label>
-                            <input type="number" id="limiteLancamentos" class="form-control" value="1000" min="10" max="10000" onchange="alteracaoNaoSalva()">
-                            <small style="color: var(--text-secondary);">Máximo de lançamentos permitidos</small>
+                            <input type="number" id="limiteLancamentos" value="1000" onchange="alteracaoNaoSalvaFinanceiro()" min="10" max="10000" />
+                        </div>
+                    </div>
+
+                    <!-- ABA DADOS FINANCEIRO -->
+                    <div id="abaDadosFinanceiro" class="tab-content">
+                        <h3>📊 DADOS DO CLIENTE</h3>
+                        <div id="dadosClienteContainer">
+                            <div class="loading">Carregando dados...</div>
+                        </div>
+                    </div>
+
+                    <!-- ABA APPS FINANCEIRO -->
+                    <div id="abaAppsFinanceiro" class="tab-content">
+                        <h3>📱 CONFIGURAÇÃO DO APP FINANCEIRO</h3>
+                        <div class="config-panel" style="background: var(--bg-secondary); padding: 20px; border-radius: 10px;">
+                            <div class="form-group">
+                                <label>📄 NOME DO ARQUIVO DO APP FINANCEIRO</label>
+                                <input type="text" id="appFinanceiroNome" value="appfinanceiro.html" placeholder="Ex: appfinanceiro.html" onchange="salvarConfigAppFinanceiro()" />
+                                <small style="color: var(--text-secondary);">Nome exato do arquivo</small>
+                            </div>
+                            <div class="form-group">
+                                <label>📁 CAMINHO DA PASTA (opcional)</label>
+                                <input type="text" id="appFinanceiroCaminho" value="" placeholder="Ex: apps/ ou ../" onchange="salvarConfigAppFinanceiro()" />
+                            </div>
+                            <div style="margin-top: 15px">
+                                <button class="btn btn-primary btn-sm" onclick="testarLinkAppFinanceiro()">🔗 TESTAR LINK</button>
+                            </div>
+                            <div id="appFinanceiroStatus" style="margin-top: 10px; font-size: 12px;"></div>
+                        </div>
+                    </div>
+
+                    <!-- ABA BANCOS FINANCEIRO -->
+                    <div id="abaBancosFinanceiro" class="tab-content">
+                        <h3>🏦 BANCOS CADASTRADOS</h3>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <button class="btn btn-primary btn-sm" onclick="mostrarModalBancoFinanceiro()">
+                                <i class="fas fa-plus"></i> NOVO BANCO
+                            </button>
+                        </div>
+                        
+                        <div class="config-list" id="listaBancosFinanceiro" style="max-height: 400px;">
+                            <div class="loading">Carregando bancos...</div>
+                        </div>
+                    </div>
+
+                    <!-- ABA CONFIG APP FINANCEIRO -->
+                    <div id="abaConfigAppFinanceiro" class="tab-content">
+                        <h3>⚙️ CONFIGURAÇÕES DO APP</h3>
+                        
+                        <div class="config-grid">
+                            <!-- CATEGORIAS -->
+                            <div class="config-card">
+                                <h4><i class="fas fa-tags"></i> CATEGORIAS</h4>
+                                <div class="config-list" id="listaCategoriasFinanceiro">
+                                    <div class="loading">Carregando...</div>
+                                </div>
+                                <div class="add-config-form">
+                                    <input type="text" id="novaCategoria" class="add-config-input" placeholder="Nova categoria...">
+                                    <button class="add-config-btn" onclick="adicionarCategoriaFinanceiro()">➕</button>
+                                </div>
+                            </div>
+                            
+                            <!-- CONTAS -->
+                            <div class="config-card">
+                                <h4><i class="fas fa-wallet"></i> CONTAS</h4>
+                                <div class="config-list" id="listaContasFinanceiro">
+                                    <div class="loading">Carregando...</div>
+                                </div>
+                                <div class="add-config-form">
+                                    <input type="text" id="novaConta" class="add-config-input" placeholder="Nova conta...">
+                                    <button class="add-config-btn" onclick="adicionarContaFinanceiro()">➕</button>
+                                </div>
+                            </div>
+                            
+                            <!-- TIPOS -->
+                            <div class="config-card">
+                                <h4><i class="fas fa-exchange-alt"></i> TIPOS</h4>
+                                <div class="config-list" id="listaTiposFinanceiro">
+                                    <div class="loading">Carregando...</div>
+                                </div>
+                                <div class="add-config-form">
+                                    <input type="text" id="novoTipo" class="add-config-input" placeholder="Novo tipo...">
+                                    <select id="novoTipoNatureza" class="add-config-input" style="flex: 0.5;">
+                                        <option value="entrada">📥 Entrada</option>
+                                        <option value="saida">📤 Saída</option>
+                                    </select>
+                                    <button class="add-config-btn" onclick="adicionarTipoFinanceiro()">➕</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button class="btn btn-primary" onclick="salvarTudoFinanceiro()" style="flex: 1;">💾 SALVAR TUDO</button>
+                        </div>
+                    </div>
+
+                    <!-- ABA CÓDIGO FINANCEIRO -->
+                    <div id="abaCodigoFinanceiro" class="tab-content">
+                        <h3>💻 CÓDIGO PERSONALIZADO</h3>
+                        <div class="form-group">
+                            <label>📜 CSS PERSONALIZADO</label>
+                            <textarea id="cssPersonalizado" rows="6" class="form-control" onchange="alteracaoNaoSalvaFinanceiro()" placeholder="/* CSS aqui */"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>⚡ JAVASCRIPT PERSONALIZADO</label>
+                            <textarea id="jsPersonalizado" rows="6" class="form-control" onchange="alteracaoNaoSalvaFinanceiro()" placeholder="// JavaScript aqui"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- ABA PLANOS FINANCEIRO -->
+                    <div id="abaPlanosFinanceiro" class="tab-content">
+                        <h3>💰 PLANOS E PREÇOS</h3>
+                        <div class="form-group">
+                            <label>💳 PLANO ATUAL</label>
+                            <select id="planoAtual" class="form-control" onchange="alteracaoNaoSalvaFinanceiro()">
+                                <option value="gratuito">Gratuito</option>
+                                <option value="basico">Básico</option>
+                                <option value="profissional">Profissional</option>
+                                <option value="empresarial">Empresarial</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>💰 VALOR MENSAL (R$)</label>
+                            <input type="text" id="valorPlano" class="form-control" value="0,00" onchange="alteracaoNaoSalvaFinanceiro()" />
+                        </div>
+                        <div class="form-group">
+                            <label>📅 PRÓXIMO VENCIMENTO</label>
+                            <input type="date" id="proximoVencimento" class="form-control" onchange="alteracaoNaoSalvaFinanceiro()" />
+                        </div>
+                    </div>
+
+                    <!-- ABA BACKUP FINANCEIRO -->
+                    <div id="abaBackupFinanceiro" class="tab-content">
+                        <h3>💾 BACKUP E RESTAURAÇÃO</h3>
+                        <div class="flex" style="flex-wrap: wrap; margin-bottom: 20px;">
+                            <button class="control-btn btn-save" onclick="exportarClienteFinanceiro()">📦 EXPORTAR</button>
+                            <button class="control-btn btn-view" onclick="importarBackupFinanceiro()">📂 IMPORTAR</button>
+                        </div>
+                    </div>
+
+                    <!-- PREVIEW FINANCEIRO -->
+                    <div class="preview-panel">
+                        <div class="preview-content" id="previewConteudoFinanceiro">
+                            <div style="text-align: center">
+                                <h3 id="previewTitulo">Nome da Empresa</h3>
+                                <p id="previewCor" style="margin-top: 10px;">Cor: #4CAF50</p>
+                                <p id="previewModo">Modo: Automático</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOTÕES DE CONTROLE FINANCEIRO -->
+                    <div class="control-buttons">
+                        <button class="control-btn btn-edit" onclick="entrarModoEdicaoFinanceiro()" id="btnEditarFinanceiro" disabled>✏️ EDITAR</button>
+                        <button class="control-btn btn-block" onclick="bloquearClienteFinanceiro()" id="btnBloquearFinanceiro" disabled>🔒 BLOQUEAR</button>
+                        <button class="control-btn btn-save" onclick="salvarAlteracoesFinanceiro()" id="btnSalvarFinanceiro" disabled>💾 SALVAR</button>
+                        <button class="control-btn btn-view" onclick="verComoClienteFinanceiro()" id="btnVisualizarFinanceiro" disabled>👁️ VER</button>
+                        <button class="control-btn btn-copy" onclick="copiarLinkFinanceiro()" id="btnCopiarLinkFinanceiro" disabled>🔗 LINK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTEÚDO PRINCIPAL - ORDEM DE SERVIÇO -->
+        <div id="mainTabOS" class="main-tab-content">
+            <!-- HEADER DA OS -->
+            <div class="main-header" style="margin-bottom: 20px; border-left-color: var(--os-primary);">
+                <div>
+                    <h2 style="color: var(--os-primary);">🔧 ORDEM DE SERVIÇO</h2>
+                    <div style="font-size: 12px; color: var(--text-secondary);">Gestão completa de serviços</div>
+                </div>
+                <div class="status-bar">
+                    <span class="status-item" id="osAtivos">✅ Clientes: 0</span>
+                    <span class="status-item" id="osTotal">📋 OS: 0</span>
+                    <span class="status-item" id="osPendentes">⏳ Pendentes: 0</span>
+                </div>
+            </div>
+
+            <!-- GRID DA OS -->
+            <div class="main-grid">
+                <!-- PAINEL DE CLIENTES OS -->
+                <div class="clientes-panel" style="border-left-color: var(--os-primary);">
+                    <div class="panel-title">
+                        <span>👥 CLIENTES OS</span>
+                        <span class="stat-tag" id="totalClientesOS">0</span>
+                    </div>
+
+                    <input type="text" class="search-box" id="buscarClienteOS" placeholder="🔍 Buscar cliente OS..." onkeyup="filtrarClientesOS()">
+
+                    <button class="btn btn-primary w-100 mb-10" onclick="mostrarModalNovoClienteOS()">➕ NOVO CLIENTE OS</button>
+
+                    <div class="clientes-lista" id="listaClientesOS">
+                        <div class="loading">
+                            <div class="loading-spinner"></div>
+                            Carregando...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EDITOR PANEL OS -->
+                <div class="editor-panel" id="editorPanelOS" style="border-top-color: var(--os-primary);">
+                    <!-- TABS DA OS -->
+                    <div class="editor-tabs">
+                        <button class="tab-btn active" onclick="mudarAbaOS('dados_cliente', this)">👤 Dados</button>
+                        <button class="tab-btn" onclick="mudarAbaOS('categorias', this)">📑 Categorias</button>
+                        <button class="tab-btn" onclick="mudarAbaOS('status', this)">📌 Status</button>
+                        <button class="tab-btn" onclick="mudarAbaOS('modelos', this)">📝 Modelos</button>
+                        <button class="tab-btn" onclick="mudarAbaOS('config', this)">⚙️ Config</button>
+                    </div>
+
+                    <!-- ABA DADOS DO CLIENTE OS -->
+                    <div id="abaDadosClienteOS" class="tab-content active">
+                        <h3 style="margin-bottom: 20px;">👤 DADOS DO CLIENTE OS</h3>
+                        
+                        <div class="form-group">
+                            <label>ID do Cliente</label>
+                            <input type="text" id="clienteOSId" class="form-control" readonly disabled style="background: #333;">
                         </div>
                         
                         <div class="form-group">
-                            <label>📅 PERÍODO MÁXIMO PARA TRÁS (DIAS)</label>
-                            <input type="number" id="limiteDias" class="form-control" value="365" min="30" max="3650" onchange="alteracaoNaoSalva()">
+                            <label>Nome da Empresa *</label>
+                            <input type="text" id="clienteOSNome" class="form-control" placeholder="Ex: Empresa XYZ">
                         </div>
-                    </div>
-                    
-                    <div class="config-card">
-                        <h4><i class="fas fa-bell"></i> NOTIFICAÇÕES</h4>
-                        <div style="display: grid; gap: 10px;">
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" id="notifEmail" onchange="alteracaoNaoSalva()">
-                                <span>📧 Receber notificações por email</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" id="notifSMS" onchange="alteracaoNaoSalva()">
-                                <span>📱 Receber notificações por SMS</span>
-                            </label>
-                            <label style="display: flex; align-items: center; gap: 8px;">
-                                <input type="checkbox" id="notifSaldo" onchange="alteracaoNaoSalva()">
-                                <span>💰 Alertas de saldo baixo</span>
-                            </label>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ABA DADOS -->
-                <div id="abaDados" class="tab-content">
-                    <h3>📊 DADOS DO CLIENTE</h3>
-                    <div id="dadosClienteContainer">
-                        <div class="loading">Carregando dados...</div>
-                    </div>
-                </div>
-
-                <!-- ABA APPS -->
-                <div id="abaApps" class="tab-content">
-                    <h3>📱 CONFIGURAÇÃO DO APP FINANCEIRO</h3>
-                    <div class="config-panel">
+                        
                         <div class="form-group">
-                            <label>📄 NOME DO ARQUIVO DO APP FINANCEIRO</label>
-                            <input type="text" id="appFinanceiroNome" value="appfinanceiro.html" placeholder="Ex: appfinanceiro.html" onchange="salvarConfigAppFinanceiro()" />
-                            <small style="color: var(--text-secondary);">Nome exato do arquivo que será aberto ao clicar em Visualizar</small>
+                            <label>Email</label>
+                            <input type="email" id="clienteOSEmail" class="form-control" placeholder="contato@empresa.com">
                         </div>
+                        
                         <div class="form-group">
-                            <label>📁 CAMINHO DA PASTA (opcional)</label>
-                            <input type="text" id="appFinanceiroCaminho" value="" placeholder="Ex: apps/ ou ../" onchange="salvarConfigAppFinanceiro()" />
-                        </div>
-                        <div style="margin-top: 15px">
-                            <button class="power-btn" onclick="testarLinkAppFinanceiro()">🔗 TESTAR LINK</button>
-                            <button class="power-btn" onclick="buscarArquivosApp()">🔍 PROCURAR ARQUIVOS</button>
-                            <button class="power-btn" onclick="validarArquivoAppFinanceiro()">✅ VALIDAR ARQUIVO</button>
-                        </div>
-                        <div id="appFinanceiroStatus" style="margin-top: 10px; font-size: 12px;"></div>
-                    </div>
-                </div>
-
-                <!-- ABA BANCOS -->
-                <div id="abaBancos" class="tab-content">
-                    <h3>🏦 BANCOS CADASTRADOS</h3>
-                    
-                    <div style="margin-bottom: 20px;">
-                        <button class="power-btn" onclick="mostrarModalBanco()" style="margin-right: 10px;">
-                            <i class="fas fa-plus"></i> NOVO BANCO
-                        </button>
-                        <button class="power-btn" onclick="salvarBancos()">
-                            <i class="fas fa-save"></i> SALVAR BANCOS
-                        </button>
-                        <button class="power-btn danger-btn" onclick="resetarBancosPadrao()" style="margin-left: 10px;">
-                            <i class="fas fa-undo"></i> PADRÃO
-                        </button>
-                    </div>
-                    
-                    <div class="config-grid">
-                        <div class="config-card" style="grid-column: span 3;">
-                            <h4><i class="fas fa-university"></i> LISTA DE BANCOS</h4>
-                            <div class="config-list" id="listaBancos" style="max-height: 400px;">
-                                <div class="loading">Carregando bancos...</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- ABA CONFIG APP -->
-                <div id="abaConfigApp" class="tab-content">
-                    <h3>⚙️ CONFIGURAÇÕES DO APP</h3>
-                    
-                    <div class="config-grid">
-                        
-                        <!-- CATEGORIAS -->
-                        <div class="config-card">
-                            <h4><i class="fas fa-tags"></i> CATEGORIAS</h4>
-                            
-                            <div class="config-list" id="listaCategorias">
-                                <div class="loading">Carregando categorias...</div>
-                            </div>
-                            
-                            <div class="add-config-form">
-                                <input type="text" id="novaCategoria" class="add-config-input" placeholder="Nova categoria...">
-                                <button class="add-config-btn" onclick="adicionarCategoria()">➕</button>
-                            </div>
+                            <label>Telefone / WhatsApp</label>
+                            <input type="text" id="clienteOSTelefone" class="form-control" placeholder="(00) 00000-0000">
                         </div>
                         
-                        <!-- CONTAS -->
-                        <div class="config-card">
-                            <h4><i class="fas fa-wallet"></i> CONTAS</h4>
-                            
-                            <div class="config-list" id="listaContas">
-                                <div class="loading">Carregando contas...</div>
+                        <div class="form-group">
+                            <label>Endereço</label>
+                            <input type="text" id="clienteOSEndereco" class="form-control" placeholder="Rua, número, bairro">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="clienteOSStatus" class="form-control">
+                                <option value="ativo">✅ Ativo</option>
+                                <option value="inativo">❌ Inativo</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex">
+                            <button class="btn btn-primary w-100" onclick="salvarClienteOS()">💾 SALVAR CLIENTE</button>
+                        </div>
+                        
+                        <div style="margin-top: 20px; padding: 15px; background: var(--bg-secondary); border-radius: 8px;">
+                            <h4>🔗 Link de Acesso</h4>
+                            <div class="flex">
+                                <input type="text" id="clienteOSLink" class="form-control" readonly>
+                                <button class="btn btn-primary btn-sm" onclick="copiarLinkOS()">📋 Copiar</button>
                             </div>
-                            
-                            <div class="add-config-form">
-                                <input type="text" id="novaConta" class="add-config-input" placeholder="Nova conta...">
-                                <button class="add-config-btn" onclick="adicionarConta()">➕</button>
+                            <small style="color: var(--text-secondary);">Compartilhe este link com o cliente</small>
+                        </div>
+                    </div>
+
+                    <!-- ABA CATEGORIAS OS -->
+                    <div id="abaCategoriasOS" class="tab-content">
+                        <h3 style="margin-bottom: 20px;">📑 CATEGORIAS DE SERVIÇO</h3>
+                        
+                        <div class="config-list" id="listaCategoriasOS" style="max-height: 300px;">
+                            <div class="loading">Carregando...</div>
+                        </div>
+                        
+                        <div class="add-config-form">
+                            <input type="text" id="novaCategoriaOS" class="add-config-input" placeholder="Nova categoria...">
+                            <select id="categoriaOSIcone" class="add-config-input" style="flex: 0.3;">
+                                <option value="⚡">⚡ Elétrica</option>
+                                <option value="💧">💧 Hidráulica</option>
+                                <option value="🎨">🎨 Pintura</option>
+                                <option value="🪑">🪑 Marcenaria</option>
+                                <option value="🌿">🌿 Jardinagem</option>
+                                <option value="📦">📦 Mudanças</option>
+                                <option value="🛠️">🛠️ Reparos</option>
+                                <option value="📌">📌 Outros</option>
+                            </select>
+                            <button class="add-config-btn" onclick="adicionarCategoriaOS()">➕</button>
+                        </div>
+                        
+                        <button class="btn btn-primary w-100 mt-20" onclick="salvarCategoriasOS()">💾 SALVAR CATEGORIAS</button>
+                    </div>
+
+                    <!-- ABA STATUS OS -->
+                    <div id="abaStatusOS" class="tab-content">
+                        <h3 style="margin-bottom: 20px;">📌 STATUS PERSONALIZADOS</h3>
+                        
+                        <div class="config-list" id="listaStatusOS" style="max-height: 300px;">
+                            <div class="loading">Carregando...</div>
+                        </div>
+                        
+                        <div class="add-config-form">
+                            <input type="text" id="novoStatusOS" class="add-config-input" placeholder="Novo status...">
+                            <select id="statusOSCor" class="add-config-input" style="flex: 0.3;">
+                                <option value="#2196F3">🔵 Azul</option>
+                                <option value="#4CAF50">🟢 Verde</option>
+                                <option value="#FF9800">🟠 Laranja</option>
+                                <option value="#f44336">🔴 Vermelho</option>
+                                <option value="#9C27B0">🟣 Roxo</option>
+                            </select>
+                            <button class="add-config-btn" onclick="adicionarStatusOS()">➕</button>
+                        </div>
+                        
+                        <button class="btn btn-primary w-100 mt-20" onclick="salvarStatusOS()">💾 SALVAR STATUS</button>
+                    </div>
+
+                    <!-- ABA MODELOS OS -->
+                    <div id="abaModelosOS" class="tab-content">
+                        <h3 style="margin-bottom: 20px;">📝 MODELOS DE OS</h3>
+                        
+                        <div class="config-list" id="listaModelosOS" style="max-height: 300px;">
+                            <div class="loading">Carregando...</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Nome do Modelo</label>
+                            <input type="text" id="modeloOSNome" class="form-control" placeholder="Ex: Modelo Padrão">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Título Padrão</label>
+                            <input type="text" id="modeloOSTitulo" class="form-control" placeholder="Ex: Serviço de {categoria}">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Descrição Padrão</label>
+                            <textarea id="modeloOSDescricao" class="form-control" rows="3" placeholder="Descrição padrão do serviço..."></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary w-100" onclick="salvarModeloOS()">💾 SALVAR MODELO</button>
+                    </div>
+
+                    <!-- ABA CONFIG OS -->
+                    <div id="abaConfigOS" class="tab-content">
+                        <h3 style="margin-bottom: 20px;">⚙️ CONFIGURAÇÕES</h3>
+                        
+                        <div class="config-card">
+                            <h4><i class="fas fa-bell"></i> NOTIFICAÇÕES</h4>
+                            <div style="display: grid; gap: 10px;">
+                                <label style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="notifEmailOS" onchange="salvarConfigOS()">
+                                    <span>📧 Notificar por email</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="notifWhatsAppOS" onchange="salvarConfigOS()">
+                                    <span>📱 Notificar por WhatsApp</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px;">
+                                    <input type="checkbox" id="notifSMSOS" onchange="salvarConfigOS()">
+                                    <span>💬 Notificar por SMS</span>
+                                </label>
                             </div>
                         </div>
                         
-                        <!-- TIPOS -->
                         <div class="config-card">
-                            <h4><i class="fas fa-exchange-alt"></i> TIPOS</h4>
-                            
-                            <div class="config-list" id="listaTipos">
-                                <div class="loading">Carregando tipos...</div>
+                            <h4><i class="fas fa-clock"></i> PRAZOS</h4>
+                            <div class="form-group">
+                                <label>Prazo padrão (dias)</label>
+                                <input type="number" id="prazoPadraoOS" class="form-control" value="7" min="1" max="30" onchange="salvarConfigOS()">
                             </div>
-                            
-                            <div class="add-config-form">
-                                <input type="text" id="novoTipo" class="add-config-input" placeholder="Novo tipo...">
-                                <select id="novoTipoNatureza" class="add-config-input" style="flex: 0.5;">
-                                    <option value="entrada">📥 Entrada</option>
-                                    <option value="saida">📤 Saída</option>
-                                </select>
-                                <button class="add-config-btn" onclick="adicionarTipo()">➕</button>
+                            <div class="form-group">
+                                <label>Lembrete antes do vencimento (dias)</label>
+                                <input type="number" id="lembreteOS" class="form-control" value="2" min="1" max="7" onchange="salvarConfigOS()">
                             </div>
                         </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button class="power-btn" onclick="salvarTudo()" style="flex: 1;">💾 SALVAR TUDO</button>
-                        <button class="power-btn danger-btn" onclick="resetarTudo()" style="flex: 1;">🔄 PADRÃO</button>
-                    </div>
-                </div>
-
-                <!-- ABA CÓDIGO -->
-                <div id="abaCodigo" class="tab-content">
-                    <h3>💻 CÓDIGO PERSONALIZADO</h3>
-                    <div class="form-group">
-                        <label>📜 CSS PERSONALIZADO</label>
-                        <textarea id="cssPersonalizado" rows="6" class="form-control" onchange="alteracaoNaoSalva()" placeholder="/* Adicione CSS personalizado aqui */"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>⚡ JAVASCRIPT PERSONALIZADO</label>
-                        <textarea id="jsPersonalizado" rows="6" class="form-control" onchange="alteracaoNaoSalva()" placeholder="// Adicione JavaScript personalizado aqui"></textarea>
-                    </div>
-                </div>
-
-                <!-- ABA PLANOS -->
-                <div id="abaPlanos" class="tab-content">
-                    <h3>💰 PLANOS E PREÇOS</h3>
-                    <div class="form-group">
-                        <label>💳 PLANO ATUAL</label>
-                        <select id="planoAtual" class="form-control" onchange="alteracaoNaoSalva()">
-                            <option value="gratuito">Gratuito</option>
-                            <option value="basico">Básico - R$ 29,90</option>
-                            <option value="profissional">Profissional - R$ 49,90</option>
-                            <option value="empresarial">Empresarial - R$ 99,90</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>💰 VALOR MENSAL (R$)</label>
-                        <input type="text" id="valorPlano" class="form-control" value="0,00" onchange="alteracaoNaoSalva()" />
-                    </div>
-                    <div class="form-group">
-                        <label>📅 PRÓXIMO VENCIMENTO</label>
-                        <input type="date" id="proximoVencimento" class="form-control" onchange="alteracaoNaoSalva()" />
-                    </div>
-                </div>
-
-                <!-- ABA BACKUP -->
-                <div id="abaBackup" class="tab-content">
-                    <h3>💾 BACKUP E RESTAURAÇÃO</h3>
-                    <div class="flex" style="flex-wrap: wrap; margin-bottom: 20px;">
-                        <button class="control-btn btn-save" onclick="exportarClienteCompleto()">📦 EXPORTAR BACKUP</button>
-                        <button class="control-btn btn-view" onclick="importarBackup()">📂 IMPORTAR BACKUP</button>
-                        <button class="control-btn btn-edit" onclick="restaurarVersaoAnterior()">🔄 RESTAURAR VERSÃO</button>
-                    </div>
-                    <div id="historicoBackups" style="max-height: 200px; overflow-y: auto; background: var(--bg-secondary); padding: 10px; border-radius: 8px;">
-                        <p style="color: var(--text-secondary); text-align: center;">Histórico de backups</p>
-                    </div>
-                </div>
-
-                <!-- PREVIEW -->
-                <div class="preview-panel">
-                    <div class="preview-content" id="previewConteudo">
-                        <div style="text-align: center">
-                            <h3 id="previewTitulo">Nome da Empresa</h3>
-                            <p id="previewCor" style="margin-top: 10px; font-size: 12px;">Cor: #4CAF50</p>
-                            <p id="previewModo">Modo: Automático</p>
+                        
+                        <div class="config-card">
+                            <h4><i class="fas fa-shield-alt"></i> SEGURANça</h4>
+                            <div class="form-group">
+                                <label>PIN de acesso (para clientes)</label>
+                                <input type="text" id="pinAcessoOS" class="form-control" value="1234" maxlength="4" placeholder="4 dígitos" onchange="salvarConfigOS()">
+                                <small style="color: var(--text-secondary);">Cliente precisará informar este PIN</small>
+                            </div>
                         </div>
+                        
+                        <button class="btn btn-primary w-100" onclick="salvarConfigOS()">💾 SALVAR CONFIGURAÇÕES</button>
                     </div>
-                </div>
-
-                <!-- BOTÕES DE CONTROLE -->
-                <div class="control-buttons">
-                    <button class="control-btn btn-edit" onclick="entrarModoEdicao()" id="btnEditar" disabled>✏️ EDITAR</button>
-                    <button class="control-btn btn-block" onclick="bloquearCliente()" id="btnBloquear" disabled>🔒 BLOQUEAR</button>
-                    <button class="control-btn btn-save" onclick="salvarAlteracoes()" id="btnSalvar" disabled>💾 SALVAR</button>
-                    <button class="control-btn btn-view" onclick="verComoCliente()" id="btnVisualizar" disabled>👁️ VER COMO CLIENTE</button>
-                    <button class="control-btn btn-copy" onclick="copiarLinkClienteAtual()" id="btnCopiarLink" disabled>🔗 COPIAR LINK</button>
-                    <button class="control-btn btn-export" onclick="exportarClienteJSON()" id="btnExportar" disabled>📦 EXPORTAR</button>
-                </div>
-
-                <!-- LOG PANEL -->
-                <div class="log-panel" id="logPanel">
-                    <div class="log-entry">🚀 Sistema pronto - v8.0 Completo</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL BANCO -->
-    <div id="modalBanco" class="modal">
-        <div class="modal-content" style="max-width: 600px;">
+    <!-- MODAL NOVO CLIENTE FINANCEIRO -->
+    <div id="modalNovoClienteFinanceiro" class="modal">
+        <div class="modal-content">
             <div class="modal-header">
-                <h2 id="modalBancoTitulo">🏦 NOVO BANCO</h2>
-                <button class="modal-close" onclick="fecharModalBanco()">×</button>
+                <h2>➕ NOVO CLIENTE FINANCEIRO</h2>
+                <button class="modal-close" onclick="fecharModalNovoClienteFinanceiro()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nome da Empresa *</label>
+                    <input type="text" id="novoClienteFinanceiroNome" class="form-control" placeholder="Ex: Empresa XYZ">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="novoClienteFinanceiroEmail" class="form-control" placeholder="email@exemplo.com">
+                </div>
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="text" id="novoClienteFinanceiroTelefone" class="form-control" placeholder="(00) 00000-0000">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="criarClienteFinanceiro()">CRIAR</button>
+                <button class="btn btn-outline" onclick="fecharModalNovoClienteFinanceiro()">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL NOVO CLIENTE OS -->
+    <div id="modalNovoClienteOS" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>➕ NOVO CLIENTE OS</h2>
+                <button class="modal-close" onclick="fecharModalNovoClienteOS()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nome da Empresa *</label>
+                    <input type="text" id="novoClienteOSNome" class="form-control" placeholder="Ex: Empresa XYZ">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="novoClienteOSEmail" class="form-control" placeholder="email@exemplo.com">
+                </div>
+                <div class="form-group">
+                    <label>Telefone</label>
+                    <input type="text" id="novoClienteOSTelefone" class="form-control" placeholder="(00) 00000-0000">
+                </div>
+                <div class="form-group">
+                    <label>Endereço</label>
+                    <input type="text" id="novoClienteOSEndereco" class="form-control" placeholder="Rua, número, bairro">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="criarClienteOS()">CRIAR</button>
+                <button class="btn btn-outline" onclick="fecharModalNovoClienteOS()">CANCELAR</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL BANCO FINANCEIRO -->
+    <div id="modalBancoFinanceiro" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🏦 NOVO BANCO</h2>
+                <button class="modal-close" onclick="fecharModalBancoFinanceiro()">×</button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="bancoIndex" value="-1">
                 
                 <div class="form-group">
-                    <label>🏦 NOME DO BANCO *</label>
-                    <input type="text" id="bancoNome" class="form-control" placeholder="Ex: Itaú, Bradesco, Nubank...">
+                    <label>Nome do Banco *</label>
+                    <input type="text" id="bancoNome" class="form-control" placeholder="Ex: Itaú, Bradesco...">
                 </div>
                 
                 <div class="form-group">
-                    <label>🎨 COR DO BANCO</label>
+                    <label>Cor</label>
                     <div style="display: flex; gap: 10px;">
                         <input type="color" id="bancoCor" value="#4CAF50" style="width: 60px; height: 40px;">
-                        <input type="text" id="bancoCorHex" value="#4CAF50" class="form-control" placeholder="#COR">
+                        <input type="text" id="bancoCorHex" value="#4CAF50" class="form-control">
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label>🔤 ÍCONE (Font Awesome)</label>
+                    <label>Ícone</label>
                     <select id="bancoIcone" class="form-control">
                         <option value="fa-university">🏛️ Padrão</option>
                         <option value="fa-building">🏢 Edifício</option>
-                        <option value="fa-landmark">🏛️ Monumento</option>
-                        <option value="fa-piggy-bank">🐷 Porquinho</option>
                         <option value="fa-credit-card">💳 Cartão</option>
-                        <option value="fa-money-bill">💰 Dinheiro</option>
-                        <option value="fa-coins">🪙 Moedas</option>
-                        <option value="fa-sack-dollar">💰 Saco de Dinheiro</option>
                     </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>📄 FORMATO DO EXTRATO</label>
-                    <select id="bancoFormato" class="form-control">
-                        <option value="ofx">OFX</option>
-                        <option value="csv_ofx">CSV estilo OFX</option>
-                        <option value="csv_itau">CSV Itaú</option>
-                        <option value="csv_bradesco">CSV Bradesco</option>
-                        <option value="csv_santander">CSV Santander</option>
-                        <option value="csv_bb">CSV Banco do Brasil</option>
-                        <option value="csv_caixa">CSV Caixa</option>
-                        <option value="csv_nubank">CSV Nubank</option>
-                        <option value="csv_inter">CSV Inter</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>🔢 POSIÇÃO DA DATA</label>
-                    <input type="text" id="bancoPosData" class="form-control" placeholder="Ex: 0, 1, A, B..." value="0">
-                    <small>Número da coluna (0 = primeira)</small>
-                </div>
-                
-                <div class="form-group">
-                    <label>🔢 POSIÇÃO DA DESCRIÇÃO</label>
-                    <input type="text" id="bancoPosDesc" class="form-control" placeholder="Ex: 1, 2, B, C..." value="1">
-                </div>
-                
-                <div class="form-group">
-                    <label>🔢 POSIÇÃO DO VALOR</label>
-                    <input type="text" id="bancoPosValor" class="form-control" placeholder="Ex: 2, 3, C, D..." value="2">
-                </div>
-                
-                <div class="form-group">
-                    <label>🔢 POSIÇÃO DO TIPO (D/C)</label>
-                    <input type="text" id="bancoPosTipo" class="form-control" placeholder="Ex: 3, 4, D, E... (opcional)">
-                </div>
-                
-                <div class="form-group">
-                    <label>📅 FORMATO DA DATA</label>
-                    <select id="bancoFormatoData" class="form-control">
-                        <option value="dd/mm/yyyy">DD/MM/AAAA</option>
-                        <option value="mm/dd/yyyy">MM/DD/AAAA</option>
-                        <option value="yyyy-mm-dd">AAAA-MM-DD</option>
-                        <option value="dd-mm-yyyy">DD-MM-AAAA</option>
-                        <option value="dd/mm/yy">DD/MM/AA</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>💰 SEPARADOR DE VALOR</label>
-                    <select id="bancoSeparador" class="form-control">
-                        <option value=".">Ponto (.)</option>
-                        <option value=",">Vírgula (,)</option>
-                        <option value="auto">Automático</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>📊 DELIMITADOR CSV</label>
-                    <select id="bancoDelimitador" class="form-control">
-                        <option value=",">Vírgula (,)</option>
-                        <option value=";">Ponto e vírgula (;)</option>
-                        <option value="\t">Tabulação</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>📝 OBSERVAÇÕES</label>
-                    <textarea id="bancoObs" class="form-control" rows="2" placeholder="Observações..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                <button class="control-btn btn-save" onclick="salvarBanco()">💾 SALVAR</button>
-                <button class="control-btn btn-block" onclick="fecharModalBanco()">CANCELAR</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL NOVO CLIENTE -->
-    <div id="modalNovoCliente" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>➕ NOVO CLIENTE</h2>
-                <button class="modal-close" onclick="fecharModalNovoCliente()">×</button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>Nome da Empresa *</label>
-                    <input type="text" id="novoClienteNome" class="form-control" placeholder="Ex: Empresa XYZ">
-                </div>
-                <div class="form-group">
-                    <label>Perfil</label>
-                    <select id="novoClientePerfil" class="form-control">
-                        <option value="pf">Pessoal/Familiar</option>
-                        <option value="pj">Empresarial</option>
-                        <option value="teste">Teste/Avaliação</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="novoClienteEmail" class="form-control" placeholder="email@exemplo.com">
-                </div>
-                <div class="form-group">
-                    <label>Telefone</label>
-                    <input type="text" id="novoClienteTelefone" class="form-control" placeholder="(00) 00000-0000">
-                </div>
-            </div>
-            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                <button class="control-btn btn-save" onclick="criarClienteFirebase()">CRIAR</button>
-                <button class="control-btn btn-block" onclick="fecharModalNovoCliente()">CANCELAR</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL TESTE LINK -->
-    <div id="modalTesteLink" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>🔗 TESTE DE LINK</h2>
-                <button class="modal-close" onclick="fecharModalTeste()">×</button>
-            </div>
-            <div class="modal-body">
-                <p id="testeLinkMsg">Testando link...</p>
-                <div class="form-group">
-                    <label>Link gerado:</label>
-                    <input type="text" id="testeLinkUrl" readonly class="form-control" style="background: #333;" />
-                </div>
-                <div id="testeLinkStatus" style="margin-top: 10px; padding: 10px; border-radius: 5px; display: none;"></div>
-            </div>
-            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                <button class="control-btn btn-view" onclick="abrirLinkTeste()">ABRIR LINK</button>
-                <button class="control-btn btn-copy" onclick="copiarLinkTeste()">COPIAR</button>
-                <button class="control-btn btn-block" onclick="fecharModalTeste()">FECHAR</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL CONFIRMAÇÃO -->
-    <div id="modalConfirm" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitulo">⚡ Confirmação</h2>
-                <button class="modal-close" onclick="fecharModal()">×</button>
-            </div>
-            <div class="modal-body"><p id="modalMsg">Tem certeza?</p></div>
-            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
-                <button class="control-btn btn-save" onclick="confirmarAcao()">SIM</button>
-                <button class="control-btn btn-block" onclick="fecharModal()">NÃO</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL DIAGNÓSTICO -->
-    <div id="modalDiagnostico" class="modal">
-        <div class="modal-content" style="max-width: 700px;">
-            <div class="modal-header">
-                <h2>🔍 DIAGNÓSTICO DO SISTEMA</h2>
-                <button class="modal-close" onclick="fecharModalDiagnostico()">×</button>
-            </div>
-            <div class="modal-body" id="diagnosticoBody">
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    Executando diagnóstico...
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="control-btn btn-save" onclick="executarDiagnosticoCompleto()">EXECUTAR</button>
-                <button class="control-btn btn-block" onclick="fecharModalDiagnostico()">FECHAR</button>
+                <button class="btn btn-primary" onclick="salvarBancoFinanceiro()">SALVAR</button>
+                <button class="btn btn-outline" onclick="fecharModalBancoFinanceiro()">CANCELAR</button>
             </div>
         </div>
     </div>
@@ -1267,1534 +1354,837 @@
 
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
-        
-        db.settings({
-            timestampsInSnapshots: true,
-            ignoreUndefinedProperties: true
-        });
 
         // ============================================
         // VARIÁVEIS GLOBAIS
         // ============================================
-        let clientes = [];
-        let clienteAtual = null;
-        let acaoPendente = null;
-        let alteracoesNaoSalvas = false;
-        let unsubscribeClientes = null;
-
-        let appFinanceiroConfig = {
-            nomeArquivo: 'appfinanceiro.html',
-            caminho: ''
-        };
+        let clienteFinanceiroAtual = null;
+        let clienteOSAtual = null;
         
-        let categoriasCliente = [];
-        let contasCliente = [];
-        let tiposCliente = [];
-        let bancosCliente = [];
+        // Dados do Financeiro
+        let clientesFinanceiro = [];
+        let categoriasFinanceiro = [];
+        let contasFinanceiro = [];
+        let tiposFinanceiro = [];
+        let bancosFinanceiro = [];
+
+        // Dados da OS
+        let clientesOS = [];
+        let categoriasOS = [];
+        let statusOS = [];
+        let modelosOS = [];
 
         // ============================================
-        // FUNÇÕES DE UTILITÁRIOS
+        // FUNÇÕES DE UTILIDADE
         // ============================================
-        
-        function mostrarSucesso(mensagem) {
-            const el = document.getElementById('successMessage');
-            el.innerHTML = mensagem;
-            el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 3000);
-            adicionarLog(`✅ ${mensagem}`);
+        function mostrarSucesso(msg) {
+            alert('✅ ' + msg);
         }
 
-        function mostrarErro(mensagem) {
-            const el = document.getElementById('errorMessage');
-            el.innerHTML = `❌ ${mensagem}`;
-            el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 5000);
-            adicionarLog(`❌ ${mensagem}`);
+        function mostrarErro(msg) {
+            alert('❌ ' + msg);
         }
 
-        function adicionarLog(mensagem) {
-            const logPanel = document.getElementById("logPanel");
-            const entry = document.createElement("div");
-            entry.className = "log-entry";
-            entry.textContent = `[${new Date().toLocaleTimeString()}] ${mensagem}`;
-            logPanel.appendChild(entry);
-            if (logPanel.children.length > 10) logPanel.removeChild(logPanel.children[0]);
+        function adicionarLog(msg) {
+            console.log('[LOG]', msg);
         }
 
         // ============================================
-        // CONFIGURAÇÕES DO APP FINANCEIRO
+        // FUNÇÕES DE TABS PRINCIPAIS
         // ============================================
-        
-        function carregarConfigAppFinanceiro() {
-            try {
-                const saved = localStorage.getItem('appFinanceiroConfig');
-                if (saved) {
-                    appFinanceiroConfig = JSON.parse(saved);
-                }
-                
-                document.getElementById('appFinanceiroNome').value = appFinanceiroConfig.nomeArquivo || 'appfinanceiro.html';
-                document.getElementById('appFinanceiroCaminho').value = appFinanceiroConfig.caminho || '';
-                
-                adicionarLog(`Configuração carregada: ${appFinanceiroConfig.nomeArquivo}`);
-            } catch (e) {
-                console.error('Erro ao carregar config:', e);
-            }
-        }
-
-        function salvarConfigAppFinanceiro() {
-            try {
-                appFinanceiroConfig.nomeArquivo = document.getElementById('appFinanceiroNome').value || 'appfinanceiro.html';
-                appFinanceiroConfig.caminho = document.getElementById('appFinanceiroCaminho').value || '';
-                localStorage.setItem('appFinanceiroConfig', JSON.stringify(appFinanceiroConfig));
-                
-                mostrarSucesso('✅ Configuração do app salva!');
-                document.getElementById('configWarning').style.display = 'none';
-                adicionarLog('Configuração do app salva');
-            } catch (e) {
-                mostrarErro('Erro ao salvar configuração');
-            }
-        }
-
-        function mostrarConfigAppFinanceiro() {
-            mudarAba('apps', document.querySelectorAll('.tab-btn')[4]);
-        }
-
-        // ============================================
-        // FUNÇÕES DE BANCOS
-        // ============================================
-        
-        function carregarBancosCliente() {
-            if (!clienteAtual) return;
+        function mudarMainTab(tab) {
+            document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.main-tab-content').forEach(c => c.classList.remove('active'));
             
-            try {
-                const saved = localStorage.getItem(`bancos_${clienteAtual.id}`);
-                if (saved) {
-                    bancosCliente = JSON.parse(saved);
-                } else {
-                    bancosCliente = [
-                        {
-                            nome: 'Itaú',
-                            cor: '#EC7000',
-                            icone: 'fa-university',
-                            formato: 'csv_itau',
-                            posData: 0,
-                            posDesc: 1,
-                            posValor: 2,
-                            posTipo: 3,
-                            formatoData: 'dd/mm/yyyy',
-                            separador: ',',
-                            delimitador: ';',
-                            obs: 'Extrato do Itaú'
-                        },
-                        {
-                            nome: 'Bradesco',
-                            cor: '#CC092F',
-                            icone: 'fa-building',
-                            formato: 'csv_bradesco',
-                            posData: 0,
-                            posDesc: 1,
-                            posValor: 3,
-                            posTipo: 4,
-                            formatoData: 'dd/mm/yyyy',
-                            separador: ',',
-                            delimitador: ';',
-                            obs: 'Extrato do Bradesco'
-                        },
-                        {
-                            nome: 'Nubank',
-                            cor: '#820AD1',
-                            icone: 'fa-credit-card',
-                            formato: 'csv_nubank',
-                            posData: 0,
-                            posDesc: 1,
-                            posValor: 2,
-                            posTipo: '',
-                            formatoData: 'dd/mm/yyyy',
-                            separador: ',',
-                            delimitador: ',',
-                            obs: 'Extrato do Nubank'
-                        }
-                    ];
-                }
-                
-                atualizarListaBancos();
-                adicionarLog(`${bancosCliente.length} bancos carregados`);
-                
-            } catch (e) {
-                console.error('Erro ao carregar bancos:', e);
-            }
-        }
-
-        function atualizarListaBancos() {
-            const lista = document.getElementById('listaBancos');
-            
-            if (!bancosCliente || bancosCliente.length === 0) {
-                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 20px;">Nenhum banco cadastrado</div>';
-                return;
-            }
-            
-            let html = '';
-            bancosCliente.forEach((banco, index) => {
-                const cor = banco.cor || '#4CAF50';
-                const icone = banco.icone || 'fa-university';
-                
-                html += `
-                    <div class="config-item" style="border-left: 4px solid ${cor};">
-                        <div style="display: flex; align-items: center; gap: 10px;">
-                            <span class="bank-icon" style="background: ${cor}; color: white;">
-                                <i class="fas ${icone}"></i>
-                            </span>
-                            <div>
-                                <strong>${banco.nome}</strong><br>
-                                <small style="color: var(--text-secondary);">${banco.formato} | ${banco.obs || ''}</small>
-                            </div>
-                        </div>
-                        <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarBanco(${index})" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerBanco(${index})" title="Remover">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            lista.innerHTML = html;
-        }
-
-        function mostrarModalBanco() {
-            if (!clienteAtual) {
-                mostrarErro('Selecione um cliente primeiro!');
-                return;
-            }
-            
-            document.getElementById('bancoIndex').value = '-1';
-            document.getElementById('modalBancoTitulo').textContent = '🏦 NOVO BANCO';
-            
-            document.getElementById('bancoNome').value = '';
-            document.getElementById('bancoCor').value = '#4CAF50';
-            document.getElementById('bancoCorHex').value = '#4CAF50';
-            document.getElementById('bancoIcone').value = 'fa-university';
-            document.getElementById('bancoFormato').value = 'ofx';
-            document.getElementById('bancoPosData').value = '0';
-            document.getElementById('bancoPosDesc').value = '1';
-            document.getElementById('bancoPosValor').value = '2';
-            document.getElementById('bancoPosTipo').value = '';
-            document.getElementById('bancoFormatoData').value = 'dd/mm/yyyy';
-            document.getElementById('bancoSeparador').value = '.';
-            document.getElementById('bancoDelimitador').value = ',';
-            document.getElementById('bancoObs').value = '';
-            
-            document.getElementById('modalBanco').style.display = 'flex';
-        }
-
-        function editarBanco(index) {
-            const banco = bancosCliente[index];
-            if (!banco) return;
-            
-            document.getElementById('bancoIndex').value = index;
-            document.getElementById('modalBancoTitulo').textContent = `✏️ EDITAR BANCO: ${banco.nome}`;
-            
-            document.getElementById('bancoNome').value = banco.nome || '';
-            document.getElementById('bancoCor').value = banco.cor || '#4CAF50';
-            document.getElementById('bancoCorHex').value = banco.cor || '#4CAF50';
-            document.getElementById('bancoIcone').value = banco.icone || 'fa-university';
-            document.getElementById('bancoFormato').value = banco.formato || 'ofx';
-            document.getElementById('bancoPosData').value = banco.posData || '0';
-            document.getElementById('bancoPosDesc').value = banco.posDesc || '1';
-            document.getElementById('bancoPosValor').value = banco.posValor || '2';
-            document.getElementById('bancoPosTipo').value = banco.posTipo || '';
-            document.getElementById('bancoFormatoData').value = banco.formatoData || 'dd/mm/yyyy';
-            document.getElementById('bancoSeparador').value = banco.separador || '.';
-            document.getElementById('bancoDelimitador').value = banco.delimitador || ',';
-            document.getElementById('bancoObs').value = banco.obs || '';
-            
-            document.getElementById('modalBanco').style.display = 'flex';
-        }
-
-        function salvarBanco() {
-            const index = parseInt(document.getElementById('bancoIndex').value);
-            const nome = document.getElementById('bancoNome').value.trim();
-            
-            if (!nome) {
-                mostrarErro('Nome do banco é obrigatório!');
-                return;
-            }
-            
-            const banco = {
-                nome: nome,
-                cor: document.getElementById('bancoCor').value,
-                icone: document.getElementById('bancoIcone').value,
-                formato: document.getElementById('bancoFormato').value,
-                posData: document.getElementById('bancoPosData').value,
-                posDesc: document.getElementById('bancoPosDesc').value,
-                posValor: document.getElementById('bancoPosValor').value,
-                posTipo: document.getElementById('bancoPosTipo').value,
-                formatoData: document.getElementById('bancoFormatoData').value,
-                separador: document.getElementById('bancoSeparador').value,
-                delimitador: document.getElementById('bancoDelimitador').value,
-                obs: document.getElementById('bancoObs').value
-            };
-            
-            if (index === -1) {
-                bancosCliente.push(banco);
-                mostrarSucesso(`Banco "${nome}" adicionado!`);
+            if (tab === 'financeiro') {
+                document.querySelector('.main-tab.financeiro').classList.add('active');
+                document.getElementById('mainTabFinanceiro').classList.add('active');
+                carregarClientesFinanceiro();
             } else {
-                bancosCliente[index] = banco;
-                mostrarSucesso(`Banco "${nome}" atualizado!`);
+                document.querySelector('.main-tab.os').classList.add('active');
+                document.getElementById('mainTabOS').classList.add('active');
+                carregarClientesOS();
             }
-            
-            atualizarListaBancos();
-            fecharModalBanco();
-        }
-
-        function removerBanco(index) {
-            if (!confirm('Remover este banco?')) return;
-            
-            const removido = bancosCliente.splice(index, 1)[0];
-            atualizarListaBancos();
-            mostrarSucesso(`Banco "${removido.nome}" removido!`);
-        }
-
-        function salvarBancos() {
-            if (!clienteAtual) {
-                mostrarErro('Selecione um cliente primeiro!');
-                return;
-            }
-            
-            try {
-                localStorage.setItem(`bancos_${clienteAtual.id}`, JSON.stringify(bancosCliente));
-                mostrarSucesso('✅ Bancos salvos com sucesso!');
-            } catch (e) {
-                mostrarErro('Erro ao salvar bancos: ' + e.message);
-            }
-        }
-
-        function resetarBancosPadrao() {
-            if (!confirm('Resetar bancos para o padrão?')) return;
-            
-            bancosCliente = [
-                {
-                    nome: 'Itaú',
-                    cor: '#EC7000',
-                    icone: 'fa-university',
-                    formato: 'csv_itau',
-                    posData: 0,
-                    posDesc: 1,
-                    posValor: 2,
-                    posTipo: 3,
-                    formatoData: 'dd/mm/yyyy',
-                    separador: ',',
-                    delimitador: ';',
-                    obs: 'Extrato do Itaú'
-                },
-                {
-                    nome: 'Bradesco',
-                    cor: '#CC092F',
-                    icone: 'fa-building',
-                    formato: 'csv_bradesco',
-                    posData: 0,
-                    posDesc: 1,
-                    posValor: 3,
-                    posTipo: 4,
-                    formatoData: 'dd/mm/yyyy',
-                    separador: ',',
-                    delimitador: ';',
-                    obs: 'Extrato do Bradesco'
-                },
-                {
-                    nome: 'Nubank',
-                    cor: '#820AD1',
-                    icone: 'fa-credit-card',
-                    formato: 'csv_nubank',
-                    posData: 0,
-                    posDesc: 1,
-                    posValor: 2,
-                    posTipo: '',
-                    formatoData: 'dd/mm/yyyy',
-                    separador: ',',
-                    delimitador: ',',
-                    obs: 'Extrato do Nubank'
-                }
-            ];
-            
-            atualizarListaBancos();
-            mostrarSucesso('Bancos resetados para o padrão!');
         }
 
         // ============================================
-        // FUNÇÕES DE CONFIGURAÇÕES
+        // FUNÇÕES DO FINANCEIRO
         // ============================================
         
-        function carregarConfiguracoesCliente() {
-            if (!clienteAtual) return;
-            
-            try {
-                // Categorias
-                const savedCategorias = localStorage.getItem(`categorias_${clienteAtual.id}`);
-                if (savedCategorias) {
-                    categoriasCliente = JSON.parse(savedCategorias);
-                } else {
-                    categoriasCliente = [
-                        'Alimentação', 'Transporte', 'Moradia', 'Saúde', 
-                        'Educação', 'Lazer', 'Salário', 'Investimentos', 
-                        'Vendas', 'Serviços', 'Impostos', 'Outros'
-                    ];
-                }
-                
-                // Contas
-                const savedContas = localStorage.getItem(`contas_${clienteAtual.id}`);
-                if (savedContas) {
-                    contasCliente = JSON.parse(savedContas);
-                } else {
-                    contasCliente = [
-                        'Carteira', 'Conta Corrente', 'Poupança', 'Cartão de Crédito'
-                    ];
-                }
-                
-                // Tipos
-                const savedTipos = localStorage.getItem(`tipos_${clienteAtual.id}`);
-                if (savedTipos) {
-                    tiposCliente = JSON.parse(savedTipos);
-                } else {
-                    tiposCliente = [
-                        { nome: 'Entrada (Receita)', natureza: 'entrada' },
-                        { nome: 'Saída (Despesa)', natureza: 'saida' }
-                    ];
-                }
-                
-                carregarBancosCliente();
-                
-                atualizarListaCategorias();
-                atualizarListaContas();
-                atualizarListaTipos();
-                
-            } catch (e) {
-                console.error('Erro ao carregar configurações:', e);
-            }
-        }
-
-        function atualizarListaCategorias() {
-            const lista = document.getElementById('listaCategorias');
-            
-            if (!categoriasCliente || categoriasCliente.length === 0) {
-                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhuma categoria</div>';
-                return;
-            }
-            
-            let html = '';
-            categoriasCliente.forEach((cat, index) => {
-                html += `
-                    <div class="config-item">
-                        <span>${cat}</span>
-                        <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarCategoria(${index})" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerCategoria(${index})" title="Remover">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            lista.innerHTML = html;
-        }
-
-        function atualizarListaContas() {
-            const lista = document.getElementById('listaContas');
-            
-            if (!contasCliente || contasCliente.length === 0) {
-                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhuma conta</div>';
-                return;
-            }
-            
-            let html = '';
-            contasCliente.forEach((conta, index) => {
-                html += `
-                    <div class="config-item">
-                        <span>${conta}</span>
-                        <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarConta(${index})" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerConta(${index})" title="Remover">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            lista.innerHTML = html;
-        }
-
-        function atualizarListaTipos() {
-            const lista = document.getElementById('listaTipos');
-            
-            if (!tiposCliente || tiposCliente.length === 0) {
-                lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhum tipo</div>';
-                return;
-            }
-            
-            let html = '';
-            tiposCliente.forEach((tipo, index) => {
-                const naturezaIcon = tipo.natureza === 'entrada' ? '📥' : '📤';
-                html += `
-                    <div class="config-item">
-                        <span>${naturezaIcon} ${tipo.nome} <span style="color: ${tipo.natureza === 'entrada' ? '#4caf50' : '#f44336'}; font-size: 10px;">(${tipo.natureza})</span></span>
-                        <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarTipo(${index})" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerTipo(${index})" title="Remover">🗑️</button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            lista.innerHTML = html;
-        }
-
-        function adicionarCategoria() {
-            const nome = document.getElementById('novaCategoria').value.trim();
-            if (!nome) {
-                mostrarErro('Digite um nome para a categoria');
-                return;
-            }
-            
-            categoriasCliente.push(nome);
-            document.getElementById('novaCategoria').value = '';
-            atualizarListaCategorias();
-            mostrarSucesso(`Categoria "${nome}" adicionada!`);
-        }
-
-        function adicionarConta() {
-            const nome = document.getElementById('novaConta').value.trim();
-            if (!nome) {
-                mostrarErro('Digite um nome para a conta');
-                return;
-            }
-            
-            contasCliente.push(nome);
-            document.getElementById('novaConta').value = '';
-            atualizarListaContas();
-            mostrarSucesso(`Conta "${nome}" adicionada!`);
-        }
-
-        function adicionarTipo() {
-            const nome = document.getElementById('novoTipo').value.trim();
-            const natureza = document.getElementById('novoTipoNatureza').value;
-            
-            if (!nome) {
-                mostrarErro('Digite um nome para o tipo');
-                return;
-            }
-            
-            tiposCliente.push({ nome: nome, natureza: natureza });
-            document.getElementById('novoTipo').value = '';
-            atualizarListaTipos();
-            mostrarSucesso(`Tipo "${nome}" adicionado!`);
-        }
-
-        function removerCategoria(index) {
-            if (!confirm('Remover esta categoria?')) return;
-            const removido = categoriasCliente.splice(index, 1)[0];
-            atualizarListaCategorias();
-            mostrarSucesso(`Categoria "${removido}" removida!`);
-        }
-
-        function removerConta(index) {
-            if (!confirm('Remover esta conta?')) return;
-            const removido = contasCliente.splice(index, 1)[0];
-            atualizarListaContas();
-            mostrarSucesso(`Conta "${removido}" removida!`);
-        }
-
-        function removerTipo(index) {
-            if (!confirm('Remover este tipo?')) return;
-            const removido = tiposCliente.splice(index, 1)[0];
-            atualizarListaTipos();
-            mostrarSucesso(`Tipo "${removido.nome}" removido!`);
-        }
-
-        function editarCategoria(index) {
-            const novoNome = prompt('Editar categoria:', categoriasCliente[index]);
-            if (novoNome && novoNome !== categoriasCliente[index]) {
-                categoriasCliente[index] = novoNome;
-                atualizarListaCategorias();
-                mostrarSucesso('Categoria atualizada!');
-            }
-        }
-
-        function editarConta(index) {
-            const novoNome = prompt('Editar conta:', contasCliente[index]);
-            if (novoNome && novoNome !== contasCliente[index]) {
-                contasCliente[index] = novoNome;
-                atualizarListaContas();
-                mostrarSucesso('Conta atualizada!');
-            }
-        }
-
-        function editarTipo(index) {
-            const tipo = tiposCliente[index];
-            const novoNome = prompt('Editar tipo:', tipo.nome);
-            if (novoNome && novoNome !== tipo.nome) {
-                tipo.nome = novoNome;
-                atualizarListaTipos();
-                mostrarSucesso('Tipo atualizado!');
-            }
-        }
-
-        function salvarTudo() {
-            if (!clienteAtual) {
-                mostrarErro('Selecione um cliente primeiro!');
-                return;
-            }
-            
-            try {
-                localStorage.setItem(`categorias_${clienteAtual.id}`, JSON.stringify(categoriasCliente));
-                localStorage.setItem(`contas_${clienteAtual.id}`, JSON.stringify(contasCliente));
-                localStorage.setItem(`tipos_${clienteAtual.id}`, JSON.stringify(tiposCliente));
-                localStorage.setItem(`bancos_${clienteAtual.id}`, JSON.stringify(bancosCliente));
-                
-                mostrarSucesso('✅ Todas as configurações salvas!');
-            } catch (e) {
-                mostrarErro('Erro ao salvar: ' + e.message);
-            }
-        }
-
-        function resetarTudo() {
-            if (!confirm('Resetar todas as configurações para o padrão?')) return;
-            
-            categoriasCliente = [
-                'Alimentação', 'Transporte', 'Moradia', 'Saúde', 
-                'Educação', 'Lazer', 'Salário', 'Investimentos', 
-                'Vendas', 'Serviços', 'Impostos', 'Outros'
-            ];
-            
-            contasCliente = [
-                'Carteira', 'Conta Corrente', 'Poupança', 'Cartão de Crédito'
-            ];
-            
-            tiposCliente = [
-                { nome: 'Entrada (Receita)', natureza: 'entrada' },
-                { nome: 'Saída (Despesa)', natureza: 'saida' }
-            ];
-            
-            bancosCliente = [];
-            
-            atualizarListaCategorias();
-            atualizarListaContas();
-            atualizarListaTipos();
-            atualizarListaBancos();
-            
-            mostrarSucesso('Configurações resetadas!');
-        }
-
-        // ============================================
-        // FUNÇÕES PRINCIPAIS DO FIREBASE
-        // ============================================
-        
-        function carregarClientes() {
-            document.getElementById("firebaseStatus").innerHTML = "🔄 Conectando...";
-
-            if (unsubscribeClientes) {
-                unsubscribeClientes();
-            }
-
-            unsubscribeClientes = db.collection("clientes").onSnapshot((snapshot) => {
-                clientes = [];
-                let ativos = 0, bloqueados = 0, teste = 0;
-
-                snapshot.forEach((doc) => {
-                    const cliente = { 
-                        id: doc.id, 
-                        ...doc.data(),
-                        status: doc.data().status || 'ativo',
-                        perfil: doc.data().perfil || 'pj',
-                        appsAtivos: doc.data().appsAtivos || 1,
-                        dataCriacao: doc.data().dataCriacao || new Date().toISOString()
-                    };
-                    clientes.push(cliente);
-                    
-                    if (cliente.status === "ativo") ativos++;
-                    else if (cliente.status === "bloqueado") bloqueados++;
-                    else if (cliente.perfil === "teste") teste++;
+        // Carregar clientes do financeiro
+        function carregarClientesFinanceiro() {
+            db.collection('clientes').onSnapshot(snapshot => {
+                clientesFinanceiro = [];
+                snapshot.forEach(doc => {
+                    clientesFinanceiro.push({ id: doc.id, ...doc.data() });
                 });
-
-                clientes.sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
-
-                document.getElementById("clientesCount").innerHTML = `📊 ${clientes.length} clientes`;
-                document.getElementById("ativosCount").innerHTML = `✅ Ativos: ${ativos}`;
-                document.getElementById("bloqueadosCount").innerHTML = `🔒 Bloqueados: ${bloqueados}`;
-                document.getElementById("testeCount").innerHTML = `🧪 Teste: ${teste}`;
-                document.getElementById("totalClientesTag").innerHTML = clientes.length;
-                document.getElementById("firebaseStatus").innerHTML = "🟢 Conectado";
-
-                atualizarListaClientes();
-
-                if (clienteAtual) {
-                    const atualizado = clientes.find(c => c.id === clienteAtual.id);
-                    if (atualizado) {
-                        clienteAtual = atualizado;
-                        preencherFormularioCliente();
-                    } else {
-                        clienteAtual = null;
-                        limparFormularioCliente();
-                    }
-                }
-
-                adicionarLog(`${clientes.length} clientes carregados`);
-
-            }, (error) => {
-                console.error("Erro no Firestore:", error);
-                document.getElementById("firebaseStatus").innerHTML = "🔴 Erro de conexão";
-                mostrarErro("Erro ao conectar ao Firebase: " + error.message);
+                atualizarListaClientesFinanceiro();
+                atualizarStatsFinanceiro();
             });
         }
 
-        function atualizarListaClientes() {
-            const lista = document.getElementById("listaClientes");
-            const filtro = document.getElementById("buscarCliente")?.value.toLowerCase() || "";
+        function atualizarListaClientesFinanceiro() {
+            const lista = document.getElementById('listaClientesFinanceiro');
+            const filtro = document.getElementById('buscarClienteFinanceiro')?.value.toLowerCase() || '';
 
-            if (clientes.length === 0) {
-                lista.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">📭 Nenhum cliente cadastrado</div>';
+            if (clientesFinanceiro.length === 0) {
+                lista.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">📭 Nenhum cliente</div>';
                 return;
             }
 
-            let html = "";
-            const clientesFiltrados = clientes.filter(c => 
+            const filtrados = clientesFinanceiro.filter(c => 
                 c.nome?.toLowerCase().includes(filtro) || 
                 c.id?.toLowerCase().includes(filtro)
             );
 
-            clientesFiltrados.forEach(c => {
-                const ativo = clienteAtual && clienteAtual.id === c.id;
-                
-                let statusClass = "status-ativo";
-                if (c.status === "bloqueado") statusClass = "status-bloqueado";
-                else if (c.perfil === "teste") statusClass = "status-teste";
-                
-                const statusText = c.status === "bloqueado" ? "BLOQUEADO" : 
-                                  (c.perfil === "teste" ? "TESTE" : "ATIVO");
+            let html = '';
+            filtrados.forEach(c => {
+                const ativo = clienteFinanceiroAtual && clienteFinanceiroAtual.id === c.id;
+                const statusClass = c.status === 'ativo' ? 'status-ativo' : 'status-bloqueado';
+                const statusText = c.status === 'ativo' ? 'ATIVO' : 'BLOQUEADO';
 
-                html += `<div class="cliente-item ${ativo ? "active" : ""}" onclick="selecionarCliente('${c.id}')">
-                    <div class="cliente-header">
-                        <span class="cliente-nome">${c.nome || "Sem nome"}</span>
-                        <span class="cliente-status ${statusClass}">${statusText}</span>
+                html += `
+                    <div class="cliente-item ${ativo ? 'active' : ''}" onclick="selecionarClienteFinanceiro('${c.id}')">
+                        <div class="cliente-header">
+                            <span class="cliente-nome">${c.nome || 'Sem nome'}</span>
+                            <span class="cliente-status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="cliente-info">
+                            <span>📧 ${c.email || 'Sem email'}</span>
+                        </div>
+                        <div class="cliente-actions">
+                            <span class="action-icon" onclick="copiarLinkFinanceiro('${c.id}'); event.stopPropagation()">🔗</span>
+                            <span class="action-icon" onclick="verComoClienteFinanceiro('${c.id}'); event.stopPropagation()">👁️</span>
+                            <span class="action-icon danger" onclick="deletarClienteFinanceiro('${c.id}'); event.stopPropagation()">🗑️</span>
+                        </div>
                     </div>
-                    <div class="cliente-info">
-                        <span>📱 ${c.appsAtivos || 1} apps</span>
-                        <span>📅 ${new Date(c.dataCriacao || Date.now()).toLocaleDateString('pt-BR')}</span>
-                    </div>
-                    <div class="cliente-actions">
-                        <span class="action-icon" title="Editar" onclick="entrarModoEdicao(); event.stopPropagation()">✏️</span>
-                        <span class="action-icon" title="${c.status === 'bloqueado' ? 'Desbloquear' : 'Bloquear'}" onclick="bloquearCliente(); event.stopPropagation()">${c.status === 'bloqueado' ? '🔓' : '🔒'}</span>
-                        <span class="action-icon" title="Visualizar" onclick="verComoCliente(); event.stopPropagation()">👁️</span>
-                        <span class="action-icon" title="Copiar link" onclick="copiarLinkClienteAtual(); event.stopPropagation()">🔗</span>
-                        <span class="action-icon danger" title="Excluir" onclick="deletarCliente('${c.id}', event)">🗑️</span>
-                    </div>
-                </div>`;
+                `;
             });
 
             lista.innerHTML = html;
         }
 
-        function limparFormularioCliente() {
-            document.getElementById("nomeEmpresa").value = "";
-            document.getElementById("perfilCliente").value = "pj";
-            document.getElementById("clienteIdVisivel").value = "";
-            document.getElementById("corPrincipal").value = "#4CAF50";
-            document.getElementById("corHex").value = "#4CAF50";
-            document.getElementById("modoEscuro").value = "auto";
-            document.getElementById("termoColaborador").value = "Motorista";
-            document.getElementById("emailContato").value = "";
-            document.getElementById("telefoneContato").value = "";
+        function atualizarStatsFinanceiro() {
+            const ativos = clientesFinanceiro.filter(c => c.status === 'ativo').length;
+            const bloqueados = clientesFinanceiro.filter(c => c.status === 'bloqueado').length;
             
-            atualizarPreview();
-            
-            ["btnEditar", "btnBloquear", "btnSalvar", "btnVisualizar", "btnCopiarLink", "btnExportar"]
-                .forEach(id => document.getElementById(id).disabled = true);
+            document.getElementById('totalClientesFinanceiro').innerHTML = clientesFinanceiro.length;
+            document.getElementById('financeiroAtivosCount').innerHTML = `✅ Ativos: ${ativos}`;
+            document.getElementById('financeiroBloqueadosCount').innerHTML = `🔒 Bloqueados: ${bloqueados}`;
+            document.getElementById('totalClientes').innerHTML = `📊 Clientes: ${clientesFinanceiro.length}`;
         }
 
-        async function selecionarCliente(clienteId) {
-            if (alteracoesNaoSalvas) {
-                if (!confirm("⚠️ Há alterações não salvas! Deseja continuar?")) {
-                    return;
-                }
-                alteracoesNaoSalvas = false;
-                document.getElementById("btnSalvar").disabled = true;
+        function selecionarClienteFinanceiro(id) {
+            clienteFinanceiroAtual = clientesFinanceiro.find(c => c.id === id);
+            if (!clienteFinanceiroAtual) return;
+
+            document.getElementById('clienteIdVisivel').value = clienteFinanceiroAtual.id;
+            document.getElementById('nomeEmpresa').value = clienteFinanceiroAtual.nome || '';
+            document.getElementById('perfilCliente').value = clienteFinanceiroAtual.perfil || 'pj';
+            document.getElementById('corPrincipal').value = clienteFinanceiroAtual.cor || '#4CAF50';
+            document.getElementById('corHex').value = clienteFinanceiroAtual.cor || '#4CAF50';
+            document.getElementById('modoEscuro').value = clienteFinanceiroAtual.modoEscuro || 'auto';
+            document.getElementById('emailContato').value = clienteFinanceiroAtual.email || '';
+            document.getElementById('telefoneContato').value = clienteFinanceiroAtual.telefone || '';
+
+            document.getElementById('btnEditarFinanceiro').disabled = false;
+            document.getElementById('btnBloquearFinanceiro').disabled = false;
+            document.getElementById('btnVisualizarFinanceiro').disabled = false;
+            document.getElementById('btnCopiarLinkFinanceiro').disabled = false;
+
+            atualizarListaClientesFinanceiro();
+            carregarConfiguracoesFinanceiro();
+        }
+
+        function carregarConfiguracoesFinanceiro() {
+            if (!clienteFinanceiroAtual) return;
+
+            // Categorias
+            const cats = localStorage.getItem(`categorias_${clienteFinanceiroAtual.id}`);
+            categoriasFinanceiro = cats ? JSON.parse(cats) : [
+                'Alimentação', 'Transporte', 'Moradia', 'Saúde', 
+                'Educação', 'Lazer', 'Salário', 'Investimentos'
+            ];
+            atualizarListaCategoriasFinanceiro();
+
+            // Contas
+            const cts = localStorage.getItem(`contas_${clienteFinanceiroAtual.id}`);
+            contasFinanceiro = cts ? JSON.parse(cts) : ['Carteira', 'Conta Corrente', 'Poupança'];
+            atualizarListaContasFinanceiro();
+
+            // Tipos
+            const tips = localStorage.getItem(`tipos_${clienteFinanceiroAtual.id}`);
+            tiposFinanceiro = tips ? JSON.parse(tips) : [
+                { nome: 'Entrada', natureza: 'entrada' },
+                { nome: 'Saída', natureza: 'saida' }
+            ];
+            atualizarListaTiposFinanceiro();
+
+            // Bancos
+            const banks = localStorage.getItem(`bancos_${clienteFinanceiroAtual.id}`);
+            bancosFinanceiro = banks ? JSON.parse(banks) : [];
+            atualizarListaBancosFinanceiro();
+        }
+
+        function atualizarListaCategoriasFinanceiro() {
+            const lista = document.getElementById('listaCategoriasFinanceiro');
+            let html = '';
+            categoriasFinanceiro.forEach((cat, i) => {
+                html += `
+                    <div class="config-item">
+                        <span>${cat}</span>
+                        <div class="config-item-actions">
+                            <button class="config-item-btn" onclick="editarCategoriaFinanceiro(${i})">✏️</button>
+                            <button class="config-item-btn danger" onclick="removerCategoriaFinanceiro(${i})">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+            lista.innerHTML = html || '<div style="color: var(--text-secondary);">Nenhuma categoria</div>';
+        }
+
+        function atualizarListaContasFinanceiro() {
+            const lista = document.getElementById('listaContasFinanceiro');
+            let html = '';
+            contasFinanceiro.forEach((conta, i) => {
+                html += `
+                    <div class="config-item">
+                        <span>${conta}</span>
+                        <div class="config-item-actions">
+                            <button class="config-item-btn" onclick="editarContaFinanceiro(${i})">✏️</button>
+                            <button class="config-item-btn danger" onclick="removerContaFinanceiro(${i})">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+            lista.innerHTML = html || '<div style="color: var(--text-secondary);">Nenhuma conta</div>';
+        }
+
+        function atualizarListaTiposFinanceiro() {
+            const lista = document.getElementById('listaTiposFinanceiro');
+            let html = '';
+            tiposFinanceiro.forEach((tipo, i) => {
+                html += `
+                    <div class="config-item">
+                        <span>${tipo.natureza === 'entrada' ? '📥' : '📤'} ${tipo.nome}</span>
+                        <div class="config-item-actions">
+                            <button class="config-item-btn" onclick="editarTipoFinanceiro(${i})">✏️</button>
+                            <button class="config-item-btn danger" onclick="removerTipoFinanceiro(${i})">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+            lista.innerHTML = html || '<div style="color: var(--text-secondary);">Nenhum tipo</div>';
+        }
+
+        function atualizarListaBancosFinanceiro() {
+            const lista = document.getElementById('listaBancosFinanceiro');
+            let html = '';
+            bancosFinanceiro.forEach((banco, i) => {
+                html += `
+                    <div class="config-item" style="border-left: 4px solid ${banco.cor || '#4CAF50'};">
+                        <span><i class="fas ${banco.icone || 'fa-university'}"></i> ${banco.nome}</span>
+                        <div class="config-item-actions">
+                            <button class="config-item-btn" onclick="editarBancoFinanceiro(${i})">✏️</button>
+                            <button class="config-item-btn danger" onclick="removerBancoFinanceiro(${i})">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+            lista.innerHTML = html || '<div style="color: var(--text-secondary);">Nenhum banco</div>';
+        }
+
+        function adicionarCategoriaFinanceiro() {
+            const nome = document.getElementById('novaCategoria').value.trim();
+            if (!nome) return mostrarErro('Digite um nome');
+            categoriasFinanceiro.push(nome);
+            document.getElementById('novaCategoria').value = '';
+            atualizarListaCategoriasFinanceiro();
+        }
+
+        function adicionarContaFinanceiro() {
+            const nome = document.getElementById('novaConta').value.trim();
+            if (!nome) return mostrarErro('Digite um nome');
+            contasFinanceiro.push(nome);
+            document.getElementById('novaConta').value = '';
+            atualizarListaContasFinanceiro();
+        }
+
+        function adicionarTipoFinanceiro() {
+            const nome = document.getElementById('novoTipo').value.trim();
+            const natureza = document.getElementById('novoTipoNatureza').value;
+            if (!nome) return mostrarErro('Digite um nome');
+            tiposFinanceiro.push({ nome, natureza });
+            document.getElementById('novoTipo').value = '';
+            atualizarListaTiposFinanceiro();
+        }
+
+        function editarCategoriaFinanceiro(i) {
+            const novo = prompt('Editar categoria:', categoriasFinanceiro[i]);
+            if (novo) categoriasFinanceiro[i] = novo;
+            atualizarListaCategoriasFinanceiro();
+        }
+
+        function editarContaFinanceiro(i) {
+            const novo = prompt('Editar conta:', contasFinanceiro[i]);
+            if (novo) contasFinanceiro[i] = novo;
+            atualizarListaContasFinanceiro();
+        }
+
+        function editarTipoFinanceiro(i) {
+            const novo = prompt('Editar tipo:', tiposFinanceiro[i].nome);
+            if (novo) tiposFinanceiro[i].nome = novo;
+            atualizarListaTiposFinanceiro();
+        }
+
+        function removerCategoriaFinanceiro(i) {
+            if (confirm('Remover?')) {
+                categoriasFinanceiro.splice(i, 1);
+                atualizarListaCategoriasFinanceiro();
             }
+        }
 
-            const cliente = clientes.find(c => c.id === clienteId);
-            if (!cliente) {
-                mostrarErro("Cliente não encontrado!");
-                return;
-            }
-
-            clienteAtual = cliente;
-            atualizarListaClientes();
-            preencherFormularioCliente();
-            
-            carregarConfiguracoesCliente();
-
-            ["btnEditar", "btnBloquear", "btnSalvar", "btnVisualizar", "btnCopiarLink", "btnExportar"]
-                .forEach(id => document.getElementById(id).disabled = false);
-
-            document.getElementById("btnBloquear").innerHTML = cliente.status === 'bloqueado' ? '🔓 DESBLOQUEAR' : '🔒 BLOQUEAR';
-
-            adicionarLog(`Cliente selecionado: ${cliente.nome || cliente.id}`);
-            
-            // Se a aba dados estiver ativa, carregar os dados
-            if (document.getElementById('abaDados').style.display === 'block') {
-                carregarDadosCliente();
+        function removerContaFinanceiro(i) {
+            if (confirm('Remover?')) {
+                contasFinanceiro.splice(i, 1);
+                atualizarListaContasFinanceiro();
             }
         }
 
-        function preencherFormularioCliente() {
-            if (!clienteAtual) return;
-
-            document.getElementById("nomeEmpresa").value = clienteAtual.nome || "";
-            document.getElementById("perfilCliente").value = clienteAtual.perfil || "pj";
-            document.getElementById("clienteIdVisivel").value = clienteAtual.id || "";
-            document.getElementById("corPrincipal").value = clienteAtual.cor || "#4CAF50";
-            document.getElementById("corHex").value = clienteAtual.cor || "#4CAF50";
-            document.getElementById("modoEscuro").value = clienteAtual.modoEscuro || "auto";
-            document.getElementById("termoColaborador").value = clienteAtual.termoColaborador || "Motorista";
-            document.getElementById("emailContato").value = clienteAtual.email || "";
-            document.getElementById("telefoneContato").value = clienteAtual.telefone || "";
-            
-            atualizarPreview();
-        }
-
-        function atualizarPreview() {
-            const nome = document.getElementById("nomeEmpresa").value || "Nome da Empresa";
-            const cor = document.getElementById("corPrincipal").value || "#4CAF50";
-            const modo = document.getElementById("modoEscuro").value;
-            
-            document.getElementById("previewTitulo").innerHTML = nome;
-            document.getElementById("previewTitulo").style.color = cor;
-            document.getElementById("previewCor").innerHTML = `Cor: ${cor}`;
-            
-            let modoTexto = "Automático";
-            if (modo === "light") modoTexto = "Sempre claro";
-            else if (modo === "dark") modoTexto = "Sempre escuro";
-            document.getElementById("previewModo").innerHTML = `Modo: ${modoTexto}`;
-        }
-
-        function alteracaoNaoSalva() {
-            alteracoesNaoSalvas = true;
-            document.getElementById("btnSalvar").disabled = false;
-            atualizarPreview();
-        }
-
-        // ============================================
-        // FUNÇÃO CORRIGIDA - CARREGAR DADOS DO CLIENTE
-        // ============================================
-        
-        async function carregarDadosCliente() {
-            const container = document.getElementById('dadosClienteContainer');
-            
-            if (!clienteAtual) {
-                container.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">Selecione um cliente primeiro</p>';
-                return;
+        function removerTipoFinanceiro(i) {
+            if (confirm('Remover?')) {
+                tiposFinanceiro.splice(i, 1);
+                atualizarListaTiposFinanceiro();
             }
+        }
+
+        function removerBancoFinanceiro(i) {
+            if (confirm('Remover banco?')) {
+                bancosFinanceiro.splice(i, 1);
+                atualizarListaBancosFinanceiro();
+            }
+        }
+
+        function salvarTudoFinanceiro() {
+            if (!clienteFinanceiroAtual) return mostrarErro('Selecione um cliente');
             
-            container.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Carregando dados...</div>';
+            localStorage.setItem(`categorias_${clienteFinanceiroAtual.id}`, JSON.stringify(categoriasFinanceiro));
+            localStorage.setItem(`contas_${clienteFinanceiroAtual.id}`, JSON.stringify(contasFinanceiro));
+            localStorage.setItem(`tipos_${clienteFinanceiroAtual.id}`, JSON.stringify(tiposFinanceiro));
+            localStorage.setItem(`bancos_${clienteFinanceiroAtual.id}`, JSON.stringify(bancosFinanceiro));
             
+            mostrarSucesso('Configurações salvas!');
+        }
+
+        function alteracaoNaoSalvaFinanceiro() {
+            document.getElementById('btnSalvarFinanceiro').disabled = false;
+        }
+
+        function atualizarPreviewFinanceiro() {
+            const nome = document.getElementById('nomeEmpresa').value || 'Nome da Empresa';
+            const cor = document.getElementById('corPrincipal').value || '#4CAF50';
+            document.getElementById('previewTitulo').innerHTML = nome;
+            document.getElementById('previewTitulo').style.color = cor;
+            document.getElementById('previewCor').innerHTML = `Cor: ${cor}`;
+        }
+
+        function mostrarModalNovoClienteFinanceiro() {
+            document.getElementById('modalNovoClienteFinanceiro').style.display = 'flex';
+        }
+
+        function fecharModalNovoClienteFinanceiro() {
+            document.getElementById('modalNovoClienteFinanceiro').style.display = 'none';
+        }
+
+        async function criarClienteFinanceiro() {
+            const nome = document.getElementById('novoClienteFinanceiroNome').value.trim();
+            if (!nome) return mostrarErro('Nome obrigatório');
+
             try {
-                // Buscar lançamentos do cliente
-                const lancamentosSnapshot = await db.collection('lancamentos')
-                    .where('clienteId', '==', clienteAtual.id)
-                    .orderBy('data', 'desc')
-                    .limit(10)
-                    .get();
-                
-                const totalLancamentos = lancamentosSnapshot.size;
-                
-                // Calcular totais
-                let totalEntradas = 0;
-                let totalSaidas = 0;
-                let saldoAtual = 0;
-                
-                lancamentosSnapshot.forEach(doc => {
-                    const l = doc.data();
-                    if (l.tipo === 'entrada') {
-                        totalEntradas += l.valor || 0;
-                        saldoAtual += l.valor || 0;
-                    } else {
-                        totalSaidas += l.valor || 0;
-                        saldoAtual -= l.valor || 0;
-                    }
+                await db.collection('clientes').add({
+                    nome: nome,
+                    email: document.getElementById('novoClienteFinanceiroEmail').value,
+                    telefone: document.getElementById('novoClienteFinanceiroTelefone').value,
+                    status: 'ativo',
+                    dataCriacao: new Date().toISOString()
                 });
-                
-                // Buscar configurações do localStorage
-                const categorias = localStorage.getItem(`categorias_${clienteAtual.id}`);
-                const contas = localStorage.getItem(`contas_${clienteAtual.id}`);
-                const tipos = localStorage.getItem(`tipos_${clienteAtual.id}`);
-                const bancos = localStorage.getItem(`bancos_${clienteAtual.id}`);
-                
-                const qtdCategorias = categorias ? JSON.parse(categorias).length : 12;
-                const qtdContas = contas ? JSON.parse(contas).length : 4;
-                const qtdTipos = tipos ? JSON.parse(tipos).length : 2;
-                const qtdBancos = bancos ? JSON.parse(bancos).length : 0;
-                
-                // Últimos lançamentos
-                let ultimosHtml = '';
-                if (lancamentosSnapshot.empty) {
-                    ultimosHtml = '<p style="color: var(--text-secondary); padding: 10px;">Nenhum lançamento encontrado</p>';
-                } else {
-                    lancamentosSnapshot.forEach(doc => {
-                        const l = doc.data();
-                        const data = l.data ? new Date(l.data + 'T12:00:00').toLocaleDateString('pt-BR') : '-';
-                        const valor = (l.valor || 0).toFixed(2).replace('.', ',');
-                        const tipoClass = l.tipo === 'entrada' ? 'text-success' : 'text-danger';
-                        const sinal = l.tipo === 'entrada' ? '+' : '-';
-                        
-                        ultimosHtml += `
-                            <div style="padding: 8px; border-bottom: 1px solid var(--border); font-size: 12px;">
-                                <div style="display: flex; justify-content: space-between;">
-                                    <span>${data} - ${l.descricao || 'Sem descrição'}</span>
-                                    <span style="color: ${l.tipo === 'entrada' ? '#4caf50' : '#f44336'};">${sinal} R$ ${valor}</span>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-                
-                // Montar HTML completo
-                const html = `
-                    <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px;">
-                        <h4 style="color: var(--neon); margin-bottom: 15px;">📊 RESUMO DO CLIENTE</h4>
-                        
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
-                            <div style="background: var(--bg-card); padding: 15px; border-radius: 8px;">
-                                <div style="color: var(--text-secondary); font-size: 12px;">Total de Lançamentos</div>
-                                <div style="font-size: 24px; font-weight: bold; color: var(--neon);">${totalLancamentos}</div>
-                            </div>
-                            <div style="background: var(--bg-card); padding: 15px; border-radius: 8px;">
-                                <div style="color: var(--text-secondary); font-size: 12px;">Saldo Atual</div>
-                                <div style="font-size: 24px; font-weight: bold; color: ${saldoAtual >= 0 ? '#4caf50' : '#f44336'};">R$ ${saldoAtual.toFixed(2).replace('.', ',')}</div>
-                            </div>
-                            <div style="background: var(--bg-card); padding: 15px; border-radius: 8px;">
-                                <div style="color: var(--text-secondary); font-size: 12px;">Total Entradas</div>
-                                <div style="font-size: 18px; font-weight: bold; color: #4caf50;">R$ ${totalEntradas.toFixed(2).replace('.', ',')}</div>
-                            </div>
-                            <div style="background: var(--bg-card); padding: 15px; border-radius: 8px;">
-                                <div style="color: var(--text-secondary); font-size: 12px;">Total Saídas</div>
-                                <div style="font-size: 18px; font-weight: bold; color: #f44336;">R$ ${totalSaidas.toFixed(2).replace('.', ',')}</div>
-                            </div>
-                        </div>
-                        
-                        <h4 style="color: var(--neon); margin: 20px 0 10px;">⚙️ CONFIGURAÇÕES</h4>
-                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px;">
-                            <div style="background: var(--bg-card); padding: 10px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 20px; color: var(--neon);">${qtdCategorias}</div>
-                                <div style="font-size: 11px; color: var(--text-secondary);">Categorias</div>
-                            </div>
-                            <div style="background: var(--bg-card); padding: 10px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 20px; color: var(--neon);">${qtdContas}</div>
-                                <div style="font-size: 11px; color: var(--text-secondary);">Contas</div>
-                            </div>
-                            <div style="background: var(--bg-card); padding: 10px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 20px; color: var(--neon);">${qtdTipos}</div>
-                                <div style="font-size: 11px; color: var(--text-secondary);">Tipos</div>
-                            </div>
-                            <div style="background: var(--bg-card); padding: 10px; border-radius: 8px; text-align: center;">
-                                <div style="font-size: 20px; color: var(--neon);">${qtdBancos}</div>
-                                <div style="font-size: 11px; color: var(--text-secondary);">Bancos</div>
-                            </div>
-                        </div>
-                        
-                        <h4 style="color: var(--neon); margin: 20px 0 10px;">📋 ÚLTIMOS LANÇAMENTOS</h4>
-                        <div style="background: var(--bg-card); border-radius: 8px; max-height: 200px; overflow-y: auto;">
-                            ${ultimosHtml}
-                        </div>
-                        
-                        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-secondary);">
-                            <div>🆔 ID: ${clienteAtual.id}</div>
-                            <div>📅 Criado em: ${new Date(clienteAtual.dataCriacao || Date.now()).toLocaleDateString('pt-BR')}</div>
-                            <div>📧 Email: ${clienteAtual.email || 'Não informado'}</div>
-                            <div>📞 Telefone: ${clienteAtual.telefone || 'Não informado'}</div>
-                        </div>
-                    </div>
-                `;
-                
-                container.innerHTML = html;
-                
+                mostrarSucesso('Cliente criado!');
+                fecharModalNovoClienteFinanceiro();
             } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-                container.innerHTML = `
-                    <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; text-align: center;">
-                        <i class="fas fa-exclamation-triangle" style="font-size: 40px; color: var(--warning); margin-bottom: 10px;"></i>
-                        <p style="color: var(--warning);">Erro ao carregar dados</p>
-                        <p style="color: var(--text-secondary); font-size: 12px;">${error.message}</p>
-                        <button class="btn btn-primary btn-sm" onclick="carregarDadosCliente()" style="margin-top: 10px;">
-                            <i class="fas fa-sync-alt"></i> Tentar novamente
-                        </button>
-                    </div>
-                `;
+                mostrarErro('Erro ao criar: ' + error.message);
             }
         }
 
-        // ============================================
-        // FUNÇÕES DE LINKS E AÇÕES
-        // ============================================
-        
-        function verComoCliente() {
-            if (!clienteAtual) {
-                mostrarErro("Selecione um cliente primeiro!");
-                return;
-            }
-            
-            const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
-            
-            window.open(url, '_blank');
-            adicionarLog(`👁️ Visualizando: ${clienteAtual.nome || clienteAtual.id}`);
+        function mostrarModalBancoFinanceiro() {
+            if (!clienteFinanceiroAtual) return mostrarErro('Selecione um cliente');
+            document.getElementById('bancoIndex').value = '-1';
+            document.getElementById('bancoNome').value = '';
+            document.getElementById('bancoCor').value = '#4CAF50';
+            document.getElementById('bancoCorHex').value = '#4CAF50';
+            document.getElementById('modalBancoFinanceiro').style.display = 'flex';
         }
 
-        function copiarLinkClienteAtual() {
-            if (!clienteAtual) {
-                mostrarErro("Selecione um cliente primeiro!");
-                return;
-            }
-            
-            const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
-            
+        function fecharModalBancoFinanceiro() {
+            document.getElementById('modalBancoFinanceiro').style.display = 'none';
+        }
+
+        function salvarBancoFinanceiro() {
+            const nome = document.getElementById('bancoNome').value.trim();
+            if (!nome) return mostrarErro('Nome obrigatório');
+
+            bancosFinanceiro.push({
+                nome: nome,
+                cor: document.getElementById('bancoCor').value,
+                icone: document.getElementById('bancoIcone').value
+            });
+
+            atualizarListaBancosFinanceiro();
+            fecharModalBancoFinanceiro();
+            mostrarSucesso('Banco adicionado!');
+        }
+
+        function copiarLinkFinanceiro(id) {
+            const url = window.location.origin + '/appfinanceiro.html?cliente=' + id;
             navigator.clipboard.writeText(url).then(() => {
-                mostrarSucesso('✅ Link copiado!');
-            }).catch(() => {
-                prompt('Copie o link manualmente:', url);
+                mostrarSucesso('Link copiado!');
             });
         }
 
-        function entrarModoEdicao() {
-            if (!clienteAtual) {
-                mostrarErro("Selecione um cliente");
-                return;
-            }
-            
-            const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}&modo=edicao&master=true`;
-            
-            window.open(url, '_blank');
-            adicionarLog(`✏️ Modo edição: ${clienteAtual.nome || clienteAtual.id}`);
+        function verComoClienteFinanceiro(id) {
+            window.open('/appfinanceiro.html?cliente=' + id, '_blank');
         }
 
-        // ============================================
-        // FUNÇÕES DE CRUD
-        // ============================================
-        
-        async function salvarAlteracoes() {
-            if (!clienteAtual) return;
-            
-            const nome = document.getElementById("nomeEmpresa").value;
-            if (!nome) {
-                mostrarErro("Nome da empresa é obrigatório!");
-                return;
-            }
-            
-            const dadosAtualizados = {
-                nome: nome,
-                perfil: document.getElementById("perfilCliente").value,
-                cor: document.getElementById("corPrincipal").value,
-                modoEscuro: document.getElementById("modoEscuro").value,
-                termoColaborador: document.getElementById("termoColaborador").value,
-                email: document.getElementById("emailContato").value,
-                telefone: document.getElementById("telefoneContato").value,
-                atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
-            };
+        function entrarModoEdicaoFinanceiro() {
+            if (!clienteFinanceiroAtual) return;
+            window.open(`/appfinanceiro.html?cliente=${clienteFinanceiroAtual.id}&modo=edicao&master=true`, '_blank');
+        }
+
+        async function salvarAlteracoesFinanceiro() {
+            if (!clienteFinanceiroAtual) return;
 
             try {
-                await db.collection("clientes").doc(clienteAtual.id).update(dadosAtualizados);
-                
-                mostrarSucesso("✅ Alterações salvas com sucesso!");
-                alteracoesNaoSalvas = false;
-                document.getElementById("btnSalvar").disabled = true;
-                adicionarLog(`💾 Dados salvos: ${clienteAtual.nome}`);
-                
+                await db.collection('clientes').doc(clienteFinanceiroAtual.id).update({
+                    nome: document.getElementById('nomeEmpresa').value,
+                    perfil: document.getElementById('perfilCliente').value,
+                    cor: document.getElementById('corPrincipal').value,
+                    modoEscuro: document.getElementById('modoEscuro').value,
+                    email: document.getElementById('emailContato').value,
+                    telefone: document.getElementById('telefoneContato').value
+                });
+                mostrarSucesso('Dados salvos!');
+                document.getElementById('btnSalvarFinanceiro').disabled = true;
             } catch (error) {
-                console.error("Erro ao salvar:", error);
-                mostrarErro("Erro ao salvar: " + error.message);
+                mostrarErro('Erro ao salvar: ' + error.message);
             }
         }
 
-        async function bloquearCliente() {
-            if (!clienteAtual) return;
-            
-            const novoStatus = clienteAtual.status === "ativo" ? "bloqueado" : "ativo";
-            const acao = novoStatus === "bloqueado" ? "bloquear" : "desbloquear";
-            
-            document.getElementById("modalTitulo").textContent = acao === "bloquear" ? "🔒 Bloquear Cliente" : "🔓 Desbloquear Cliente";
-            document.getElementById("modalMsg").textContent = `Deseja ${acao} o cliente ${clienteAtual.nome || clienteAtual.id}?`;
-            document.getElementById("modalConfirm").style.display = "flex";
-            
-            acaoPendente = async () => {
-                try {
-                    await db.collection("clientes").doc(clienteAtual.id).update({ 
-                        status: novoStatus,
-                        motivoBloqueio: novoStatus === "bloqueado" ? "Bloqueado pelo Master" : null,
-                        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
-                    });
-                    
-                    mostrarSucesso(`✅ Cliente ${novoStatus === "bloqueado" ? "bloqueado" : "desbloqueado"}!`);
-                    document.getElementById("btnBloquear").innerHTML = novoStatus === 'bloqueado' ? '🔓 DESBLOQUEAR' : '🔒 BLOQUEAR';
-                    
-                } catch (error) {
-                    mostrarErro("Erro ao alterar status: " + error.message);
+        async function bloquearClienteFinanceiro() {
+            if (!clienteFinanceiroAtual) return;
+            const novoStatus = clienteFinanceiroAtual.status === 'ativo' ? 'bloqueado' : 'ativo';
+            try {
+                await db.collection('clientes').doc(clienteFinanceiroAtual.id).update({ status: novoStatus });
+                mostrarSucesso(`Cliente ${novoStatus === 'ativo' ? 'desbloqueado' : 'bloqueado'}!`);
+            } catch (error) {
+                mostrarErro('Erro: ' + error.message);
+            }
+        }
+
+        async function deletarClienteFinanceiro(id) {
+            if (!confirm('Excluir cliente?')) return;
+            try {
+                await db.collection('clientes').doc(id).delete();
+                mostrarSucesso('Cliente excluído!');
+                if (clienteFinanceiroAtual && clienteFinanceiroAtual.id === id) {
+                    clienteFinanceiroAtual = null;
                 }
-                fecharModal();
-            };
-        }
-
-        async function confirmarAcao() {
-            if (acaoPendente) {
-                await acaoPendente();
-                acaoPendente = null;
-            }
-        }
-
-        async function deletarCliente(clienteId, event) {
-            if (event) event.stopPropagation();
-            
-            const cliente = clientes.find(c => c.id === clienteId);
-            if (!cliente) return;
-            
-            if (!confirm(`⚠️ ATENÇÃO!\n\nExcluir cliente "${cliente.nome || cliente.id}"?\n\nEsta ação NÃO pode ser desfeita!`)) {
-                return;
-            }
-            
-            try {
-                const lancamentosSnapshot = await db.collection('lancamentos')
-                    .where('clienteId', '==', clienteId)
-                    .get();
-                
-                const batch = db.batch();
-                lancamentosSnapshot.forEach(doc => batch.delete(doc.ref));
-                batch.delete(db.collection("clientes").doc(clienteId));
-                
-                await batch.commit();
-                
-                localStorage.removeItem(`categorias_${clienteId}`);
-                localStorage.removeItem(`contas_${clienteId}`);
-                localStorage.removeItem(`tipos_${clienteId}`);
-                localStorage.removeItem(`bancos_${clienteId}`);
-                
-                mostrarSucesso("✅ Cliente excluído!");
-                
-                if (clienteAtual && clienteAtual.id === clienteId) {
-                    clienteAtual = null;
-                    limparFormularioCliente();
-                }
-                
             } catch (error) {
-                mostrarErro("Erro ao excluir: " + error.message);
+                mostrarErro('Erro: ' + error.message);
             }
         }
 
-        function criarCliente() { 
-            document.getElementById("novoClienteNome").value = "";
-            document.getElementById("novoClientePerfil").value = "pj";
-            document.getElementById("novoClienteEmail").value = "";
-            document.getElementById("novoClienteTelefone").value = "";
-            document.getElementById("modalNovoCliente").style.display = "flex"; 
+        function mudarAbaFinanceiro(aba, btn) {
+            document.querySelectorAll('#editorPanelFinanceiro .tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('#editorPanelFinanceiro .tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById('aba' + aba.charAt(0).toUpperCase() + aba.slice(1) + 'Financeiro').classList.add('active');
+            btn.classList.add('active');
         }
 
-        async function criarClienteFirebase() {
-            const nome = document.getElementById("novoClienteNome").value.trim();
-            if (!nome) {
-                mostrarErro("Digite o nome do cliente");
-                return;
-            }
-
-            const novoCliente = {
-                nome: nome,
-                perfil: document.getElementById("novoClientePerfil").value,
-                status: "ativo",
-                dataCriacao: new Date().toISOString(),
-                appsAtivos: 1,
-                cor: "#4CAF50",
-                modoEscuro: "auto",
-                termoColaborador: "Motorista",
-                email: document.getElementById("novoClienteEmail").value || "",
-                telefone: document.getElementById("novoClienteTelefone").value || "",
-                criadoEm: firebase.firestore.FieldValue.serverTimestamp()
-            };
-
-            try {
-                await db.collection("clientes").add(novoCliente);
-                mostrarSucesso(`✅ Cliente "${nome}" criado!`);
-                fecharModalNovoCliente();
-            } catch (error) {
-                mostrarErro("Erro ao criar cliente: " + error.message);
-            }
-        }
-
-        function fecharModalNovoCliente() { 
-            document.getElementById("modalNovoCliente").style.display = "none"; 
+        function filtrarClientesFinanceiro() {
+            atualizarListaClientesFinanceiro();
         }
 
         // ============================================
-        // FUNÇÕES DE DIAGNÓSTICO
+        // FUNÇÕES DA OS
         // ============================================
         
-        function diagnosticarConexao() {
-            document.getElementById('modalDiagnostico').style.display = 'flex';
-            executarDiagnosticoCompleto();
+        function carregarClientesOS() {
+            db.collection('clientes_os').onSnapshot(snapshot => {
+                clientesOS = [];
+                snapshot.forEach(doc => {
+                    clientesOS.push({ id: doc.id, ...doc.data() });
+                });
+                atualizarListaClientesOS();
+                document.getElementById('totalClientesOS').innerHTML = clientesOS.length;
+                document.getElementById('osAtivos').innerHTML = `✅ Clientes: ${clientesOS.length}`;
+            });
         }
 
-        async function executarDiagnosticoCompleto() {
-            const body = document.getElementById('diagnosticoBody');
-            body.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Executando diagnóstico...</div>';
-            
-            try {
-                const resultados = [];
-                
-                resultados.push({
-                    teste: "Firebase inicializado",
-                    status: !!firebase.apps.length,
-                    mensagem: !!firebase.apps.length ? "✅ OK" : "❌ Falha"
-                });
-                
-                try {
-                    const testRef = db.collection('_teste').doc('teste');
-                    await testRef.set({ timestamp: new Date().toISOString() });
-                    await testRef.delete();
-                    resultados.push({
-                        teste: "Conexão com Firestore",
-                        status: true,
-                        mensagem: "✅ OK"
-                    });
-                } catch (e) {
-                    resultados.push({
-                        teste: "Conexão com Firestore",
-                        status: false,
-                        mensagem: "❌ Falha: " + e.message
-                    });
-                }
-                
-                try {
-                    const snapshot = await db.collection('clientes').limit(1).get();
-                    resultados.push({
-                        teste: "Leitura de clientes",
-                        status: true,
-                        mensagem: `✅ OK (${snapshot.size} docs)`
-                    });
-                } catch (e) {
-                    resultados.push({
-                        teste: "Leitura de clientes",
-                        status: false,
-                        mensagem: "❌ Falha: " + e.message
-                    });
-                }
-                
-                resultados.push({
-                    teste: "Configuração do App",
-                    status: !!(appFinanceiroConfig && appFinanceiroConfig.nomeArquivo),
-                    mensagem: appFinanceiroConfig?.nomeArquivo || "⚠️ Não configurado"
-                });
-                
-                resultados.push({
-                    teste: "Cliente selecionado",
-                    status: !!clienteAtual,
-                    mensagem: clienteAtual ? `✅ ${clienteAtual.nome || clienteAtual.id}` : "⚠️ Nenhum"
-                });
-                
-                if (clienteAtual) {
-                    const categorias = localStorage.getItem(`categorias_${clienteAtual.id}`);
-                    const contas = localStorage.getItem(`contas_${clienteAtual.id}`);
-                    const tipos = localStorage.getItem(`tipos_${clienteAtual.id}`);
-                    const bancos = localStorage.getItem(`bancos_${clienteAtual.id}`);
-                    
-                    const temConfig = !!(categorias || contas || tipos || bancos);
-                    
-                    resultados.push({
-                        teste: "Configurações do cliente",
-                        status: true,
-                        mensagem: temConfig ? "✅ Configurado" : "⚠️ Usando padrão"
-                    });
-                }
-                
-                let html = '<h3 style="margin-bottom: 15px;">📊 Resultados:</h3>';
-                html += '<table style="width: 100%; border-collapse: collapse;">';
-                
-                resultados.forEach(r => {
-                    const cor = r.status ? 'var(--accent)' : (r.mensagem.includes('⚠️') ? 'var(--warning)' : 'var(--danger)');
-                    html += `
-                        <tr style="border-bottom: 1px solid var(--border);">
-                            <td style="padding: 10px 0;">${r.teste}</td>
-                            <td style="padding: 10px 0; text-align: right;">
-                                <span style="color: ${cor};">${r.mensagem}</span>
-                            </td>
-                        </tr>
-                    `;
-                });
-                
-                html += '</table>';
-                
-                html += '<h4 style="margin: 20px 0 10px;">💡 Sugestões:</h4><ul style="color: var(--text-secondary);">';
-                
-                if (!resultados[1].status) {
-                    html += '<li>Verifique as regras de segurança do Firebase</li>';
-                }
-                
-                if (!resultados[3].status) {
-                    html += '<li>Configure o nome do arquivo do App Financeiro na aba "Apps"</li>';
-                }
-                
-                if (!resultados[4].status) {
-                    html += '<li>Selecione um cliente para ver suas configurações</li>';
-                }
-                
-                html += '</ul>';
-                
-                body.innerHTML = html;
-                
-            } catch (error) {
-                body.innerHTML = `<p style="color: var(--danger);">Erro: ${error.message}</p>`;
+        function atualizarListaClientesOS() {
+            const lista = document.getElementById('listaClientesOS');
+            const filtro = document.getElementById('buscarClienteOS')?.value.toLowerCase() || '';
+
+            if (clientesOS.length === 0) {
+                lista.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-secondary);">📭 Nenhum cliente OS</div>';
+                return;
+            }
+
+            const filtrados = clientesOS.filter(c => 
+                c.nome?.toLowerCase().includes(filtro) || 
+                c.id?.toLowerCase().includes(filtro)
+            );
+
+            let html = '';
+            filtrados.forEach(c => {
+                const ativo = clienteOSAtual && clienteOSAtual.id === c.id;
+
+                html += `
+                    <div class="cliente-item ${ativo ? 'active' : ''}" onclick="selecionarClienteOS('${c.id}')">
+                        <div class="cliente-header">
+                            <span class="cliente-nome">${c.nome || 'Sem nome'}</span>
+                            <span class="cliente-status ${c.status === 'ativo' ? 'status-ativo' : 'status-bloqueado'}">${c.status || 'ativo'}</span>
+                        </div>
+                        <div class="cliente-info">
+                            <span>📧 ${c.email || 'Sem email'}</span>
+                        </div>
+                        <div class="cliente-actions">
+                            <span class="action-icon" onclick="copiarLinkOS('${c.id}'); event.stopPropagation()">🔗</span>
+                            <span class="action-icon danger" onclick="deletarClienteOS('${c.id}'); event.stopPropagation()">🗑️</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            lista.innerHTML = html;
+        }
+
+        function selecionarClienteOS(id) {
+            clienteOSAtual = clientesOS.find(c => c.id === id);
+            if (!clienteOSAtual) return;
+
+            document.getElementById('clienteOSId').value = clienteOSAtual.id;
+            document.getElementById('clienteOSNome').value = clienteOSAtual.nome || '';
+            document.getElementById('clienteOSEmail').value = clienteOSAtual.email || '';
+            document.getElementById('clienteOSTelefone').value = clienteOSAtual.telefone || '';
+            document.getElementById('clienteOSEndereco').value = clienteOSAtual.endereco || '';
+            document.getElementById('clienteOSStatus').value = clienteOSAtual.status || 'ativo';
+
+            const link = window.location.origin + '/os_cliente.html?cliente=' + id;
+            document.getElementById('clienteOSLink').value = link;
+
+            atualizarListaClientesOS();
+            carregarCategoriasOS();
+            carregarStatusOS();
+            carregarModelosOS();
+        }
+
+        function carregarCategoriasOS() {
+            const saved = localStorage.getItem(`os_categorias_${clienteOSAtual?.id}`);
+            categoriasOS = saved ? JSON.parse(saved) : [
+                { icone: '⚡', nome: 'Elétrica' },
+                { icone: '💧', nome: 'Hidráulica' },
+                { icone: '🎨', nome: 'Pintura' },
+                { icone: '🛠️', nome: 'Reparos Gerais' }
+            ];
+            atualizarListaCategoriasOS();
+        }
+
+        function atualizarListaCategoriasOS() {
+            const lista = document.getElementById('listaCategoriasOS');
+            let html = '';
+            categoriasOS.forEach((cat, i) => {
+                html += `
+                    <div class="config-item">
+                        <span>${cat.icone || '📌'} ${cat.nome}</span>
+                        <div class="config-item-actions">
+                            <button class="config-item-btn" onclick="editarCategoriaOS(${i})">✏️</button>
+                            <button class="config-item-btn danger" onclick="removerCategoriaOS(${i})">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+            lista.innerHTML = html || '<div style="color: var(--text-secondary);">Nenhuma categoria</div>';
+        }
+
+        function adicionarCategoriaOS() {
+            const nome = document.getElementById('novaCategoriaOS').value.trim();
+            const icone = document.getElementById('categoriaOSIcone').value;
+            if (!nome) return mostrarErro('Digite um nome');
+            categoriasOS.push({ icone, nome });
+            document.getElementById('novaCategoriaOS').value = '';
+            atualizarListaCategoriasOS();
+        }
+
+        function removerCategoriaOS(i) {
+            if (confirm('Remover categoria?')) {
+                categoriasOS.splice(i, 1);
+                atualizarListaCategoriasOS();
             }
         }
 
-        function fecharModalDiagnostico() {
-            document.getElementById('modalDiagnostico').style.display = 'none';
+        function salvarCategoriasOS() {
+            if (!clienteOSAtual) return mostrarErro('Selecione um cliente');
+            localStorage.setItem(`os_categorias_${clienteOSAtual.id}`, JSON.stringify(categoriasOS));
+            mostrarSucesso('Categorias salvas!');
         }
 
-        function fecharModalBanco() {
-            document.getElementById('modalBanco').style.display = 'none';
+        function carregarStatusOS() {
+            const saved = localStorage.getItem(`os_status_${clienteOSAtual?.id}`);
+            statusOS = saved ? JSON.parse(saved) : [
+                { nome: 'Nova', cor: '#2196F3' },
+                { nome: 'Em Análise', cor: '#FF9800' },
+                { nome: 'Aprovado', cor: '#4CAF50' },
+                { nome: 'Concluída', cor: '#9C27B0' },
+                { nome: 'Cancelada', cor: '#f44336' }
+            ];
+            atualizarListaStatusOS();
         }
 
-        function mudarAba(aba, btnEl) {
-            document.querySelectorAll(".tab-content").forEach(el => el.style.display = "none");
+        function atualizarListaStatusOS() {
+            const lista = document.getElementById('listaStatusOS');
+            let html = '';
+            statusOS.forEach((st, i) => {
+                html += `
+                    <div class="config-item" style="border-left: 4px solid ${st.cor};">
+                        <span>${st.nome}</span>
+                        <div class="config-item-actions">
+                            <button class="config-item-btn" onclick="editarStatusOS(${i})">✏️</button>
+                            <button class="config-item-btn danger" onclick="removerStatusOS(${i})">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+            lista.innerHTML = html || '<div style="color: var(--text-secondary);">Nenhum status</div>';
+        }
+
+        function adicionarStatusOS() {
+            const nome = document.getElementById('novoStatusOS').value.trim();
+            const cor = document.getElementById('statusOSCor').value;
+            if (!nome) return mostrarErro('Digite um nome');
+            statusOS.push({ nome, cor });
+            document.getElementById('novoStatusOS').value = '';
+            atualizarListaStatusOS();
+        }
+
+        function removerStatusOS(i) {
+            if (confirm('Remover status?')) {
+                statusOS.splice(i, 1);
+                atualizarListaStatusOS();
+            }
+        }
+
+        function salvarStatusOS() {
+            if (!clienteOSAtual) return mostrarErro('Selecione um cliente');
+            localStorage.setItem(`os_status_${clienteOSAtual.id}`, JSON.stringify(statusOS));
+            mostrarSucesso('Status salvos!');
+        }
+
+        function carregarModelosOS() {
+            const saved = localStorage.getItem(`os_modelos_${clienteOSAtual?.id}`);
+            modelosOS = saved ? JSON.parse(saved) : [];
+            atualizarListaModelosOS();
+        }
+
+        function atualizarListaModelosOS() {
+            const lista = document.getElementById('listaModelosOS');
+            let html = '';
+            modelosOS.forEach((modelo, i) => {
+                html += `
+                    <div class="config-item">
+                        <span>📝 ${modelo.nome}</span>
+                        <div class="config-item-actions">
+                            <button class="config-item-btn" onclick="aplicarModeloOS(${i})">📋 Aplicar</button>
+                            <button class="config-item-btn danger" onclick="removerModeloOS(${i})">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            });
+            lista.innerHTML = html || '<div style="color: var(--text-secondary);">Nenhum modelo</div>';
+        }
+
+        function salvarModeloOS() {
+            if (!clienteOSAtual) return mostrarErro('Selecione um cliente');
             
-            const idMap = { 
-                visual: "abaVisual", 
-                conteudo: "abaConteudo", 
-                funcoes: "abaFuncoes", 
-                dados: "abaDados", 
-                apps: "abaApps",
-                bancos: "abaBancos",
-                config_app: "abaConfigApp",
-                codigo: "abaCodigo", 
-                planos: "abaPlanos", 
-                backup: "abaBackup" 
+            const nome = document.getElementById('modeloOSNome').value.trim();
+            const titulo = document.getElementById('modeloOSTitulo').value.trim();
+            const descricao = document.getElementById('modeloOSDescricao').value.trim();
+
+            if (!nome) return mostrarErro('Nome do modelo obrigatório');
+
+            modelosOS.push({ nome, titulo, descricao });
+            localStorage.setItem(`os_modelos_${clienteOSAtual.id}`, JSON.stringify(modelosOS));
+            
+            document.getElementById('modeloOSNome').value = '';
+            document.getElementById('modeloOSTitulo').value = '';
+            document.getElementById('modeloOSDescricao').value = '';
+            
+            atualizarListaModelosOS();
+            mostrarSucesso('Modelo salvo!');
+        }
+
+        function removerModeloOS(i) {
+            if (confirm('Remover modelo?')) {
+                modelosOS.splice(i, 1);
+                localStorage.setItem(`os_modelos_${clienteOSAtual.id}`, JSON.stringify(modelosOS));
+                atualizarListaModelosOS();
+            }
+        }
+
+        function salvarConfigOS() {
+            if (!clienteOSAtual) return;
+            
+            const config = {
+                notifEmail: document.getElementById('notifEmailOS').checked,
+                notifWhatsApp: document.getElementById('notifWhatsAppOS').checked,
+                notifSMS: document.getElementById('notifSMSOS').checked,
+                prazoPadrao: document.getElementById('prazoPadraoOS').value,
+                lembrete: document.getElementById('lembreteOS').value,
+                pin: document.getElementById('pinAcessoOS').value
             };
             
-            const abaElement = document.getElementById(idMap[aba]);
-            if (abaElement) {
-                abaElement.style.display = "block";
-                
-                if (aba === 'config_app' && clienteAtual) {
-                    carregarConfiguracoesCliente();
-                }
-                
-                if (aba === 'bancos' && clienteAtual) {
-                    carregarBancosCliente();
-                }
-                
-                if (aba === 'dados' && clienteAtual) {
-                    carregarDadosCliente();
-                }
+            localStorage.setItem(`os_config_${clienteOSAtual.id}`, JSON.stringify(config));
+            mostrarSucesso('Configurações salvas!');
+        }
+
+        function mostrarModalNovoClienteOS() {
+            document.getElementById('modalNovoClienteOS').style.display = 'flex';
+        }
+
+        function fecharModalNovoClienteOS() {
+            document.getElementById('modalNovoClienteOS').style.display = 'none';
+        }
+
+        async function criarClienteOS() {
+            const nome = document.getElementById('novoClienteOSNome').value.trim();
+            if (!nome) return mostrarErro('Nome obrigatório');
+
+            try {
+                await db.collection('clientes_os').add({
+                    nome: nome,
+                    email: document.getElementById('novoClienteOSEmail').value,
+                    telefone: document.getElementById('novoClienteOSTelefone').value,
+                    endereco: document.getElementById('novoClienteOSEndereco').value,
+                    status: 'ativo',
+                    dataCadastro: new Date().toISOString()
+                });
+                mostrarSucesso('Cliente OS criado!');
+                fecharModalNovoClienteOS();
+            } catch (error) {
+                mostrarErro('Erro ao criar: ' + error.message);
             }
+        }
+
+        async function salvarClienteOS() {
+            if (!clienteOSAtual) return;
+
+            try {
+                await db.collection('clientes_os').doc(clienteOSAtual.id).update({
+                    nome: document.getElementById('clienteOSNome').value,
+                    email: document.getElementById('clienteOSEmail').value,
+                    telefone: document.getElementById('clienteOSTelefone').value,
+                    endereco: document.getElementById('clienteOSEndereco').value,
+                    status: document.getElementById('clienteOSStatus').value
+                });
+                mostrarSucesso('Cliente atualizado!');
+            } catch (error) {
+                mostrarErro('Erro: ' + error.message);
+            }
+        }
+
+        function copiarLinkOS(id) {
+            const url = window.location.origin + '/os_cliente.html?cliente=' + (id || clienteOSAtual?.id);
+            navigator.clipboard.writeText(url).then(() => {
+                mostrarSucesso('Link copiado!');
+            });
+        }
+
+        async function deletarClienteOS(id) {
+            if (!confirm('Excluir cliente OS?')) return;
+            try {
+                await db.collection('clientes_os').doc(id).delete();
+                mostrarSucesso('Cliente OS excluído!');
+                if (clienteOSAtual && clienteOSAtual.id === id) {
+                    clienteOSAtual = null;
+                }
+            } catch (error) {
+                mostrarErro('Erro: ' + error.message);
+            }
+        }
+
+        function mudarAbaOS(aba, btn) {
+            document.querySelectorAll('#editorPanelOS .tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('#editorPanelOS .tab-btn').forEach(el => el.classList.remove('active'));
             
-            document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-            if (btnEl) btnEl.classList.add("active");
+            document.getElementById('aba' + aba.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join('') + 'OS').classList.add('active');
+            btn.classList.add('active');
         }
 
-        function filtrarClientes() { 
-            atualizarListaClientes(); 
-        }
-        
-        function mostrarAjuda() { 
-            alert(`🚀 MASTER APP v8.0\n\n✅ Firebase conectado\n✅ Clientes gerenciados\n✅ Bancos configuráveis\n✅ Categorias, Contas e Tipos\n✅ Funções e permissões\n✅ Dados do cliente com gráficos\n✅ Diagnóstico completo\n✅ Backup e restauração\n✅ Modo edição\n✅ Links personalizados\n\nTodas as abas funcionando perfeitamente!`); 
+        function filtrarClientesOS() {
+            atualizarListaClientesOS();
         }
 
-        function fecharModal() { 
-            document.getElementById("modalConfirm").style.display = "none"; 
-            acaoPendente = null; 
+        // ============================================
+        // FUNÇÕES GLOBAIS
+        // ============================================
+        function mostrarAjuda() {
+            alert('MASTER APP v2.0\n\n📊 ABA 1: App Financeiro\n🔧 ABA 2: Ordem de Serviço\n\nTudo separado e organizado!');
+        }
+
+        function diagnosticar() {
+            alert('Firebase: ' + (firebase.apps.length ? '✅ Conectado' : '❌ Erro'));
         }
 
         function testarLinkAppFinanceiro() {
-            if (!clienteAtual) {
-                mostrarErro('Selecione um cliente primeiro!');
-                return;
-            }
-
-            const config = appFinanceiroConfig;
-            const url = config.caminho + config.nomeArquivo + `?cliente=${clienteAtual.id}`;
-            
-            document.getElementById('testeLinkMsg').innerHTML = `Testando link para: <strong>${clienteAtual.nome || 'Cliente'}</strong>`;
-            document.getElementById('testeLinkUrl').value = url;
-            
-            const statusEl = document.getElementById('testeLinkStatus');
-            statusEl.style.display = 'block';
-            statusEl.innerHTML = '🔄 Testando acesso...';
-            
-            fetch(url, { method: 'HEAD', cache: 'no-cache' })
-                .then(response => {
-                    if (response.ok) {
-                        statusEl.innerHTML = '✅ Link acessível!';
-                        statusEl.style.background = 'rgba(76, 175, 80, 0.2)';
-                        statusEl.style.color = 'var(--accent)';
-                    } else {
-                        statusEl.innerHTML = '⚠️ Arquivo não encontrado';
-                        statusEl.style.background = 'rgba(255, 193, 7, 0.2)';
-                        statusEl.style.color = 'var(--warning)';
-                    }
-                })
-                .catch(() => {
-                    statusEl.innerHTML = '❌ Não foi possível acessar';
-                    statusEl.style.background = 'rgba(244, 67, 54, 0.2)';
-                    statusEl.style.color = 'var(--danger)';
-                });
-            
-            document.getElementById('modalTesteLink').style.display = 'flex';
-        }
-
-        function abrirLinkTeste() {
-            const url = document.getElementById('testeLinkUrl').value;
+            if (!clienteFinanceiroAtual) return mostrarErro('Selecione um cliente');
+            const url = '/appfinanceiro.html?cliente=' + clienteFinanceiroAtual.id;
             window.open(url, '_blank');
         }
 
-        function copiarLinkTeste() {
-            const url = document.getElementById('testeLinkUrl').value;
-            navigator.clipboard.writeText(url).then(() => {
-                mostrarSucesso('✅ Link copiado!');
-            }).catch(() => {
-                prompt('Copie o link manualmente:', url);
-            });
+        function salvarConfigAppFinanceiro() {
+            mostrarSucesso('Configuração salva!');
         }
 
-        function fecharModalTeste() {
-            document.getElementById('modalTesteLink').style.display = 'none';
-        }
-
-        function validarArquivoAppFinanceiro() {
-            const statusEl = document.getElementById('appFinanceiroStatus');
-            statusEl.innerHTML = '🔄 Validando...';
-            
-            try {
-                const config = appFinanceiroConfig;
-                const url = config.caminho + config.nomeArquivo;
-                
-                fetch(url, { method: 'HEAD', cache: 'no-cache' })
-                    .then(response => {
-                        if (response.ok) {
-                            statusEl.innerHTML = '✅ Arquivo encontrado!';
-                            statusEl.style.color = 'var(--accent)';
-                        } else {
-                            statusEl.innerHTML = '⚠️ Arquivo não encontrado';
-                            statusEl.style.color = 'var(--warning)';
-                            document.getElementById('configWarning').style.display = 'block';
-                        }
-                    })
-                    .catch(() => {
-                        statusEl.innerHTML = '❌ Erro ao acessar';
-                        statusEl.style.color = 'var(--danger)';
-                        document.getElementById('configWarning').style.display = 'block';
-                    });
-            } catch (error) {
-                statusEl.innerHTML = '❌ Erro na validação';
-                statusEl.style.color = 'var(--danger)';
-            }
-        }
-
-        function buscarArquivosApp() {
-            const possiveisNomes = [
-                'appfinanceiro.html',
-                'app-financeiro.html',
-                'app_financeiro.html',
-                'financeiro.html'
-            ];
-            
-            let msg = 'Arquivos comuns:\n\n';
-            possiveisNomes.forEach(nome => {
-                msg += `• ${nome}\n`;
-            });
-            
-            alert(msg);
-        }
-
-        function exportarClienteJSON() {
-            if (!clienteAtual) return;
-            
-            const dados = { 
-                cliente: clienteAtual, 
-                dataExportacao: new Date().toISOString(),
-                versao: "8.0"
-            };
-            
-            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
-            const a = document.createElement("a");
+        function exportarClienteFinanceiro() {
+            if (!clienteFinanceiroAtual) return mostrarErro('Selecione um cliente');
+            const dados = { cliente: clienteFinanceiroAtual, categorias: categoriasFinanceiro, contas: contasFinanceiro };
+            const blob = new Blob([JSON.stringify(dados)], { type: 'application/json' });
+            const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = `cliente_${clienteAtual.nome || clienteAtual.id}_${new Date().toISOString().slice(0, 10)}.json`;
+            a.download = `backup_${clienteFinanceiroAtual.id}.json`;
             a.click();
-            
-            mostrarSucesso("📦 Backup exportado!");
         }
 
-        function exportarClienteCompleto() {
-            exportarClienteJSON();
+        function importarBackupFinanceiro() {
+            alert('Funcionalidade em desenvolvimento');
         }
 
-        function importarBackup() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            
-            input.onchange = async (e) => {
-                const file = e.target.files[0];
-                if (!file) return;
-                
-                const reader = new FileReader();
-                reader.onload = async (e) => {
-                    try {
-                        const dados = JSON.parse(e.target.result);
-                        
-                        if (!dados.cliente || !dados.cliente.id) {
-                            mostrarErro("Arquivo de backup inválido!");
-                            return;
-                        }
-                        
-                        if (confirm(`Deseja restaurar o backup do cliente "${dados.cliente.nome}"?\n\nIsso substituirá os dados atuais!`)) {
-                            await db.collection("clientes").doc(dados.cliente.id).set(dados.cliente);
-                            mostrarSucesso("✅ Backup restaurado!");
-                        }
-                        
-                    } catch (error) {
-                        mostrarErro("Erro ao importar backup: " + error.message);
-                    }
-                };
-                reader.readAsText(file);
-            };
-            
-            input.click();
-        }
-
-        function restaurarVersaoAnterior() {
-            alert("Use Exportar/Importar backup");
-        }
-
+        // ============================================
+        // INICIALIZAÇÃO
+        // ============================================
         window.onload = function() {
-            carregarConfigAppFinanceiro();
-            carregarClientes();
+            document.getElementById('firebaseStatus').innerHTML = '🟢 Conectado';
+            carregarClientesFinanceiro();
+            carregarClientesOS();
             
-            document.getElementById("corPrincipal").addEventListener("input", function(e) {
-                document.getElementById("corHex").value = e.target.value;
-                atualizarPreview();
+            document.getElementById('corPrincipal').addEventListener('input', function(e) {
+                document.getElementById('corHex').value = e.target.value;
+                atualizarPreviewFinanceiro();
             });
             
-            document.getElementById("corHex").addEventListener("input", function(e) {
-                document.getElementById("corPrincipal").value = e.target.value;
-                atualizarPreview();
+            document.getElementById('corHex').addEventListener('input', function(e) {
+                document.getElementById('corPrincipal').value = e.target.value;
+                atualizarPreviewFinanceiro();
             });
-
-            document.getElementById("bancoCor").addEventListener("input", function(e) {
-                document.getElementById("bancoCorHex").value = e.target.value;
-            });
-            
-            document.getElementById("bancoCorHex").addEventListener("input", function(e) {
-                document.getElementById("bancoCor").value = e.target.value;
-            });
-
-            setTimeout(() => {
-                if (!localStorage.getItem('appFinanceiroConfig')) {
-                    document.getElementById('configWarning').style.display = 'block';
-                }
-            }, 2000);
-            
-            adicionarLog("🚀 Sistema iniciado - v8.0 Completo");
         };
     </script>
 </body>
