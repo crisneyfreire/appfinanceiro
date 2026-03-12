@@ -660,7 +660,7 @@
             <div>
                 <h1>👑 MASTER JEDI - CONTROLE TOTAL</h1>
                 <div style="display: flex; gap: 10px; margin-top: 5px">
-                    <span class="badge badge-success">v3.0 - CONFIGURAÇÕES COMPLETAS</span>
+                    <span class="badge badge-success">v3.1 - CONFIGURAÇÕES CORRIGIDAS</span>
                     <span class="badge" style="background: var(--neon); color: black">MODO SUPREMO</span>
                 </div>
             </div>
@@ -832,7 +832,7 @@
                     </div>
                 </div>
 
-                <!-- NOVA ABA: CONFIGURAÇÕES DO APP (CATEGORIAS, CONTAS, TIPOS) -->
+                <!-- NOVA ABA: CONFIGURAÇÕES DO APP (CATEGORIAS, CONTAS, TIPOS) - CORRIGIDA -->
                 <div id="abaConfigApp" class="tab-content">
                     <h3>⚙️ CONFIGURAÇÕES DO APP FINANCEIRO</h3>
                     
@@ -975,7 +975,7 @@
 
                 <!-- LOG PANEL -->
                 <div class="log-panel" id="logPanel">
-                    <div class="log-entry">🚀 Sistema pronto - Versão 3.0 configurável</div>
+                    <div class="log-entry">🚀 Sistema pronto - Versão 3.1 configurável</div>
                 </div>
             </div>
         </div>
@@ -1074,7 +1074,7 @@
 
     <script>
         // ============================================
-        // CONFIGURAÇÃO FIREBASE (CORRIGIDA)
+        // CONFIGURAÇÃO FIREBASE
         // ============================================
         const firebaseConfig = {
             apiKey: "AIzaSyArkRZLVVJNzx6I6GcWVF7NnjIkrF1jrcU",
@@ -1318,21 +1318,25 @@
         }
 
         // ============================================
-        // FUNÇÕES DE CONFIGURAÇÕES DO APP (CATEGORIAS, CONTAS, TIPOS)
+        // FUNÇÕES DE CONFIGURAÇÕES DO APP (CATEGORIAS, CONTAS, TIPOS) - CORRIGIDAS
         // ============================================
         
         async function carregarConfiguracoesCliente() {
-            if (!clienteAtual) return;
+            if (!clienteAtual) {
+                adicionarLog('Nenhum cliente selecionado para carregar configurações');
+                return;
+            }
             
             try {
-                adicionarLog(`Carregando configurações do cliente: ${clienteAtual.nome}`);
+                adicionarLog(`Carregando configurações do cliente: ${clienteAtual.nome || clienteAtual.id}`);
                 
-                // Carregar categorias
-                const categoriasSnapshot = await db.collection('configuracoes')
-                    .doc(clienteAtual.id)
-                    .collection('categorias')
-                    .orderBy('nome')
-                    .get();
+                // Mostrar loading
+                document.getElementById('listaCategorias').innerHTML = '<div class="loading"><div class="loading-spinner" style="width:20px;height:20px;"></div>Carregando...</div>';
+                document.getElementById('listaContas').innerHTML = '<div class="loading"><div class="loading-spinner" style="width:20px;height:20px;"></div>Carregando...</div>';
+                document.getElementById('listaTipos').innerHTML = '<div class="loading"><div class="loading-spinner" style="width:20px;height:20px;"></div>Carregando...</div>';
+                
+                // Carregar categorias - usando uma estrutura mais simples
+                const categoriasSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_categorias`).get();
                 
                 if (!categoriasSnapshot.empty) {
                     categoriasCliente = [];
@@ -1342,29 +1346,46 @@
                             ...doc.data()
                         });
                     });
+                    adicionarLog(`${categoriasCliente.length} categorias carregadas`);
                 } else {
+                    // Criar categorias padrão se não existirem
+                    adicionarLog('Nenhuma categoria encontrada, criando padrão...');
                     categoriasCliente = [
-                        { id: '1', nome: 'Alimentação' },
-                        { id: '2', nome: 'Transporte' },
-                        { id: '3', nome: 'Moradia' },
-                        { id: '4', nome: 'Saúde' },
-                        { id: '5', nome: 'Educação' },
-                        { id: '6', nome: 'Lazer' },
-                        { id: '7', nome: 'Salário' },
-                        { id: '8', nome: 'Investimentos' },
-                        { id: '9', nome: 'Vendas' },
-                        { id: '10', nome: 'Serviços' },
-                        { id: '11', nome: 'Impostos' },
-                        { id: '12', nome: 'Outros' }
+                        { nome: 'Alimentação' },
+                        { nome: 'Transporte' },
+                        { nome: 'Moradia' },
+                        { nome: 'Saúde' },
+                        { nome: 'Educação' },
+                        { nome: 'Lazer' },
+                        { nome: 'Salário' },
+                        { nome: 'Investimentos' },
+                        { nome: 'Vendas' },
+                        { nome: 'Serviços' },
+                        { nome: 'Impostos' },
+                        { nome: 'Outros' }
                     ];
+                    
+                    // Salvar categorias padrão
+                    const batch = db.batch();
+                    categoriasCliente.forEach(cat => {
+                        const docRef = db.collection(`configuracoes_${clienteAtual.id}_categorias`).doc();
+                        batch.set(docRef, cat);
+                    });
+                    await batch.commit();
+                    
+                    // Recarregar com IDs
+                    const novaSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_categorias`).get();
+                    categoriasCliente = [];
+                    novaSnapshot.forEach(doc => {
+                        categoriasCliente.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
                 }
                 
                 // Carregar contas
-                const contasSnapshot = await db.collection('configuracoes')
-                    .doc(clienteAtual.id)
-                    .collection('contas')
-                    .orderBy('nome')
-                    .get();
+                const contasSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_contas`).get();
                 
                 if (!contasSnapshot.empty) {
                     contasCliente = [];
@@ -1374,21 +1395,36 @@
                             ...doc.data()
                         });
                     });
+                    adicionarLog(`${contasCliente.length} contas carregadas`);
                 } else {
+                    // Criar contas padrão
+                    adicionarLog('Nenhuma conta encontrada, criando padrão...');
                     contasCliente = [
-                        { id: '1', nome: 'Carteira' },
-                        { id: '2', nome: 'Conta Corrente' },
-                        { id: '3', nome: 'Poupança' },
-                        { id: '4', nome: 'Cartão de Crédito' }
+                        { nome: 'Carteira' },
+                        { nome: 'Conta Corrente' },
+                        { nome: 'Poupança' },
+                        { nome: 'Cartão de Crédito' }
                     ];
+                    
+                    const batch = db.batch();
+                    contasCliente.forEach(conta => {
+                        const docRef = db.collection(`configuracoes_${clienteAtual.id}_contas`).doc();
+                        batch.set(docRef, conta);
+                    });
+                    await batch.commit();
+                    
+                    const novaSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_contas`).get();
+                    contasCliente = [];
+                    novaSnapshot.forEach(doc => {
+                        contasCliente.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
                 }
                 
                 // Carregar tipos
-                const tiposSnapshot = await db.collection('configuracoes')
-                    .doc(clienteAtual.id)
-                    .collection('tipos')
-                    .orderBy('nome')
-                    .get();
+                const tiposSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_tipos`).get();
                 
                 if (!tiposSnapshot.empty) {
                     tiposCliente = [];
@@ -1398,11 +1434,30 @@
                             ...doc.data()
                         });
                     });
+                    adicionarLog(`${tiposCliente.length} tipos carregados`);
                 } else {
+                    // Criar tipos padrão
+                    adicionarLog('Nenhum tipo encontrado, criando padrão...');
                     tiposCliente = [
-                        { id: 'entrada', nome: 'Entrada (Receita)', natureza: 'entrada' },
-                        { id: 'saida', nome: 'Saída (Despesa)', natureza: 'saida' }
+                        { nome: 'Entrada (Receita)', natureza: 'entrada' },
+                        { nome: 'Saída (Despesa)', natureza: 'saida' }
                     ];
+                    
+                    const batch = db.batch();
+                    tiposCliente.forEach(tipo => {
+                        const docRef = db.collection(`configuracoes_${clienteAtual.id}_tipos`).doc();
+                        batch.set(docRef, tipo);
+                    });
+                    await batch.commit();
+                    
+                    const novaSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_tipos`).get();
+                    tiposCliente = [];
+                    novaSnapshot.forEach(doc => {
+                        tiposCliente.push({
+                            id: doc.id,
+                            ...doc.data()
+                        });
+                    });
                 }
                 
                 // Atualizar as listas na interface
@@ -1410,30 +1465,68 @@
                 atualizarListaContas();
                 atualizarListaTipos();
                 
-                adicionarLog(`${categoriasCliente.length} categorias, ${contasCliente.length} contas, ${tiposCliente.length} tipos carregados`);
+                adicionarLog(`Configurações carregadas com sucesso!`);
                 
             } catch (error) {
                 console.error('Erro ao carregar configurações:', error);
-                mostrarErro('Erro ao carregar configurações do cliente');
+                adicionarLog(`Erro ao carregar configurações: ${error.message}`);
+                
+                // Mostrar erro na interface
+                document.getElementById('listaCategorias').innerHTML = `<div style="color: var(--danger); padding: 10px; text-align: center;">❌ Erro ao carregar</div>`;
+                document.getElementById('listaContas').innerHTML = `<div style="color: var(--danger); padding: 10px; text-align: center;">❌ Erro ao carregar</div>`;
+                document.getElementById('listaTipos').innerHTML = `<div style="color: var(--danger); padding: 10px; text-align: center;">❌ Erro ao carregar</div>`;
+                
+                // Usar dados padrão em caso de erro
+                categoriasCliente = [
+                    { id: '1', nome: 'Alimentação' },
+                    { id: '2', nome: 'Transporte' },
+                    { id: '3', nome: 'Moradia' },
+                    { id: '4', nome: 'Saúde' },
+                    { id: '5', nome: 'Educação' },
+                    { id: '6', nome: 'Lazer' },
+                    { id: '7', nome: 'Salário' },
+                    { id: '8', nome: 'Investimentos' },
+                    { id: '9', nome: 'Vendas' },
+                    { id: '10', nome: 'Serviços' },
+                    { id: '11', nome: 'Impostos' },
+                    { id: '12', nome: 'Outros' }
+                ];
+                
+                contasCliente = [
+                    { id: '1', nome: 'Carteira' },
+                    { id: '2', nome: 'Conta Corrente' },
+                    { id: '3', nome: 'Poupança' },
+                    { id: '4', nome: 'Cartão de Crédito' }
+                ];
+                
+                tiposCliente = [
+                    { id: 'entrada', nome: 'Entrada (Receita)', natureza: 'entrada' },
+                    { id: 'saida', nome: 'Saída (Despesa)', natureza: 'saida' }
+                ];
+                
+                atualizarListaCategorias();
+                atualizarListaContas();
+                atualizarListaTipos();
             }
         }
 
         function atualizarListaCategorias() {
             const lista = document.getElementById('listaCategorias');
             
-            if (categoriasCliente.length === 0) {
+            if (!categoriasCliente || categoriasCliente.length === 0) {
                 lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhuma categoria cadastrada</div>';
                 return;
             }
             
             let html = '';
             categoriasCliente.forEach((cat, index) => {
+                const catId = cat.id || `temp_${index}`;
                 html += `
                     <div class="config-item">
-                        <span>${cat.nome}</span>
+                        <span>${cat.nome || 'Sem nome'}</span>
                         <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarCategoria('${cat.id}', '${cat.nome}')" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerCategoria('${cat.id}')" title="Remover">🗑️</button>
+                            <button class="config-item-btn" onclick="editarCategoria('${catId}', '${cat.nome}')" title="Editar">✏️</button>
+                            <button class="config-item-btn danger" onclick="removerCategoria('${catId}')" title="Remover">🗑️</button>
                         </div>
                     </div>
                 `;
@@ -1445,19 +1538,20 @@
         function atualizarListaContas() {
             const lista = document.getElementById('listaContas');
             
-            if (contasCliente.length === 0) {
+            if (!contasCliente || contasCliente.length === 0) {
                 lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhuma conta cadastrada</div>';
                 return;
             }
             
             let html = '';
             contasCliente.forEach((conta, index) => {
+                const contaId = conta.id || `temp_${index}`;
                 html += `
                     <div class="config-item">
-                        <span>${conta.nome}</span>
+                        <span>${conta.nome || 'Sem nome'}</span>
                         <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarConta('${conta.id}', '${conta.nome}')" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerConta('${conta.id}')" title="Remover">🗑️</button>
+                            <button class="config-item-btn" onclick="editarConta('${contaId}', '${conta.nome}')" title="Editar">✏️</button>
+                            <button class="config-item-btn danger" onclick="removerConta('${contaId}')" title="Remover">🗑️</button>
                         </div>
                     </div>
                 `;
@@ -1469,21 +1563,22 @@
         function atualizarListaTipos() {
             const lista = document.getElementById('listaTipos');
             
-            if (tiposCliente.length === 0) {
+            if (!tiposCliente || tiposCliente.length === 0) {
                 lista.innerHTML = '<div style="color: var(--text-secondary); text-align: center; padding: 10px;">Nenhum tipo cadastrado</div>';
                 return;
             }
             
             let html = '';
             tiposCliente.forEach((tipo, index) => {
+                const tipoId = tipo.id || `temp_${index}`;
                 const naturezaIcon = tipo.natureza === 'entrada' ? '📥' : '📤';
                 const naturezaClass = tipo.natureza === 'entrada' ? 'text-success' : 'text-danger';
                 html += `
                     <div class="config-item">
-                        <span>${naturezaIcon} ${tipo.nome} <span class="${naturezaClass}" style="font-size: 10px;">(${tipo.natureza})</span></span>
+                        <span>${naturezaIcon} ${tipo.nome || 'Sem nome'} <span style="color: ${tipo.natureza === 'entrada' ? '#4caf50' : '#f44336'}; font-size: 10px;">(${tipo.natureza})</span></span>
                         <div class="config-item-actions">
-                            <button class="config-item-btn" onclick="editarTipo('${tipo.id}', '${tipo.nome}', '${tipo.natureza}')" title="Editar">✏️</button>
-                            <button class="config-item-btn danger" onclick="removerTipo('${tipo.id}')" title="Remover">🗑️</button>
+                            <button class="config-item-btn" onclick="editarTipo('${tipoId}', '${tipo.nome}', '${tipo.natureza}')" title="Editar">✏️</button>
+                            <button class="config-item-btn danger" onclick="removerTipo('${tipoId}')" title="Remover">🗑️</button>
                         </div>
                     </div>
                 `;
@@ -1507,13 +1602,10 @@
             try {
                 const novaCategoria = {
                     nome: nome,
-                    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                    criadoEm: new Date().toISOString()
                 };
                 
-                await db.collection('configuracoes')
-                    .doc(clienteAtual.id)
-                    .collection('categorias')
-                    .add(novaCategoria);
+                const docRef = await db.collection(`configuracoes_${clienteAtual.id}_categorias`).add(novaCategoria);
                 
                 document.getElementById('novaCategoria').value = '';
                 mostrarSucesso(`Categoria "${nome}" adicionada!`);
@@ -1522,7 +1614,7 @@
                 
             } catch (error) {
                 console.error('Erro ao adicionar categoria:', error);
-                mostrarErro('Erro ao adicionar categoria');
+                mostrarErro('Erro ao adicionar categoria: ' + error.message);
             }
         }
 
@@ -1541,13 +1633,10 @@
             try {
                 const novaConta = {
                     nome: nome,
-                    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                    criadoEm: new Date().toISOString()
                 };
                 
-                await db.collection('configuracoes')
-                    .doc(clienteAtual.id)
-                    .collection('contas')
-                    .add(novaConta);
+                const docRef = await db.collection(`configuracoes_${clienteAtual.id}_contas`).add(novaConta);
                 
                 document.getElementById('novaConta').value = '';
                 mostrarSucesso(`Conta "${nome}" adicionada!`);
@@ -1556,7 +1645,7 @@
                 
             } catch (error) {
                 console.error('Erro ao adicionar conta:', error);
-                mostrarErro('Erro ao adicionar conta');
+                mostrarErro('Erro ao adicionar conta: ' + error.message);
             }
         }
 
@@ -1578,13 +1667,10 @@
                 const novoTipo = {
                     nome: nome,
                     natureza: natureza,
-                    criadoEm: firebase.firestore.FieldValue.serverTimestamp()
+                    criadoEm: new Date().toISOString()
                 };
                 
-                await db.collection('configuracoes')
-                    .doc(clienteAtual.id)
-                    .collection('tipos')
-                    .add(novoTipo);
+                const docRef = await db.collection(`configuracoes_${clienteAtual.id}_tipos`).add(novoTipo);
                 
                 document.getElementById('novoTipo').value = '';
                 mostrarSucesso(`Tipo "${nome}" adicionado!`);
@@ -1593,7 +1679,7 @@
                 
             } catch (error) {
                 console.error('Erro ao adicionar tipo:', error);
-                mostrarErro('Erro ao adicionar tipo');
+                mostrarErro('Erro ao adicionar tipo: ' + error.message);
             }
         }
 
@@ -1601,11 +1687,7 @@
             if (!confirm('Remover esta categoria?')) return;
             
             try {
-                await db.collection('configuracoes')
-                    .doc(clienteAtual.id)
-                    .collection('categorias')
-                    .doc(id)
-                    .delete();
+                await db.collection(`configuracoes_${clienteAtual.id}_categorias`).doc(id).delete();
                 
                 mostrarSucesso('Categoria removida!');
                 await carregarConfiguracoesCliente();
@@ -1620,11 +1702,7 @@
             if (!confirm('Remover esta conta?')) return;
             
             try {
-                await db.collection('configuracoes')
-                    .doc(clienteAtual.id)
-                    .collection('contas')
-                    .doc(id)
-                    .delete();
+                await db.collection(`configuracoes_${clienteAtual.id}_contas`).doc(id).delete();
                 
                 mostrarSucesso('Conta removida!');
                 await carregarConfiguracoesCliente();
@@ -1639,11 +1717,7 @@
             if (!confirm('Remover este tipo?')) return;
             
             try {
-                await db.collection('configuracoes')
-                    .doc(clienteAtual.id)
-                    .collection('tipos')
-                    .doc(id)
-                    .delete();
+                await db.collection(`configuracoes_${clienteAtual.id}_tipos`).doc(id).delete();
                 
                 mostrarSucesso('Tipo removido!');
                 await carregarConfiguracoesCliente();
@@ -1677,14 +1751,10 @@
 
         async function salvarEdicaoCategoria(id, novoNome) {
             try {
-                await db.collection('configuracoes')
-                    .doc(clienteAtual.id)
-                    .collection('categorias')
-                    .doc(id)
-                    .update({
-                        nome: novoNome,
-                        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                await db.collection(`configuracoes_${clienteAtual.id}_categorias`).doc(id).update({
+                    nome: novoNome,
+                    atualizadoEm: new Date().toISOString()
+                });
                 
                 mostrarSucesso('Categoria atualizada!');
                 await carregarConfiguracoesCliente();
@@ -1697,14 +1767,10 @@
 
         async function salvarEdicaoConta(id, novoNome) {
             try {
-                await db.collection('configuracoes')
-                    .doc(clienteAtual.id)
-                    .collection('contas')
-                    .doc(id)
-                    .update({
-                        nome: novoNome,
-                        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                await db.collection(`configuracoes_${clienteAtual.id}_contas`).doc(id).update({
+                    nome: novoNome,
+                    atualizadoEm: new Date().toISOString()
+                });
                 
                 mostrarSucesso('Conta atualizada!');
                 await carregarConfiguracoesCliente();
@@ -1717,15 +1783,11 @@
 
         async function salvarEdicaoTipo(id, novoNome, natureza) {
             try {
-                await db.collection('configuracoes')
-                    .doc(clienteAtual.id)
-                    .collection('tipos')
-                    .doc(id)
-                    .update({
-                        nome: novoNome,
-                        natureza: natureza,
-                        atualizadoEm: firebase.firestore.FieldValue.serverTimestamp()
-                    });
+                await db.collection(`configuracoes_${clienteAtual.id}_tipos`).doc(id).update({
+                    nome: novoNome,
+                    natureza: natureza,
+                    atualizadoEm: new Date().toISOString()
+                });
                 
                 mostrarSucesso('Tipo atualizado!');
                 await carregarConfiguracoesCliente();
@@ -1749,48 +1811,51 @@
         }
 
         function resetarCategoriasPadrao() {
-            if (confirm('Resetar categorias para o padrão?')) {
-                categoriasCliente = [
-                    { id: '1', nome: 'Alimentação' },
-                    { id: '2', nome: 'Transporte' },
-                    { id: '3', nome: 'Moradia' },
-                    { id: '4', nome: 'Saúde' },
-                    { id: '5', nome: 'Educação' },
-                    { id: '6', nome: 'Lazer' },
-                    { id: '7', nome: 'Salário' },
-                    { id: '8', nome: 'Investimentos' },
-                    { id: '9', nome: 'Vendas' },
-                    { id: '10', nome: 'Serviços' },
-                    { id: '11', nome: 'Impostos' },
-                    { id: '12', nome: 'Outros' }
-                ];
-                atualizarListaCategorias();
-                mostrarSucesso('Categorias resetadas (clique em Salvar para persistir)');
-            }
+            if (!confirm('Resetar categorias para o padrão?')) return;
+            
+            categoriasCliente = [
+                { nome: 'Alimentação' },
+                { nome: 'Transporte' },
+                { nome: 'Moradia' },
+                { nome: 'Saúde' },
+                { nome: 'Educação' },
+                { nome: 'Lazer' },
+                { nome: 'Salário' },
+                { nome: 'Investimentos' },
+                { nome: 'Vendas' },
+                { nome: 'Serviços' },
+                { nome: 'Impostos' },
+                { nome: 'Outros' }
+            ];
+            
+            atualizarListaCategorias();
+            mostrarSucesso('Categorias resetadas (clique em Salvar para persistir)');
         }
 
         function resetarContasPadrao() {
-            if (confirm('Resetar contas para o padrão?')) {
-                contasCliente = [
-                    { id: '1', nome: 'Carteira' },
-                    { id: '2', nome: 'Conta Corrente' },
-                    { id: '3', nome: 'Poupança' },
-                    { id: '4', nome: 'Cartão de Crédito' }
-                ];
-                atualizarListaContas();
-                mostrarSucesso('Contas resetadas (clique em Salvar para persistir)');
-            }
+            if (!confirm('Resetar contas para o padrão?')) return;
+            
+            contasCliente = [
+                { nome: 'Carteira' },
+                { nome: 'Conta Corrente' },
+                { nome: 'Poupança' },
+                { nome: 'Cartão de Crédito' }
+            ];
+            
+            atualizarListaContas();
+            mostrarSucesso('Contas resetadas (clique em Salvar para persistir)');
         }
 
         function resetarTiposPadrao() {
-            if (confirm('Resetar tipos para o padrão?')) {
-                tiposCliente = [
-                    { id: 'entrada', nome: 'Entrada (Receita)', natureza: 'entrada' },
-                    { id: 'saida', nome: 'Saída (Despesa)', natureza: 'saida' }
-                ];
-                atualizarListaTipos();
-                mostrarSucesso('Tipos resetados (clique em Salvar para persistir)');
-            }
+            if (!confirm('Resetar tipos para o padrão?')) return;
+            
+            tiposCliente = [
+                { nome: 'Entrada (Receita)', natureza: 'entrada' },
+                { nome: 'Saída (Despesa)', natureza: 'saida' }
+            ];
+            
+            atualizarListaTipos();
+            mostrarSucesso('Tipos resetados (clique em Salvar para persistir)');
         }
 
         // ============================================
@@ -2204,39 +2269,17 @@
                     .where('clienteId', '==', clienteId)
                     .get();
                 
-                // Excluir configurações (categorias, contas, tipos)
-                const categoriasSnapshot = await db.collection('configuracoes')
-                    .doc(clienteId)
-                    .collection('categorias')
-                    .get();
-                    
-                const contasSnapshot = await db.collection('configuracoes')
-                    .doc(clienteId)
-                    .collection('contas')
-                    .get();
-                    
-                const tiposSnapshot = await db.collection('configuracoes')
-                    .doc(clienteId)
-                    .collection('tipos')
-                    .get();
+                // Excluir configurações
+                const categoriasSnapshot = await db.collection(`configuracoes_${clienteId}_categorias`).get();
+                const contasSnapshot = await db.collection(`configuracoes_${clienteId}_contas`).get();
+                const tiposSnapshot = await db.collection(`configuracoes_${clienteId}_tipos`).get();
                 
                 const batch = db.batch();
                 
-                lancamentosSnapshot.forEach(doc => {
-                    batch.delete(doc.ref);
-                });
-                
-                categoriasSnapshot.forEach(doc => {
-                    batch.delete(doc.ref);
-                });
-                
-                contasSnapshot.forEach(doc => {
-                    batch.delete(doc.ref);
-                });
-                
-                tiposSnapshot.forEach(doc => {
-                    batch.delete(doc.ref);
-                });
+                lancamentosSnapshot.forEach(doc => batch.delete(doc.ref));
+                categoriasSnapshot.forEach(doc => batch.delete(doc.ref));
+                contasSnapshot.forEach(doc => batch.delete(doc.ref));
+                tiposSnapshot.forEach(doc => batch.delete(doc.ref));
                 
                 batch.delete(db.collection("clientes").doc(clienteId));
                 
@@ -2310,7 +2353,7 @@
             const dados = { 
                 cliente: clienteAtual, 
                 dataExportacao: new Date().toISOString(),
-                versao: "3.0"
+                versao: "3.1"
             };
             
             const blob = new Blob([JSON.stringify(dados, null, 2)], { type: "application/json" });
@@ -2443,12 +2486,7 @@
                 
                 if (clienteAtual) {
                     try {
-                        const categoriasSnapshot = await db.collection('configuracoes')
-                            .doc(clienteAtual.id)
-                            .collection('categorias')
-                            .limit(1)
-                            .get();
-                        
+                        const categoriasSnapshot = await db.collection(`configuracoes_${clienteAtual.id}_categorias`).limit(1).get();
                         resultados.push({
                             teste: "Configurações do cliente",
                             status: true,
@@ -2548,7 +2586,7 @@
         }
         
         function mostrarAjuda() { 
-            alert(`🚀 MASTER APP v3.0 CONFIGURÁVEL\n\n✅ Categorias editáveis\n✅ Contas editáveis\n✅ Tipos editáveis\n✅ Links corrigidos\n✅ Configuração do app financeiro\n✅ Validação de arquivos\n✅ Diagnóstico completo\n✅ Backup funcional\n✅ Sincronia com Firebase\n\nAcesse a aba "⚙️ Config. App" para personalizar as opções do app financeiro.`); 
+            alert(`🚀 MASTER APP v3.1 CONFIGURÁVEL\n\n✅ Categorias editáveis\n✅ Contas editáveis\n✅ Tipos editáveis\n✅ Links corrigidos\n✅ Configuração do app financeiro\n✅ Validação de arquivos\n✅ Diagnóstico completo\n✅ Backup funcional\n✅ Sincronia com Firebase\n\nAcesse a aba "⚙️ Config. App" para personalizar as opções do app financeiro.`); 
         }
 
         function fecharModal() { 
@@ -2581,7 +2619,7 @@
                 }
             }, 2000);
             
-            adicionarLog("🚀 Sistema iniciado - v3.0 configurável");
+            adicionarLog("🚀 Sistema iniciado - v3.1 configurável");
         };
     </script>
 </body>
