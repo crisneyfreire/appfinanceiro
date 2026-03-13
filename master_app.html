@@ -1356,6 +1356,11 @@
         const db = firebase.firestore();
 
         // ============================================
+        // URL BASE DO GITHUB PAGES (CORRIGIDA!)
+        // ============================================
+        const GITHUB_BASE_URL = 'https://crisneyfreire.github.io/appfinanceiro/';
+
+        // ============================================
         // VARIÁVEIS GLOBAIS
         // ============================================
         let clienteFinanceiroAtual = null;
@@ -1743,20 +1748,29 @@
             mostrarSucesso('Banco adicionado!');
         }
 
+        // ============================================
+        // FUNÇÕES DE LINK CORRIGIDAS (GITHUB PAGES)
+        // ============================================
+        
         function copiarLinkFinanceiro(id) {
-            const url = window.location.origin + '/appfinanceiro.html?cliente=' + id;
+            // CORRIGIDO: Agora usa a URL base do GitHub Pages
+            const url = GITHUB_BASE_URL + 'appfinanceiro.html?cliente=' + (id || clienteFinanceiroAtual?.id);
             navigator.clipboard.writeText(url).then(() => {
                 mostrarSucesso('Link copiado!');
+            }).catch(() => {
+                prompt('Copie o link manualmente:', url);
             });
         }
 
         function verComoClienteFinanceiro(id) {
-            window.open('/appfinanceiro.html?cliente=' + id, '_blank');
+            // CORRIGIDO: Agora usa a URL base do GitHub Pages
+            window.open(GITHUB_BASE_URL + 'appfinanceiro.html?cliente=' + id, '_blank');
         }
 
         function entrarModoEdicaoFinanceiro() {
             if (!clienteFinanceiroAtual) return;
-            window.open(`/appfinanceiro.html?cliente=${clienteFinanceiroAtual.id}&modo=edicao&master=true`, '_blank');
+            // CORRIGIDO: Agora usa a URL base do GitHub Pages
+            window.open(GITHUB_BASE_URL + 'appfinanceiro.html?cliente=' + clienteFinanceiroAtual.id + '&modo=edicao&master=true', '_blank');
         }
 
         async function salvarAlteracoesFinanceiro() {
@@ -1815,7 +1829,7 @@
         }
 
         // ============================================
-        // FUNÇÕES DA OS
+        // FUNÇÕES DA OS (COM LINKS CORRIGIDOS)
         // ============================================
         
         function carregarClientesOS() {
@@ -1879,7 +1893,8 @@
             document.getElementById('clienteOSEndereco').value = clienteOSAtual.endereco || '';
             document.getElementById('clienteOSStatus').value = clienteOSAtual.status || 'ativo';
 
-            const link = window.location.origin + '/os_cliente.html?cliente=' + id;
+            // CORRIGIDO: Link do cliente OS com a URL base do GitHub
+            const link = GITHUB_BASE_URL + 'os_cliente.html?cliente=' + id;
             document.getElementById('clienteOSLink').value = link;
 
             atualizarListaClientesOS();
@@ -2102,9 +2117,12 @@
         }
 
         function copiarLinkOS(id) {
-            const url = window.location.origin + '/os_cliente.html?cliente=' + (id || clienteOSAtual?.id);
+            // CORRIGIDO: Link do cliente OS com a URL base do GitHub
+            const url = GITHUB_BASE_URL + 'os_cliente.html?cliente=' + (id || clienteOSAtual?.id);
             navigator.clipboard.writeText(url).then(() => {
                 mostrarSucesso('Link copiado!');
+            }).catch(() => {
+                prompt('Copie o link manualmente:', url);
             });
         }
 
@@ -2146,7 +2164,8 @@
 
         function testarLinkAppFinanceiro() {
             if (!clienteFinanceiroAtual) return mostrarErro('Selecione um cliente');
-            const url = '/appfinanceiro.html?cliente=' + clienteFinanceiroAtual.id;
+            // CORRIGIDO: Link do app financeiro com a URL base do GitHub
+            const url = GITHUB_BASE_URL + 'appfinanceiro.html?cliente=' + clienteFinanceiroAtual.id;
             window.open(url, '_blank');
         }
 
